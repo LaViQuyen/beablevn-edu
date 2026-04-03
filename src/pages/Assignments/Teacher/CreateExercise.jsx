@@ -3,8 +3,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { db } from "../../../firebase";
-import Button from '../../components/Button';
-import Input from '../../components/Input';
+import Button from '../../../components/Layouts/Button';
+import Input from '../../../components/Layouts/Input';
 
 // --- HỆ THỐNG SVG ICONS TỐI GIẢN (Nét mảnh, màu #003366) ---
 const SvgIcons = {
