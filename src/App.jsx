@@ -37,13 +37,10 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          {/* Trang mặc định điều hướng về Login */}
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<Login />} />
 
-          {/* ========================================== */}
           {/* KHU VỰC CỦA HỌC VIÊN (STUDENT) */}
-          {/* ========================================== */}
           <Route path="/student" element={<StudentLayout />}>
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<DashboardStudent />} />
@@ -53,9 +50,7 @@ function App() {
             <Route path="room/:roomId" element={<DoAssignment />} />
           </Route>
 
-          {/* ========================================== */}
           {/* KHU VỰC CỦA GIÁO VIÊN (STAFF) */}
-          {/* ========================================== */}
           <Route path="/staff" element={<StaffLayout />}>
             <Route index element={<Navigate to="classes" replace />} />
             <Route path="classes" element={<ClassList />} />
@@ -65,9 +60,7 @@ function App() {
             <Route path="assignments/*" element={<TeacherDashboard />} />
           </Route>
 
-          {/* ========================================== */}
           {/* KHU VỰC CỦA ADMIN */}
-          {/* ========================================== */}
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Navigate to="staff" replace />} />
             <Route path="staff" element={<StaffManager />} />
