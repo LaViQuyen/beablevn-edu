@@ -1,0 +1,10 @@
+{
+  "users": {
+    "iDsPsOqyZnaBBaRRgCF7px8irM22": {
+      "name": "Super Admin",
+      "email": "helpdesk@beablevn.com",
+      "role": "admin",
+      "createdAt": "2026-01-28T00:00:00Z"
+    }
+  }
+}
