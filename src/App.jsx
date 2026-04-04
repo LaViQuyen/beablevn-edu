@@ -57,9 +57,8 @@ function App() {
             <Route path="attendance" element={<StaffAttendance />} />
             <Route path="scores" element={<ScoreInput />} />
             <Route path="notifications" element={<StaffNotifications />} />
-            <Route path="assignments/*" element={<TeacherDashboard />} />
           </Route>
-
+          <Route path="/staff/assignments/*" element={<TeacherDashboard />} />
           {/* KHU VỰC CỦA ADMIN */}
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Navigate to="staff" replace />} />

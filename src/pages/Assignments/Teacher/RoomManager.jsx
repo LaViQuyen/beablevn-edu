@@ -1,7 +1,7 @@
 // src/pages/teacher/RoomManager.jsx
 import { useState, useEffect } from 'react';
 import { collection, getDocs, doc, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
-import { db } from "../../../firebase";
+import { firestore as db } from "../../../firebase";
 import Input from "../../../components/Layouts/Input";
 // --- HỆ THỐNG SVG ICONS TỐI GIẢN (Nét mảnh, strokeWidth="1.5") ---
 const SvgIcons = {

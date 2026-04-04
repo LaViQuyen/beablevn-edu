@@ -1,56 +1,53 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../../firebase';
 import { ref, onValue } from "firebase/database";
-import { useAuth } from '../../context/AuthContext'; // 1. Import Auth
+import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const ClassList = () => {
-  const { userData } = useAuth(); // 2. Lấy thông tin user hiện tại (chứa assignedClasses)
+  const navigate = useNavigate();
+  const { userData } = useAuth();
   const [students, setStudents] = useState([]);
   const [classes, setClasses] = useState([]);
   const [viewMode, setViewMode] = useState('class');
   const [filterValue, setFilterValue] = useState('');
 
   useEffect(() => {
-    // Lấy danh sách lớp được phân công
     onValue(ref(db, 'classes'), (snapshot) => {
       const data = snapshot.val();
       if(data) {
         const allClasses = Object.entries(data).map(([id, val]) => ({ id, ...val }));
-        
-        // 3. Lọc: Chỉ lấy các lớp có trong assignedClasses của GV
         const myClassIds = userData?.assignedClasses || [];
-        const myClasses = allClasses.filter(c => myClassIds.includes(c.id));
-        
-        setClasses(myClasses);
+        setClasses(allClasses.filter(c => myClassIds.includes(c.id)));
       }
     });
 
-    // Lấy danh sách học viên
     onValue(ref(db, 'users'), (snapshot) => {
       const data = snapshot.val();
       if(data) {
         const myClassIds = userData?.assignedClasses || [];
-
         const list = Object.values(data).filter(u => {
-          // Phải là học viên
           if (u.role !== 'student') return false;
 
-          // 4. Lọc: Học viên phải thuộc ít nhất 1 lớp mà GV phụ trách
-          const studentClasses = u.classIds || (u.classId ? [u.classId] : []);
-          const isMyStudent = studentClasses.some(id => myClassIds.includes(id));
-          
-          return isMyStudent;
+          // FIX LỖI SẬP MÀN HÌNH TẠI ĐÂY
+          let studentClasses = [];
+          if (Array.isArray(u.classIds)) studentClasses = u.classIds;
+          else if (u.classIds && typeof u.classIds === 'object') studentClasses = Object.values(u.classIds);
+          else if (u.classId) studentClasses = [u.classId];
+
+          return studentClasses.some(id => myClassIds.includes(id));
         });
-        
         setStudents(list);
       }
     });
-  }, [userData]); // Chạy lại khi userData thay đổi
+  }, [userData]);
 
   const getClassInfo = (student, type) => {
-    if (!student.classIds || !Array.isArray(student.classIds)) return [];
-    return student.classIds.map(id => {
-      // Chỉ hiển thị thông tin của những lớp mà GV này quản lý (có trong state classes đã lọc)
+    let sClasses = [];
+    if (Array.isArray(student.classIds)) sClasses = student.classIds;
+    else if (student.classIds && typeof student.classIds === 'object') sClasses = Object.values(student.classIds);
+    
+    return sClasses.map(id => {
       const foundClass = classes.find(c => c.id === id);
       if (!foundClass) return null;
       return type === 'name' ? foundClass.name : `${foundClass.schedule} (${foundClass.startTime}-${foundClass.endTime})`;
@@ -78,19 +75,22 @@ const ClassList = () => {
               <option value="time">Xem theo Thời gian</option>
             </select>
             <input className="border border-slate-200 p-2 rounded-lg text-sm outline-none focus:border-[#003366] w-full" placeholder={viewMode === 'class' ? "Lọc theo tên lớp..." : "Lọc theo giờ học..."} value={filterValue} onChange={(e) => setFilterValue(e.target.value)} />
+            <button onClick={() => navigate('/staff/assignments/launch')} className="bg-[#003366] text-white px-4 py-2 rounded-lg font-bold text-sm whitespace-nowrap hover:bg-[#002244] shadow-sm">
+               Phát Bài Tập
+            </button>
          </div>
       </div>
 
       <div className="grid gap-3">
-        {filteredStudents.length === 0 && <p className="text-slate-400 text-center py-8 italic">Không tìm thấy kết quả phù hợp (Hoặc chưa được gán lớp).</p>}
+        {filteredStudents.length === 0 && <p className="text-slate-400 text-center py-8 italic">Không tìm thấy kết quả phù hợp.</p>}
         {filteredStudents.map((st, idx) => {
           const infoList = getClassInfo(st, viewMode === 'class' ? 'name' : 'time');
           return (
             <div key={idx} className="flex justify-between items-center p-4 border border-slate-100 rounded-xl hover:shadow-md hover:border-blue-100 transition-all bg-white group">
               <div className="flex items-center gap-3">
-                 <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center font-bold text-[#003366]">{st.name.charAt(0)}</div>
+                 <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center font-bold text-[#003366]">{st.name?.charAt(0) || '?'}</div>
                  <div>
-                    <div className="font-bold text-gray-800">{st.name}</div>
+                    <div className="font-bold text-gray-800">{st.name || 'Unknown'}</div>
                     <div className="text-xs text-slate-500 font-mono">{st.studentCode}</div>
                  </div>
               </div>

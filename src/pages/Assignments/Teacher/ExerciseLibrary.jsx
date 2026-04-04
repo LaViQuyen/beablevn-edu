@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { collection, getDocs, doc, deleteDoc, updateDoc, setDoc } from 'firebase/firestore';
-import { db } from "../../../firebase";
+import { firestore as db } from "../../../firebase";
 // --- HỆ THỐNG ICONS TỐI GIẢN (SVG Nét mảnh, màu #003366) ---
 const Icons = {
   Search: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>,
@@ -230,7 +230,7 @@ export default function ExerciseLibrary() {
     }
     return (
       <div ref={menuRef} style={{ position: 'absolute', right: '40px', top: '30px', backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '8px', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', zIndex: 100, minWidth: '160px', padding: '8px 0' }}>
-        <button style={btnStyle} onClick={() => { if(!isFolder) navigate(`/teacher/exercises/${item.id}`); }}> <Icons.Edit /> Edit</button>
+        <button style={btnStyle} onClick={() => { if(!isFolder) navigate(`/staff/assignments/exercises/${item.id}`); }}> <Icons.Edit /> Edit</button>
         {!isFolder && <button style={btnStyle} onClick={() => handleDuplicate(item)}> <Icons.Copy /> Duplicate</button>}
         <button style={btnStyle} onClick={() => handleMove(item, isFolder)}> <Icons.Move /> Move</button>
         <button style={btnStyle} onClick={() => handleRename(item, isFolder)}> <Icons.Edit /> Rename</button>
@@ -270,7 +270,7 @@ export default function ExerciseLibrary() {
               <Icons.Plus /> New Folder
             </button>
             <button 
-              onClick={() => navigate('/teacher/exercises/new')} 
+              onClick={() => navigate('/staff/assignments/exercises/new')} 
               style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', flex: 1, backgroundColor: '#003366', color: 'white', border: 'none', padding: '12px 20px', borderRadius: '100px', fontWeight: '700', cursor: 'pointer', boxShadow: '0 4px 6px -1px rgba(0,51,102,0.2)', fontSize: '14px', whiteSpace: 'nowrap', transition: 'all 0.2s' }}
               onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
               onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
@@ -332,7 +332,7 @@ export default function ExerciseLibrary() {
           {displayedQuizzes.map(quiz => (
             <div key={quiz.id} style={{ display: 'grid', gridTemplateColumns: '60px 1fr 200px 80px', alignItems: 'center', padding: '16px 20px', borderBottom: '1px solid #f1f5f9', position: 'relative', transition: 'background 0.2s', zIndex: activeMenuId === quiz.id ? 50 : 1 }} onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f0f9ff'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'white'}>
               <div style={{ display: 'flex', justifyContent: 'center' }}><input type="checkbox" checked={selectedItems.includes(quiz.id)} onChange={() => handleSelectItem(quiz.id)} style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: '#003366' }} /></div>
-              <div onClick={() => navigate(`/teacher/exercises/${quiz.id}`)} style={{ display: 'flex', alignItems: 'center', gap: '14px', cursor: 'pointer' }}>
+              <div onClick={() => navigate(`/staff/assignments/exercises/${quiz.id}`)} style={{ display: 'flex', alignItems: 'center', gap: '14px', cursor: 'pointer' }}>
                 <Icons.Quiz /><span style={{ fontWeight: '600', color: '#334155', fontSize: '15px', textDecoration: quiz.isDeleted ? 'line-through' : 'none', opacity: quiz.isDeleted ? 0.6 : 1 }}>{quiz.title}</span>
               </div>
               <div style={{ color: '#64748b', fontSize: '14px', fontWeight: '500' }}>{quiz.modified}</div>

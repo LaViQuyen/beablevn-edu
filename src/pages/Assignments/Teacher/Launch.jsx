@@ -2,8 +2,8 @@
 import { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { collection, getDocs, doc, updateDoc, getDoc, deleteDoc } from 'firebase/firestore';
-import { db } from "../../../firebase";
-import { TeacherContext } from './TeacherDashboard';
+import { firestore as db } from "../../../firebase";
+import { TeacherContext } from './TeacherContext';
 
 // --- HỆ THỐNG SVG ICONS TỐI GIẢN (Nét mảnh, màu #003366) ---
 const SvgIcons = {
@@ -127,7 +127,7 @@ export default function Launch() {
           startTime: new Date().toISOString()
         }
       });
-      navigate('/teacher/live');
+      navigate('/staff/assignments/live');
     } catch (error) {
       console.error("Lỗi khởi chạy:", error);
       alert("Lỗi kết nối. Không thể khởi chạy bài tập.");

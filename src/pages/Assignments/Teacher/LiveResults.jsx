@@ -2,8 +2,8 @@
 import { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { collection, onSnapshot, doc, updateDoc, addDoc, getDocs, deleteDoc, getDoc } from 'firebase/firestore';
-import { db } from "../../../firebase";
-import { TeacherContext } from './TeacherDashboard';
+import { firestore as db } from "../../../firebase";
+import { TeacherContext } from './TeacherContext';
 
 // --- HỆ THỐNG SVG ICONS TỐI GIẢN ---
 const SvgIcons = {

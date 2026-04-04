@@ -1,8 +1,8 @@
 // src/pages/teacher/VocabularyManager.jsx
 import { useState, useEffect, useContext } from 'react';
 import { collection, getDocs, doc, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
-import { db } from "../../../firebase";
-import { TeacherContext } from './TeacherDashboard';
+import { firestore as db } from "../../../firebase";
+import { TeacherContext } from './TeacherContext';
 
 const SvgIcons = {
   Plus: () => <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>,

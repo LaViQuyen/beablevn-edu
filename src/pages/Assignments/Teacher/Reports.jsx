@@ -1,7 +1,7 @@
 // src/pages/teacher/Reports.jsx
 import { useState, useEffect } from 'react';
 import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
-import { db } from "../../../firebase";
+import { firestore as db } from "../../../firebase";
 
 // --- HỆ THỐNG SVG ICONS TỐI GIẢN ---
 const SvgIcons = {

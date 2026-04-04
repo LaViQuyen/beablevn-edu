@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
-import { db } from "../../../firebase";
+import { firestore as db } from "../../../firebase";
 import { useAuth } from '../../../context/AuthContext';
 
 // --- HỆ THỐNG SVG ICONS TỐI GIẢN (Nét mảnh, màu #003366) ---

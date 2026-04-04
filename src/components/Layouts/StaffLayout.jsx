@@ -1,14 +1,19 @@
 import React, { useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { db } from '../../firebase'; // Import db
-import { ref, update, get } from 'firebase/database'; // Import thao tác DB
-import bcrypt from 'bcryptjs'; // Import mã hóa
+import { db } from '../../firebase';
+import { ref, update, get } from 'firebase/database';
+import bcrypt from 'bcryptjs';
 
 const Icons = {
   Class: ({ active }) => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke={active ? "#003366" : "#64748b"} className="w-5 h-5">
       <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m-6 2.292c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 006 18c2.305 0 4.408.867 6 2.292M7.5 12h3" />
+    </svg>
+  ),
+  Assignment: ({ active }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke={active ? "#003366" : "#64748b"} className="w-5 h-5">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
     </svg>
   ),
   Attendance: ({ active }) => (
@@ -31,7 +36,6 @@ const Icons = {
       <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
     </svg>
   ),
-  // Icon Chìa khóa cho Đổi mật khẩu
   Key: () => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
       <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
@@ -42,9 +46,8 @@ const Icons = {
 const StaffLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { logout, currentUser } = useAuth(); // Lấy thêm currentUser
+  const { logout, currentUser } = useAuth();
 
-  // State cho Modal đổi mật khẩu
   const [showPassModal, setShowPassModal] = useState(false);
   const [passForm, setPassForm] = useState({ oldPass: '', newPass: '', confirmPass: '' });
   const [loadingPass, setLoadingPass] = useState(false);
@@ -57,7 +60,6 @@ const StaffLayout = () => {
     navigate('/');
   };
 
-  // Xử lý đổi mật khẩu
   const handleChangePassword = async (e) => {
     e.preventDefault();
     if (!passForm.oldPass || !passForm.newPass || !passForm.confirmPass) return alert("Vui lòng điền đầy đủ thông tin.");
@@ -66,19 +68,16 @@ const StaffLayout = () => {
 
     setLoadingPass(true);
     try {
-        // 1. Lấy dữ liệu user mới nhất từ DB để check pass cũ
         const userRef = ref(db, `users/${currentUser.id}`);
         const snapshot = await get(userRef);
         const userData = snapshot.val();
 
-        // 2. So sánh pass cũ
         const isMatch = bcrypt.compareSync(passForm.oldPass, userData.password);
         if (!isMatch) {
             setLoadingPass(false);
             return alert("Mật khẩu cũ không đúng!");
         }
 
-        // 3. Mã hóa và lưu pass mới
         const salt = bcrypt.genSaltSync(10);
         const newHash = bcrypt.hashSync(passForm.newPass, salt);
 
@@ -119,13 +118,15 @@ const StaffLayout = () => {
           <Link to="/staff/scores" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('scores') ? 'bg-[#003366]/5 text-[#003366]' : 'text-slate-600 hover:bg-slate-50'}`}>
             <Icons.Scores active={isActive('scores')} /> Nhập điểm
           </Link>
+          <Link to="/staff/assignments" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${location.pathname.includes('assignments') ? 'bg-[#003366]/5 text-[#003366]' : 'text-slate-600 hover:bg-slate-50'}`}>
+            <Icons.Assignment active={location.pathname.includes('assignments')} /> Quản lý Bài tập
+          </Link>
           <Link to="/staff/notifications" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('notifications') ? 'bg-[#003366]/5 text-[#003366]' : 'text-slate-600 hover:bg-slate-50'}`}>
             <Icons.Noti active={isActive('notifications')} /> Thông báo
           </Link>
         </nav>
 
         <div className="p-4 border-t border-slate-100 space-y-1">
-           {/* Nút Đổi Mật Khẩu Desktop */}
            <button onClick={() => setShowPassModal(true)} className="flex items-center gap-3 px-4 py-3 rounded-xl w-full text-slate-500 hover:bg-blue-50 hover:text-[#003366] transition-all font-medium text-sm">
              <Icons.Key /> Đổi mật khẩu
            </button>
@@ -142,7 +143,6 @@ const StaffLayout = () => {
           <span className="text-[#003366] font-bold text-sm">Staff Portal</span>
         </div>
         <div className="flex items-center gap-1">
-            {/* Nút Đổi Mật Khẩu Mobile */}
             <button onClick={() => setShowPassModal(true)} className="p-2 text-slate-400 hover:text-[#003366]">
                 <Icons.Key />
             </button>
@@ -162,6 +162,7 @@ const StaffLayout = () => {
         <Link to="/staff/classes" className={mobileLinkClass('classes')}><Icons.Class active={isActive('classes')} /><span className="text-[10px] font-medium">Lớp</span></Link>
         <Link to="/staff/attendance" className={mobileLinkClass('attendance')}><Icons.Attendance active={isActive('attendance')} /><span className="text-[10px] font-medium">Đ.Danh</span></Link>
         <Link to="/staff/scores" className={mobileLinkClass('scores')}><Icons.Scores active={isActive('scores')} /><span className="text-[10px] font-medium">Điểm</span></Link>
+        <Link to="/staff/assignments" className={mobileLinkClass('assignments')}><Icons.Assignment active={isActive('assignments')} /><span className="text-[10px] font-medium">B.Tập</span></Link>
         <Link to="/staff/notifications" className={mobileLinkClass('notifications')}><Icons.Noti active={isActive('notifications')} /><span className="text-[10px] font-medium">TBáo</span></Link>
       </nav>
 

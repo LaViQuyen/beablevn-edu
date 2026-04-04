@@ -1,27 +1,22 @@
+// Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getDatabase } from "firebase/database";
-import { getAuth } from "firebase/auth";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
 
-// Cấu hình trực tiếp (Không dùng .env)
-export const firebaseConfig = {
-  apiKey: "AIzaSyDib-AzfVlINhKd-EiiFhZq1PQwPCMMrBw",
-  authDomain: "beablevn-learning.firebaseapp.com",
-  // QUAN TRỌNG: URL này đã được sửa thành 'bavn-learning' thay vì 'beablevn-learning' để khớp với database thực tế
-  databaseURL: "https://bavn-learning-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "beablevn-learning",
-  storageBucket: "beablevn-learning.firebasestorage.app",
-  messagingSenderId: "929043730121",
-  appId: "1:929043730121:web:3f95e39b6bfe93d2f2c718",
-  measurementId: "G-8TL2GYB1L8"
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyDZHCMwzGHvodsgbX4la3B763KYeFzPm5Y",
+  authDomain: "beablevn-system.firebaseapp.com",
+  databaseURL: "https://beablevn-system-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "beablevn-system",
+  storageBucket: "beablevn-system.firebasestorage.app",
+  messagingSenderId: "17618073710",
+  appId: "1:17618073710:web:0b9cf14c1f1d8125f1ce7f",
+  measurementId: "G-4Q65DS3EQX"
 };
 
-// 1. Khởi tạo App
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-
-// 2. Khởi tạo Database (Truyền URL cấu hình vào để đảm bảo kết nối đúng)
-export const db = getDatabase(app, firebaseConfig.databaseURL);
-
-// 3. Khởi tạo Auth
-export const auth = getAuth(app);
-
-export default app;
+const analytics = getAnalytics(app);

@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { db } from "../../../firebase";
+import { firestore as db } from "../../../firebase";
 import Button from '../../../components/Layouts/Button';
 import Input from '../../../components/Layouts/Input';
 
@@ -333,7 +333,7 @@ export default function CreateExercise() {
         modified: new Date().toISOString().split('T')[0]
       }, { merge: true });
       alert("Đã lưu bài tập thành công!");
-      navigate('/teacher/exercises');
+      navigate('/staff/assignments/exercises');
     } catch (error) { alert("Lỗi lưu bài tập!"); }
     setIsLoading(false);
   };
@@ -359,7 +359,7 @@ export default function CreateExercise() {
         
         <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', justifyContent: 'space-between', alignItems: isMobile ? 'stretch' : 'center', marginBottom: '30px', gap: '15px' }}>
           <div>
-            <button onClick={() => navigate('/teacher/exercises')} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', marginBottom: '8px', fontWeight: '700', fontSize: '14px', padding: 0 }}>
+            <button onClick={() => navigate('/staff/assignments/exercises')} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', marginBottom: '8px', fontWeight: '700', fontSize: '14px', padding: 0 }}>
               <SvgIcons.Back /> Quay lại Library
             </button>
             <h2 style={{ color: '#003366', margin: 0, fontSize: isMobile ? '22px' : '28px', fontWeight: '800' }}>

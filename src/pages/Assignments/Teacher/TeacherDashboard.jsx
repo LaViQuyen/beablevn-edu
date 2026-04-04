@@ -1,8 +1,8 @@
-// src/pages/teacher/TeacherDashboard.jsx
+// src/pages/teacher/TeacherDashboard.jsxư
 import { useState, useEffect, createContext } from 'react';
 import { Routes, Route, useNavigate, useLocation, Link } from 'react-router-dom';
 import { collection, getDocs } from 'firebase/firestore';
-import { db } from "../../../firebase";
+import { firestore as db } from "../../../firebase";
 import Launch from './Launch';
 import ExerciseLibrary from './ExerciseLibrary';
 import CreateExercise from './CreateExercise';
@@ -11,8 +11,8 @@ import Reports from './Reports';
 import RoomManager from './RoomManager';
 import VocabularyManager from './VocabularyManager';
 
-export const TeacherContext = createContext();
-
+import { TeacherContext } from './TeacherContext';
+// --- HỆ THỐNG SVG ICONS TỐI GIẢN ---
 // --- HỆ THỐNG SVG ICONS TỐI GIẢN ---
 const SvgIcons = {
   Vocabulary: () => <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>,
@@ -22,7 +22,8 @@ const SvgIcons = {
   Reports: () => <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>,
   Live: () => <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>,
   Menu: () => <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>,
-  LogOut: () => <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+  LogOut: () => <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>,
+  Back: () => <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
 };
 
 export default function TeacherDashboard() {
@@ -63,12 +64,12 @@ export default function TeacherDashboard() {
   };
 
   const navItems = [
-    { id: 'vocabulary', path: '/teacher/vocabulary', icon: <SvgIcons.Vocabulary />, label: 'Vocabulary' },
-    { id: 'launch', path: '/teacher/launch', icon: <SvgIcons.Launch />, label: 'Launch' },
-    { id: 'library', path: '/teacher/exercises', icon: <SvgIcons.Library />, label: 'Library' },
-    { id: 'rooms', path: '/teacher/rooms', icon: <SvgIcons.Rooms />, label: 'Rooms' },
-    { id: 'reports', path: '/teacher/reports', icon: <SvgIcons.Reports />, label: 'Reports' },
-    { id: 'live', path: '/teacher/live', icon: <SvgIcons.Live />, label: 'Live Results' }
+    { id: 'vocabulary', path: '/staff/assignments/vocabulary', icon: <SvgIcons.Vocabulary />, label: 'Vocabulary' },
+    { id: 'launch', path: '/staff/assignments/launch', icon: <SvgIcons.Launch />, label: 'Launch' },
+    { id: 'library', path: '/staff/assignments/exercises', icon: <SvgIcons.Library />, label: 'Library' },
+    { id: 'rooms', path: '/staff/assignments/rooms', icon: <SvgIcons.Rooms />, label: 'Rooms' },
+    { id: 'reports', path: '/staff/assignments/reports', icon: <SvgIcons.Reports />, label: 'Reports' },
+    { id: 'live', path: '/staff/assignments/live', icon: <SvgIcons.Live />, label: 'Live Results' }
   ];
 
   return (
@@ -142,17 +143,11 @@ export default function TeacherDashboard() {
 
             <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '20px', marginTop: 'auto' }}>
               <Link 
-                to="/" 
-                onClick={() => { 
-                  localStorage.removeItem('activeRoom'); 
-                  localStorage.removeItem('teacherAuth'); 
-                  setIsMenuOpen(false); 
-                }} 
-                style={{ color: '#ef4444', textDecoration: 'none', fontWeight: '800', fontSize: '16px', display: 'flex', alignItems: 'center', gap: '10px', padding: '10px', transition: 'opacity 0.2s' }} 
-                onMouseEnter={e => e.currentTarget.style.opacity = 0.7} 
-                onMouseLeave={e => e.currentTarget.style.opacity = 1}
+                to="/staff/classes" 
+                onClick={() => setIsMenuOpen(false)} 
+                style={{ color: '#003366', textDecoration: 'none', fontWeight: '800', fontSize: '16px', display: 'flex', alignItems: 'center', gap: '10px', padding: '10px', transition: 'opacity 0.2s' }} 
               >
-                <SvgIcons.LogOut /> Log Out
+                <SvgIcons.Back /> Quay lại Edu
               </Link>
             </div>
           </div>
@@ -176,14 +171,14 @@ export default function TeacherDashboard() {
           <main style={{ flex: 1, overflowY: 'auto', backgroundColor: '#f8fafc', position: 'relative' }}>
             <Routes>
               <Route path="/" element={<Launch />} />
-              <Route path="/vocabulary" element={<VocabularyManager />} />
-              <Route path="/launch" element={<Launch />} />
-              <Route path="/exercises" element={<ExerciseLibrary />} />
-              <Route path="/exercises/new" element={<CreateExercise />} />
-              <Route path="/exercises/:quizId" element={<CreateExercise />} />
-              <Route path="/live" element={<LiveResults />} />
-              <Route path="/reports" element={<Reports />} />
-              <Route path="/rooms" element={<RoomManager />} />
+              <Route path="vocabulary" element={<VocabularyManager />} />
+              <Route path="launch" element={<Launch />} />
+              <Route path="exercises" element={<ExerciseLibrary />} />
+              <Route path="exercises/new" element={<CreateExercise />} />
+              <Route path="exercises/:quizId" element={<CreateExercise />} />
+              <Route path="live" element={<LiveResults />} />
+              <Route path="reports" element={<Reports />} />
+              <Route path="rooms" element={<RoomManager />} />
             </Routes>
           </main>
         </div>
