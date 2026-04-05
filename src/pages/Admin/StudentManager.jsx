@@ -22,6 +22,12 @@ const StudentManager = () => {
   const handleCreate = async (e) => {
     e.preventDefault();
     if (!formData.name || !formData.password || !formData.studentCode) return alert("Thiếu thông tin!");
+
+    // --- BẮT BUỘC 8 CHỮ SỐ KHI TẠO MỚI ---
+    const codeTrimmed = formData.studentCode.trim();
+    if (!/^\d{8}$/.test(codeTrimmed)) {
+      return alert("LỖI: Mã Học viên (Login ID) BẮT BUỘC phải là 8 chữ số (Ví dụ: 20260101)!");
+    }
     
     const classIds = [formData.classId1, formData.classId2, formData.classId3].filter(id => id);
     const loginEmail = `${formData.studentCode.trim()}@beable.vn`;
@@ -52,6 +58,13 @@ const StudentManager = () => {
 
   const handleUpdate = async () => {
     if(!editingStudent) return;
+
+    // --- BẮT BUỘC 8 CHỮ SỐ KHI CHỈNH SỬA ---
+    const codeTrimmed = editingStudent.studentCode.trim();
+    if (!/^\d{8}$/.test(codeTrimmed)) {
+      return alert("LỖI: Mã Học viên (Login ID) BẮT BUỘC phải là 8 chữ số!");
+    }
+    
     try {
       await update(ref(db, `users/${editingStudent.id}`), {
         name: editingStudent.name,
