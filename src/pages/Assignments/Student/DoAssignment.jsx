@@ -18,7 +18,9 @@ const SvgIcons = {
   Quiz: () => <svg width="40" height="40" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>,
   Book: () => <svg width="40" height="40" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>,
   Flip: () => <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"></polyline><polyline points="23 20 23 14 17 14"></polyline><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path></svg>,
-  Back: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" /></svg>
+  Back: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" /></svg>,
+  Error: () => <svg width="64" height="64" fill="none" stroke="#ef4444" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>,
+  Denied: () => <svg width="64" height="64" fill="none" stroke="#f97316" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
 };
 
 export default function DoAssignment() {
@@ -26,8 +28,11 @@ export default function DoAssignment() {
   const navigate = useNavigate();
   const { currentUser, userData } = useAuth();
   
-  // Tự động lấy studentId từ hệ thống Edu (Ưu tiên mã học viên, nếu không có thì lấy loginId/email)
+  // Tự động lấy studentId từ hệ thống Edu (Mã học viên 8 chữ số)
   const studentId = userData?.studentCode || userData?.loginId || currentUser?.email?.split('@')[0] || currentUser?.uid || "Unknown";
+
+  // --- STATE QUẢN LÝ QUYỀN TRUY CẬP (BẢO VỆ 2 LỚP) ---
+  const [accessStatus, setAccessStatus] = useState('CHECKING'); // CHECKING, ALLOWED, NOT_FOUND, DENIED
 
   // States chung
   const [view, setView] = useState('DASHBOARD'); // DASHBOARD, QUIZ, VOCAB_HOME, VOCAB_FLASHCARDS, VOCAB_LEARN, VOCAB_MATCH
@@ -61,44 +66,64 @@ export default function DoAssignment() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Lắng nghe Room
+  // ==========================================
+  // LẮNG NGHE PHÒNG THI VÀ KIỂM TRA BẢO MẬT 2 LỚP
+  // ==========================================
   useEffect(() => {
     const roomRef = doc(db, "rooms", roomId);
     const unsubscribe = onSnapshot(roomRef, async (snap) => {
-      if (snap.exists()) {
-        const data = snap.data();
-        setRoomData(data);
+      
+      // LỚP BẢO VỆ 1: KIỂM TRA PHÒNG CÓ TỒN TẠI KHÔNG?
+      if (!snap.exists()) {
+        setAccessStatus('NOT_FOUND');
+        return;
+      }
 
-        // Load Quiz
-        const activeSession = data.activeSession;
-        if (activeSession && activeSession.status === 'active') {
-          setSessionInfo(activeSession);
-          const quizSnap = await getDoc(doc(db, "quizzes", activeSession.quizId));
-          if (quizSnap.exists()) {
-            setQuiz({ id: activeSession.quizId, ...quizSnap.data() });
-          }
-        } else {
-          setQuiz(null);
-          setSessionInfo(null);
-          setShuffledQuiz(null);
-        }
+      const data = snap.data();
 
-        // Load Vocab
-        if (data.assignedVocabId) {
-          const vocabSnap = await getDoc(doc(db, "vocab_sets", data.assignedVocabId));
-          if (vocabSnap.exists()) {
-            setVocabSet({ id: vocabSnap.id, ...vocabSnap.data() });
-          }
-        } else {
-          setVocabSet(null);
+      // LỚP BẢO VỆ 2: KIỂM TRA ROSTER (HỌC VIÊN CÓ TRONG DANH SÁCH KHÔNG?)
+      const roster = data.students || [];
+      const isAllowed = roster.some(s => String(s.studentId).trim() === String(studentId).trim());
+      
+      if (!isAllowed) {
+        setAccessStatus('DENIED');
+        return;
+      }
+
+      // VƯỢT QUA 2 VÒNG KIỂM TRA -> CHO PHÉP TRUY CẬP
+      setAccessStatus('ALLOWED');
+      setRoomData(data);
+
+      // Load Quiz
+      const activeSession = data.activeSession;
+      if (activeSession && activeSession.status === 'active') {
+        setSessionInfo(activeSession);
+        const quizSnap = await getDoc(doc(db, "quizzes", activeSession.quizId));
+        if (quizSnap.exists()) {
+          setQuiz({ id: activeSession.quizId, ...quizSnap.data() });
         }
+      } else {
+        setQuiz(null);
+        setSessionInfo(null);
+        setShuffledQuiz(null);
+      }
+
+      // Load Vocab
+      if (data.assignedVocabId) {
+        const vocabSnap = await getDoc(doc(db, "vocab_sets", data.assignedVocabId));
+        if (vocabSnap.exists()) {
+          setVocabSet({ id: vocabSnap.id, ...vocabSnap.data() });
+        }
+      } else {
+        setVocabSet(null);
       }
     });
+
     return () => unsubscribe();
-  }, [roomId]);
+  }, [roomId, studentId]);
 
   // ==========================================
-  // LOGIC QUIZ (Giữ nguyên không thay đổi)
+  // LOGIC QUIZ
   // ==========================================
   useEffect(() => {
     if (sessionInfo?.startTime) {
@@ -174,12 +199,12 @@ export default function DoAssignment() {
         existingSessions.push(newSession);
         setCurrentSessionId(newSessionId);
         sessionsRef.current = existingSessions;
-        await setDoc(subRef, { studentId, studentName: studentId, rawAnswers: prevRaw, answers: {}, sessions: existingSessions, lastUpdated: new Date().toISOString() }, { merge: true });
+        await setDoc(subRef, { studentId, studentName: userData?.name || studentId, rawAnswers: prevRaw, answers: {}, sessions: existingSessions, lastUpdated: new Date().toISOString() }, { merge: true });
       }
       setLocalAnswers(prevRaw); setIsSubmitted(isSub); setIsInitialized(true);
     };
     initSession();
-  }, [shuffledQuiz, sessionInfo, isInitialized, roomId, studentId]);
+  }, [shuffledQuiz, sessionInfo, isInitialized, roomId, studentId, userData]);
 
   const evaluateAnswer = (question, studentAnswer) => {
     if (!studentAnswer) return false;
@@ -303,7 +328,7 @@ export default function DoAssignment() {
   };
 
   // ==========================================
-  // LOGIC VOCABULARY (Giữ nguyên không thay đổi)
+  // LOGIC VOCABULARY
   // ==========================================
   const saveVocabReport = async (updateData) => {
     try {
@@ -372,10 +397,49 @@ export default function DoAssignment() {
   };
 
   // ==========================================
-  // RENDERS ĐƯỢC CHUẨN HÓA (DÙNG TAILWIND CSS CỦA EDU)
+  // RENDERS MÀN HÌNH BÁO LỖI (BẢO VỆ 2 LỚP)
+  // ==========================================
+  
+  if (accessStatus === 'CHECKING') {
+    return (
+      <div className="flex flex-col items-center justify-center h-[80vh] animate-fade-in-up">
+        <div className="mb-6 animate-pulse"><SvgIcons.Wait /></div>
+        <h2 className="font-extrabold text-xl text-[#003366]">Đang kiểm tra quyền truy cập...</h2>
+      </div>
+    );
+  }
+
+  if (accessStatus === 'NOT_FOUND') {
+    return (
+      <div className="flex flex-col items-center justify-center h-[80vh] px-4 animate-fade-in-up">
+        <div className="mb-6"><SvgIcons.Error /></div>
+        <h2 className="text-3xl font-extrabold text-[#003366] mb-3 text-center">Phòng thi không tồn tại!</h2>
+        <p className="text-slate-500 text-center max-w-md mb-8 leading-relaxed">
+          Mã phòng <strong className="text-red-500">{roomId}</strong> không đúng hoặc đã bị giáo viên đóng. Vui lòng kiểm tra lại mã với giáo viên của bạn.
+        </p>
+        <button onClick={() => navigate('/student/dashboard')} className="px-8 py-3 bg-[#003366] text-white font-bold rounded-full hover:bg-[#002244] transition-colors shadow-lg">Quay lại Dashboard</button>
+      </div>
+    );
+  }
+
+  if (accessStatus === 'DENIED') {
+    return (
+      <div className="flex flex-col items-center justify-center h-[80vh] px-4 animate-fade-in-up">
+        <div className="mb-6"><SvgIcons.Denied /></div>
+        <h2 className="text-3xl font-extrabold text-[#003366] mb-3 text-center">Truy cập bị từ chối!</h2>
+        <p className="text-slate-500 text-center max-w-md mb-8 leading-relaxed">
+          Mã học viên <strong className="text-orange-500">{studentId}</strong> của bạn không có tên trong danh sách dự thi của phòng này. Vui lòng báo giáo viên thêm bạn vào Roster.
+        </p>
+        <button onClick={() => navigate('/student/dashboard')} className="px-8 py-3 bg-[#003366] text-white font-bold rounded-full hover:bg-[#002244] transition-colors shadow-lg">Quay lại Dashboard</button>
+      </div>
+    );
+  }
+
+
+  // ==========================================
+  // RENDERS NỘI DUNG BÀI TẬP BÌNH THƯỜNG
   // ==========================================
 
-  // Header Tiêu đề chuyên dụng cho trang này (Thay thế cái appHeader cồng kềnh cũ)
   const renderPageHeader = (titleText, showBack = false, backAction = null) => (
     <div className="mb-6 animate-fade-in-up">
       {showBack ? (
