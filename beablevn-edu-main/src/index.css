@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Áp dụng font Josefin Sans cho toàn bộ body */
+body {
+  font-family: 'Josefin Sans', sans-serif;
+  background-color: #f9fafb; /* Màu nền xám sáng nhẹ */
+  color: #111827; /* Màu chữ tối */
+}
+
+/* Đảm bảo các thành phần form cũng nhận font này */
+button, input, optgroup, select, textarea {
+  font-family: 'Josefin Sans', sans-serif;
+}
+
+/* Tùy chỉnh thanh cuộn cho đẹp hơn (Optional) */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
