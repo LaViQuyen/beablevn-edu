@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "bavn-learning"
+  },
+  "targets": {
+    "bavn-learning": {
+      "hosting": {
+        "edu": [
+          "beablevn-edu"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}
