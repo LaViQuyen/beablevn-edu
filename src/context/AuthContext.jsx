@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-
+import { db } from "../firebase"; 
+import { ref, onValue } from "firebase/database";
 const AuthContext = createContext(null);
 
 export function useAuth() {
@@ -19,7 +20,23 @@ export function AuthProvider({ children }) {
   });
 
   const [loading, setLoading] = useState(false);
+  useEffect(() => {
+      if (!currentUser?.id) return; // Nếu chưa đăng nhập thì bỏ qua
 
+      const userRef = ref(db, `users/${currentUser.id}`);
+      const unsubscribe = onValue(userRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          // Cập nhật lại state và đè LocalStorage mới nhất ngay lập tức
+          const updatedUser = { id: currentUser.id, ...data };
+          setCurrentUser(updatedUser);
+          localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+        }
+      });
+
+      // Hủy lắng nghe khi thoát app hoặc đăng xuất
+      return () => unsubscribe();
+    }, [currentUser?.id])
   // 2. Hàm Đăng nhập: Lưu vào State và LocalStorage
   const login = (userData) => {
     setCurrentUser(userData);

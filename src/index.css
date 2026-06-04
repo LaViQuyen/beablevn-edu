@@ -2,30 +2,159 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Áp dụng font Josefin Sans cho toàn bộ body */
-body {
-  font-family: 'Josefin Sans', sans-serif;
-  background-color: #f9fafb; /* Màu nền xám sáng nhẹ */
-  color: #111827; /* Màu chữ tối */
+/* ============================================================
+   DESIGN TOKENS — Be Able VN / 2Sol EDU
+   Thay đổi màu thương hiệu: chỉ cần sửa --color-primary
+   ============================================================ */
+:root {
+  /* === Màu thương hiệu === */
+  --color-primary:        #003366;
+  --color-primary-hover:  #002244;
+  --color-primary-light:  #EEF3FA;   /* bg-blue-50 tương đương */
+  --color-primary-ring:   #003366/10;
+
+  /* === Màu trạng thái === */
+  --color-success:   #059669;
+  --color-warning:   #D97706;
+  --color-danger:    #DC2626;
+  --color-info:      #2563EB;
+
+  /* === Border radius === */
+  --radius-sm:  6px;   /* badge, tag nhỏ */
+  --radius-md:  12px;  /* input, button, card — rounded-xl */
+  --radius-lg:  16px;  /* modal, drawer     — rounded-2xl */
+  --radius-full: 9999px; /* pill, avatar */
+
+  /* === Shadow === */
+  --shadow-card:   0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.04);
+  --shadow-hover:  0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  --shadow-modal:  0 20px 50px -10px rgb(0 0 0 / 0.18);
+
+  /* === Transition === */
+  --transition-base: 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Đảm bảo các thành phần form cũng nhận font này */
+/* ============================================================
+   BASE STYLES
+   ============================================================ */
+body {
+  font-family: 'Josefin Sans', sans-serif;
+  background-color: #f8fafc;
+  color: #111827;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 button, input, optgroup, select, textarea {
   font-family: 'Josefin Sans', sans-serif;
 }
 
-/* Tùy chỉnh thanh cuộn cho đẹp hơn (Optional) */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+/* ============================================================
+   UTILITY CLASSES — Design System
+   Dùng trong JSX: className="btn-primary", "card", "input-base"
+   ============================================================ */
+@layer components {
+
+  /* --- Buttons --- */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 font-bold rounded-xl transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-sm  { @apply btn px-3 py-2 text-xs; }
+  .btn-md  { @apply btn px-5 py-2.5 text-sm; }
+  .btn-lg  { @apply btn px-8 py-3 text-sm; }
+
+  .btn-primary  { @apply btn-md bg-[#003366] text-white hover:bg-[#002244] shadow-sm; }
+  .btn-secondary{ @apply btn-md bg-slate-100 text-slate-700 hover:bg-slate-200; }
+  .btn-danger   { @apply btn-md bg-red-500 text-white hover:bg-red-600; }
+  .btn-ghost    { @apply btn-md text-slate-600 hover:bg-slate-100; }
+  .btn-outline  { @apply btn-md border border-[#003366] text-[#003366] hover:bg-[#003366] hover:text-white; }
+
+  /* --- Inputs --- */
+  .input-base {
+    @apply w-full border border-slate-200 p-3 rounded-xl text-sm outline-none
+           focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/10
+           bg-white transition-all placeholder:text-slate-400;
+  }
+  .input-error {
+    @apply border-red-300 focus:border-red-400 focus:ring-red-100;
+  }
+
+  /* --- Cards --- */
+  .card {
+    @apply bg-white rounded-xl border border-slate-100 shadow-sm;
+  }
+  .card-hover {
+    @apply card hover:shadow-md hover:border-blue-100 transition-all;
+  }
+  .card-body {
+    @apply p-4 md:p-6;
+  }
+
+  /* --- Badges / Tags --- */
+  .badge {
+    @apply inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded border uppercase tracking-wide;
+  }
+  .badge-blue   { @apply badge bg-blue-50 text-blue-700 border-blue-200; }
+  .badge-green  { @apply badge bg-green-50 text-green-700 border-green-200; }
+  .badge-amber  { @apply badge bg-amber-50 text-amber-700 border-amber-200; }
+  .badge-red    { @apply badge bg-red-50 text-red-700 border-red-200; }
+  .badge-purple { @apply badge bg-purple-50 text-purple-700 border-purple-200; }
+  .badge-slate  { @apply badge bg-slate-50 text-slate-600 border-slate-200; }
+
+  /* --- Section headers --- */
+  .page-header {
+    @apply flex items-center gap-3 pb-4 border-b border-slate-100 mb-6;
+  }
+  .page-header-icon {
+    @apply p-2 rounded-lg flex-shrink-0;
+  }
+
+  /* --- Form labels --- */
+  .label {
+    @apply text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1.5;
+  }
+
+  /* --- Skeleton pulse --- */
+  .skeleton {
+    @apply bg-slate-100 rounded-xl animate-pulse;
+  }
+
+  /* --- Toast --- */
+  .toast-success { @apply fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-emerald-600 text-white px-5 py-3 rounded-xl shadow-lg text-sm font-medium flex items-center gap-2; }
+  .toast-error   { @apply fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-red-500 text-white px-5 py-3 rounded-xl shadow-lg text-sm font-medium flex items-center gap-2; }
+
+  /* --- Inline alert messages --- */
+  .alert-error   { @apply flex items-start gap-2 bg-red-50 text-red-700 border border-red-200 px-4 py-3 rounded-xl text-sm; }
+  .alert-success { @apply flex items-center gap-2 bg-green-50 text-green-700 border border-green-200 px-4 py-3 rounded-xl text-sm font-medium; }
+  .alert-warning { @apply flex items-start gap-2 bg-amber-50 text-amber-700 border border-amber-200 px-4 py-3 rounded-xl text-sm; }
 }
-::-webkit-scrollbar-track {
-  background: transparent;
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 10px;
+.animate-fade-in-up {
+  animation: fade-in-up 0.25s ease-out;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+.custom-scrollbar { scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
+
+/* ============================================================
+   QUILL RICH TEXT — áp dụng cho cả editor lẫn display
+   ============================================================ */
+.quill-content ul,
+.ql-editor ul { list-style-type: disc !important; padding-left: 1.5rem !important; margin-bottom: 0.5rem !important; }
+.quill-content ol,
+.ql-editor ol { list-style-type: decimal !important; padding-left: 1.5rem !important; margin-bottom: 0.5rem !important; }
+.quill-content li,
+.ql-editor li { padding-left: 0.25rem !important; margin-bottom: 0.25rem !important; }

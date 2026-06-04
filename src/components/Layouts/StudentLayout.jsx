@@ -35,7 +35,17 @@ const Icons = {
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
       <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
     </svg>
-  )
+  ),
+  Feedback: ({ active }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke={active ? "#003366" : "#64748b"} className="w-5 h-5">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+    </svg>
+  ),
+  Contact: ({ active }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke={active ? "#003366" : "#64748b"} className="w-5 h-5">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+    </svg>
+  ),
 };
 
 const StudentLayout = () => {
@@ -46,6 +56,8 @@ const StudentLayout = () => {
   const [showPassModal, setShowPassModal] = useState(false);
   const [passForm, setPassForm] = useState({ oldPass: '', newPass: '', confirmPass: '' });
   const [loadingPass, setLoadingPass] = useState(false);
+  const [passError, setPassError] = useState('');
+  const [passSuccess, setPassSuccess] = useState('');
 
   const isActive = (path) => location.pathname.includes(path);
   const mobileLinkClass = (path) => `flex flex-col items-center justify-center w-full h-full space-y-1 ${isActive(path) ? 'text-[#003366]' : 'text-slate-400 hover:text-slate-600'}`;
@@ -57,33 +69,29 @@ const StudentLayout = () => {
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
-    if (!passForm.oldPass || !passForm.newPass || !passForm.confirmPass) return alert("Vui lòng điền đầy đủ thông tin.");
-    if (passForm.newPass !== passForm.confirmPass) return alert("Xác nhận mật khẩu mới không khớp.");
-    if (passForm.newPass.length < 6) return alert("Mật khẩu mới phải từ 6 ký tự trở lên.");
+    setPassError(''); setPassSuccess('');
+    if (!passForm.oldPass || !passForm.newPass || !passForm.confirmPass) return setPassError("Vui lòng điền đầy đủ thông tin.");
+    if (passForm.newPass !== passForm.confirmPass) return setPassError("Xác nhận mật khẩu mới không khớp.");
+    if (passForm.newPass.length < 6) return setPassError("Mật khẩu mới phải từ 6 ký tự trở lên.");
+    if (passForm.oldPass === passForm.newPass) return setPassError("Mật khẩu mới phải khác mật khẩu cũ.");
 
     setLoadingPass(true);
     try {
         const userRef = ref(db, `users/${currentUser.id}`);
         const snapshot = await get(userRef);
         const userData = snapshot.val();
-
         const isMatch = bcrypt.compareSync(passForm.oldPass, userData.password);
-        if (!isMatch) {
-            setLoadingPass(false);
-            return alert("Mật khẩu cũ không đúng!");
-        }
+        if (!isMatch) { setPassError("Mật khẩu cũ không đúng!"); setLoadingPass(false); return; }
 
         const salt = bcrypt.genSaltSync(10);
         const newHash = bcrypt.hashSync(passForm.newPass, salt);
-
         await update(userRef, { password: newHash });
 
-        alert("Đổi mật khẩu thành công!");
-        setShowPassModal(false);
+        setPassSuccess("Đổi mật khẩu thành công!");
         setPassForm({ oldPass: '', newPass: '', confirmPass: '' });
-
+        setTimeout(() => { setShowPassModal(false); setPassSuccess(''); }, 1800);
     } catch (error) {
-        alert("Lỗi: " + error.message);
+        setPassError("Lỗi: " + error.message);
     } finally {
         setLoadingPass(false);
     }
@@ -96,8 +104,8 @@ const StudentLayout = () => {
         <div className="p-6 border-b border-slate-100 flex items-center gap-3">
           <img src="/BA LOGO.png" alt="Logo" className="w-10 h-10 object-contain" />
           <div>
-            <h1 className="font-extrabold text-[#003366] text-lg leading-tight">BE ABLE</h1>
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Student Portal</p>
+            <h1 className="font-extrabold text-[#003366] text-lg leading-tight">BE ABLE VN</h1>
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Cổng Học viên</p>
           </div>
         </div>
 
@@ -116,12 +124,20 @@ const StudentLayout = () => {
           <Link to="/student/notifications" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('notifications') ? 'bg-[#003366]/5 text-[#003366]' : 'text-slate-600 hover:bg-slate-50'}`}>
             <Icons.Noti active={isActive('notifications')} /> Thông báo
           </Link>
+
+          <p className="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 mt-4">Tương tác</p>
+          <Link to="/student/feedback" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('feedback') ? 'bg-[#003366]/5 text-[#003366]' : 'text-slate-600 hover:bg-slate-50'}`}>
+            <Icons.Feedback active={isActive('feedback')} /> Phản ánh
+          </Link>
+          <Link to="/student/contact" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('contact') ? 'bg-[#003366]/5 text-[#003366]' : 'text-slate-600 hover:bg-slate-50'}`}>
+            <Icons.Contact active={isActive('contact')} /> Liên hệ GV
+          </Link>
         </nav>
 
         <div className="p-4 border-t border-slate-100 space-y-1">
-           <button onClick={() => setShowPassModal(true)} className="flex items-center gap-3 px-4 py-3 rounded-xl w-full text-slate-500 hover:bg-blue-50 hover:text-[#003366] transition-all font-medium text-sm">
-             <Icons.Key /> Đổi mật khẩu
-           </button>
+           <Link to="/student/profile" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('profile') ? 'bg-[#003366]/5 text-[#003366]' : 'text-slate-500 hover:bg-blue-50 hover:text-[#003366]'}`}>
+             <Icons.Key /> Tài khoản & Bảo mật
+           </Link>
            <button onClick={handleLogout} className="flex items-center gap-3 px-4 py-3 rounded-xl w-full text-slate-500 hover:bg-red-50 hover:text-red-600 transition-all font-medium text-sm">
              <Icons.Logout /> Đăng xuất
            </button>
@@ -145,7 +161,7 @@ const StudentLayout = () => {
       </header>
 
       {/* MAIN CONTENT */}
-      <main className="flex-1 md:ml-64 p-4 md:p-8 pb-24 md:pb-8 overflow-auto">
+      <main className="flex-1 md:ml-64 px-4 pt-20 pb-24 md:p-8 md:pb-8 overflow-auto">
         <div className="max-w-5xl mx-auto"><Outlet /></div>
       </main>
 
@@ -155,6 +171,8 @@ const StudentLayout = () => {
         <Link to="/student/attendance" className={mobileLinkClass('attendance')}><Icons.Attendance active={isActive('attendance')} /><span className="text-[10px] font-medium">Đ.Danh</span></Link>
         <Link to="/student/scores" className={mobileLinkClass('scores')}><Icons.Scores active={isActive('scores')} /><span className="text-[10px] font-medium">Kết quả</span></Link>
         <Link to="/student/notifications" className={mobileLinkClass('notifications')}><Icons.Noti active={isActive('notifications')} /><span className="text-[10px] font-medium">TBáo</span></Link>
+        <Link to="/student/feedback" className={mobileLinkClass('feedback')}><Icons.Feedback active={isActive('feedback')} /><span className="text-[10px] font-medium">Phản ánh</span></Link>
+        <Link to="/student/contact" className={mobileLinkClass('contact')}><Icons.Contact active={isActive('contact')} /><span className="text-[10px] font-medium">Liên hệ</span></Link>
       </nav>
 
       {/* MODAL */}
@@ -165,27 +183,42 @@ const StudentLayout = () => {
                     <Icons.Key /> Đổi Mật Khẩu
                 </h3>
                 <form onSubmit={handleChangePassword} className="space-y-4">
+                    {passError && (
+                        <div className="flex items-start gap-2 bg-red-50 text-red-700 border border-red-200 px-3 py-2.5 rounded-xl text-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 shrink-0 mt-0.5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>
+                            {passError}
+                        </div>
+                    )}
+                    {passSuccess && (
+                        <div className="flex items-center gap-2 bg-green-50 text-green-700 border border-green-200 px-3 py-2.5 rounded-xl text-sm font-medium">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 shrink-0"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                            {passSuccess}
+                        </div>
+                    )}
                     <div>
                         <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Mật khẩu cũ</label>
-                        <input type="password" required className="w-full p-3 border border-slate-300 rounded-xl outline-none focus:border-[#003366]" 
-                            value={passForm.oldPass} onChange={e => setPassForm({...passForm, oldPass: e.target.value})}
+                        <input type="password" className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/10 transition"
+                            value={passForm.oldPass} onChange={e => { setPassForm({...passForm, oldPass: e.target.value}); setPassError(''); }}
                         />
                     </div>
                     <div>
                         <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Mật khẩu mới</label>
-                        <input type="password" required className="w-full p-3 border border-slate-300 rounded-xl outline-none focus:border-[#003366]" 
-                            value={passForm.newPass} onChange={e => setPassForm({...passForm, newPass: e.target.value})}
+                        <input type="password" className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/10 transition"
+                            value={passForm.newPass} onChange={e => { setPassForm({...passForm, newPass: e.target.value}); setPassError(''); }}
                         />
                     </div>
                     <div>
                         <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Xác nhận mật khẩu mới</label>
-                        <input type="password" required className="w-full p-3 border border-slate-300 rounded-xl outline-none focus:border-[#003366]" 
-                            value={passForm.confirmPass} onChange={e => setPassForm({...passForm, confirmPass: e.target.value})}
+                        <input type="password" className={`w-full p-3 border rounded-xl outline-none focus:ring-2 transition ${passForm.confirmPass && passForm.newPass !== passForm.confirmPass ? 'border-red-300 focus:ring-red-100' : 'border-slate-200 focus:border-[#003366] focus:ring-[#003366]/10'}`}
+                            value={passForm.confirmPass} onChange={e => { setPassForm({...passForm, confirmPass: e.target.value}); setPassError(''); }}
                         />
+                        {passForm.confirmPass && passForm.newPass !== passForm.confirmPass && (
+                            <p className="text-red-500 text-xs mt-1">Mật khẩu không khớp</p>
+                        )}
                     </div>
                     <div className="flex gap-3 pt-2">
-                        <button type="button" onClick={() => setShowPassModal(false)} className="flex-1 py-3 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition-colors">Hủy</button>
-                        <button type="submit" disabled={loadingPass} className="flex-1 py-3 bg-[#003366] text-white rounded-xl font-bold hover:bg-[#002244] transition-colors shadow-lg shadow-blue-900/10">
+                        <button type="button" onClick={() => { setShowPassModal(false); setPassError(''); setPassSuccess(''); setPassForm({ oldPass:'', newPass:'', confirmPass:'' }); }} className="flex-1 py-3 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition-colors">Hủy</button>
+                        <button type="submit" disabled={loadingPass} className="flex-1 py-3 bg-[#003366] text-white rounded-xl font-bold hover:bg-[#002244] transition-colors disabled:opacity-50">
                             {loadingPass ? "Đang xử lý..." : "Lưu thay đổi"}
                         </button>
                     </div>

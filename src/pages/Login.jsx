@@ -1,164 +1,161 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { ref, get } from 'firebase/database';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import bcrypt from 'bcryptjs';
+import { Alert, Button } from '../components/UI';
+
+const REMEMBER_KEY = 'bavn_remember_id';
 
 const Login = () => {
   const [formData, setFormData] = useState({ id: '', password: '' });
+  const [rememberMe, setRememberMe] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  
+
   const navigate = useNavigate();
   const { login } = useAuth();
 
+  useEffect(() => {
+    const savedId = localStorage.getItem(REMEMBER_KEY);
+    if (savedId) { setFormData(prev => ({ ...prev, id: savedId })); setRememberMe(true); }
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setLoading(true);
-
+    setError(''); setLoading(true);
     try {
-      // 1. Lấy dữ liệu người dùng từ Database
       const snapshot = await get(ref(db, 'users'));
-      
-      if (!snapshot.exists()) {
-        setError("Hệ thống đang bảo trì (Database trống).");
-        setLoading(false);
-        return;
-      }
+      if (!snapshot.exists()) { setError("Hệ thống đang bảo trì."); setLoading(false); return; }
 
-      const users = snapshot.val();
-      const userList = Object.entries(users).map(([key, value]) => ({ ...value, id: key }));
-
+      const userList = Object.entries(snapshot.val()).map(([key, value]) => ({ ...value, id: key }));
       const inputId = formData.id.trim();
-      
-      // 2. Tìm kiếm người dùng (hỗ trợ nhập ID, Email, Mã HV hoặc LoginID)
-      const foundUser = userList.find(u => 
-        (u.username === inputId) || 
-        (u.loginId === inputId) || 
-        (u.email === inputId) ||
-        (u.studentCode === inputId)
+      const foundUser = userList.find(u =>
+        u.username === inputId || u.loginId === inputId || u.email === inputId || u.studentCode === inputId
       );
 
-      if (!foundUser) {
-        setError("Sai tên đăng nhập hoặc mật khẩu."); // Thông báo chung để bảo mật
-        setLoading(false);
-        return;
+      if (!foundUser) { setError("Sai tên đăng nhập hoặc mật khẩu."); setLoading(false); return; }
+
+      if (foundUser.lockedAt) {
+        const lockDate = new Date(foundUser.lockedAt);
+        if (new Date() >= lockDate) {
+          setError(`Tài khoản bị khóa từ ${lockDate.toLocaleDateString('vi-VN')}. Liên hệ trung tâm.`);
+          setLoading(false); return;
+        }
       }
 
-      // 3. Kiểm tra mật khẩu
-      let isValid = false;
       const storedPass = foundUser.password || "";
-      
-      // Ưu tiên kiểm tra Bcrypt ($2...), hỗ trợ ngược cho pass cũ (nếu sót)
-      if (storedPass.startsWith('$2')) {
-          isValid = bcrypt.compareSync(formData.password, storedPass);
-      } else {
-          isValid = String(storedPass) === String(formData.password);
-      }
+      const isValid = storedPass.startsWith('$2')
+        ? bcrypt.compareSync(formData.password, storedPass)
+        : String(storedPass) === String(formData.password);
 
       if (isValid) {
-        // 4. Đăng nhập thành công
-        const { password, ...safeUser } = foundUser; // Loại bỏ pass trước khi lưu session
+        if (rememberMe) localStorage.setItem(REMEMBER_KEY, inputId);
+        else localStorage.removeItem(REMEMBER_KEY);
+        const { password, ...safeUser } = foundUser;
         login(safeUser);
-        
-        // Điều hướng dựa trên vai trò
-        if (foundUser.role === 'admin') navigate('/admin/staff');
+        if (foundUser.role === 'admin') navigate('/admin/dashboard');
         else if (foundUser.role === 'staff') navigate('/staff/classes');
-        else navigate('/student/dashboard'); // Học viên về Dashboard
+        else navigate('/student/dashboard');
       } else {
         setError("Sai tên đăng nhập hoặc mật khẩu.");
       }
-
     } catch (err) {
-      console.error(err);
-      setError("Lỗi kết nối máy chủ. Vui lòng thử lại sau.");
+      setError("Lỗi kết nối máy chủ. Vui lòng thử lại.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4 font-sans">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50 p-4 font-sans">
       <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-100">
-        
-        {/* LOGO & TITLE */}
+
+        {/* Logo */}
         <div className="text-center mb-8">
-           <div className="w-20 h-20 bg-white rounded-2xl mx-auto flex items-center justify-center mb-4 shadow-sm border border-slate-50">
+          <div className="w-20 h-20 bg-white rounded-2xl mx-auto flex items-center justify-center mb-4 shadow-sm border border-slate-100">
             <img src="/BA LOGO.png" alt="Logo" className="w-14 h-14 object-contain" />
           </div>
           <h1 className="text-2xl font-extrabold text-[#003366]">BE ABLE VN</h1>
           <p className="text-slate-400 text-sm mt-1 font-medium">Hệ thống Quản lý Đào tạo</p>
         </div>
 
-        {/* THÔNG BÁO LỖI */}
-        {error && (
-          <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm mb-6 flex items-center gap-2 border border-red-100 font-medium animate-pulse">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-            </svg>
-            {error}
-          </div>
-        )}
+        {/* Error alert */}
+        {error && <Alert type="error" className="mb-5">{error}</Alert>}
 
-        {/* FORM ĐĂNG NHẬP */}
         <form onSubmit={handleSubmit} className="space-y-5">
+
+          {/* ID field */}
           <div>
-            <label className="block text-xs font-bold text-[#003366] uppercase mb-1.5 ml-1">Tên đăng nhập / Mã HV</label>
+            <label className="text-xs font-bold text-[#003366] uppercase tracking-wider block mb-1.5 ml-1">
+              Tên đăng nhập / Mã HV
+            </label>
             <div className="relative">
-              <input 
-                type="text" 
-                className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#003366] focus:border-transparent outline-none transition-all bg-white text-slate-700 font-medium" 
-                placeholder="Ví dụ: 20230240 hoặc gv01" 
-                value={formData.id} 
-                onChange={(e) => setFormData({...formData, id: e.target.value})} 
-                required 
+              <input
+                type="text" autoComplete="username" autoFocus required
+                className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#003366]/10 focus:border-[#003366] outline-none transition-all bg-white text-slate-700 font-medium placeholder:text-slate-400"
+                placeholder="VD: 20230240 hoặc gv01"
+                value={formData.id}
+                onChange={e => { setFormData({...formData, id: e.target.value}); setError(''); }}
               />
-              <span className="absolute left-3 top-3.5 text-slate-400">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
-              </span>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="#94a3b8" className="w-5 h-5 absolute left-3 top-3.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+              </svg>
             </div>
           </div>
 
+          {/* Password field */}
           <div>
-            <label className="block text-xs font-bold text-[#003366] uppercase mb-1.5 ml-1">Mật khẩu</label>
+            <label className="text-xs font-bold text-[#003366] uppercase tracking-wider block mb-1.5 ml-1">
+              Mật khẩu
+            </label>
             <div className="relative">
-              <input 
-                type="password" 
-                className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#003366] focus:border-transparent outline-none transition-all bg-white text-slate-700 font-medium" 
-                placeholder="••••••••" 
-                value={formData.password} 
-                onChange={(e) => setFormData({...formData, password: e.target.value})} 
-                required 
+              <input
+                type={showPassword ? 'text' : 'password'} autoComplete="current-password" required
+                className="w-full pl-10 pr-11 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#003366]/10 focus:border-[#003366] outline-none transition-all bg-white text-slate-700 font-medium placeholder:text-slate-400"
+                placeholder="••••••••"
+                value={formData.password}
+                onChange={e => { setFormData({...formData, password: e.target.value}); setError(''); }}
               />
-              <span className="absolute left-3 top-3.5 text-slate-400">
-                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
-              </span>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="#94a3b8" className="w-5 h-5 absolute left-3 top-3.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+              </svg>
+              <button
+                type="button" tabIndex={-1}
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-3.5 text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                {showPassword ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                )}
+              </button>
             </div>
           </div>
 
-          <button 
-            disabled={loading}
-            className="w-full bg-[#003366] text-white font-bold py-3.5 rounded-xl hover:bg-[#002244] transition-all shadow-lg shadow-blue-900/10 active:scale-[0.98] disabled:opacity-70 flex justify-center items-center gap-2"
-          >
-            {loading ? (
-              <div className="flex items-center gap-2">
-                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                <span>Đang xử lý...</span>
-              </div>
-            ) : (
-              <>
-                <span>Đăng Nhập</span>
-              </>
-            )}
-          </button>
+          {/* Remember me */}
+          <label className="flex items-center gap-2.5 cursor-pointer group">
+            <input type="checkbox" className="w-4 h-4 accent-[#003366] rounded" checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} />
+            <span className="text-sm text-slate-500 group-hover:text-slate-700 transition-colors select-none">Nhớ tên đăng nhập</span>
+          </label>
+
+          {/* Submit — dùng Button component */}
+          <Button type="submit" variant="primary" size="lg" loading={loading} className="w-full justify-center shadow-lg shadow-blue-900/10">
+            {loading ? 'Đang xác thực...' : 'Đăng Nhập'}
+          </Button>
         </form>
 
         <div className="mt-8 text-center">
-            <p className="text-xs text-slate-400">© 2026 BE ABLE VN Education System</p>
+          <p className="text-xs text-slate-400">© 2026 BE ABLE VN Education System</p>
         </div>
-
       </div>
     </div>
   );

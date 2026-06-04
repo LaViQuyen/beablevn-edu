@@ -11,22 +11,31 @@ import StudentLayout from './components/Layouts/StudentLayout';
 import Login from './pages/Login';
 
 // Pages - Admin
+import AdminDashboard from './pages/Admin/AdminDashboard';
 import StaffManager from './pages/Admin/StaffManager';
 import StudentManager from './pages/Admin/StudentManager';
 import DataManager from './pages/Admin/DataManager';
-import NotificationManager from './pages/Admin/NotificationManager'; // Đã thêm import này
+import NotificationManager from './pages/Admin/NotificationManager';
+import FeedbackManager from './pages/Admin/FeedbackManager';
+import BulkImport from './pages/Admin/BulkImport';
+import ClassStats from './pages/Admin/ClassStats';
+import NotFound from './pages/NotFound';
 
 // Pages - Staff (Be Able)
 import ClassList from './pages/Staff/ClassList';
 import Attendance from './pages/Staff/Attendance';
 import ScoreInput from './pages/Staff/ScoreInput';
 import StaffNotifications from './pages/Staff/Notifications';
+import StaffInbox from './pages/Staff/Inbox';
 
 // Pages - Student
 import StudentDashboard from './pages/Student/Dashboard';
 import MyAttendance from './pages/Student/MyAttendance';
 import MyGrades from './pages/Student/MyGrades';
 import StudentNotifications from './pages/Student/Notifications';
+import StudentProfile from './pages/Student/Profile';
+import StudentFeedback from './pages/Student/Feedback';
+import StudentContact from './pages/Student/Contact';
 
 // Component: Điều hướng dựa trên Role (Khi vào trang chủ /)
 const RedirectBasedOnRole = () => {
@@ -35,7 +44,7 @@ const RedirectBasedOnRole = () => {
   if (loading) return <div className="h-screen flex items-center justify-center text-[#003366] font-bold">Đang tải dữ liệu...</div>;
   if (!currentUser) return <Navigate to="/login" />;
   
-  if (userData?.role === 'admin') return <Navigate to="/admin/staff" />;
+  if (userData?.role === 'admin') return <Navigate to="/admin/dashboard" />;
   if (userData?.role === 'staff') return <Navigate to="/staff/classes" />;
   if (userData?.role === 'student') return <Navigate to="/student/dashboard" />;
   
@@ -67,11 +76,15 @@ const App = () => {
 
           {/* --- ADMIN ROUTES --- */}
           <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminLayout /></ProtectedRoute>}>
+            <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="staff" element={<StaffManager />} />
             <Route path="students" element={<StudentManager />} />
             <Route path="data" element={<DataManager />} />
-            <Route path="notifications" element={<NotificationManager />} /> {/* Route mới cho Quản lý Thông báo */}
-            <Route index element={<Navigate to="staff" />} />
+            <Route path="stats" element={<ClassStats />} />
+            <Route path="notifications" element={<NotificationManager />} />
+            <Route path="feedback" element={<FeedbackManager />} />
+            <Route path="import" element={<BulkImport />} />
+            <Route index element={<Navigate to="dashboard" />} />
           </Route>
 
           {/* --- STAFF ROUTES --- */}
@@ -80,6 +93,7 @@ const App = () => {
             <Route path="attendance" element={<Attendance />} />
             <Route path="scores" element={<ScoreInput />} />
             <Route path="notifications" element={<StaffNotifications />} />
+            <Route path="inbox" element={<StaffInbox />} />
             <Route index element={<Navigate to="classes" />} />
           </Route>
 
@@ -89,12 +103,15 @@ const App = () => {
             <Route path="attendance" element={<MyAttendance />} />
             <Route path="scores" element={<MyGrades />} />
             <Route path="notifications" element={<StudentNotifications />} />
+            <Route path="profile" element={<StudentProfile />} />
+            <Route path="feedback" element={<StudentFeedback />} />
+            <Route path="contact" element={<StudentContact />} />
             <Route index element={<Navigate to="dashboard" />} />
           </Route>
 
           {/* Default Route */}
           <Route path="/" element={<RedirectBasedOnRole />} />
-          <Route path="*" element={<Navigate to="/" />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
     </AuthProvider>
