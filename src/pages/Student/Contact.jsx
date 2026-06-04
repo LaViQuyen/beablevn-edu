@@ -52,6 +52,18 @@ const Contact = () => {
     return () => unsubConv();
   }, [currentUser?.id]);
 
+  // Đồng bộ thread đang mở với dữ liệu realtime:
+  // khi 'conversations' cập nhật (có tin nhắn mới), gắn lại selectedConv
+  // bằng bản mới nhất -> tin nhắn tự hiện, không cần load lại trang
+  useEffect(() => {
+    if (!selectedConv) return;
+    const fresh = conversations.find(c => c.id === selectedConv.id);
+    if (fresh && (fresh.lastDate !== selectedConv.lastDate
+        || (fresh.thread?.length || 0) !== (selectedConv.thread?.length || 0))) {
+      setSelectedConv(fresh);
+    }
+  }, [conversations]);
+
   // Cuộn xuống cuối khi mở conversation
   useEffect(() => {
     if (selectedConv) {

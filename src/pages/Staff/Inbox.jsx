@@ -65,6 +65,18 @@ const Inbox = () => {
     return () => unsub();
   }, [currentUser?.id]);
 
+  // Đồng bộ thread đang mở với dữ liệu realtime:
+  // khi 'messages' cập nhật (học viên gửi tin mới), gắn lại selectedMsg
+  // bằng bản mới nhất -> tin nhắn tự hiện, không cần load lại trang
+  useEffect(() => {
+    if (!selectedMsg) return;
+    const fresh = messages.find(m => m.id === selectedMsg.id);
+    if (fresh && (fresh.lastDate !== selectedMsg.lastDate
+        || (fresh.thread?.length || 0) !== (selectedMsg.thread?.length || 0))) {
+      setSelectedMsg(fresh);
+    }
+  }, [messages]);
+
   // Cuộn xuống cuối thread
   useEffect(() => {
     if (selectedMsg) setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
