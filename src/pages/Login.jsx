@@ -70,7 +70,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50 p-4 font-sans">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-[#E8F4EC] p-4 font-sans">
       <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-100">
 
         {/* Logo */}
@@ -78,7 +78,7 @@ const Login = () => {
           <div className="w-20 h-20 bg-white rounded-2xl mx-auto flex items-center justify-center mb-4 shadow-sm border border-slate-100">
             <img src="/BA LOGO.png" alt="Logo" className="w-14 h-14 object-contain" />
           </div>
-          <h1 className="text-2xl font-extrabold text-[#003366]">BE ABLE VN</h1>
+          <h1 className="text-2xl font-extrabold text-[#2B6830]">BE ABLE VN</h1>
           <p className="text-slate-400 text-sm mt-1 font-medium">Hệ thống Quản lý Đào tạo</p>
         </div>
 
@@ -89,13 +89,13 @@ const Login = () => {
 
           {/* ID field */}
           <div>
-            <label className="text-xs font-bold text-[#003366] uppercase tracking-wider block mb-1.5 ml-1">
+            <label className="text-xs font-bold text-[#2B6830] uppercase tracking-wider block mb-1.5 ml-1">
               Tên đăng nhập / Mã HV
             </label>
             <div className="relative">
               <input
                 type="text" autoComplete="username" autoFocus required
-                className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#003366]/10 focus:border-[#003366] outline-none transition-all bg-white text-slate-700 font-medium placeholder:text-slate-400"
+                className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#2B6830]/10 focus:border-[#2B6830] outline-none transition-all bg-white text-slate-700 font-medium placeholder:text-slate-400"
                 placeholder="VD: 20230240 hoặc gv01"
                 value={formData.id}
                 onChange={e => { setFormData({...formData, id: e.target.value}); setError(''); }}
@@ -108,13 +108,13 @@ const Login = () => {
 
           {/* Password field */}
           <div>
-            <label className="text-xs font-bold text-[#003366] uppercase tracking-wider block mb-1.5 ml-1">
+            <label className="text-xs font-bold text-[#2B6830] uppercase tracking-wider block mb-1.5 ml-1">
               Mật khẩu
             </label>
             <div className="relative">
               <input
                 type={showPassword ? 'text' : 'password'} autoComplete="current-password" required
-                className="w-full pl-10 pr-11 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#003366]/10 focus:border-[#003366] outline-none transition-all bg-white text-slate-700 font-medium placeholder:text-slate-400"
+                className="w-full pl-10 pr-11 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#2B6830]/10 focus:border-[#2B6830] outline-none transition-all bg-white text-slate-700 font-medium placeholder:text-slate-400"
                 placeholder="••••••••"
                 value={formData.password}
                 onChange={e => { setFormData({...formData, password: e.target.value}); setError(''); }}
@@ -143,12 +143,12 @@ const Login = () => {
 
           {/* Remember me */}
           <label className="flex items-center gap-2.5 cursor-pointer group">
-            <input type="checkbox" className="w-4 h-4 accent-[#003366] rounded" checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} />
+            <input type="checkbox" className="w-4 h-4 accent-[#2B6830] rounded" checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} />
             <span className="text-sm text-slate-500 group-hover:text-slate-700 transition-colors select-none">Nhớ tên đăng nhập</span>
           </label>
 
           {/* Submit — dùng Button component */}
-          <Button type="submit" variant="primary" size="lg" loading={loading} className="w-full justify-center shadow-lg shadow-blue-900/10">
+          <Button type="submit" variant="primary" size="lg" loading={loading} className="w-full justify-center shadow-lg shadow-green-900/10">
             {loading ? 'Đang xác thực...' : 'Đăng Nhập'}
           </Button>
         </form>

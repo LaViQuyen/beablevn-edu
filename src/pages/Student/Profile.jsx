@@ -55,10 +55,10 @@ const Profile = () => {
 
       {/* Thông tin cá nhân */}
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-        <h2 className="text-lg font-bold text-[#003366] mb-4">Thông tin tài khoản</h2>
+        <h2 className="text-lg font-bold text-[#2B6830] mb-4">Thông tin tài khoản</h2>
         <div className="space-y-3">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#003366] to-[#0055aa] flex items-center justify-center text-white text-2xl font-extrabold shrink-0">
+            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#2B6830] to-[#3D8B47] flex items-center justify-center text-white text-2xl font-extrabold shrink-0">
               {currentUser?.name?.charAt(0) || '?'}
             </div>
             <div>
@@ -73,7 +73,7 @@ const Profile = () => {
             </div>
             <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Mã học viên</p>
-              <p className="font-bold text-[#003366] text-sm font-mono mt-0.5">{currentUser?.studentCode || '—'}</p>
+              <p className="font-bold text-[#2B6830] text-sm font-mono mt-0.5">{currentUser?.studentCode || '—'}</p>
             </div>
           </div>
         </div>
@@ -81,7 +81,7 @@ const Profile = () => {
 
       {/* Đổi mật khẩu */}
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-        <h2 className="text-lg font-bold text-[#003366] mb-1">Đổi mật khẩu</h2>
+        <h2 className="text-lg font-bold text-[#2B6830] mb-1">Đổi mật khẩu</h2>
         <p className="text-xs text-slate-400 mb-4">Mật khẩu phải từ 6 ký tự trở lên.</p>
 
         {/* Thông báo lỗi / thành công */}
@@ -107,7 +107,7 @@ const Profile = () => {
             <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Mật khẩu hiện tại</label>
             <input
               type="password"
-              className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/10 transition"
+              className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition"
               value={form.oldPass}
               onChange={e => { setForm({...form, oldPass: e.target.value}); setError(''); }}
               placeholder="••••••"
@@ -117,7 +117,7 @@ const Profile = () => {
             <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Mật khẩu mới</label>
             <input
               type="password"
-              className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/10 transition"
+              className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition"
               value={form.newPass}
               onChange={e => { setForm({...form, newPass: e.target.value}); setError(''); }}
               placeholder="••••••"
@@ -130,7 +130,7 @@ const Profile = () => {
               className={`w-full border p-3 rounded-xl text-sm outline-none focus:ring-2 transition ${
                 form.confirmPass && form.newPass !== form.confirmPass
                   ? 'border-red-300 focus:border-red-400 focus:ring-red-100'
-                  : 'border-slate-200 focus:border-[#003366] focus:ring-[#003366]/10'
+                  : 'border-slate-200 focus:border-[#2B6830] focus:ring-[#2B6830]/10'
               }`}
               value={form.confirmPass}
               onChange={e => { setForm({...form, confirmPass: e.target.value}); setError(''); }}
@@ -143,7 +143,7 @@ const Profile = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#003366] text-white py-3 rounded-xl font-bold hover:bg-[#002244] transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full bg-[#2B6830] text-white py-3 rounded-xl font-bold hover:bg-[#1E5225] transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {loading ? (
               <>

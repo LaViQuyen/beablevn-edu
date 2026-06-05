@@ -126,28 +126,28 @@ const DataManager = () => {
 
       {/* FORM NHẬP LIỆU */}
       <div className="bg-white p-4 md:p-6 rounded-xl border border-slate-100 shadow-sm">
-        <h2 className="text-lg font-bold text-[#003366] mb-4">{editingId ? '✏️ Cập nhật Lớp' : '➕ Thêm Lớp Mới'}</h2>
+        <h2 className="text-lg font-bold text-[#2B6830] mb-4">{editingId ? '✏️ Cập nhật Lớp' : '➕ Thêm Lớp Mới'}</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
           <input
-            className="border p-3 rounded-xl text-sm outline-none focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/10 transition"
+            className="border p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition"
             placeholder="Tên Lớp (VD: Kids 1)"
             value={formData.name}
             onChange={e => setFormData({...formData, name: e.target.value})}
           />
           <input
-            className="border p-3 rounded-xl text-sm outline-none focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/10 transition"
+            className="border p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition"
             placeholder="Phòng (VD: P.101)"
             value={formData.room}
             onChange={e => setFormData({...formData, room: e.target.value})}
           />
           <input
-            className="border p-3 rounded-xl text-sm outline-none focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/10 transition"
+            className="border p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition"
             placeholder="Môn (VD: Tiếng Anh)"
             value={formData.subject}
             onChange={e => setFormData({...formData, subject: e.target.value})}
           />
           <input
-            className="border p-3 rounded-xl text-sm outline-none focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/10 transition"
+            className="border p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition"
             placeholder="Lịch học (VD: T2-T4-T6)"
             value={formData.schedule}
             onChange={e => setFormData({...formData, schedule: e.target.value})}
@@ -157,7 +157,7 @@ const DataManager = () => {
           <div className="flex flex-col">
             <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Giáo viên phụ trách</label>
             <select
-              className="border p-3 rounded-xl text-sm outline-none focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/10 bg-white transition"
+              className="border p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 bg-white transition"
               value={formData.teacherId}
               onChange={e => handleTeacherSelect(e.target.value)}
             >
@@ -171,11 +171,11 @@ const DataManager = () => {
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col">
               <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Giờ bắt đầu</label>
-              <input className="border p-3 rounded-xl text-sm outline-none focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/10 transition" type="time" value={formData.startTime} onChange={e => setFormData({...formData, startTime: e.target.value})} />
+              <input className="border p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition" type="time" value={formData.startTime} onChange={e => setFormData({...formData, startTime: e.target.value})} />
             </div>
             <div className="flex flex-col">
               <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Giờ kết thúc</label>
-              <input className="border p-3 rounded-xl text-sm outline-none focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/10 transition" type="time" value={formData.endTime} onChange={e => setFormData({...formData, endTime: e.target.value})} />
+              <input className="border p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition" type="time" value={formData.endTime} onChange={e => setFormData({...formData, endTime: e.target.value})} />
             </div>
           </div>
         </div>
@@ -187,7 +187,7 @@ const DataManager = () => {
           </p>
         )}
         <div className="flex gap-2">
-          <button onClick={handleSubmit} className="flex-1 md:flex-none bg-[#003366] text-white px-8 py-3 rounded-xl font-bold shadow-md shadow-blue-900/10 hover:bg-[#002244] transition-all active:scale-[0.98]">
+          <button onClick={handleSubmit} className="flex-1 md:flex-none bg-[#2B6830] text-white px-8 py-3 rounded-xl font-bold shadow-md shadow-green-900/10 hover:bg-[#1E5225] transition-all active:scale-[0.98]">
             {editingId ? 'Lưu Thay Đổi' : 'Thêm Lớp'}
           </button>
           {editingId && (
@@ -204,15 +204,15 @@ const DataManager = () => {
       {/* DANH SÁCH LỚP */}
       <div className="bg-white p-4 md:p-6 rounded-xl border border-slate-100 shadow-sm">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-          <h2 className="text-lg font-bold text-[#003366]">Danh sách Lớp học ({filteredClasses.length})</h2>
+          <h2 className="text-lg font-bold text-[#2B6830]">Danh sách Lớp học ({filteredClasses.length})</h2>
           <div className="flex flex-col md:flex-row gap-3">
-            <select className="p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/10 bg-slate-50 md:min-w-[180px]" value={selectedClassFilter} onChange={(e) => setSelectedClassFilter(e.target.value)}>
+            <select className="p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 bg-slate-50 md:min-w-[180px]" value={selectedClassFilter} onChange={(e) => setSelectedClassFilter(e.target.value)}>
               <option value="all">-- Tất cả các lớp --</option>
               {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
             <div className="grid grid-cols-2 gap-3 md:flex">
-              <input className="w-full p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/10 md:w-32" placeholder="Lọc Phòng..." value={filters.room} onChange={e => setFilters({...filters, room: e.target.value})} />
-              <input className="w-full p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/10 md:w-32" placeholder="Lọc Lịch..." value={filters.schedule} onChange={e => setFilters({...filters, schedule: e.target.value})} />
+              <input className="w-full p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 md:w-32" placeholder="Lọc Phòng..." value={filters.room} onChange={e => setFilters({...filters, room: e.target.value})} />
+              <input className="w-full p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 md:w-32" placeholder="Lọc Lịch..." value={filters.schedule} onChange={e => setFilters({...filters, schedule: e.target.value})} />
             </div>
           </div>
         </div>
@@ -236,7 +236,7 @@ const DataManager = () => {
               {filteredClasses.map((c, index) => (
                 <tr key={c.id} className="hover:bg-slate-50 transition-colors">
                   <td className="p-4 text-center text-slate-400 font-bold">{index + 1}</td>
-                  <td className="p-4 font-bold text-[#003366]">{c.name}</td>
+                  <td className="p-4 font-bold text-[#2B6830]">{c.name}</td>
                   <td className="p-4 text-slate-600">{c.room || '—'}</td>
                   <td className="p-4 text-slate-600">{c.subject || '—'}</td>
                   <td className="p-4">
@@ -245,10 +245,10 @@ const DataManager = () => {
                       : <span className="text-xs text-slate-300 italic">Chưa phân công</span>
                     }
                   </td>
-                  <td className="p-4"><span className="text-[10px] font-bold bg-blue-50 text-[#003366] px-2 py-1 rounded border border-blue-100 whitespace-nowrap">{c.schedule || '—'}</span></td>
+                  <td className="p-4"><span className="text-[10px] font-bold bg-[#E8F4EC] text-[#2B6830] px-2 py-1 rounded border border-green-100 whitespace-nowrap">{c.schedule || '—'}</span></td>
                   <td className="p-4 text-xs text-slate-500 font-mono whitespace-nowrap">{c.startTime || '—'} - {c.endTime || '—'}</td>
                   <td className="p-4 text-right space-x-2">
-                    <button onClick={() => handleEdit(c)} className="text-[#003366] text-xs font-bold border border-[#003366] px-3 py-1.5 rounded-xl hover:bg-[#003366] hover:text-white transition-all">Sửa</button>
+                    <button onClick={() => handleEdit(c)} className="text-[#2B6830] text-xs font-bold border border-[#2B6830] px-3 py-1.5 rounded-xl hover:bg-[#2B6830] hover:text-white transition-all">Sửa</button>
                     <button onClick={() => handleDelete(c.id)} className="text-red-500 text-xs font-bold border border-red-300 px-3 py-1.5 rounded-xl hover:bg-red-500 hover:text-white transition-all">Xóa</button>
                   </td>
                 </tr>
@@ -271,9 +271,9 @@ const DataManager = () => {
             <div key={c.id} className="p-4 border border-slate-200 rounded-xl bg-white shadow-sm flex flex-col gap-3">
               <div className="flex justify-between items-start">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-blue-50 text-[#003366] flex items-center justify-center font-bold text-xs">{index + 1}</div>
+                  <div className="w-8 h-8 rounded-full bg-[#E8F4EC] text-[#2B6830] flex items-center justify-center font-bold text-xs">{index + 1}</div>
                   <div>
-                    <h4 className="font-bold text-[#003366] text-sm">{c.name}</h4>
+                    <h4 className="font-bold text-[#2B6830] text-sm">{c.name}</h4>
                     <p className="text-xs text-slate-500">{c.subject || 'Chưa cập nhật môn'}</p>
                   </div>
                 </div>
@@ -292,7 +292,7 @@ const DataManager = () => {
               <div className="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-2 rounded border border-slate-100">
                 <div>
                   <span className="text-slate-400 block mb-0.5">Lịch học</span>
-                  <span className="font-bold text-[#003366]">{c.schedule || '—'}</span>
+                  <span className="font-bold text-[#2B6830]">{c.schedule || '—'}</span>
                 </div>
                 <div className="text-right">
                   <span className="text-slate-400 block mb-0.5">Thời gian</span>
@@ -301,7 +301,7 @@ const DataManager = () => {
               </div>
 
               <div className="flex gap-2 border-t border-slate-100 pt-3">
-                <button onClick={() => handleEdit(c)} className="flex-1 py-2 text-[#003366] bg-blue-50 rounded-xl text-xs font-bold border border-blue-200 active:bg-blue-100">Sửa</button>
+                <button onClick={() => handleEdit(c)} className="flex-1 py-2 text-[#2B6830] bg-[#E8F4EC] rounded-xl text-xs font-bold border border-green-200 active:bg-green-100">Sửa</button>
                 <button onClick={() => handleDelete(c.id)} className="flex-1 py-2 text-red-600 bg-red-50 rounded-xl text-xs font-bold border border-red-200 active:bg-red-100">Xóa</button>
               </div>
             </div>

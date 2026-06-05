@@ -4,7 +4,7 @@ import { db } from '../../firebase';
 import { ref, onValue, update } from 'firebase/database';
 
 const CATEGORIES = {
-  'hoc-tap':   { label: '📚 Học tập',        color: 'bg-blue-50 text-blue-700 border-blue-200' },
+  'hoc-tap':   { label: '📚 Học tập',        color: 'bg-[#E8F4EC] text-green-700 border-green-200' },
   'giao-vien': { label: '👨‍🏫 Giáo viên',      color: 'bg-purple-50 text-purple-700 border-purple-200' },
   'co-so':     { label: '🏫 Cơ sở vật chất', color: 'bg-amber-50 text-amber-700 border-amber-200' },
   'khac':      { label: '💬 Khác',            color: 'bg-slate-50 text-slate-600 border-slate-200' },
@@ -12,7 +12,7 @@ const CATEGORIES = {
 
 const STATUS_STYLES = {
   pending:  'bg-amber-50 text-amber-700 border-amber-200',
-  read:     'bg-blue-50 text-blue-700 border-blue-200',
+  read:     'bg-[#E8F4EC] text-green-700 border-green-200',
   resolved: 'bg-green-50 text-green-700 border-green-200',
 };
 
@@ -149,13 +149,13 @@ const Inbox = () => {
 
       {/* Header */}
       <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
-        <div className="p-2 bg-indigo-50 rounded-xl text-indigo-600">
+        <div className="p-2 bg-[#E8F4EC] rounded-xl text-[#3D8B47]">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
             <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 13.5h3.86a2.25 2.25 0 012.012 1.244l.256.512a2.25 2.25 0 002.013 1.244h3.218a2.25 2.25 0 002.013-1.244l.256-.512a2.25 2.25 0 012.013-1.244h3.859m-19.5.338V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 00-2.15-1.588H6.911a2.25 2.25 0 00-2.15 1.588L2.35 13.177a2.25 2.25 0 00-.1.661z" />
           </svg>
         </div>
         <div>
-          <h2 className="text-xl font-bold text-[#003366]">Hộp thư</h2>
+          <h2 className="text-xl font-bold text-[#2B6830]">Hộp thư</h2>
           <p className="text-xs text-slate-400 mt-0.5">Phản ánh và tin nhắn từ học viên.</p>
         </div>
       </div>
@@ -170,12 +170,12 @@ const Inbox = () => {
             key={t.id}
             onClick={() => { setActiveTab(t.id); setSelectedFb(null); setSelectedMsg(null); }}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold border transition-all ${
-              activeTab === t.id ? 'bg-[#003366] text-white border-[#003366]' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+              activeTab === t.id ? 'bg-[#2B6830] text-white border-[#2B6830]' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
             }`}
           >
             {t.label}
             {t.badge > 0 && (
-              <span className={`w-5 h-5 rounded-full text-[10px] font-bold flex items-center justify-center ${activeTab === t.id ? 'bg-white text-[#003366]' : 'bg-[#003366] text-white'}`}>
+              <span className={`w-5 h-5 rounded-full text-[10px] font-bold flex items-center justify-center ${activeTab === t.id ? 'bg-white text-[#2B6830]' : 'bg-[#2B6830] text-white'}`}>
                 {t.badge}
               </span>
             )}
@@ -199,7 +199,7 @@ const Inbox = () => {
                   <button
                     key={f.id}
                     onClick={() => setFilterStatus(f.id)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${filterStatus === f.id ? 'bg-[#003366] text-white border-[#003366]' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${filterStatus === f.id ? 'bg-[#2B6830] text-white border-[#2B6830]' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
                   >
                     {f.label}
                   </button>
@@ -217,7 +217,7 @@ const Inbox = () => {
                     <button
                       key={fb.id}
                       onClick={() => openFeedback(fb)}
-                      className={`w-full bg-white rounded-2xl border shadow-sm p-4 text-left hover:shadow-md transition-all flex items-start gap-3 ${fb.status === 'pending' ? 'border-amber-200 bg-amber-50/30' : 'border-slate-100 hover:border-blue-100'}`}
+                      className={`w-full bg-white rounded-2xl border shadow-sm p-4 text-left hover:shadow-md transition-all flex items-start gap-3 ${fb.status === 'pending' ? 'border-amber-200 bg-amber-50/30' : 'border-slate-100 hover:border-green-100'}`}
                     >
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-wrap gap-2 mb-1">
@@ -240,7 +240,7 @@ const Inbox = () => {
           ) : (
             /* Chi tiết feedback */
             <div className="max-w-2xl">
-              <button onClick={() => setSelectedFb(null)} className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-[#003366] mb-4 transition-colors font-medium">
+              <button onClick={() => setSelectedFb(null)} className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-[#2B6830] mb-4 transition-colors font-medium">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
                 Quay lại
               </button>
@@ -272,7 +272,7 @@ const Inbox = () => {
                   <div className="space-y-3">
                     <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Phản hồi học viên</label>
                     <textarea
-                      className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/10 resize-none transition"
+                      className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 resize-none transition"
                       rows={4}
                       placeholder="Nhập phản hồi của bạn..."
                       value={reply}
@@ -306,16 +306,16 @@ const Inbox = () => {
                 <button
                   key={msg.id}
                   onClick={() => openMessage(msg)}
-                  className={`w-full bg-white rounded-2xl border shadow-sm p-4 text-left hover:shadow-md transition-all flex items-start gap-3 ${msg.staffUnread > 0 ? 'border-blue-200 bg-blue-50/20' : 'border-slate-100 hover:border-blue-100'}`}
+                  className={`w-full bg-white rounded-2xl border shadow-sm p-4 text-left hover:shadow-md transition-all flex items-start gap-3 ${msg.staffUnread > 0 ? 'border-green-200 bg-[#E8F4EC]/20' : 'border-slate-100 hover:border-green-100'}`}
                 >
-                  <div className="w-10 h-10 rounded-full bg-[#003366]/10 text-[#003366] font-bold text-sm flex items-center justify-center shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-[#2B6830]/10 text-[#2B6830] font-bold text-sm flex items-center justify-center shrink-0">
                     {msg.studentName?.charAt(0) || '?'}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start">
                       <p className={`text-sm font-bold truncate ${msg.staffUnread > 0 ? 'text-slate-900' : 'text-slate-700'}`}>{msg.studentName}</p>
                       <div className="flex items-center gap-2 shrink-0 ml-2">
-                        {msg.staffUnread > 0 && <span className="w-5 h-5 bg-[#003366] text-white text-[10px] font-bold rounded-full flex items-center justify-center">{msg.staffUnread}</span>}
+                        {msg.staffUnread > 0 && <span className="w-5 h-5 bg-[#2B6830] text-white text-[10px] font-bold rounded-full flex items-center justify-center">{msg.staffUnread}</span>}
                         <span className="text-[10px] text-slate-400">{new Date(msg.lastDate).toLocaleDateString('vi-VN')}</span>
                       </div>
                     </div>
@@ -327,14 +327,14 @@ const Inbox = () => {
             </div>
           ) : (
             <div className="max-w-2xl">
-              <button onClick={() => setSelectedMsg(null)} className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-[#003366] mb-4 transition-colors font-medium">
+              <button onClick={() => setSelectedMsg(null)} className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-[#2B6830] mb-4 transition-colors font-medium">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
                 Quay lại
               </button>
 
               <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
                 <div className="p-4 border-b border-slate-100 bg-slate-50">
-                  <p className="font-bold text-[#003366]">{selectedMsg.subject}</p>
+                  <p className="font-bold text-[#2B6830]">{selectedMsg.subject}</p>
                   <p className="text-xs text-slate-400 mt-0.5">Từ {selectedMsg.studentName} ({selectedMsg.studentCode})</p>
                 </div>
 
@@ -343,9 +343,9 @@ const Inbox = () => {
                     const isStaff = msg.from === 'staff';
                     return (
                       <div key={i} className={`flex ${isStaff ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm ${isStaff ? 'bg-[#003366] text-white rounded-br-sm' : 'bg-slate-100 text-slate-800 rounded-bl-sm'}`}>
+                        <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm ${isStaff ? 'bg-[#2B6830] text-white rounded-br-sm' : 'bg-slate-100 text-slate-800 rounded-bl-sm'}`}>
                           <p className="leading-relaxed whitespace-pre-line">{msg.content}</p>
-                          <p className={`text-[10px] mt-1 ${isStaff ? 'text-blue-200' : 'text-slate-400'}`}>
+                          <p className={`text-[10px] mt-1 ${isStaff ? 'text-green-200' : 'text-slate-400'}`}>
                             {new Date(msg.date).toLocaleString('vi-VN', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' })}
                           </p>
                         </div>
@@ -357,7 +357,7 @@ const Inbox = () => {
 
                 <div className="p-4 border-t border-slate-100 flex gap-3">
                   <input
-                    className="flex-1 border border-slate-200 px-4 py-2.5 rounded-xl text-sm outline-none focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/10 transition"
+                    className="flex-1 border border-slate-200 px-4 py-2.5 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition"
                     placeholder="Nhập phản hồi..."
                     value={reply}
                     onChange={e => setReply(e.target.value)}
@@ -366,7 +366,7 @@ const Inbox = () => {
                   <button
                     onClick={handleMessageReply}
                     disabled={!reply.trim() || sending}
-                    className="bg-[#003366] text-white px-4 py-2.5 rounded-xl font-bold hover:bg-[#002244] transition-all disabled:opacity-40 flex items-center gap-1.5 text-sm"
+                    className="bg-[#2B6830] text-white px-4 py-2.5 rounded-xl font-bold hover:bg-[#1E5225] transition-all disabled:opacity-40 flex items-center gap-1.5 text-sm"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" /></svg>
                     Gửi

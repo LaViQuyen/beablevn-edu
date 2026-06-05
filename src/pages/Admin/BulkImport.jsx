@@ -138,7 +138,7 @@ const BulkImport = () => {
             </svg>
           </div>
           <div>
-            <h2 className="text-xl font-bold text-[#003366]">Import học viên từ CSV</h2>
+            <h2 className="text-xl font-bold text-[#2B6830]">Import học viên từ CSV</h2>
             <p className="text-xs text-slate-400 mt-0.5">Tạo nhiều tài khoản học viên cùng lúc.</p>
           </div>
         </div>
@@ -174,11 +174,11 @@ const BulkImport = () => {
         {/* Nhập CSV */}
         <div className="space-y-4">
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
-            <h3 className="font-bold text-[#003366] mb-3">1. Nhập dữ liệu</h3>
+            <h3 className="font-bold text-[#2B6830] mb-3">1. Nhập dữ liệu</h3>
 
             {/* Upload file */}
             <div
-              className="border-2 border-dashed border-slate-200 rounded-xl p-5 text-center cursor-pointer hover:border-[#003366] hover:bg-blue-50/30 transition-all mb-3"
+              className="border-2 border-dashed border-slate-200 rounded-xl p-5 text-center cursor-pointer hover:border-[#2B6830] hover:bg-[#E8F4EC]/30 transition-all mb-3"
               onClick={() => fileRef.current?.click()}
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="#94a3b8" className="w-10 h-10 mx-auto mb-2">
@@ -193,7 +193,7 @@ const BulkImport = () => {
 
             {/* Textarea paste */}
             <textarea
-              className="w-full border border-slate-200 p-3 rounded-xl text-xs font-mono outline-none focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/10 resize-none transition"
+              className="w-full border border-slate-200 p-3 rounded-xl text-xs font-mono outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 resize-none transition"
               rows={8}
               placeholder={`Họ tên,Mã học viên,Mật khẩu,Lớp 1,Lớp 2,Lớp 3\nNguyễn Văn An,HV001,BAVNbavn,Kids 1,,\n...`}
               value={rawText}
@@ -210,10 +210,10 @@ const BulkImport = () => {
           </div>
 
           {/* Hướng dẫn */}
-          <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 text-xs text-blue-700 space-y-1.5">
-            <p className="font-bold text-blue-800 mb-2">📋 Quy tắc format CSV:</p>
+          <div className="bg-[#E8F4EC] border border-green-100 rounded-2xl p-4 text-xs text-green-700 space-y-1.5">
+            <p className="font-bold text-green-800 mb-2">📋 Quy tắc format CSV:</p>
             <p>• <strong>Cột bắt buộc:</strong> Họ tên, Mã học viên</p>
-            <p>• <strong>Mật khẩu</strong> mặc định <code className="bg-blue-100 px-1 rounded">BAVNbavn</code> nếu để trống</p>
+            <p>• <strong>Mật khẩu</strong> mặc định <code className="bg-green-100 px-1 rounded">BAVNbavn</code> nếu để trống</p>
             <p>• <strong>Tên lớp</strong> phải khớp chính xác với lớp trong hệ thống</p>
             <p>• Dòng đầu tiên là header, bỏ qua khi import</p>
             <p>• Tối đa 3 lớp mỗi học viên</p>
@@ -223,7 +223,7 @@ const BulkImport = () => {
         {/* Preview */}
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="font-bold text-[#003366]">2. Xem trước ({preview.length} học viên)</h3>
+            <h3 className="font-bold text-[#2B6830]">2. Xem trước ({preview.length} học viên)</h3>
             {preview.length > 0 && (
               <button
                 onClick={handleImport}
@@ -261,7 +261,7 @@ const BulkImport = () => {
                     <tr key={i} className="hover:bg-slate-50">
                       <td className="p-3 text-slate-400">{i + 1}</td>
                       <td className="p-3 font-bold text-slate-700">{row.name}</td>
-                      <td className="p-3 font-mono text-[#003366]">{row.studentCode}</td>
+                      <td className="p-3 font-mono text-[#2B6830]">{row.studentCode}</td>
                       <td className="p-3 font-mono text-slate-500">{row.password}</td>
                       <td className="p-3">
                         {row.classNames.length > 0 ? (

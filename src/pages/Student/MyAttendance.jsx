@@ -91,7 +91,7 @@ const MyAttendance = () => {
       switch(status) {
           case 'present': return <span className="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-1 rounded">Có mặt</span>;
           case 'late': return <span className="bg-orange-100 text-orange-700 text-[10px] font-bold px-2 py-1 rounded">Đi muộn</span>;
-          case 'excused': return <span className="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-1 rounded">Có phép</span>;
+          case 'excused': return <span className="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-1 rounded">Có phép</span>;
           default: return <span className="bg-red-100 text-red-700 text-[10px] font-bold px-2 py-1 rounded">Vắng</span>;
       }
   };
@@ -106,12 +106,12 @@ const MyAttendance = () => {
   return (
     <div className="space-y-6 pb-6">
       <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
-        <div className="p-2 bg-blue-50 rounded-xl text-[#003366]">
+        <div className="p-2 bg-[#E8F4EC] rounded-xl text-[#2B6830]">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
             <path strokeLinecap="round" strokeLinejoin="round" d="M11.35 3.836c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
           </svg>
         </div>
-        <h2 className="text-xl font-bold text-[#003366]">Theo dõi Chuyên cần</h2>
+        <h2 className="text-xl font-bold text-[#2B6830]">Theo dõi Chuyên cần</h2>
       </div>
 
       {/* SKELETON */}
@@ -140,7 +140,7 @@ const MyAttendance = () => {
                     <div className="p-4 bg-slate-50 border-b border-slate-100">
                         <div className="flex justify-between items-start mb-3">
                             <div>
-                                <h3 className="font-bold text-[#003366]">{item.className}</h3>
+                                <h3 className="font-bold text-[#2B6830]">{item.className}</h3>
                                 <p className="text-xs text-slate-500">{item.totalSessions} buổi đã điểm danh</p>
                             </div>
                             <div className="text-right">
@@ -173,7 +173,7 @@ const MyAttendance = () => {
                             <div className="text-[10px] text-slate-400">Đi muộn</div>
                         </div>
                         <div className="p-3 text-center">
-                            <div className="text-blue-500 font-bold">{item.excusedCount}</div>
+                            <div className="text-[#E8F4EC]0 font-bold">{item.excusedCount}</div>
                             <div className="text-[10px] text-slate-400">Có phép</div>
                         </div>
                         <div className="p-3 text-center">

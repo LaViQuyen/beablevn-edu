@@ -8,16 +8,16 @@
    ============================================================ */
 :root {
   /* === Màu thương hiệu === */
-  --color-primary:        #003366;
-  --color-primary-hover:  #002244;
-  --color-primary-light:  #EEF3FA;   /* bg-blue-50 tương đương */
-  --color-primary-ring:   #003366/10;
+  --color-primary:        #2B6830;
+  --color-primary-hover:  #1E5225;
+  --color-primary-light:  #E8F4EC;   /* bg-[#E8F4EC] tương đương */
+  --color-primary-ring:   #2B6830/10;
 
   /* === Màu trạng thái === */
   --color-success:   #059669;
   --color-warning:   #D97706;
   --color-danger:    #DC2626;
-  --color-info:      #2563EB;
+  --color-info:      #2B6830;
 
   /* === Border radius === */
   --radius-sm:  6px;   /* badge, tag nhỏ */
@@ -38,15 +38,15 @@
    BASE STYLES
    ============================================================ */
 body {
-  font-family: 'Josefin Sans', sans-serif;
+  font-family: 'Be Vietnam Pro', sans-serif;
   background-color: #f8fafc;
-  color: #111827;
+  color: #2C2C2C;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 button, input, optgroup, select, textarea {
-  font-family: 'Josefin Sans', sans-serif;
+  font-family: 'Be Vietnam Pro', sans-serif;
 }
 
 /* ============================================================
@@ -63,16 +63,16 @@ button, input, optgroup, select, textarea {
   .btn-md  { @apply btn px-5 py-2.5 text-sm; }
   .btn-lg  { @apply btn px-8 py-3 text-sm; }
 
-  .btn-primary  { @apply btn-md bg-[#003366] text-white hover:bg-[#002244] shadow-sm; }
+  .btn-primary  { @apply btn-md bg-[#2B6830] text-white hover:bg-[#1E5225] shadow-sm; }
   .btn-secondary{ @apply btn-md bg-slate-100 text-slate-700 hover:bg-slate-200; }
   .btn-danger   { @apply btn-md bg-red-500 text-white hover:bg-red-600; }
   .btn-ghost    { @apply btn-md text-slate-600 hover:bg-slate-100; }
-  .btn-outline  { @apply btn-md border border-[#003366] text-[#003366] hover:bg-[#003366] hover:text-white; }
+  .btn-outline  { @apply btn-md border border-[#2B6830] text-[#2B6830] hover:bg-[#2B6830] hover:text-white; }
 
   /* --- Inputs --- */
   .input-base {
     @apply w-full border border-slate-200 p-3 rounded-xl text-sm outline-none
-           focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/10
+           focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10
            bg-white transition-all placeholder:text-slate-400;
   }
   .input-error {
@@ -84,7 +84,7 @@ button, input, optgroup, select, textarea {
     @apply bg-white rounded-xl border border-slate-100 shadow-sm;
   }
   .card-hover {
-    @apply card hover:shadow-md hover:border-blue-100 transition-all;
+    @apply card hover:shadow-md hover:border-green-100 transition-all;
   }
   .card-body {
     @apply p-4 md:p-6;
@@ -94,7 +94,7 @@ button, input, optgroup, select, textarea {
   .badge {
     @apply inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded border uppercase tracking-wide;
   }
-  .badge-blue   { @apply badge bg-blue-50 text-blue-700 border-blue-200; }
+  .badge-blue   { @apply badge bg-[#E8F4EC] text-green-700 border-green-200; }
   .badge-green  { @apply badge bg-green-50 text-green-700 border-green-200; }
   .badge-amber  { @apply badge bg-amber-50 text-amber-700 border-amber-200; }
   .badge-red    { @apply badge bg-red-50 text-red-700 border-red-200; }

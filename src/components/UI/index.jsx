@@ -17,11 +17,11 @@ export const Button = ({
   className = '', onClick, type = 'button', ...props
 }) => {
   const variantMap = {
-    primary:   'bg-[#003366] text-white hover:bg-[#002244]',
+    primary:   'bg-[#2B6830] text-white hover:bg-[#1E5225]',
     secondary: 'bg-slate-100 text-slate-700 hover:bg-slate-200',
     danger:    'bg-red-500 text-white hover:bg-red-600',
     ghost:     'text-slate-600 hover:bg-slate-100',
-    outline:   'border border-[#003366] text-[#003366] hover:bg-[#003366] hover:text-white',
+    outline:   'border border-[#2B6830] text-[#2B6830] hover:bg-[#2B6830] hover:text-white',
     success:   'bg-emerald-600 text-white hover:bg-emerald-700',
   };
   const sizeMap = {
@@ -58,7 +58,7 @@ export const Input = ({ label, error, className = '', type = 'text', ...props })
       className={`w-full border p-3 rounded-xl text-sm outline-none transition-all placeholder:text-slate-400
         ${error
           ? 'border-red-300 focus:border-red-400 focus:ring-2 focus:ring-red-100'
-          : 'border-slate-200 focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/10'
+          : 'border-slate-200 focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10'
         } ${className}`}
       {...props}
     />
@@ -80,7 +80,7 @@ export const Select = ({ label, children, className = '', ...props }) => (
   <div className="space-y-1.5">
     {label && <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block">{label}</label>}
     <select
-      className={`w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/10 bg-white transition-all ${className}`}
+      className={`w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 bg-white transition-all ${className}`}
       {...props}
     >
       {children}
@@ -96,7 +96,7 @@ export const Textarea = ({ label, error, rows = 4, className = '', ...props }) =
     {label && <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block">{label}</label>}
     <textarea
       rows={rows}
-      className={`w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/10 resize-none transition-all ${className}`}
+      className={`w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 resize-none transition-all ${className}`}
       {...props}
     />
     {error && <p className="text-red-500 text-xs">{error}</p>}
@@ -107,7 +107,7 @@ export const Textarea = ({ label, error, rows = 4, className = '', ...props }) =
 // CARD
 // ============================================================
 export const Card = ({ children, className = '', hover = false, padding = true }) => (
-  <div className={`bg-white rounded-xl border border-slate-100 shadow-sm ${hover ? 'hover:shadow-md hover:border-blue-100 transition-all' : ''} ${padding ? 'p-4 md:p-6' : ''} ${className}`}>
+  <div className={`bg-white rounded-xl border border-slate-100 shadow-sm ${hover ? 'hover:shadow-md hover:border-green-100 transition-all' : ''} ${padding ? 'p-4 md:p-6' : ''} ${className}`}>
     {children}
   </div>
 );
@@ -117,14 +117,14 @@ export const Card = ({ children, className = '', hover = false, padding = true }
 // color: 'blue'|'green'|'amber'|'red'|'purple'|'slate'|'emerald'
 // ============================================================
 const BADGE_COLORS = {
-  blue:    'bg-blue-50 text-blue-700 border-blue-200',
+  blue:    'bg-[#E8F4EC] text-green-700 border-green-200',
   green:   'bg-green-50 text-green-700 border-green-200',
   amber:   'bg-amber-50 text-amber-700 border-amber-200',
   red:     'bg-red-50 text-red-700 border-red-200',
   purple:  'bg-purple-50 text-purple-700 border-purple-200',
   slate:   'bg-slate-50 text-slate-600 border-slate-200',
   emerald: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  primary: 'bg-[#003366]/5 text-[#003366] border-[#003366]/20',
+  primary: 'bg-[#2B6830]/5 text-[#2B6830] border-[#2B6830]/20',
 };
 export const Badge = ({ children, color = 'slate', className = '' }) => (
   <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded border uppercase tracking-wide ${BADGE_COLORS[color] || BADGE_COLORS.slate} ${className}`}>
@@ -195,14 +195,14 @@ export const ConfirmModal = ({
 // ============================================================
 // PAGE HEADER — tiêu đề trang chuẩn
 // ============================================================
-export const PageHeader = ({ icon, iconBg = 'bg-blue-50', iconColor = 'text-[#003366]', title, subtitle, children }) => (
+export const PageHeader = ({ icon, iconBg = 'bg-[#E8F4EC]', iconColor = 'text-[#2B6830]', title, subtitle, children }) => (
   <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-0">
     <div className="flex items-center gap-3">
       {icon && (
         <div className={`p-2 rounded-lg shrink-0 ${iconBg} ${iconColor}`}>{icon}</div>
       )}
       <div>
-        <h2 className="text-xl font-bold text-[#003366]">{title}</h2>
+        <h2 className="text-xl font-bold text-[#2B6830]">{title}</h2>
         {subtitle && <p className="text-xs text-slate-400 mt-0.5 hidden md:block">{subtitle}</p>}
       </div>
     </div>
@@ -248,7 +248,7 @@ export const FilterGroup = ({ options, value, onChange }) => (
         key={opt.id}
         onClick={() => onChange(opt.id)}
         className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
-          value === opt.id ? 'bg-white text-[#003366] shadow-sm' : 'text-slate-500 hover:text-slate-700'
+          value === opt.id ? 'bg-white text-[#2B6830] shadow-sm' : 'text-slate-500 hover:text-slate-700'
         }`}
       >
         {opt.label}
@@ -263,7 +263,7 @@ export const FilterGroup = ({ options, value, onChange }) => (
 export const SearchInput = ({ placeholder = 'Tìm kiếm...', value, onChange, className = '' }) => (
   <div className={`relative ${className}`}>
     <input
-      className="w-full border border-slate-200 pl-9 pr-4 py-2.5 rounded-xl text-sm outline-none focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/10 transition-all bg-white placeholder:text-slate-400"
+      className="w-full border border-slate-200 pl-9 pr-4 py-2.5 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition-all bg-white placeholder:text-slate-400"
       placeholder={placeholder}
       value={value}
       onChange={onChange}
@@ -277,7 +277,7 @@ export const SearchInput = ({ placeholder = 'Tìm kiếm...', value, onChange, c
 // ============================================================
 // STAT CARD — dùng cho Dashboard
 // ============================================================
-export const StatCard = ({ title, value, sub, icon, iconBg = 'bg-blue-50', iconColor = 'text-[#003366]' }) => (
+export const StatCard = ({ title, value, sub, icon, iconBg = 'bg-[#E8F4EC]', iconColor = 'text-[#2B6830]' }) => (
   <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex items-center gap-4">
     <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${iconBg} ${iconColor}`}>
       {icon}

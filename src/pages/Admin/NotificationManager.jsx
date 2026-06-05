@@ -111,7 +111,7 @@ const NotificationManager = () => {
   const renderTargets = (n) => {
     if (n.scope === 'all') return <span className="bg-green-100 text-green-800 text-[10px] font-bold px-2 py-1 rounded border border-green-200">TOÀN HỆ THỐNG</span>;
     const clsName = classes[n.scope]?.name || n.scope;
-    return <span className="bg-blue-50 text-[#003366] text-[10px] font-bold px-2 py-1 rounded border border-blue-200">Lớp {clsName}</span>;
+    return <span className="bg-[#E8F4EC] text-[#2B6830] text-[10px] font-bold px-2 py-1 rounded border border-green-200">Lớp {clsName}</span>;
   };
 
   return (
@@ -128,7 +128,7 @@ const NotificationManager = () => {
 
       {/* ===== FORM TẠO THÔNG BÁO MỚI ===== */}
       <div className="bg-white p-4 md:p-6 rounded-xl border border-slate-100 shadow-sm">
-        <h2 className="text-lg font-bold text-[#003366] mb-4 flex items-center gap-2">
+        <h2 className="text-lg font-bold text-[#2B6830] mb-4 flex items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
           </svg>
@@ -150,7 +150,7 @@ const NotificationManager = () => {
           <div>
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Tiêu đề *</label>
             <input
-              className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/10 transition"
+              className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition"
               placeholder="VD: Lịch nghỉ lễ 30/4 - 1/5"
               value={form.title}
               onChange={e => setForm({ ...form, title: e.target.value })}
@@ -170,7 +170,7 @@ const NotificationManager = () => {
                     onClick={() => setForm({ ...form, type: t })}
                     className={`flex-1 py-2.5 rounded-xl text-xs font-bold border transition-colors ${
                       form.type === t
-                        ? 'bg-[#003366] text-white border-[#003366]'
+                        ? 'bg-[#2B6830] text-white border-[#2B6830]'
                         : 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100'
                     }`}
                   >
@@ -183,7 +183,7 @@ const NotificationManager = () => {
             <div>
               <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Gửi đến</label>
               <select
-                className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/10 bg-white transition"
+                className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 bg-white transition"
                 value={form.scope}
                 onChange={e => setForm({ ...form, scope: e.target.value })}
               >
@@ -200,7 +200,7 @@ const NotificationManager = () => {
             <div>
               <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Nội dung *</label>
               <textarea
-                className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/10 resize-none transition"
+                className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 resize-none transition"
                 rows={4}
                 placeholder="Nhập nội dung thông báo..."
                 value={form.content}
@@ -213,7 +213,7 @@ const NotificationManager = () => {
               <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">URL *</label>
               <input
                 type="url"
-                className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/10 transition"
+                className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition"
                 placeholder="https://..."
                 value={form.linkUrl}
                 onChange={e => setForm({ ...form, linkUrl: e.target.value })}
@@ -226,7 +226,7 @@ const NotificationManager = () => {
             <button
               type="submit"
               disabled={submitting}
-              className="bg-[#003366] text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-[#004080] active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="bg-[#2B6830] text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-[#004080] active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               {submitting ? (
                 <>
@@ -244,7 +244,7 @@ const NotificationManager = () => {
 
       {/* ===== BẢNG QUẢN LÝ ===== */}
       <div className="bg-white p-4 md:p-6 rounded-xl border border-slate-100 shadow-sm">
-        <h2 className="text-lg font-bold text-[#003366] mb-4 flex items-center gap-2">
+        <h2 className="text-lg font-bold text-[#2B6830] mb-4 flex items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
           </svg>
@@ -272,7 +272,7 @@ const NotificationManager = () => {
                     <div className="text-xs text-slate-500 mt-1 flex items-center gap-2">
                       {n.type === 'link'
                         ? <span className="text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded border border-purple-100 font-bold text-[10px]">LINK</span>
-                        : <span className="text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100 font-bold text-[10px]">CONTENT</span>
+                        : <span className="text-green-600 bg-[#E8F4EC] px-1.5 py-0.5 rounded border border-green-100 font-bold text-[10px]">CONTENT</span>
                       }
                       <span className="truncate max-w-[200px]">{n.type === 'link' ? n.linkUrl : n.content}</span>
                     </div>
@@ -303,7 +303,7 @@ const NotificationManager = () => {
               <div className="flex justify-between items-start">
                 <div className="flex items-center gap-2">
                   <span className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase ${
-                    n.type === 'link' ? 'bg-purple-50 text-purple-700 border-purple-200' : 'bg-blue-50 text-blue-700 border-blue-200'
+                    n.type === 'link' ? 'bg-purple-50 text-purple-700 border-purple-200' : 'bg-[#E8F4EC] text-green-700 border-green-200'
                   }`}>
                     {n.type === 'link' ? 'Link' : n.label || 'Tin tức'}
                   </span>

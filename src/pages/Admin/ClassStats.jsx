@@ -168,13 +168,13 @@ const ClassStats = () => {
       {/* Header */}
       <div className="flex items-center justify-between pb-4 border-b border-slate-100">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-indigo-50 rounded-xl text-indigo-600">
+          <div className="p-2 bg-[#E8F4EC] rounded-xl text-[#3D8B47]">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
             </svg>
           </div>
           <div>
-            <h2 className="text-xl font-bold text-[#003366]">Thống kê Lớp học</h2>
+            <h2 className="text-xl font-bold text-[#2B6830]">Thống kê Lớp học</h2>
             <p className="text-xs text-slate-400 mt-0.5">Điểm số + chuyên cần tổng hợp theo lớp.</p>
           </div>
         </div>
@@ -195,7 +195,7 @@ const ClassStats = () => {
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
         <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">Chọn lớp cần xem thống kê</label>
         <select
-          className="w-full md:w-80 border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/10 bg-white transition"
+          className="w-full md:w-80 border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 bg-white transition"
           value={selectedClass}
           onChange={e => setSelectedClass(e.target.value)}
         >
@@ -215,7 +215,7 @@ const ClassStats = () => {
         <>
           {/* Stat summary */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <StatCard label="Học viên" value={rows.length} sub={cls?.name} color="bg-blue-50" />
+            <StatCard label="Học viên" value={rows.length} sub={cls?.name} color="bg-[#E8F4EC]" />
             <StatCard label="GPA Trung bình" value={avgGPA} sub="Assignment·Formative·MMT·EOMT" color="bg-purple-50" />
             <StatCard
               label="Chuyên cần TB"
@@ -234,7 +234,7 @@ const ClassStats = () => {
           ) : (
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
               <div className="p-4 border-b border-slate-100 flex items-center justify-between">
-                <h3 className="font-bold text-[#003366] text-sm">Bảng xếp hạng ({sorted.length} học viên)</h3>
+                <h3 className="font-bold text-[#2B6830] text-sm">Bảng xếp hạng ({sorted.length} học viên)</h3>
                 <p className="text-xs text-slate-400">Bấm vào tiêu đề cột để sắp xếp</p>
               </div>
 
@@ -244,13 +244,13 @@ const ClassStats = () => {
                   <thead className="bg-slate-50 text-slate-500 text-xs uppercase font-bold border-b border-slate-100">
                     <tr>
                       <th className="p-4 w-12 text-center">Hạng</th>
-                      <th className="p-4 cursor-pointer hover:text-[#003366] transition-colors" onClick={() => toggleSort('name')}>
+                      <th className="p-4 cursor-pointer hover:text-[#2B6830] transition-colors" onClick={() => toggleSort('name')}>
                         Học viên <SortIcon col="name" />
                       </th>
-                      <th className="p-4 text-center cursor-pointer hover:text-[#003366] transition-colors" onClick={() => toggleSort('gpa')}>
+                      <th className="p-4 text-center cursor-pointer hover:text-[#2B6830] transition-colors" onClick={() => toggleSort('gpa')}>
                         Điểm TK <SortIcon col="gpa" />
                       </th>
-                      <th className="p-4 text-center cursor-pointer hover:text-[#003366] transition-colors" onClick={() => toggleSort('att')}>
+                      <th className="p-4 text-center cursor-pointer hover:text-[#2B6830] transition-colors" onClick={() => toggleSort('att')}>
                         Chuyên cần <SortIcon col="att" />
                       </th>
                       <th className="p-4 text-center">Bonus</th>
@@ -300,7 +300,7 @@ const ClassStats = () => {
                             <div className="flex justify-center gap-2 text-[10px] font-bold">
                               {[
                                 { label: 'A', val: getAvg('assignment'), color: 'bg-green-50 text-green-700' },
-                                { label: 'F', val: getAvg('formative'),  color: 'bg-blue-50 text-blue-700' },
+                                { label: 'F', val: getAvg('formative'),  color: 'bg-[#E8F4EC] text-green-700' },
                                 { label: 'S', val: getAvg('summative'),  color: 'bg-purple-50 text-purple-700' },
                               ].map(d => (
                                 <span key={d.label} className={`px-1.5 py-0.5 rounded ${d.color}`} title={d.label === 'A' ? 'Assignment' : d.label === 'F' ? 'Formative' : 'Summative'}>

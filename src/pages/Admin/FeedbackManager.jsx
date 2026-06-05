@@ -4,7 +4,7 @@ import { ref, onValue, update } from 'firebase/database';
 import { useAuth } from '../../context/AuthContext';
 
 const CATEGORIES = {
-  'hoc-tap':   { label: '📚 Học tập',        color: 'bg-blue-50 text-blue-700 border-blue-200' },
+  'hoc-tap':   { label: '📚 Học tập',        color: 'bg-[#E8F4EC] text-green-700 border-green-200' },
   'giao-vien': { label: '👨‍🏫 Giáo viên',      color: 'bg-purple-50 text-purple-700 border-purple-200' },
   'co-so':     { label: '🏫 Cơ sở vật chất', color: 'bg-amber-50 text-amber-700 border-amber-200' },
   'khac':      { label: '💬 Khác',            color: 'bg-slate-50 text-slate-600 border-slate-200' },
@@ -12,7 +12,7 @@ const CATEGORIES = {
 
 const STATUS_STYLES = {
   pending:  { label: 'Chờ xử lý', color: 'bg-amber-50 text-amber-700 border-amber-200' },
-  read:     { label: 'Đã xem',    color: 'bg-blue-50 text-blue-700 border-blue-200' },
+  read:     { label: 'Đã xem',    color: 'bg-[#E8F4EC] text-green-700 border-green-200' },
   resolved: { label: 'Đã xử lý', color: 'bg-green-50 text-green-700 border-green-200' },
 };
 
@@ -104,7 +104,7 @@ const FeedbackManager = () => {
           </svg>
         </div>
         <div>
-          <h2 className="text-xl font-bold text-[#003366]">Quản lý Phản ánh</h2>
+          <h2 className="text-xl font-bold text-[#2B6830]">Quản lý Phản ánh</h2>
           <p className="text-xs text-slate-400 mt-0.5">Toàn bộ phản ánh từ học viên trong hệ thống.</p>
         </div>
       </div>
@@ -138,7 +138,7 @@ const FeedbackManager = () => {
                 <button
                   key={f.id}
                   onClick={() => setFilterStatus(f.id)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${filterStatus === f.id ? 'bg-white text-[#003366] shadow-sm' : 'text-slate-500'}`}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${filterStatus === f.id ? 'bg-white text-[#2B6830] shadow-sm' : 'text-slate-500'}`}
                 >
                   {f.label}
                 </button>
@@ -147,7 +147,7 @@ const FeedbackManager = () => {
 
             {/* Category filter */}
             <select
-              className="border border-slate-200 px-3 py-1.5 rounded-xl text-xs font-bold outline-none focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/10 bg-white"
+              className="border border-slate-200 px-3 py-1.5 rounded-xl text-xs font-bold outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 bg-white"
               value={filterCat}
               onChange={e => setFilterCat(e.target.value)}
             >
@@ -160,7 +160,7 @@ const FeedbackManager = () => {
             {/* Search */}
             <div className="flex-1 min-w-[200px] relative">
               <input
-                className="w-full border border-slate-200 pl-8 pr-4 py-1.5 rounded-xl text-xs outline-none focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/10 transition"
+                className="w-full border border-slate-200 pl-8 pr-4 py-1.5 rounded-xl text-xs outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition"
                 placeholder="Tìm theo tiêu đề hoặc tên học viên..."
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
@@ -184,7 +184,7 @@ const FeedbackManager = () => {
                 <button
                   key={fb.id}
                   onClick={() => openFeedback(fb)}
-                  className={`w-full bg-white rounded-2xl border shadow-sm p-4 text-left hover:shadow-md transition-all flex items-start gap-3 ${fb.status === 'pending' ? 'border-amber-200' : 'border-slate-100 hover:border-blue-100'}`}
+                  className={`w-full bg-white rounded-2xl border shadow-sm p-4 text-left hover:shadow-md transition-all flex items-start gap-3 ${fb.status === 'pending' ? 'border-amber-200' : 'border-slate-100 hover:border-green-100'}`}
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap gap-2 mb-1.5">
@@ -207,7 +207,7 @@ const FeedbackManager = () => {
       ) : (
         /* Chi tiết */
         <div className="max-w-2xl">
-          <button onClick={() => setSelectedFb(null)} className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-[#003366] mb-4 transition-colors font-medium">
+          <button onClick={() => setSelectedFb(null)} className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-[#2B6830] mb-4 transition-colors font-medium">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
             Quay lại
           </button>
@@ -243,7 +243,7 @@ const FeedbackManager = () => {
                 {/* Cho phép sửa phản hồi */}
                 <button
                   onClick={() => setSelectedFb(prev => ({ ...prev, staffReply: null }))}
-                  className="mt-2 text-xs text-slate-400 hover:text-[#003366] underline"
+                  className="mt-2 text-xs text-slate-400 hover:text-[#2B6830] underline"
                 >
                   Chỉnh sửa phản hồi
                 </button>
@@ -252,7 +252,7 @@ const FeedbackManager = () => {
               <div className="space-y-3">
                 <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Phản hồi học viên</label>
                 <textarea
-                  className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/10 resize-none transition"
+                  className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 resize-none transition"
                   rows={4}
                   placeholder="Nhập phản hồi của bạn..."
                   value={reply}

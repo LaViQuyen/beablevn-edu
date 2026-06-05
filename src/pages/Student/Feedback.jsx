@@ -14,7 +14,7 @@ const ADMIN_EMAIL         = 'support@beablevn.com';
 
 // Danh mục phản ánh
 const CATEGORIES = [
-  { id: 'hoc-tap',    label: '📚 Học tập',          color: 'bg-blue-50 text-blue-700 border-blue-200' },
+  { id: 'hoc-tap',    label: '📚 Học tập',          color: 'bg-[#E8F4EC] text-green-700 border-green-200' },
   { id: 'giao-vien',  label: '👨‍🏫 Giáo viên',        color: 'bg-purple-50 text-purple-700 border-purple-200' },
   { id: 'co-so',      label: '🏫 Cơ sở vật chất',   color: 'bg-amber-50 text-amber-700 border-amber-200' },
   { id: 'khac',       label: '💬 Khác',              color: 'bg-slate-50 text-slate-600 border-slate-200' },
@@ -22,7 +22,7 @@ const CATEGORIES = [
 
 const STATUS_MAP = {
   pending:  { label: 'Chờ xử lý',  color: 'bg-amber-50 text-amber-700 border-amber-200' },
-  read:     { label: 'Đã xem',     color: 'bg-blue-50 text-blue-700 border-blue-200' },
+  read:     { label: 'Đã xem',     color: 'bg-[#E8F4EC] text-green-700 border-green-200' },
   resolved: { label: 'Đã xử lý',  color: 'bg-green-50 text-green-700 border-green-200' },
 };
 
@@ -179,7 +179,7 @@ const Feedback = () => {
           </svg>
         </div>
         <div>
-          <h2 className="text-xl font-bold text-[#003366]">Phản ánh</h2>
+          <h2 className="text-xl font-bold text-[#2B6830]">Phản ánh</h2>
           <p className="text-xs text-slate-400 mt-0.5">Ý kiến của bạn giúp chúng tôi cải thiện chất lượng dạy và học.</p>
         </div>
       </div>
@@ -190,7 +190,7 @@ const Feedback = () => {
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
-            className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${tab === t.id ? 'bg-white text-[#003366] shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${tab === t.id ? 'bg-white text-[#2B6830] shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
           >
             {t.label}
           </button>
@@ -219,7 +219,7 @@ const Feedback = () => {
                     type="button"
                     onClick={() => setForm({ ...form, category: cat.id })}
                     className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all ${
-                      form.category === cat.id ? cat.color + ' ring-2 ring-offset-1 ring-[#003366]/30' : 'bg-white text-slate-400 border-slate-200'
+                      form.category === cat.id ? cat.color + ' ring-2 ring-offset-1 ring-[#2B6830]/30' : 'bg-white text-slate-400 border-slate-200'
                     }`}
                   >
                     {cat.label}
@@ -232,7 +232,7 @@ const Feedback = () => {
             <div>
               <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Tiêu đề *</label>
               <input
-                className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/10 transition"
+                className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition"
                 placeholder="Tóm tắt vấn đề bạn muốn phản ánh..."
                 value={form.title}
                 onChange={e => { setForm({ ...form, title: e.target.value }); setErrorMsg(''); }}
@@ -245,7 +245,7 @@ const Feedback = () => {
             <div>
               <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Nội dung chi tiết *</label>
               <textarea
-                className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/10 resize-none transition"
+                className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 resize-none transition"
                 rows={5}
                 placeholder="Mô tả chi tiết vấn đề, thời gian xảy ra, và kỳ vọng của bạn..."
                 value={form.content}
@@ -257,7 +257,7 @@ const Feedback = () => {
             <label className="flex items-center gap-2.5 cursor-pointer group">
               <input
                 type="checkbox"
-                className="w-4 h-4 accent-[#003366] rounded"
+                className="w-4 h-4 accent-[#2B6830] rounded"
                 checked={form.isAnonymous}
                 onChange={e => setForm({ ...form, isAnonymous: e.target.checked })}
               />
@@ -269,7 +269,7 @@ const Feedback = () => {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full bg-[#003366] text-white py-3 rounded-xl font-bold hover:bg-[#002244] transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full bg-[#2B6830] text-white py-3 rounded-xl font-bold hover:bg-[#1E5225] transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {submitting ? (
                 <><svg className="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>Đang gửi...</>
@@ -288,7 +288,7 @@ const Feedback = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
               </svg>
               <p className="text-slate-400 text-sm font-medium">Bạn chưa gửi phản ánh nào.</p>
-              <button onClick={() => setTab('new')} className="mt-3 text-[#003366] text-sm font-bold hover:underline">Gửi phản ánh đầu tiên →</button>
+              <button onClick={() => setTab('new')} className="mt-3 text-[#2B6830] text-sm font-bold hover:underline">Gửi phản ánh đầu tiên →</button>
             </div>
           ) : myFeedbacks.map(fb => {
             const cat = catInfo(fb.category);
@@ -323,8 +323,8 @@ const Feedback = () => {
 
                     {/* Phản hồi từ nhà trường */}
                     {fb.staffReply ? (
-                      <div className="bg-blue-50 border border-blue-200 rounded-xl p-3">
-                        <p className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1.5">
+                      <div className="bg-[#E8F4EC] border border-green-200 rounded-xl p-3">
+                        <p className="text-xs font-bold text-green-600 uppercase tracking-wider mb-1.5">
                           Phản hồi từ {fb.replyBy || 'Nhà trường'} · {fb.replyDate && new Date(fb.replyDate).toLocaleDateString('vi-VN')}
                         </p>
                         <p className="text-sm text-slate-700 whitespace-pre-line leading-relaxed">{fb.staffReply}</p>

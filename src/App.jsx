@@ -41,7 +41,7 @@ import StudentContact from './pages/Student/Contact';
 const RedirectBasedOnRole = () => {
   const { currentUser, userData, loading } = useAuth();
   
-  if (loading) return <div className="h-screen flex items-center justify-center text-[#003366] font-bold">Đang tải dữ liệu...</div>;
+  if (loading) return <div className="h-screen flex items-center justify-center text-[#2B6830] font-bold">Đang tải dữ liệu...</div>;
   if (!currentUser) return <Navigate to="/login" />;
   
   if (userData?.role === 'admin') return <Navigate to="/admin/dashboard" />;
@@ -55,7 +55,7 @@ const RedirectBasedOnRole = () => {
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { currentUser, userData, loading } = useAuth();
   
-  if (loading) return <div className="h-screen flex items-center justify-center text-[#003366] font-bold">Đang xác thực...</div>;
+  if (loading) return <div className="h-screen flex items-center justify-center text-[#2B6830] font-bold">Đang xác thực...</div>;
   if (!currentUser) return <Navigate to="/login" />;
   
   // Nếu đã đăng nhập nhưng không đúng quyền -> Về trang chủ để Redirect lại đúng chỗ

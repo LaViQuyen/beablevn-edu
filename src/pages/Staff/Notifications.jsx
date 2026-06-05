@@ -44,7 +44,7 @@ const Notifications = () => {
 
     const LINK_TITLES = ["Link điểm danh", "Link sự kiện", "Link bài tập", "Link kiểm tra"];
     const LABELS = [
-        { id: 'báo bài', color: 'bg-blue-50 text-blue-700 border-blue-200' },
+        { id: 'báo bài', color: 'bg-[#E8F4EC] text-green-700 border-green-200' },
         { id: 'quan trọng', color: 'bg-red-50 text-red-700 border-red-200' },
         { id: 'sự kiện', color: 'bg-yellow-50 text-yellow-700 border-yellow-200' }
     ];
@@ -192,7 +192,7 @@ const Notifications = () => {
             const isExpanded = expandedId === noti.id;
 
             return (
-                <div key={noti.id} className="bg-white p-4 md:p-5 rounded-xl border border-slate-200 flex flex-col gap-3 group hover:border-blue-200 transition-all shadow-sm">
+                <div key={noti.id} className="bg-white p-4 md:p-5 rounded-xl border border-slate-200 flex flex-col gap-3 group hover:border-green-200 transition-all shadow-sm">
                     <div className="flex justify-between items-start">
                         <div className="flex items-center gap-2 mb-1">
                             {noti.type === 'link' ? (
@@ -205,7 +205,7 @@ const Notifications = () => {
                                 </span>
                             )}
                             <span className="text-[11px] text-slate-400 font-medium font-mono">{new Date(noti.date).toLocaleDateString('vi-VN')}</span>
-                            <span className="text-[11px] font-bold text-[#003366] bg-slate-50 px-2 py-0.5 rounded border border-slate-100">{getScopeName(noti.scope)}</span>
+                            <span className="text-[11px] font-bold text-[#2B6830] bg-slate-50 px-2 py-0.5 rounded border border-slate-100">{getScopeName(noti.scope)}</span>
                         </div>
                         <button
                             onClick={() => handleDelete(noti.id)}
@@ -220,7 +220,7 @@ const Notifications = () => {
                         className={noti.type === 'content' ? "cursor-pointer group/content" : ""}
                         onClick={() => { if (noti.type === 'content') toggleExpand(noti.id); }}
                     >
-                        <h4 className={`font-bold text-sm mb-2 transition-colors ${noti.type === 'content' ? 'text-slate-800 group-hover/content:text-[#003366]' : 'text-slate-800'}`}>
+                        <h4 className={`font-bold text-sm mb-2 transition-colors ${noti.type === 'content' ? 'text-slate-800 group-hover/content:text-[#2B6830]' : 'text-slate-800'}`}>
                             {noti.title}
                         </h4>
 
@@ -229,7 +229,7 @@ const Notifications = () => {
                                 href={noti.linkUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#003366] bg-blue-50 hover:bg-blue-100 px-3.5 py-2 rounded-xl border border-blue-100 transition-colors"
+                                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#2B6830] bg-[#E8F4EC] hover:bg-green-100 px-3.5 py-2 rounded-xl border border-green-100 transition-colors"
                             >
                                 <IconLink /> Mở liên kết
                             </a>
@@ -242,7 +242,7 @@ const Notifications = () => {
                                 
                                 {/* Đưa "Xem thêm..." lên ngay dưới nội dung bị rút gọn */}
                                 {!isExpanded && noti.content?.length > 120 && (
-                                    <span className="text-[10px] text-blue-500 font-semibold mt-1.5 mb-1 inline-block group-hover/content:underline">Xem thêm...</span>
+                                    <span className="text-[10px] text-[#E8F4EC]0 font-semibold mt-1.5 mb-1 inline-block group-hover/content:underline">Xem thêm...</span>
                                 )}
 
                                 {/* Nút đính kèm tự động xuống hàng và nằm gọn gàng ở dưới cùng */}
@@ -252,7 +252,7 @@ const Notifications = () => {
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         onClick={(e) => e.stopPropagation()}
-                                        className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-[#003366] bg-blue-50 hover:bg-blue-100 px-3.5 py-2.5 rounded-xl border border-blue-100 transition-colors w-fit"
+                                        className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-[#2B6830] bg-[#E8F4EC] hover:bg-green-100 px-3.5 py-2.5 rounded-xl border border-green-100 transition-colors w-fit"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13" /></svg>
                                         {noti.attachmentTitle || noti.attachmentName}
@@ -298,23 +298,23 @@ const Notifications = () => {
                 .ql-editor li { padding-left: 0.25rem !important; margin-bottom: 0.25rem !important; }
             `}</style>
             <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
-                <div className="p-2 bg-blue-50 rounded-xl text-[#003366]">
+                <div className="p-2 bg-[#E8F4EC] rounded-xl text-[#2B6830]">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 01-1.44-4.282m3.102.069a18.03 18.03 0 01-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 018.835 2.535M10.34 6.66a23.847 23.847 0 008.835-2.535m0 0A23.74 23.74 0 0018.795 3m.38 1.125a23.91 23.91 0 011.014 5.795c0 1.94-.254 3.82-.734 5.622m-4.731.213a23.87 23.87 0 005.932 2.535m0 0A23.753 23.753 0 0122.5 6" /></svg>
                 </div>
-                <h2 className="text-xl md:text-2xl font-bold text-[#003366]">Đăng Thông Báo Mới</h2>
+                <h2 className="text-xl md:text-2xl font-bold text-[#2B6830]">Đăng Thông Báo Mới</h2>
             </div>
 
             <div className="bg-white p-4 md:p-6 rounded-xl border border-slate-100 shadow-sm max-w-3xl">
                 <div className="flex gap-3 mb-6">
                     <button
                         onClick={() => setPostMode('content')}
-                        className={`flex-1 py-3 rounded-xl text-sm font-semibold transition-all border flex items-center justify-center gap-2 ${postMode === 'content' ? 'bg-[#003366] text-white border-[#003366]' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
+                        className={`flex-1 py-3 rounded-xl text-sm font-semibold transition-all border flex items-center justify-center gap-2 ${postMode === 'content' ? 'bg-[#2B6830] text-white border-[#2B6830]' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
                     >
                         <IconContent /> Nội dung
                     </button>
                     <button
                         onClick={() => setPostMode('link')}
-                        className={`flex-1 py-3 rounded-xl text-sm font-semibold transition-all border flex items-center justify-center gap-2 ${postMode === 'link' ? 'bg-[#003366] text-white border-[#003366]' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
+                        className={`flex-1 py-3 rounded-xl text-sm font-semibold transition-all border flex items-center justify-center gap-2 ${postMode === 'link' ? 'bg-[#2B6830] text-white border-[#2B6830]' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
                     >
                         <IconLink /> Hyperlink
                     </button>
@@ -323,7 +323,7 @@ const Notifications = () => {
                 <div className="mb-4">
                     <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Phạm vi hiển thị</label>
                     <select
-                        className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/10 text-sm transition-colors bg-slate-50 focus:bg-white"
+                        className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 text-sm transition-colors bg-slate-50 focus:bg-white"
                         value={scope}
                         onChange={(e) => setScope(e.target.value)}
                     >
@@ -341,7 +341,7 @@ const Notifications = () => {
                                     <button
                                         key={lbl.id}
                                         onClick={() => setSelectedLabel(lbl.id)}
-                                        className={`px-3 py-1.5 rounded-md text-[10px] font-bold border transition-all uppercase tracking-wider ${selectedLabel === lbl.id ? lbl.color + ' ring-2 ring-offset-1 ring-blue-200' : 'bg-white text-slate-400 border-slate-200'}`}
+                                        className={`px-3 py-1.5 rounded-md text-[10px] font-bold border transition-all uppercase tracking-wider ${selectedLabel === lbl.id ? lbl.color + ' ring-2 ring-offset-1 ring-green-200' : 'bg-white text-slate-400 border-slate-200'}`}
                                     >
                                         {lbl.id}
                                     </button>
@@ -351,7 +351,7 @@ const Notifications = () => {
                         <div className="mb-4">
                             <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Tiêu đề</label>
                             <input
-                                className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/10 text-sm bg-slate-50 focus:bg-white transition-colors"
+                                className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 text-sm bg-slate-50 focus:bg-white transition-colors"
                                 placeholder="Nhập tiêu đề thông báo..."
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
@@ -363,7 +363,7 @@ const Notifications = () => {
                                 type="file"
                                 accept=".html,.htm,.pdf,.doc,.docx"
                                 onChange={(e) => setAttachment(e.target.files[0])}
-                                className="w-full p-2 border border-slate-200 rounded-xl outline-none text-sm bg-slate-50 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-colors cursor-pointer"
+                                className="w-full p-2 border border-slate-200 rounded-xl outline-none text-sm bg-slate-50 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#E8F4EC] file:text-green-700 hover:file:bg-green-100 transition-colors cursor-pointer"
                             />
                         </div>
                         {/* THÊM KHUNG NHẬP TIÊU ĐỀ FILE VÀO ĐÂY */}
@@ -371,7 +371,7 @@ const Notifications = () => {
                             <div className="mb-4 animate-fade-in">
                                 <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Tên hiển thị cho File đính kèm</label>
                                 <input
-                                    className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/10 text-sm bg-slate-50 focus:bg-white transition-colors"
+                                    className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 text-sm bg-slate-50 focus:bg-white transition-colors"
                                     placeholder="Ví dụ: Tài liệu ôn tập Body Paragraph..."
                                     value={attachmentTitle}
                                     onChange={(e) => setAttachmentTitle(e.target.value)}
@@ -397,7 +397,7 @@ const Notifications = () => {
                         <div className="mb-4">
                             <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Tiêu đề liên kết</label>
                             <select
-                                className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/10 text-sm font-semibold text-[#003366] bg-slate-50 focus:bg-white transition-colors"
+                                className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 text-sm font-semibold text-[#2B6830] bg-slate-50 focus:bg-white transition-colors"
                                 value={linkTitle}
                                 onChange={(e) => setLinkTitle(e.target.value)}
                             >
@@ -407,7 +407,7 @@ const Notifications = () => {
                         <div className="mb-6">
                             <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Đường dẫn (URL)</label>
                             <input
-                                className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/10 text-sm font-mono text-blue-600 bg-slate-50 focus:bg-white transition-colors"
+                                className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 text-sm font-mono text-green-600 bg-slate-50 focus:bg-white transition-colors"
                                 placeholder="https://..."
                                 value={linkUrl}
                                 onChange={(e) => setLinkUrl(e.target.value)}
@@ -419,7 +419,7 @@ const Notifications = () => {
                 <button
                     onClick={handlePost}
                     disabled={loading}
-                    className="w-full bg-[#003366] text-white py-3.5 rounded-xl text-sm font-bold hover:bg-[#002244] transition-all shadow-md flex justify-center items-center gap-2 active:scale-[0.98]"
+                    className="w-full bg-[#2B6830] text-white py-3.5 rounded-xl text-sm font-bold hover:bg-[#1E5225] transition-all shadow-md flex justify-center items-center gap-2 active:scale-[0.98]"
                 >
                     {loading ? "Đang xử lý..." : (
                         <>
@@ -431,11 +431,11 @@ const Notifications = () => {
             </div>
 
             <div className="border-t border-slate-200 pt-8">
-                <h3 className="text-lg font-bold text-[#003366] mb-4">Danh sách Thông báo đã tạo</h3>
+                <h3 className="text-lg font-bold text-[#2B6830] mb-4">Danh sách Thông báo đã tạo</h3>
 
                 <div className="flex flex-col md:flex-row gap-3 mb-6">
                     <select
-                        className="w-full md:w-auto p-2.5 border border-slate-200 rounded-xl outline-none focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/10 text-sm text-slate-700 bg-slate-50 transition-colors hover:border-slate-200"
+                        className="w-full md:w-auto p-2.5 border border-slate-200 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 text-sm text-slate-700 bg-slate-50 transition-colors hover:border-slate-200"
                         value={filterClass}
                         onChange={e => setFilterClass(e.target.value)}
                     >
@@ -444,7 +444,7 @@ const Notifications = () => {
                     </select>
 
                     <select
-                        className="w-full md:w-auto p-2.5 border border-slate-200 rounded-xl outline-none focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/10 text-sm text-slate-700 bg-slate-50 transition-colors hover:border-slate-200"
+                        className="w-full md:w-auto p-2.5 border border-slate-200 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 text-sm text-slate-700 bg-slate-50 transition-colors hover:border-slate-200"
                         value={filterLabel}
                         onChange={e => setFilterLabel(e.target.value)}
                     >
@@ -461,7 +461,7 @@ const Notifications = () => {
                         </div>
                         <input
                             type="text"
-                            className="w-full pl-10 p-2.5 border border-slate-200 rounded-xl outline-none focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/10 text-sm text-slate-700 bg-slate-50 transition-colors hover:border-slate-200"
+                            className="w-full pl-10 p-2.5 border border-slate-200 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 text-sm text-slate-700 bg-slate-50 transition-colors hover:border-slate-200"
                             placeholder="Tìm kiếm theo tiêu đề..."
                             value={searchKeyword}
                             onChange={e => setSearchKeyword(e.target.value)}

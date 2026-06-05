@@ -128,11 +128,11 @@ const AdminDashboard = () => {
     <div className="space-y-6 pb-20 animate-fade-in-up">
 
       {/* ===== HEADER ===== */}
-      <div className="bg-gradient-to-r from-[#003366] to-[#0055aa] rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
+      <div className="bg-gradient-to-r from-[#2B6830] to-[#3D8B47] rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
         <div className="relative z-10">
-          <p className="text-blue-200 text-sm font-medium capitalize">{todayLabel}</p>
+          <p className="text-green-200 text-sm font-medium capitalize">{todayLabel}</p>
           <h1 className="text-2xl font-extrabold mt-1">Tổng quan hệ thống</h1>
-          <p className="text-blue-200 text-sm mt-1">Be Able VN — 2Sol EDU</p>
+          <p className="text-green-200 text-sm mt-1">Be Able VN — 2Sol EDU</p>
         </div>
         <div className="absolute right-0 top-0 w-40 h-40 bg-white/10 rounded-full -mr-16 -mt-16 blur-3xl" />
       </div>
@@ -147,9 +147,9 @@ const AdminDashboard = () => {
               title="Lớp học"
               value={totalClasses}
               sub="đang hoạt động"
-              color="bg-blue-50"
+              color="bg-[#E8F4EC]"
               icon={
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="#003366" className="w-6 h-6">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="#2B6830" className="w-6 h-6">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443m-7.007 11.55A5.981 5.981 0 006.75 15.75v-1.5" />
                 </svg>
               }
@@ -196,7 +196,7 @@ const AdminDashboard = () => {
 
         {/* Danh sách lớp */}
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
-          <h2 className="text-sm font-bold text-[#003366] uppercase tracking-wider mb-4">
+          <h2 className="text-sm font-bold text-[#2B6830] uppercase tracking-wider mb-4">
             Các lớp đang hoạt động
           </h2>
           {loading ? (
@@ -213,7 +213,7 @@ const AdminDashboard = () => {
                     <p className="text-sm font-bold text-slate-700">{cls.name}</p>
                     <p className="text-xs text-slate-400">{cls.schedule || '—'} · {cls.room || '—'}</p>
                   </div>
-                  <span className="text-[10px] font-bold text-[#003366] bg-blue-50 px-2 py-1 rounded-full border border-blue-100">
+                  <span className="text-[10px] font-bold text-[#2B6830] bg-[#E8F4EC] px-2 py-1 rounded-full border border-green-100">
                     {cls.subject || 'N/A'}
                   </span>
                 </div>
@@ -224,7 +224,7 @@ const AdminDashboard = () => {
 
         {/* Thông báo gần nhất */}
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
-          <h2 className="text-sm font-bold text-[#003366] uppercase tracking-wider mb-4">
+          <h2 className="text-sm font-bold text-[#2B6830] uppercase tracking-wider mb-4">
             Thông báo gần nhất
           </h2>
           {loading ? (
@@ -237,7 +237,7 @@ const AdminDashboard = () => {
             <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
               {recentNotifs.map(n => (
                 <div key={n.id} className="flex items-start gap-3 px-3 py-2 rounded-xl hover:bg-slate-50 transition-colors">
-                  <div className={`mt-0.5 w-2 h-2 rounded-full shrink-0 ${n.scope === 'all' ? 'bg-green-400' : 'bg-blue-400'}`} />
+                  <div className={`mt-0.5 w-2 h-2 rounded-full shrink-0 ${n.scope === 'all' ? 'bg-green-400' : 'bg-green-400'}`} />
                   <div className="min-w-0">
                     <p className="text-sm font-bold text-slate-700 truncate">{n.title}</p>
                     <p className="text-xs text-slate-400">

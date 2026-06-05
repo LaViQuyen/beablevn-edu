@@ -117,9 +117,9 @@ const StudentDashboard = () => {
     <div className="space-y-6 animate-fade-in-up pb-6">
 
       {/* ===== HEADER CHÀO ===== */}
-      <div className="bg-gradient-to-r from-[#003366] to-[#0055aa] rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
+      <div className="bg-gradient-to-r from-[#2B6830] to-[#3D8B47] rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
         <div className="relative z-10">
-          <p className="text-blue-200 text-sm font-medium">
+          <p className="text-green-200 text-sm font-medium">
             {new Date().toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit' })}
           </p>
           <h1 className="text-2xl font-bold mt-1 mb-3">Xin chào, {currentUser?.name}! 👋</h1>
@@ -178,7 +178,7 @@ const StudentDashboard = () => {
             <p className="font-bold text-slate-800 text-sm truncate">{latestScore.content || '—'}</p>
             <p className="text-xs text-slate-400">{typeLabel[latestScore.type] || latestScore.type} · {new Date(latestScore.date).toLocaleDateString('vi-VN')}</p>
           </div>
-          <div className="text-3xl font-extrabold text-[#003366] shrink-0">
+          <div className="text-3xl font-extrabold text-[#2B6830] shrink-0">
             {latestScore.score ?? '—'}
           </div>
         </div>
@@ -186,7 +186,7 @@ const StudentDashboard = () => {
 
       {/* ===== DANH SÁCH LỚP HỌC ===== */}
       <div>
-        <h2 className="text-base font-bold text-[#003366] mb-3 flex items-center gap-2">
+        <h2 className="text-base font-bold text-[#2B6830] mb-3 flex items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443m-7.007 11.55A5.981 5.981 0 006.75 15.75v-1.5" />
           </svg>
@@ -202,11 +202,11 @@ const StudentDashboard = () => {
             {myClasses.map((cls) => (
               <div key={cls.id} className="bg-white p-5 rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-all group">
                 <div className="flex justify-between items-start mb-3">
-                  <div className="bg-blue-50 text-[#003366] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">
+                  <div className="bg-[#E8F4EC] text-[#2B6830] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">
                     {cls.room || 'Online'}
                   </div>
                 </div>
-                <h3 className="font-bold text-lg text-slate-800 mb-1 group-hover:text-[#003366] transition-colors">{cls.name}</h3>
+                <h3 className="font-bold text-lg text-slate-800 mb-1 group-hover:text-[#2B6830] transition-colors">{cls.name}</h3>
                 <p className="text-slate-500 text-xs mb-4">
                   GV: {cls.teacherName || 'Đang cập nhật'}
                 </p>
