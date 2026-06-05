@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 
 const CATEGORIES = {
   'hoc-tap':   { label: '📚 Học tập',        color: 'bg-[#E8F4EC] text-green-700 border-green-200' },
-  'giao-vien': { label: '👨‍🏫 Giáo viên',      color: 'bg-purple-50 text-purple-700 border-purple-200' },
+  'giao-vien': { label: '👨‍🏫 Giáo viên',      color: 'bg-[#1E5225]/10 text-[#1E5225] border-[#1E5225]/25' },
   'co-so':     { label: '🏫 Cơ sở vật chất', color: 'bg-amber-50 text-amber-700 border-amber-200' },
   'khac':      { label: '💬 Khác',            color: 'bg-slate-50 text-slate-600 border-slate-200' },
 };

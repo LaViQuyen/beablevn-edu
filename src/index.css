@@ -98,7 +98,7 @@ button, input, optgroup, select, textarea {
   .badge-green  { @apply badge bg-green-50 text-green-700 border-green-200; }
   .badge-amber  { @apply badge bg-amber-50 text-amber-700 border-amber-200; }
   .badge-red    { @apply badge bg-red-50 text-red-700 border-red-200; }
-  .badge-purple { @apply badge bg-purple-50 text-purple-700 border-purple-200; }
+  .badge-purple { @apply badge bg-[#E8F4EC] text-green-700 border-green-200; }
   .badge-slate  { @apply badge bg-slate-50 text-slate-600 border-slate-200; }
 
   /* --- Section headers --- */

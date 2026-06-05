@@ -181,10 +181,10 @@ const Attendance = () => {
                 <div className="p-2 bg-[#E8F4EC] rounded-xl text-[#2B6830]">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M11.35 3.836c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" /></svg>
                 </div>
-                <h2 className="text-xl md:text-2xl font-bold text-[#2B6830]">Điểm danh & Chuyên cần</h2>
+                <h2 className="text-xl font-bold text-[#2B6830]">Điểm danh & Chuyên cần</h2>
             </div>
 
-            <div className="bg-white p-5 rounded-xl border border-slate-100 shadow-sm flex flex-col md:flex-row gap-4">
+            <div className="bg-white p-5 md:p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col md:flex-row gap-4">
                 <select className="flex-1 p-2.5 border border-slate-200 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 text-sm text-slate-700 bg-slate-50 transition-colors hover:border-slate-200" value={selectedClass} onChange={e => setSelectedClass(e.target.value)}>
                     <option value="">-- Chọn lớp phụ trách --</option>
                     {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -193,7 +193,7 @@ const Attendance = () => {
             </div>
 
             {selectedClass && (
-                <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+                <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
                     <div className="flex border-b border-slate-100 bg-slate-50/50">
                         <button onClick={() => setTab('take')} className={`px-6 py-4 text-sm font-medium transition-all ${tab === 'take' ? 'bg-white text-[#2B6830] border-t-2 border-t-[#2B6830] shadow-[0_1px_0_white]' : 'text-slate-500 hover:text-[#2B6830]'}`}>Điểm danh</button>
                         <button onClick={() => setTab('report')} className={`px-6 py-4 text-sm font-medium transition-all ${tab === 'report' ? 'bg-white text-[#2B6830] border-t-2 border-t-[#2B6830] shadow-[0_1px_0_white]' : 'text-slate-500 hover:text-[#2B6830]'}`}>Báo cáo</button>
@@ -238,7 +238,7 @@ const Attendance = () => {
                                             {[
                                                 { val: 'present', label: '✓ Có mặt', active: 'bg-green-500 text-white border-green-500', hover: 'border-green-300 text-green-600' },
                                                 { val: 'late',    label: '⏰ Muộn',   active: 'bg-orange-500 text-white border-orange-500', hover: 'border-orange-300 text-orange-600' },
-                                                { val: 'excused', label: '📋 Phép',   active: 'bg-[#E8F4EC]0 text-white border-[#E8F4EC]0',   hover: 'border-green-300 text-green-600' },
+                                                { val: 'excused', label: '📋 Phép',   active: 'bg-green-500 text-white border-green-500',   hover: 'border-green-300 text-green-600' },
                                                 { val: 'absent',  label: '✗ Vắng',   active: 'bg-red-500 text-white border-red-500',     hover: 'border-red-300 text-red-600' },
                                             ].map(btn => (
                                                 <button
@@ -310,7 +310,7 @@ const Attendance = () => {
                                                     <div className="flex justify-center gap-2">
                                                         <button title="Có mặt" onClick={() => handleMark(st.id, 'present')} className={`w-8 h-8 rounded-full flex items-center justify-center transition-all border ${status[st.id] === 'present' ? 'bg-green-500 border-green-500 text-white shadow-sm' : 'bg-white border-slate-200 text-slate-400 hover:border-green-400 hover:text-green-500'}`}><IconPresent /></button>
                                                         <button title="Đi muộn" onClick={() => handleMark(st.id, 'late')} className={`w-8 h-8 rounded-full flex items-center justify-center transition-all border ${status[st.id] === 'late' ? 'bg-orange-500 border-orange-500 text-white shadow-sm' : 'bg-white border-slate-200 text-slate-400 hover:border-orange-400 hover:text-orange-500'}`}><IconLate /></button>
-                                                        <button title="Có phép" onClick={() => handleMark(st.id, 'excused')} className={`w-8 h-8 rounded-full flex items-center justify-center transition-all border ${status[st.id] === 'excused' ? 'bg-[#E8F4EC]0 border-[#E8F4EC]0 text-white shadow-sm' : 'bg-white border-slate-200 text-slate-400 hover:border-green-400 hover:text-[#E8F4EC]0'}`}><IconExcused /></button>
+                                                        <button title="Có phép" onClick={() => handleMark(st.id, 'excused')} className={`w-8 h-8 rounded-full flex items-center justify-center transition-all border ${status[st.id] === 'excused' ? 'bg-green-500 border-green-500 text-white shadow-sm' : 'bg-white border-slate-200 text-slate-400 hover:border-green-400 hover:text-green-500'}`}><IconExcused /></button>
                                                         <button title="Vắng" onClick={() => handleMark(st.id, 'absent')} className={`w-8 h-8 rounded-full flex items-center justify-center transition-all border ${status[st.id] === 'absent' ? 'bg-red-500 border-red-500 text-white shadow-sm' : 'bg-white border-slate-200 text-slate-400 hover:border-red-400 hover:text-red-500'}`}><IconAbsent /></button>
                                                     </div>
                                                 </td>
@@ -446,7 +446,7 @@ const Attendance = () => {
                                         {history.map((h, i) => (
                                             <li key={i} className="flex gap-4">
                                                 <div className="flex flex-col items-center pt-1">
-                                                    <div className={`w-2.5 h-2.5 rounded-full ring-4 ${h.status === 'absent' ? 'bg-red-500 ring-red-50' : h.status === 'late' ? 'bg-orange-500 ring-orange-50' : 'bg-[#E8F4EC]0 ring-[#E8F4EC]'}`} />
+                                                    <div className={`w-2.5 h-2.5 rounded-full ring-4 ${h.status === 'absent' ? 'bg-red-500 ring-red-50' : h.status === 'late' ? 'bg-orange-500 ring-orange-50' : 'bg-green-500 ring-[#E8F4EC]'}`} />
                                                     {i !== history.length - 1 && <div className="w-[1px] h-full bg-slate-100 mt-2" />}
                                                 </div>
                                                 <div className="flex-1 pb-4">

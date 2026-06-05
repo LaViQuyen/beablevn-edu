@@ -130,7 +130,7 @@ const BulkImport = () => {
     <div className="space-y-6 pb-20">
 
       {/* Header */}
-      <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-100">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-emerald-50 rounded-xl text-emerald-600">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -245,7 +245,8 @@ const BulkImport = () => {
               <p className="text-sm">Nhập CSV để xem trước danh sách học viên.</p>
             </div>
           ) : (
-            <div className="overflow-auto max-h-96 rounded-xl border border-slate-100">
+            <>
+            <div className="hidden md:block overflow-auto max-h-96 rounded-xl border border-slate-100">
               <table className="w-full text-left text-xs">
                 <thead className="bg-slate-50 text-slate-500 uppercase font-bold border-b border-slate-200 sticky top-0">
                   <tr>
@@ -283,6 +284,33 @@ const BulkImport = () => {
                 </tbody>
               </table>
             </div>
+
+            {/* MOBILE CARDS */}
+            <div className="md:hidden space-y-2 max-h-96 overflow-auto">
+              {preview.map((row, i) => (
+                <div key={i} className="p-3 border border-slate-200 rounded-xl bg-white">
+                  <div className="flex justify-between items-start gap-2">
+                    <div>
+                      <h4 className="font-bold text-slate-700 text-sm">{i + 1}. {row.name}</h4>
+                      <p className="text-xs font-mono text-[#2B6830] mt-0.5">{row.studentCode}</p>
+                    </div>
+                    <span className="text-[10px] font-mono text-slate-400 shrink-0">{row.password}</span>
+                  </div>
+                  <div className="mt-2">
+                    {row.classNames.length > 0 ? (
+                      <div className="flex flex-wrap gap-1">
+                        {row.classNames.map((cn, j) => (
+                          <span key={j} className={`px-1.5 py-0.5 rounded text-[10px] font-bold border ${row.classIds.length > j ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-600 border-red-200'}`}>
+                            {cn} {row.classIds.length <= j && '⚠️'}
+                          </span>
+                        ))}
+                      </div>
+                    ) : <span className="text-slate-300 italic text-xs">— Chưa có lớp</span>}
+                  </div>
+                </div>
+              ))}
+            </div>
+            </>
           )}
         </div>
       </div>

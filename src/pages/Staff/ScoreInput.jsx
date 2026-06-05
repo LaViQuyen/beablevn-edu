@@ -394,7 +394,7 @@ const ScoreInput = () => {
                 <div className="p-2 bg-[#E8F4EC] rounded-xl text-[#2B6830]">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
                 </div>
-                <h2 className="text-xl md:text-2xl font-bold text-[#2B6830]">Nhập Điểm Chi Tiết</h2>
+                <h2 className="text-xl font-bold text-[#2B6830]">Nhập Điểm Chi Tiết</h2>
             </div>
 
             <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
@@ -485,7 +485,7 @@ const ScoreInput = () => {
                                         <th className="p-4 text-center text-yellow-700 bg-yellow-50/50 hidden md:table-cell">Bonus</th>
                                         <th className="p-4 text-center text-green-700 bg-green-50/50 hidden md:table-cell">Assign</th>
                                         <th className="p-4 text-center text-green-700 bg-[#E8F4EC]/50 hidden md:table-cell">Format</th>
-                                        <th className="p-4 text-center text-purple-700 bg-purple-50/50 hidden md:table-cell">Summa</th>
+                                        <th className="p-4 text-center text-green-700 bg-[#E8F4EC]/50 hidden md:table-cell">Summa</th>
                                         <th className="p-4 w-40 text-center border-l border-slate-200 bg-slate-50">Nhập Điểm</th>
                                     </tr>
                                 </thead>
@@ -511,14 +511,14 @@ const ScoreInput = () => {
                                                         <div className="bg-yellow-50 text-yellow-700 text-[10px] font-bold text-center py-1 rounded border border-yellow-100" title="Bonus">B: {summary.bonus}</div>
                                                         <div className="bg-green-50 text-green-700 text-[10px] font-bold text-center py-1 rounded border border-green-100" title="Assignment">A: {summary.assignment}</div>
                                                         <div className="bg-[#E8F4EC] text-green-700 text-[10px] font-bold text-center py-1 rounded border border-green-100" title="Formative">F: {summary.formative}</div>
-                                                        <div className="bg-purple-50 text-purple-700 text-[10px] font-bold text-center py-1 rounded border border-purple-100" title="Summative">S: {summary.summative}</div>
+                                                        <div className="bg-[#E8F4EC] text-green-700 text-[10px] font-bold text-center py-1 rounded border border-green-100" title="Summative">S: {summary.summative}</div>
                                                     </div>
                                                     {/* ------------------------------------------------ */}
                                                 </td>
                                                 <td className="p-4 text-center font-bold text-yellow-700 bg-yellow-50/30 hidden md:table-cell">{summary.bonus}</td>
                                                 <td className="p-4 text-center font-bold text-green-700 bg-green-50/30 hidden md:table-cell">{summary.assignment}</td>
                                                 <td className="p-4 text-center font-bold text-green-700 bg-[#E8F4EC]/30 hidden md:table-cell">{summary.formative}</td>
-                                                <td className="p-4 text-center font-bold text-purple-700 bg-purple-50/30 hidden md:table-cell">{summary.summative}</td>
+                                                <td className="p-4 text-center font-bold text-green-700 bg-[#E8F4EC]/30 hidden md:table-cell">{summary.summative}</td>
                                                 <td className="p-4 border-l border-slate-100 bg-slate-50/50">
                                                     <div className="flex justify-center">
                                                         <input
@@ -599,7 +599,7 @@ const ScoreInput = () => {
                                         {renderEditableHistoryColumn('bonus', '1. Điểm Bonus', 'border-yellow-200 text-yellow-900')}
                                         {renderEditableHistoryColumn('assignment', '2. Assignment', 'border-green-200 text-green-900')}
                                         {renderEditableHistoryColumn('formative', '3. Formative', 'border-green-200 text-green-900')}
-                                        {renderEditableHistoryColumn('summative', '4. Summative', 'border-purple-200 text-purple-900')}
+                                        {renderEditableHistoryColumn('summative', '4. Summative', 'border-green-200 text-green-900')}
                                     </div>
                                 </div>
                             </div>

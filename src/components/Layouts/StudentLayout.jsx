@@ -162,7 +162,7 @@ const StudentLayout = () => {
 
       {/* MAIN CONTENT */}
       <main className="flex-1 md:ml-64 px-4 pt-20 pb-24 md:p-8 md:pb-8 overflow-auto">
-        <div className="max-w-5xl mx-auto"><Outlet /></div>
+        <div className="max-w-6xl mx-auto"><Outlet /></div>
       </main>
 
       {/* MOBILE BOTTOM NAV */}

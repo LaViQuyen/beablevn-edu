@@ -107,7 +107,7 @@ export const Textarea = ({ label, error, rows = 4, className = '', ...props }) =
 // CARD
 // ============================================================
 export const Card = ({ children, className = '', hover = false, padding = true }) => (
-  <div className={`bg-white rounded-xl border border-slate-100 shadow-sm ${hover ? 'hover:shadow-md hover:border-green-100 transition-all' : ''} ${padding ? 'p-4 md:p-6' : ''} ${className}`}>
+  <div className={`bg-white rounded-2xl border border-slate-100 shadow-sm ${hover ? 'hover:shadow-md hover:border-green-100 transition-all' : ''} ${padding ? 'p-4 md:p-6' : ''} ${className}`}>
     {children}
   </div>
 );
@@ -121,7 +121,7 @@ const BADGE_COLORS = {
   green:   'bg-green-50 text-green-700 border-green-200',
   amber:   'bg-amber-50 text-amber-700 border-amber-200',
   red:     'bg-red-50 text-red-700 border-red-200',
-  purple:  'bg-purple-50 text-purple-700 border-purple-200',
+  purple:  'bg-[#E8F4EC] text-green-700 border-green-200',
   slate:   'bg-slate-50 text-slate-600 border-slate-200',
   emerald: 'bg-emerald-50 text-emerald-700 border-emerald-200',
   primary: 'bg-[#2B6830]/5 text-[#2B6830] border-[#2B6830]/20',
@@ -218,7 +218,7 @@ export const Skeleton = ({ className = '' }) => (
 );
 
 export const SkeletonCard = ({ rows = 3 }) => (
-  <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-5 animate-pulse space-y-3">
+  <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 animate-pulse space-y-3">
     <Skeleton className="h-5 w-32" />
     {Array.from({ length: rows }).map((_, i) => (
       <Skeleton key={i} className={`h-3 ${i === rows - 1 ? 'w-2/3' : 'w-full'}`} />

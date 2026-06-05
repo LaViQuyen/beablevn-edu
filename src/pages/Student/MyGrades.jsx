@@ -164,7 +164,7 @@ const MyGrades = () => {
     const xScale = (i) => PAD.left + (i / (data.length - 1)) * innerW;
     const yScale = (s) => PAD.top + innerH - ((s - minS) / (maxS - minS || 1)) * innerH;
 
-    const typeColor = { bonus: '#f59e0b', assignment: '#10b981', formative: '#3D8B47', summative: '#8b5cf6' };
+    const typeColor = { bonus: '#f59e0b', assignment: '#10b981', formative: '#3D8B47', summative: '#1E5225' };
     const linePath = data.map((d, i) => `${i === 0 ? 'M' : 'L'}${xScale(i).toFixed(1)},${yScale(d.score).toFixed(1)}`).join(' ');
 
     return (
@@ -215,7 +215,7 @@ const MyGrades = () => {
         <div className="flex flex-wrap gap-3 mt-1">
           {Object.entries({ bonus: '⭐ Bonus', assignment: '📝 Assignment', formative: '📊 Formative', summative: '🎯 Summative' }).map(([k, v]) => (
             <span key={k} className="text-[10px] font-bold flex items-center gap-1 text-slate-500">
-              <span className="w-2 h-2 rounded-full inline-block" style={{ background: { bonus: '#f59e0b', assignment: '#10b981', formative: '#3D8B47', summative: '#8b5cf6' }[k] }} />
+              <span className="w-2 h-2 rounded-full inline-block" style={{ background: { bonus: '#f59e0b', assignment: '#10b981', formative: '#3D8B47', summative: '#1E5225' }[k] }} />
               {v}
             </span>
           ))}
@@ -278,7 +278,7 @@ const MyGrades = () => {
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg>
             </div>
             <div>
-                <h2 className="text-xl md:text-2xl font-bold text-[#2B6830]">Bảng Kết Quả Học Tập</h2>
+                <h2 className="text-xl font-bold text-[#2B6830]">Bảng Kết Quả Học Tập</h2>
                 <p className="text-xs text-slate-400 font-medium hidden md:block">Chi tiết lịch sử nhận điểm và xếp hạng lớp</p>
             </div>
       </div>
@@ -328,7 +328,7 @@ const MyGrades = () => {
                     {renderHistoryColumn('bonus', '1. Điểm Bonus', 'bg-yellow-50 border-yellow-200 text-yellow-900')}
                     {renderHistoryColumn('assignment', '2. Assignment', 'bg-green-50 border-green-200 text-green-900')}
                     {renderHistoryColumn('formative', '3. Formative', 'bg-[#E8F4EC] border-green-200 text-green-900')}
-                    {renderHistoryColumn('summative', '4. Summative', 'bg-purple-50 border-purple-200 text-purple-900')}
+                    {renderHistoryColumn('summative', '4. Summative', 'bg-[#E8F4EC] border-green-200 text-green-900')}
                 </div>
             ) : null}
             

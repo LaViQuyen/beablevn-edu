@@ -51,7 +51,19 @@ const Profile = () => {
   };
 
   return (
-    <div className="space-y-6 pb-20 max-w-lg">
+    <div className="space-y-6 pb-20">
+      {/* PAGE HEADER */}
+      <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
+        <div className="p-2 bg-[#E8F4EC] rounded-xl text-[#3D8B47]">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+          </svg>
+        </div>
+        <div>
+          <h2 className="text-xl font-bold text-[#2B6830]">Hồ sơ cá nhân</h2>
+          <p className="text-xs text-slate-400 mt-0.5">Thông tin tài khoản của bạn.</p>
+        </div>
+      </div>
 
       {/* Thông tin cá nhân */}
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">

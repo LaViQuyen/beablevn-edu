@@ -116,6 +116,18 @@ const NotificationManager = () => {
 
   return (
     <div className="space-y-6 pb-20">
+      {/* PAGE HEADER */}
+      <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
+        <div className="p-2 bg-[#E8F4EC] rounded-xl text-[#3D8B47]">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+          </svg>
+        </div>
+        <div>
+          <h2 className="text-xl font-bold text-[#2B6830]">Quản lý Thông báo</h2>
+          <p className="text-xs text-slate-400 mt-0.5">Tạo và gửi thông báo đến học viên.</p>
+        </div>
+      </div>
 
       {/* ===== MODAL XÓA ===== */}
       {deleteTarget && (
@@ -127,7 +139,7 @@ const NotificationManager = () => {
       )}
 
       {/* ===== FORM TẠO THÔNG BÁO MỚI ===== */}
-      <div className="bg-white p-4 md:p-6 rounded-xl border border-slate-100 shadow-sm">
+      <div className="bg-white p-5 md:p-6 rounded-2xl border border-slate-100 shadow-sm">
         <h2 className="text-lg font-bold text-[#2B6830] mb-4 flex items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -243,7 +255,7 @@ const NotificationManager = () => {
       </div>
 
       {/* ===== BẢNG QUẢN LÝ ===== */}
-      <div className="bg-white p-4 md:p-6 rounded-xl border border-slate-100 shadow-sm">
+      <div className="bg-white p-5 md:p-6 rounded-2xl border border-slate-100 shadow-sm">
         <h2 className="text-lg font-bold text-[#2B6830] mb-4 flex items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
@@ -271,7 +283,7 @@ const NotificationManager = () => {
                     <div className="font-bold text-slate-800">{n.title}</div>
                     <div className="text-xs text-slate-500 mt-1 flex items-center gap-2">
                       {n.type === 'link'
-                        ? <span className="text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded border border-purple-100 font-bold text-[10px]">LINK</span>
+                        ? <span className="text-green-600 bg-[#E8F4EC] px-1.5 py-0.5 rounded border border-green-100 font-bold text-[10px]">LINK</span>
                         : <span className="text-green-600 bg-[#E8F4EC] px-1.5 py-0.5 rounded border border-green-100 font-bold text-[10px]">CONTENT</span>
                       }
                       <span className="truncate max-w-[200px]">{n.type === 'link' ? n.linkUrl : n.content}</span>
@@ -303,7 +315,7 @@ const NotificationManager = () => {
               <div className="flex justify-between items-start">
                 <div className="flex items-center gap-2">
                   <span className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase ${
-                    n.type === 'link' ? 'bg-purple-50 text-purple-700 border-purple-200' : 'bg-[#E8F4EC] text-green-700 border-green-200'
+                    n.type === 'link' ? 'bg-[#E8F4EC] text-green-700 border-green-200' : 'bg-[#E8F4EC] text-green-700 border-green-200'
                   }`}>
                     {n.type === 'link' ? 'Link' : n.label || 'Tin tức'}
                   </span>

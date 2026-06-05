@@ -102,7 +102,7 @@ const Notifications = () => {
                     <IconBell />
                 </div>
                 <div>
-                    <h2 className="text-xl md:text-2xl font-bold text-[#2B6830]">Bảng Tin & Sự Kiện</h2>
+                    <h2 className="text-xl font-bold text-[#2B6830]">Bảng Tin & Sự Kiện</h2>
                     <p className="text-xs text-slate-400 font-medium hidden md:block">Cập nhật tin tức mới nhất từ hệ thống</p>
                 </div>
             </div>
@@ -144,7 +144,7 @@ const Notifications = () => {
             {loading ? (
                 <div className="space-y-3">
                     {[1,2,3].map(i => (
-                        <div key={i} className="bg-white rounded-xl border border-slate-100 shadow-sm p-5 animate-pulse space-y-2">
+                        <div key={i} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 animate-pulse space-y-2">
                             <div className="flex gap-2"><div className="h-5 bg-slate-100 rounded w-16" /><div className="h-5 bg-slate-100 rounded w-24" /></div>
                             <div className="h-4 bg-slate-100 rounded w-3/4" />
                             <div className="h-3 bg-slate-100 rounded w-full" />
@@ -164,11 +164,11 @@ const Notifications = () => {
                             const isExpanded = expandedId === noti.id;
 
                             return (
-                                <div key={noti.id} className="bg-white p-4 md:p-5 rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex flex-col gap-3 group">
+                                <div key={noti.id} className="bg-white p-5 md:p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex flex-col gap-3 group">
 
                                     <div className="flex items-center gap-2 mb-1">
                                         {noti.type === 'link' ? (
-                                            <span className="bg-purple-50 text-purple-700 text-[10px] font-bold px-2.5 py-1 rounded-md border border-purple-100 flex items-center gap-1 uppercase tracking-wide">
+                                            <span className="bg-[#E8F4EC] text-green-700 text-[10px] font-bold px-2.5 py-1 rounded-md border border-green-100 flex items-center gap-1 uppercase tracking-wide">
                                                 <IconLink /> Link
                                             </span>
                                         ) : (
@@ -210,7 +210,7 @@ const Notifications = () => {
                                                     dangerouslySetInnerHTML={{ __html: noti.content }}
                                                 />
                                                 {!isExpanded && noti.content?.length > 120 && (
-                                                    <span className="text-[10px] text-[#E8F4EC]0 font-semibold mt-1.5 mb-1 inline-block group-hover/content:underline">Xem thêm...</span>
+                                                    <span className="text-[10px] text-green-500 font-semibold mt-1.5 mb-1 inline-block group-hover/content:underline">Xem thêm...</span>
                                                 )}
                                                 {/* Nút Xem File Đính Kèm */}
                                                 {noti.attachmentUrl && (

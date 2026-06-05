@@ -15,7 +15,7 @@ const ADMIN_EMAIL         = 'support@beablevn.com';
 // Danh mục phản ánh
 const CATEGORIES = [
   { id: 'hoc-tap',    label: '📚 Học tập',          color: 'bg-[#E8F4EC] text-green-700 border-green-200' },
-  { id: 'giao-vien',  label: '👨‍🏫 Giáo viên',        color: 'bg-purple-50 text-purple-700 border-purple-200' },
+  { id: 'giao-vien',  label: '👨‍🏫 Giáo viên',        color: 'bg-[#1E5225]/10 text-[#1E5225] border-[#1E5225]/25' },
   { id: 'co-so',      label: '🏫 Cơ sở vật chất',   color: 'bg-amber-50 text-amber-700 border-amber-200' },
   { id: 'khac',       label: '💬 Khác',              color: 'bg-slate-50 text-slate-600 border-slate-200' },
 ];

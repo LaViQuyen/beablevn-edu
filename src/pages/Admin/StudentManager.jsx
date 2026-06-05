@@ -195,7 +195,7 @@ const StudentManager = () => {
       </div>
 
       {activeTab === 'create' && (
-        <div className="bg-white p-4 md:p-6 rounded-xl border border-slate-100 shadow-sm animate-fade-in-up">
+        <div className="bg-white p-5 md:p-6 rounded-2xl border border-slate-100 shadow-sm animate-fade-in-up">
           <h2 className="text-lg font-bold text-[#2B6830] mb-4">Thông tin Học viên mới</h2>
           <form onSubmit={handleCreate} className="space-y-4 max-w-2xl">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -229,7 +229,7 @@ const StudentManager = () => {
       )}
 
       {activeTab === 'list' && (
-        <div className="bg-white p-4 md:p-6 rounded-xl border border-slate-100 shadow-sm">
+        <div className="bg-white p-5 md:p-6 rounded-2xl border border-slate-100 shadow-sm">
            {/* --- BỘ LỌC (Responsive) --- */}
            <div className="flex flex-col md:flex-row gap-3 mb-4">
                <select 

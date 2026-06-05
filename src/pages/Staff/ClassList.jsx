@@ -86,7 +86,7 @@ const ClassList = () => {
   }).length;
 
   return (
-    <div className="bg-white p-4 md:p-6 rounded-xl border border-slate-100 shadow-sm">
+    <div className="bg-white p-5 md:p-6 rounded-2xl border border-slate-100 shadow-sm">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 border-b border-slate-100 pb-4 gap-4">
         <div className="flex items-center gap-3">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="#2B6830" className="w-6 h-6">

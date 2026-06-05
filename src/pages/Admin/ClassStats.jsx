@@ -166,7 +166,7 @@ const ClassStats = () => {
     <div className="space-y-6 pb-20">
 
       {/* Header */}
-      <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-100">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-[#E8F4EC] rounded-xl text-[#3D8B47]">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -216,7 +216,7 @@ const ClassStats = () => {
           {/* Stat summary */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <StatCard label="Học viên" value={rows.length} sub={cls?.name} color="bg-[#E8F4EC]" />
-            <StatCard label="GPA Trung bình" value={avgGPA} sub="Assignment·Formative·MMT·EOMT" color="bg-purple-50" />
+            <StatCard label="GPA Trung bình" value={avgGPA} sub="Assignment·Formative·MMT·EOMT" color="bg-[#E8F4EC]" />
             <StatCard
               label="Chuyên cần TB"
               value={avgAtt !== null ? `${avgAtt}%` : '—'}
@@ -233,7 +233,7 @@ const ClassStats = () => {
             </div>
           ) : (
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-              <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+              <div className="p-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-2">
                 <h3 className="font-bold text-[#2B6830] text-sm">Bảng xếp hạng ({sorted.length} học viên)</h3>
                 <p className="text-xs text-slate-400">Bấm vào tiêu đề cột để sắp xếp</p>
               </div>
@@ -301,7 +301,7 @@ const ClassStats = () => {
                               {[
                                 { label: 'A', val: getAvg('assignment'), color: 'bg-green-50 text-green-700' },
                                 { label: 'F', val: getAvg('formative'),  color: 'bg-[#E8F4EC] text-green-700' },
-                                { label: 'S', val: getAvg('summative'),  color: 'bg-purple-50 text-purple-700' },
+                                { label: 'S', val: getAvg('summative'),  color: 'bg-[#E8F4EC] text-green-700' },
                               ].map(d => (
                                 <span key={d.label} className={`px-1.5 py-0.5 rounded ${d.color}`} title={d.label === 'A' ? 'Assignment' : d.label === 'F' ? 'Formative' : 'Summative'}>
                                   {d.label}: {d.val}

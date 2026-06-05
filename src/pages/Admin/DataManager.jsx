@@ -114,6 +114,18 @@ const DataManager = () => {
 
   return (
     <div className="space-y-6 pb-20">
+      {/* PAGE HEADER */}
+      <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
+        <div className="p-2 bg-[#E8F4EC] rounded-xl text-[#3D8B47]">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
+          </svg>
+        </div>
+        <div>
+          <h2 className="text-xl font-bold text-[#2B6830]">Dữ liệu Lớp học</h2>
+          <p className="text-xs text-slate-400 mt-0.5">Quản lý danh sách lớp và lịch học.</p>
+        </div>
+      </div>
 
       {/* MODAL XÓA */}
       {deleteTarget && (
@@ -125,7 +137,7 @@ const DataManager = () => {
       )}
 
       {/* FORM NHẬP LIỆU */}
-      <div className="bg-white p-4 md:p-6 rounded-xl border border-slate-100 shadow-sm">
+      <div className="bg-white p-5 md:p-6 rounded-2xl border border-slate-100 shadow-sm">
         <h2 className="text-lg font-bold text-[#2B6830] mb-4">{editingId ? '✏️ Cập nhật Lớp' : '➕ Thêm Lớp Mới'}</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
           <input
@@ -202,7 +214,7 @@ const DataManager = () => {
       </div>
 
       {/* DANH SÁCH LỚP */}
-      <div className="bg-white p-4 md:p-6 rounded-xl border border-slate-100 shadow-sm">
+      <div className="bg-white p-5 md:p-6 rounded-2xl border border-slate-100 shadow-sm">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
           <h2 className="text-lg font-bold text-[#2B6830]">Danh sách Lớp học ({filteredClasses.length})</h2>
           <div className="flex flex-col md:flex-row gap-3">

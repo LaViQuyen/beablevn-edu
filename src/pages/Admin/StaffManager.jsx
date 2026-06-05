@@ -181,7 +181,7 @@ const StaffManager = () => {
       )}
 
       {/* FORM TẠO MỚI */}
-      <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm">
+      <div className="bg-white p-5 md:p-6 rounded-2xl border border-slate-100 shadow-sm">
         <div className="flex items-center gap-2 mb-6 border-b border-slate-100 pb-4">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="#2B6830" className="w-6 h-6">
             <path strokeLinecap="round" strokeLinejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM3.75 15a2.25 2.25 0 012.25-2.25h2.93a2.625 2.625 0 011.603.543c.47.372.673.855.567 1.348l-.053.25c-.29.988-1.2 1.609-2.227 1.609H6.262c-1.026 0-1.936-.621-2.226-1.61l-.054-.25a1.884 1.884 0 01.568-1.348z" />
@@ -234,7 +234,7 @@ const StaffManager = () => {
       )}
 
       {/* DANH SÁCH NHÂN SỰ */}
-      <div className="bg-white p-4 md:p-6 rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+      <div className="bg-white p-5 md:p-6 rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="#2B6830" className="w-5 h-5">

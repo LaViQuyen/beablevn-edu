@@ -7,7 +7,7 @@ import { ref, onValue } from 'firebase/database';
 // SKELETON CARD — thay thế "Đang tải..."
 // ============================================================
 const SkeletonCard = () => (
-  <div className="bg-white p-5 rounded-xl border border-slate-100 shadow-sm animate-pulse">
+  <div className="bg-white p-5 md:p-6 rounded-2xl border border-slate-100 shadow-sm animate-pulse">
     <div className="h-3 bg-slate-100 rounded w-16 mb-3" />
     <div className="h-5 bg-slate-100 rounded w-32 mb-2" />
     <div className="h-3 bg-slate-100 rounded w-24 mb-4" />
@@ -167,7 +167,7 @@ const StudentDashboard = () => {
 
       {/* ===== ĐIỂM MỚI NHẤT ===== */}
       {!loading && latestScore && (
-        <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-4 flex items-center gap-4">
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center shrink-0">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="#d97706" className="w-6 h-6">
               <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
@@ -200,7 +200,7 @@ const StudentDashboard = () => {
         ) : myClasses.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {myClasses.map((cls) => (
-              <div key={cls.id} className="bg-white p-5 rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-all group">
+              <div key={cls.id} className="bg-white p-5 md:p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all group">
                 <div className="flex justify-between items-start mb-3">
                   <div className="bg-[#E8F4EC] text-[#2B6830] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">
                     {cls.room || 'Online'}

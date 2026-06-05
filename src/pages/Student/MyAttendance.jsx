@@ -118,7 +118,7 @@ const MyAttendance = () => {
       {loading && (
         <div className="space-y-4">
           {[1, 2].map(i => (
-            <div key={i} className="bg-white rounded-xl border border-slate-100 shadow-sm p-5 animate-pulse space-y-3">
+            <div key={i} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 animate-pulse space-y-3">
               <div className="h-5 bg-slate-100 rounded w-32" />
               <div className="h-3 bg-slate-100 rounded w-full" />
               <div className="h-3 bg-slate-100 rounded w-3/4" />
@@ -173,7 +173,7 @@ const MyAttendance = () => {
                             <div className="text-[10px] text-slate-400">Đi muộn</div>
                         </div>
                         <div className="p-3 text-center">
-                            <div className="text-[#E8F4EC]0 font-bold">{item.excusedCount}</div>
+                            <div className="text-green-500 font-bold">{item.excusedCount}</div>
                             <div className="text-[10px] text-slate-400">Có phép</div>
                         </div>
                         <div className="p-3 text-center">
