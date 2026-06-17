@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'; // Bổ sung useMemo
-import { db, storage } from '../../firebase'; 
+import { db, storage } from '../../firebase';
 import { ref, push, set, onValue, remove, update } from 'firebase/database';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useAuth } from '../../context/AuthContext';
@@ -8,10 +8,10 @@ import 'react-quill-new/dist/quill.snow.css';
 
 const modules = {
     toolbar: [
-        ['bold', 'italic', 'underline', 'strike'],        
-        [{ 'color': [] }, { 'background': [] }],          
-        [{ 'list': 'ordered'}, { 'list': 'bullet' }],     
-        ['clean']                                         
+        ['bold', 'italic', 'underline', 'strike'],
+        [{ 'color': [] }, { 'background': [] }],
+        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+        ['clean']
     ],
 };
 
@@ -23,7 +23,7 @@ const Notifications = () => {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [attachment, setAttachment] = useState(null);
-    const [attachmentTitle, setAttachmentTitle] = useState(''); 
+    const [attachmentTitle, setAttachmentTitle] = useState('');
     const [linkUrl, setLinkUrl] = useState('');
     const [linkTitle, setLinkTitle] = useState('Link bài tập');
     const [codeHtml, setCodeHtml] = useState(''); // chế độ Code: dán HTML soạn sẵn (từ GEM Gemini) — có preview trước khi đăng
@@ -306,11 +306,11 @@ const Notifications = () => {
                             </a>
                         ) : (
                             <div className="flex flex-col items-start">
-                            <div 
+                            <div
                                     className={`quill-content text-xs text-slate-600 leading-relaxed ${isExpanded ? '' : 'line-clamp-2'}`}
                                     dangerouslySetInnerHTML={{ __html: noti.content }}
                                 />
-                                
+
                                 {/* Đưa "Xem thêm..." lên ngay dưới nội dung bị rút gọn */}
                                 {!isExpanded && noti.content?.length > 120 && (
                                     <span className="text-[10px] text-green-500 font-semibold mt-1.5 mb-1 inline-block group-hover/content:underline">Xem thêm...</span>
@@ -336,7 +336,7 @@ const Notifications = () => {
             );
         });
     // Các biến này thay đổi thì danh sách mới cần tải lại:
-    }, [notiList, currentUser, filterClass, filterLabel, searchKeyword, expandedId, classes]); 
+    }, [notiList, currentUser, filterClass, filterLabel, searchKeyword, expandedId, classes]);
     // === KẾT THÚC ĐOẠN TỐI ƯU ===
 
     return (
@@ -550,13 +550,13 @@ const Notifications = () => {
                         <div className="mb-6">
                             <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Nội dung chi tiết</label>
                             <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-                                <ReactQuill 
+                                <ReactQuill
                                     theme="snow"
                                     modules={modules}
-                                    value={content} 
+                                    value={content}
                                     onChange={setContent}
                                     placeholder="Nội dung sẽ được hiển thị cho học viên..."
-                                    className="h-40 pb-10" 
+                                    className="h-40 pb-10"
                                 />
                             </div>
                         </div>

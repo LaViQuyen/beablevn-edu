@@ -16,6 +16,14 @@ const STATUS_STYLES = {
   resolved: 'bg-green-50 text-green-700 border-green-200',
 };
 
+// Dựng hội thoại từ 1 phản ánh (tương thích bản ghi cũ chỉ có content + staffReply)
+const buildThread = (fb) => {
+  if (Array.isArray(fb.thread) && fb.thread.length) return fb.thread;
+  const t = [{ from: 'student', name: fb.isAnonymous ? 'Học viên' : fb.studentName, content: fb.content, date: fb.date }];
+  if (fb.staffReply) t.push({ from: 'staff', name: fb.replyBy || 'Nhà trường', content: fb.staffReply, date: fb.replyDate });
+  return t;
+};
+
 const Inbox = () => {
   const { currentUser } = useAuth();
 
@@ -82,21 +90,43 @@ const Inbox = () => {
     if (selectedMsg) setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
   }, [selectedMsg]);
 
-  // Xử lý reply feedback
+  // Đồng bộ phản ánh đang mở với realtime (học viên trả lời mới hiện ngay)
+  useEffect(() => {
+    if (!selectedFb) return;
+    const fresh = feedbacks.find(f => f.id === selectedFb.id);
+    if (fresh && (fresh.replyDate !== selectedFb.replyDate
+        || (fresh.thread?.length || 0) !== (selectedFb.thread?.length || 0)
+        || fresh.status !== selectedFb.status)) {
+      setSelectedFb(fresh);
+    }
+  }, [feedbacks]);
+
+  // Gửi 1 lượt phản hồi (hội thoại nhiều lượt, KHÔNG tự đánh dấu đã xử lý)
   const handleFeedbackReply = async () => {
     if (!reply.trim() || !selectedFb) return;
     setSending(true);
     try {
+      const now = new Date().toISOString();
+      const newThread = [...buildThread(selectedFb), { from: 'staff', name: currentUser.name, content: reply.trim(), date: now }];
       await update(ref(db, `feedback/${selectedFb.id}`), {
-        staffReply: reply.trim(),
-        replyDate:  new Date().toISOString(),
-        replyBy:    currentUser.name,
-        status:     'resolved',
+        thread:        newThread,
+        staffReply:    reply.trim(),  // giữ phản hồi mới nhất cho trang admin xem nhanh
+        replyDate:     now,
+        replyBy:       currentUser.name,
+        studentUnread: (selectedFb.studentUnread || 0) + 1, // báo cho học viên có phản hồi mới
+        staffUnread:   0,
+        status:        selectedFb.status === 'resolved' ? 'resolved' : 'read',
       });
       setReply('');
-      setSelectedFb(prev => ({ ...prev, staffReply: reply.trim(), status: 'resolved', replyBy: currentUser.name }));
     } catch (err) { console.error(err); }
     finally { setSending(false); }
+  };
+
+  // Đánh dấu đã xử lý (tách riêng khỏi việc gửi phản hồi)
+  const handleResolveFeedback = async () => {
+    if (!selectedFb) return;
+    try { await update(ref(db, `feedback/${selectedFb.id}`), { status: 'resolved' }); }
+    catch (err) { console.error(err); }
   };
 
   // Xử lý reply message
@@ -121,13 +151,14 @@ const Inbox = () => {
     finally { setSending(false); }
   };
 
-  // Mở feedback → đánh dấu đã đọc
+  // Mở feedback → đánh dấu đã đọc + xóa số chưa đọc của GV
   const openFeedback = async (fb) => {
     setSelectedFb(fb);
     setReply('');
-    if (fb.status === 'pending') {
-      await update(ref(db, `feedback/${fb.id}`), { status: 'read' });
-    }
+    const updates = {};
+    if (fb.status === 'pending') updates.status = 'read';
+    if (fb.staffUnread) updates.staffUnread = 0;
+    if (Object.keys(updates).length) await update(ref(db, `feedback/${fb.id}`), updates);
   };
 
   // Mở message → đánh dấu đã đọc
@@ -139,7 +170,7 @@ const Inbox = () => {
     }
   };
 
-  const unreadFeedback = feedbacks.filter(f => f.status === 'pending').length;
+  const unreadFeedback = feedbacks.filter(f => (f.staffUnread || 0) > 0 || f.status === 'pending').length;
   const unreadMessages = messages.reduce((sum, m) => sum + (m.staffUnread || 0), 0);
 
   const filteredFeedbacks = feedbacks.filter(fb => filterStatus === 'all' || fb.status === filterStatus);
@@ -259,34 +290,51 @@ const Inbox = () => {
                   {selectedFb.isAnonymous ? 'Ẩn danh' : `${selectedFb.studentName} (${selectedFb.studentCode})`} · {new Date(selectedFb.date).toLocaleString('vi-VN')}
                 </p>
 
-                <div className="bg-slate-50 rounded-xl p-4">
-                  <p className="text-sm text-slate-700 whitespace-pre-line leading-relaxed">{selectedFb.content}</p>
+                {/* Hội thoại 2 chiều */}
+                <div className="space-y-2">
+                  {buildThread(selectedFb).map((m, i) => {
+                    const isStaff = m.from === 'staff';
+                    return (
+                      <div key={i} className={`flex ${isStaff ? 'justify-end' : 'justify-start'}`}>
+                        <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm ${isStaff ? 'bg-[#2B6830] text-white rounded-br-sm' : 'bg-slate-100 text-slate-800 rounded-bl-sm'}`}>
+                          <p className={`text-[10px] font-bold mb-0.5 ${isStaff ? 'text-green-200' : 'text-slate-500'}`}>{isStaff ? (m.name || 'GV') : (selectedFb.isAnonymous ? 'Học viên (ẩn danh)' : (m.name || selectedFb.studentName))}</p>
+                          <p className="leading-relaxed whitespace-pre-line">{m.content}</p>
+                          <p className={`text-[10px] mt-1 ${isStaff ? 'text-green-200' : 'text-slate-400'}`}>{m.date && new Date(m.date).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
 
-                {selectedFb.staffReply ? (
-                  <div className="bg-green-50 border border-green-200 rounded-xl p-4">
-                    <p className="text-xs font-bold text-green-700 mb-1.5">Phản hồi của bạn · {selectedFb.replyDate && new Date(selectedFb.replyDate).toLocaleString('vi-VN')}</p>
-                    <p className="text-sm text-slate-700 whitespace-pre-line">{selectedFb.staffReply}</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Phản hồi học viên</label>
-                    <textarea
-                      className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 resize-none transition"
-                      rows={4}
-                      placeholder="Nhập phản hồi của bạn..."
-                      value={reply}
-                      onChange={e => setReply(e.target.value)}
-                    />
+                {/* Ô trả lời + nút đánh dấu đã xử lý (tách riêng) */}
+                <div className="space-y-3 pt-3 border-t border-slate-100">
+                  <textarea
+                    className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 resize-none transition"
+                    rows={3}
+                    placeholder="Nhập phản hồi (có thể hỏi thêm nếu chưa đủ thông tin)..."
+                    value={reply}
+                    onChange={e => setReply(e.target.value)}
+                  />
+                  <div className="flex flex-wrap gap-2 items-center">
                     <button
                       onClick={handleFeedbackReply}
                       disabled={!reply.trim() || sending}
-                      className="bg-emerald-600 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-emerald-700 transition-all disabled:opacity-50 text-sm"
+                      className="bg-[#2B6830] text-white px-5 py-2.5 rounded-xl font-bold hover:bg-[#1E5225] transition-all disabled:opacity-50 text-sm"
                     >
-                      {sending ? 'Đang gửi...' : '✅ Gửi phản hồi & Đánh dấu đã xử lý'}
+                      {sending ? 'Đang gửi...' : 'Gửi phản hồi'}
                     </button>
+                    {selectedFb.status !== 'resolved' ? (
+                      <button
+                        onClick={handleResolveFeedback}
+                        className="border border-emerald-600 text-emerald-600 px-5 py-2.5 rounded-xl font-bold hover:bg-emerald-600 hover:text-white transition-all text-sm"
+                      >
+                        ✅ Đánh dấu đã xử lý
+                      </button>
+                    ) : (
+                      <span className="text-xs font-bold text-green-600 flex items-center gap-1">✅ Đã xử lý</span>
+                    )}
                   </div>
-                )}
+                </div>
               </div>
             </div>
           )}
@@ -306,9 +354,9 @@ const Inbox = () => {
                 <button
                   key={msg.id}
                   onClick={() => openMessage(msg)}
-                  className={`w-full bg-white rounded-2xl border shadow-sm p-4 text-left hover:shadow-md transition-all flex items-start gap-3 ${msg.staffUnread > 0 ? 'border-green-200 bg-[#E8F4EC]/20' : 'border-slate-100 hover:border-green-100'}`}
+                  className={`w-full rounded-2xl border shadow-sm p-4 text-left hover:shadow-md transition-all flex items-start gap-3 ${msg.system ? 'border-yellow-300 bg-yellow-50' : msg.staffUnread > 0 ? 'border-green-200 bg-[#E8F4EC]/20' : 'border-slate-100 hover:border-green-100 bg-white'}`}
                 >
-                  <div className="w-10 h-10 rounded-full bg-[#2B6830]/10 text-[#2B6830] font-bold text-sm flex items-center justify-center shrink-0">
+                  <div className={`w-10 h-10 rounded-full font-bold text-sm flex items-center justify-center shrink-0 ${msg.system ? 'bg-yellow-200 text-yellow-800' : 'bg-[#2B6830]/10 text-[#2B6830]'}`}>
                     {msg.studentName?.charAt(0) || '?'}
                   </div>
                   <div className="flex-1 min-w-0">

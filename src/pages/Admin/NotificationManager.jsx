@@ -1,7 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { db } from '../../firebase';
-import { ref, onValue, remove, push, set } from "firebase/database";
+import { ref, onValue, remove, push, set, update } from "firebase/database";
 import { useAuth } from '../../context/AuthContext';
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css';
+
+// Toolbar rich editor — cùng cấu hình với form của Giáo vụ
+const quillModules = {
+  toolbar: [
+    ['bold', 'italic', 'underline', 'strike'],
+    [{ 'color': [] }, { 'background': [] }],
+    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+    ['clean']
+  ],
+};
+
+// Nhãn thông báo — giống cổng Giáo vụ để học viên thấy đồng nhất
+const LABELS = [
+  { id: 'báo bài', color: 'bg-[#E8F4EC] text-green-700 border-green-200' },
+  { id: 'quan trọng', color: 'bg-red-50 text-red-700 border-red-200' },
+  { id: 'sự kiện', color: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
+];
 
 // ============================================================
 // MODAL XÁC NHẬN XÓA — thay thế window.confirm
@@ -30,6 +49,26 @@ const ConfirmModal = ({ message, onConfirm, onCancel }) => (
 );
 
 // ============================================================
+// HELPER: chuyển HTML thô thành text sạch để hiển thị excerpt
+// (nội dung lưu từ Quill / tab Code là HTML — không đổ thẳng ra bảng)
+// ============================================================
+const stripHtml = (html) => {
+  if (!html) return '';
+  return html
+    .replace(/<[^>]*>/g, ' ')        // bỏ toàn bộ thẻ HTML
+    .replace(/&nbsp;/gi, ' ')        // decode các entity hay gặp
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/\s+/g, ' ')            // gộp khoảng trắng thừa
+    .trim();
+};
+
+const PAGE_SIZE = 10; // số thông báo mỗi trang
+
+// ============================================================
 // MAIN COMPONENT
 // ============================================================
 const NotificationManager = () => {
@@ -44,13 +83,23 @@ const NotificationManager = () => {
     content: '',
     linkUrl: '',
     scope: 'all',    // 'all' | classId
-    label: 'Tin tức' // nhãn hiển thị cho loại content
+    label: 'báo bài' // nhãn: báo bài / quan trọng / sự kiện — giống Giáo vụ
   });
   const [submitting, setSubmitting] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
 
-  // --- State modal xóa ---
+  // --- State modal xóa + modal xem chi tiết + modal sửa ---
   const [deleteTarget, setDeleteTarget] = useState(null); // id cần xóa
+  const [viewTarget, setViewTarget] = useState(null);     // thông báo đang xem chi tiết
+  const [editTarget, setEditTarget] = useState(null);     // bản sao thông báo đang sửa
+  const [savingEdit, setSavingEdit] = useState(false);
+
+  // --- State bộ lọc / sắp xếp / phân trang ---
+  const [filterScope, setFilterScope] = useState('all');   // 'all' | 'system' | classId
+  const [filterType, setFilterType] = useState('all');     // 'all' | 'content' | 'link'
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const [sortDir, setSortDir] = useState('desc');          // 'desc' mới nhất trước | 'asc' cũ nhất trước
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     onValue(ref(db, 'classes'), (snapshot) => {
@@ -60,9 +109,7 @@ const NotificationManager = () => {
     onValue(ref(db, 'notifications'), (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        const list = Object.entries(data)
-          .map(([id, val]) => ({ id, ...val }))
-          .sort((a, b) => new Date(b.date) - new Date(a.date));
+        const list = Object.entries(data).map(([id, val]) => ({ id, ...val }));
         setNotifs(list);
       } else {
         setNotifs([]);
@@ -70,11 +117,40 @@ const NotificationManager = () => {
     });
   }, []);
 
+  // Đổi bộ lọc / tìm kiếm / sắp xếp thì quay về trang 1
+  useEffect(() => { setPage(1); }, [filterScope, filterType, searchKeyword, sortDir]);
+
+  // --- Lọc + sắp xếp (cache bằng useMemo, 500+ thông báo không bị giật) ---
+  const filteredNotifs = useMemo(() => {
+    let list = notifs;
+
+    if (filterScope === 'system') list = list.filter(n => n.scope === 'all');
+    else if (filterScope !== 'all') list = list.filter(n => n.scope === filterScope);
+
+    if (filterType !== 'all') list = list.filter(n => (n.type || 'content') === filterType);
+
+    if (searchKeyword.trim()) {
+      const kw = searchKeyword.trim().toLowerCase();
+      list = list.filter(n => n.title?.toLowerCase().includes(kw));
+    }
+
+    return [...list].sort((a, b) =>
+      sortDir === 'desc'
+        ? new Date(b.date) - new Date(a.date)
+        : new Date(a.date) - new Date(b.date)
+    );
+  }, [notifs, filterScope, filterType, searchKeyword, sortDir]);
+
+  // --- Phân trang ---
+  const totalPages = Math.max(1, Math.ceil(filteredNotifs.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const pagedNotifs = filteredNotifs.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
   // --- Xử lý tạo thông báo mới ---
   const handleCreate = async (e) => {
     e.preventDefault();
     if (!form.title.trim()) return;
-    if (form.type === 'content' && !form.content.trim()) return;
+    if (form.type === 'content' && !stripHtml(form.content)) return; // Quill rỗng = '<p><br></p>' nên phải strip HTML mới biết rỗng thật
     if (form.type === 'link' && !form.linkUrl.trim()) return;
 
     setSubmitting(true);
@@ -83,7 +159,7 @@ const NotificationManager = () => {
       await set(newRef, {
         title: form.title.trim(),
         type: form.type,
-        content: form.type === 'content' ? form.content.trim() : '',
+        content: form.type === 'content' ? form.content : '', // giữ nguyên HTML từ Quill
         linkUrl: form.type === 'link' ? form.linkUrl.trim() : '',
         label: form.type === 'content' ? form.label : '',
         scope: form.scope,
@@ -91,13 +167,43 @@ const NotificationManager = () => {
         date: new Date().toISOString(),
       });
       // Reset form
-      setForm({ title: '', type: 'content', content: '', linkUrl: '', scope: 'all', label: 'Tin tức' });
+      setForm({ title: '', type: 'content', content: '', linkUrl: '', scope: 'all', label: 'báo bài' });
       setSuccessMsg('Đã đăng thông báo thành công!');
       setTimeout(() => setSuccessMsg(''), 3000);
     } catch (err) {
       setSuccessMsg('❌ Lỗi: ' + err.message);
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  // --- Lưu chỉnh sửa thông báo đã đăng (giống cổng Giáo vụ) ---
+  const handleSaveEdit = async () => {
+    if (!editTarget) return;
+    if (!editTarget.title?.trim()) return setSuccessMsg('⚠️ Vui lòng nhập tiêu đề.');
+    if (editTarget.type === 'content' && !stripHtml(editTarget.content)) return setSuccessMsg('⚠️ Vui lòng nhập nội dung.');
+    if (editTarget.type === 'link' && !editTarget.linkUrl?.trim()) return setSuccessMsg('⚠️ Vui lòng nhập đường dẫn.');
+    setSavingEdit(true);
+    try {
+      const changes = {
+        title: editTarget.title.trim(),
+        editedAt: new Date().toISOString(),
+        editedBy: userData?.name || 'Admin',
+      };
+      if (editTarget.type === 'content') {
+        changes.content = editTarget.content;
+        changes.label = editTarget.label || 'báo bài';
+      } else {
+        changes.linkUrl = editTarget.linkUrl.trim();
+      }
+      await update(ref(db, `notifications/${editTarget.id}`), changes);
+      setEditTarget(null);
+      setSuccessMsg('Đã cập nhật thông báo!');
+      setTimeout(() => setSuccessMsg(''), 3000);
+    } catch (e) {
+      setSuccessMsg('❌ Lỗi: ' + e.message);
+    } finally {
+      setSavingEdit(false);
     }
   };
 
@@ -136,6 +242,141 @@ const NotificationManager = () => {
           onConfirm={confirmDelete}
           onCancel={() => setDeleteTarget(null)}
         />
+      )}
+
+      {/* ===== MODAL XEM CHI TIẾT THÔNG BÁO ===== */}
+      {viewTarget && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setViewTarget(null)}>
+          <div
+            className="bg-white rounded-2xl shadow-xl max-w-2xl w-full border border-slate-100 max-h-[85vh] flex flex-col"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Header modal */}
+            <div className="flex items-start justify-between gap-3 p-5 border-b border-slate-100">
+              <div className="min-w-0">
+                <h3 className="font-bold text-[#2B6830] text-base leading-snug">{viewTarget.title}</h3>
+                <div className="flex items-center gap-2 mt-2 flex-wrap">
+                  {renderTargets(viewTarget)}
+                  <span className="text-[11px] text-slate-400 font-mono">{new Date(viewTarget.date).toLocaleString('vi-VN')}</span>
+                  <span className="text-[11px] text-slate-500">Bởi: <b>{viewTarget.author || 'Admin'}</b></span>
+                  {viewTarget.label && <span className="text-[10px] font-bold uppercase text-green-700 bg-[#E8F4EC] px-2 py-0.5 rounded border border-green-100">{viewTarget.label}</span>}
+                </div>
+              </div>
+              <button
+                onClick={() => setViewTarget(null)}
+                className="shrink-0 text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-1.5 rounded-xl transition-colors"
+                title="Đóng"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+
+            {/* Body modal — render HTML đúng như học viên thấy (class quill-content) */}
+            <div className="p-5 overflow-y-auto">
+              {viewTarget.type === 'link' ? (
+                <a
+                  href={viewTarget.linkUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#2B6830] bg-[#E8F4EC] hover:bg-green-100 px-4 py-2.5 rounded-xl border border-green-100 transition-colors break-all"
+                >
+                  🔗 {viewTarget.linkUrl}
+                </a>
+              ) : (
+                <div
+                  className="quill-content text-sm text-slate-700 leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: viewTarget.content }}
+                />
+              )}
+              {viewTarget.attachmentUrl && (
+                <a
+                  href={viewTarget.attachmentUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-[#2B6830] bg-[#E8F4EC] hover:bg-green-100 px-3.5 py-2.5 rounded-xl border border-green-100 transition-colors"
+                >
+                  📎 {viewTarget.attachmentTitle || viewTarget.attachmentName}
+                </a>
+              )}
+            </div>
+
+            {/* Footer modal */}
+            <div className="flex justify-end gap-3 p-4 border-t border-slate-100">
+              <button
+                onClick={() => { handleDelete(viewTarget.id); setViewTarget(null); }}
+                className="px-4 py-2 rounded-xl text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-100 transition-colors"
+              >
+                Xóa thông báo
+              </button>
+              <button
+                onClick={() => setViewTarget(null)}
+                className="px-4 py-2 rounded-xl text-sm font-bold text-white bg-[#2B6830] hover:bg-[#1E5225] transition-colors"
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===== MODAL SỬA THÔNG BÁO ĐÃ ĐĂNG ===== */}
+      {editTarget && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl p-6 max-w-lg w-full space-y-4 border border-slate-100 max-h-[90vh] overflow-y-auto">
+            <h3 className="font-bold text-[#2B6830]">✏️ Sửa thông báo — {editTarget.scope === 'all' ? 'Toàn hệ thống' : `Lớp ${classes[editTarget.scope]?.name || editTarget.scope}`}</h3>
+
+            <div>
+              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Tiêu đề</label>
+              <input
+                className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition"
+                value={editTarget.title || ''}
+                onChange={e => setEditTarget({ ...editTarget, title: e.target.value })}
+              />
+            </div>
+
+            {editTarget.type === 'link' ? (
+              <div>
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Đường dẫn (URL)</label>
+                <input
+                  className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition font-mono"
+                  value={editTarget.linkUrl || ''}
+                  onChange={e => setEditTarget({ ...editTarget, linkUrl: e.target.value })}
+                />
+              </div>
+            ) : (
+              <>
+                <div>
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Nhãn</label>
+                  <div className="flex gap-2 flex-wrap">
+                    {LABELS.map(l => (
+                      <button key={l.id} type="button"
+                        onClick={() => setEditTarget({ ...editTarget, label: l.id })}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all uppercase ${editTarget.label === l.id ? l.color + ' ring-2 ring-[#2B6830]/20' : 'bg-white text-slate-400 border-slate-200 hover:border-slate-300'}`}>
+                        {l.id}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Nội dung</label>
+                  <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                    <ReactQuill theme="snow" modules={quillModules}
+                      value={editTarget.content || ''}
+                      onChange={(val) => setEditTarget(prev => ({ ...prev, content: val }))}
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+
+            <div className="flex gap-3 justify-end pt-1">
+              <button onClick={() => setEditTarget(null)} className="px-4 py-2 rounded-xl text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">Hủy</button>
+              <button onClick={handleSaveEdit} disabled={savingEdit} className="px-4 py-2 rounded-xl text-sm font-bold text-white bg-[#2B6830] hover:bg-[#1E5225] transition-colors disabled:opacity-50">
+                {savingEdit ? 'Đang lưu...' : 'Lưu thay đổi'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* ===== FORM TẠO THÔNG BÁO MỚI ===== */}
@@ -210,15 +451,37 @@ const NotificationManager = () => {
           {/* Nội dung / Link */}
           {form.type === 'content' ? (
             <div>
+              {/* Nhãn dán — giống cổng Giáo vụ */}
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1.5">Nhãn dán (Label)</label>
+              <div className="flex gap-2 mb-4">
+                {LABELS.map(lbl => (
+                  <button
+                    key={lbl.id}
+                    type="button"
+                    onClick={() => setForm({ ...form, label: lbl.id })}
+                    className={`px-3 py-1.5 rounded-md text-[10px] font-bold border transition-all uppercase tracking-wider ${form.label === lbl.id ? lbl.color + ' ring-2 ring-offset-1 ring-green-200' : 'bg-white text-slate-400 border-slate-200'}`}
+                  >
+                    {lbl.id}
+                  </button>
+                ))}
+              </div>
               <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Nội dung *</label>
-              <textarea
-                className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 resize-none transition"
-                rows={4}
-                placeholder="Nhập nội dung thông báo..."
-                value={form.content}
-                onChange={e => setForm({ ...form, content: e.target.value })}
-                required
-              />
+              {/* Style cho bullet/số trong editor — giống form Giáo vụ */}
+              <style>{`
+                .ql-editor ul { list-style-type: disc !important; padding-left: 1.5rem !important; margin-bottom: 0.5rem !important; }
+                .ql-editor ol { list-style-type: decimal !important; padding-left: 1.5rem !important; margin-bottom: 0.5rem !important; }
+                .ql-editor li { padding-left: 0.25rem !important; margin-bottom: 0.25rem !important; }
+              `}</style>
+              <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                <ReactQuill
+                  theme="snow"
+                  modules={quillModules}
+                  value={form.content}
+                  onChange={(val) => setForm(prev => ({ ...prev, content: val }))}
+                  placeholder="Nội dung sẽ được hiển thị cho học viên..."
+                  className="h-40 pb-10"
+                />
+              </div>
             </div>
           ) : (
             <div>
@@ -238,7 +501,7 @@ const NotificationManager = () => {
             <button
               type="submit"
               disabled={submitting}
-              className="bg-[#2B6830] text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-[#004080] active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="bg-[#2B6830] text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-[#1E5225] active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               {submitting ? (
                 <>
@@ -260,8 +523,69 @@ const NotificationManager = () => {
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
           </svg>
-          Lịch sử Thông báo ({notifs.length})
+          Lịch sử Thông báo ({filteredNotifs.length}{filteredNotifs.length !== notifs.length ? `/${notifs.length}` : ''})
         </h2>
+
+        {/* ===== THANH BỘ LỌC + TÌM KIẾM + SẮP XẾP ===== */}
+        <div className="flex flex-col md:flex-row gap-3 mb-5">
+          {/* Lọc theo phạm vi (lớp) */}
+          <select
+            className="w-full md:w-52 p-2.5 border border-slate-200 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 text-sm text-slate-700 bg-slate-50 transition-colors"
+            value={filterScope}
+            onChange={e => setFilterScope(e.target.value)}
+          >
+            <option value="all">-- Tất cả phạm vi --</option>
+            <option value="system">🌐 Toàn hệ thống</option>
+            {Object.entries(classes).map(([id, cls]) => (
+              <option key={id} value={id}>🏫 Lớp {cls.name}</option>
+            ))}
+          </select>
+
+          {/* Lọc theo loại */}
+          <select
+            className="w-full md:w-44 p-2.5 border border-slate-200 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 text-sm text-slate-700 bg-slate-50 transition-colors"
+            value={filterType}
+            onChange={e => setFilterType(e.target.value)}
+          >
+            <option value="all">-- Tất cả loại --</option>
+            <option value="content">📝 Nội dung</option>
+            <option value="link">🔗 Đường link</option>
+          </select>
+
+          {/* Tìm kiếm theo tiêu đề */}
+          <div className="flex-1 relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-slate-400"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
+            </div>
+            <input
+              type="text"
+              className="w-full pl-10 p-2.5 border border-slate-200 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 text-sm text-slate-700 bg-slate-50 transition-colors"
+              placeholder="Tìm kiếm theo tiêu đề..."
+              value={searchKeyword}
+              onChange={e => setSearchKeyword(e.target.value)}
+            />
+          </div>
+
+          {/* Nút đảo chiều sắp xếp theo ngày */}
+          <button
+            type="button"
+            onClick={() => setSortDir(d => d === 'desc' ? 'asc' : 'desc')}
+            className="shrink-0 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 bg-slate-50 hover:bg-[#E8F4EC] hover:text-[#2B6830] hover:border-green-200 transition-colors"
+            title={sortDir === 'desc' ? 'Đang xếp: mới nhất trước — bấm để đảo' : 'Đang xếp: cũ nhất trước — bấm để đảo'}
+          >
+            {sortDir === 'desc' ? (
+              <>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3" /></svg>
+                Mới nhất
+              </>
+            ) : (
+              <>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" /></svg>
+                Cũ nhất
+              </>
+            )}
+          </button>
+        </div>
 
         {/* DESKTOP TABLE */}
         <div className="hidden md:block overflow-x-auto rounded-xl border border-slate-200">
@@ -276,22 +600,39 @@ const NotificationManager = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {notifs.map(n => (
-                <tr key={n.id} className="hover:bg-slate-50 transition-colors">
+              {pagedNotifs.map(n => (
+                <tr
+                  key={n.id}
+                  className="hover:bg-slate-50 transition-colors cursor-pointer"
+                  onClick={() => setViewTarget(n)}
+                >
                   <td className="p-4 text-slate-500 text-xs font-mono">{new Date(n.date).toLocaleDateString('vi-VN')}</td>
                   <td className="p-4">
                     <div className="font-bold text-slate-800">{n.title}</div>
                     <div className="text-xs text-slate-500 mt-1 flex items-center gap-2">
                       {n.type === 'link'
                         ? <span className="text-green-600 bg-[#E8F4EC] px-1.5 py-0.5 rounded border border-green-100 font-bold text-[10px]">LINK</span>
-                        : <span className="text-green-600 bg-[#E8F4EC] px-1.5 py-0.5 rounded border border-green-100 font-bold text-[10px]">CONTENT</span>
+                        : <span className="text-green-600 bg-[#E8F4EC] px-1.5 py-0.5 rounded border border-green-100 font-bold text-[10px] uppercase">{n.label || 'CONTENT'}</span>
                       }
-                      <span className="truncate max-w-[200px]">{n.type === 'link' ? n.linkUrl : n.content}</span>
+                      {/* Excerpt đã làm sạch HTML — không còn lộ thẻ thô */}
+                      <span className="truncate max-w-[280px]">{n.type === 'link' ? n.linkUrl : stripHtml(n.content)}</span>
                     </div>
                   </td>
                   <td className="p-4 font-medium">{renderTargets(n)}</td>
                   <td className="p-4 text-slate-500 text-xs font-medium">{n.author || 'Admin'}</td>
-                  <td className="p-4 text-right">
+                  <td className="p-4 text-right whitespace-nowrap" onClick={e => e.stopPropagation()}>
+                    <button
+                      onClick={() => setViewTarget(n)}
+                      className="text-[#2B6830] hover:bg-[#E8F4EC] px-3 py-1.5 rounded-xl transition-colors text-xs font-bold border border-green-100 mr-2"
+                    >
+                      Xem
+                    </button>
+                    <button
+                      onClick={() => setEditTarget({ ...n })}
+                      className="text-amber-600 hover:bg-amber-50 px-3 py-1.5 rounded-xl transition-colors text-xs font-bold border border-amber-200 mr-2"
+                    >
+                      Sửa
+                    </button>
                     <button
                       onClick={() => handleDelete(n.id)}
                       className="text-red-500 hover:bg-red-50 px-3 py-1.5 rounded-xl transition-colors text-xs font-bold border border-red-100"
@@ -301,8 +642,8 @@ const NotificationManager = () => {
                   </td>
                 </tr>
               ))}
-              {notifs.length === 0 && (
-                <tr><td colSpan="5" className="p-8 text-center text-slate-400 italic">Chưa có thông báo nào.</td></tr>
+              {pagedNotifs.length === 0 && (
+                <tr><td colSpan="5" className="p-8 text-center text-slate-400 italic">Không tìm thấy thông báo nào phù hợp.</td></tr>
               )}
             </tbody>
           </table>
@@ -310,40 +651,94 @@ const NotificationManager = () => {
 
         {/* MOBILE CARDS */}
         <div className="md:hidden space-y-3">
-          {notifs.map(n => (
+          {pagedNotifs.map(n => (
             <div key={n.id} className="p-4 border border-slate-200 rounded-xl bg-white shadow-sm flex flex-col gap-3">
               <div className="flex justify-between items-start">
                 <div className="flex items-center gap-2">
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase ${
-                    n.type === 'link' ? 'bg-[#E8F4EC] text-green-700 border-green-200' : 'bg-[#E8F4EC] text-green-700 border-green-200'
-                  }`}>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded border uppercase bg-[#E8F4EC] text-green-700 border-green-200">
                     {n.type === 'link' ? 'Link' : n.label || 'Tin tức'}
                   </span>
                   <span className="text-[10px] text-slate-400">{new Date(n.date).toLocaleDateString('vi-VN')}</span>
                 </div>
                 {renderTargets(n)}
               </div>
-              <div>
+              <div onClick={() => setViewTarget(n)}>
                 <h4 className="font-bold text-slate-800 text-sm mb-1">{n.title}</h4>
-                <p className="text-xs text-slate-500 line-clamp-2">{n.type === 'link' ? n.linkUrl : n.content}</p>
+                <p className="text-xs text-slate-500 line-clamp-2">{n.type === 'link' ? n.linkUrl : stripHtml(n.content)}</p>
               </div>
               <div className="flex justify-between items-center pt-3 border-t border-slate-100">
                 <span className="text-xs text-slate-400 italic">Bởi: {n.author || 'Admin'}</span>
-                <button
-                  onClick={() => handleDelete(n.id)}
-                  className="bg-red-50 text-red-600 px-4 py-2 rounded-xl text-xs font-bold border border-red-100 active:bg-red-100"
-                >
-                  Xóa
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setViewTarget(n)}
+                    className="bg-[#E8F4EC] text-[#2B6830] px-4 py-2 rounded-xl text-xs font-bold border border-green-100 active:bg-green-100"
+                  >
+                    Xem
+                  </button>
+                  <button
+                    onClick={() => setEditTarget({ ...n })}
+                    className="bg-amber-50 text-amber-700 px-4 py-2 rounded-xl text-xs font-bold border border-amber-200 active:bg-amber-100"
+                  >
+                    Sửa
+                  </button>
+                  <button
+                    onClick={() => handleDelete(n.id)}
+                    className="bg-red-50 text-red-600 px-4 py-2 rounded-xl text-xs font-bold border border-red-100 active:bg-red-100"
+                  >
+                    Xóa
+                  </button>
+                </div>
               </div>
             </div>
           ))}
-          {notifs.length === 0 && (
+          {pagedNotifs.length === 0 && (
             <div className="p-8 text-center text-slate-400 italic bg-slate-50 rounded-xl border border-dashed border-slate-200">
-              Chưa có thông báo nào.
+              Không tìm thấy thông báo nào phù hợp.
             </div>
           )}
         </div>
+
+        {/* ===== PHÂN TRANG ===== */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between mt-5 flex-wrap gap-3">
+            <span className="text-xs text-slate-400">
+              Hiển thị {(safePage - 1) * PAGE_SIZE + 1}–{Math.min(safePage * PAGE_SIZE, filteredNotifs.length)} / {filteredNotifs.length} thông báo
+            </span>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => setPage(1)}
+                disabled={safePage === 1}
+                className="px-3 py-2 rounded-xl text-xs font-bold border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                «
+              </button>
+              <button
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={safePage === 1}
+                className="px-3 py-2 rounded-xl text-xs font-bold border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                ‹ Trước
+              </button>
+              <span className="px-4 py-2 rounded-xl text-xs font-bold bg-[#2B6830] text-white">
+                {safePage} / {totalPages}
+              </span>
+              <button
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={safePage === totalPages}
+                className="px-3 py-2 rounded-xl text-xs font-bold border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                Sau ›
+              </button>
+              <button
+                onClick={() => setPage(totalPages)}
+                disabled={safePage === totalPages}
+                className="px-3 py-2 rounded-xl text-xs font-bold border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                »
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -68,7 +68,7 @@ const ChangePasswordModal = ({ staff, onConfirm, onCancel }) => {
 // MAIN COMPONENT
 // ============================================================
 const StaffManager = () => {
-  const [formData, setFormData] = useState({ name: '', username: '', password: 'BAVNbavn', subRole: 'teacher', assignedClasses: [] });
+  const [formData, setFormData] = useState({ name: '', username: '', password: 'BAVNbavn', subRole: 'teacher', assignedClasses: [], ffAccess: false, ffPlusAccess: false, bodAccess: false });
   const [staffList, setStaffList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [availableClasses, setAvailableClasses] = useState([]);
@@ -116,7 +116,37 @@ const StaffManager = () => {
         createdAt: new Date().toISOString()
       });
       showSuccess(`Đã tạo nhân sự "${formData.name}" · ID: ${formData.username}`);
-      setFormData({ name: '', username: '', password: 'BAVNbavn', subRole: 'teacher', assignedClasses: [] });
+      setFormData({ name: '', username: '', password: 'BAVNbavn', subRole: 'teacher', assignedClasses: [], ffAccess: false, ffPlusAccess: false, bodAccess: false });
+    } catch (error) { showSuccess('❌ Lỗi: ' + error.message); }
+  };
+
+  // Bật / tắt quyền FF (Fresh Fit) trên thẻ nhân sự
+  const toggleFF = async (staff) => {
+    try {
+      await update(ref(db, `users/${staff.id}`), { ffAccess: !staff.ffAccess });
+      showSuccess(!staff.ffAccess
+        ? `Đã gán quyền FF cho "${staff.name}" — truy cập được menu Fresh Fit.`
+        : `Đã gỡ quyền FF của "${staff.name}".`);
+    } catch (error) { showSuccess('❌ Lỗi: ' + error.message); }
+  };
+
+  // Bật / tắt quyền FF+ — cho phép NẠP Credits + cho học viên & nhân sự (nạp tiền mặt)
+  const toggleFFPlus = async (staff) => {
+    try {
+      await update(ref(db, `users/${staff.id}`), { ffPlusAccess: !staff.ffPlusAccess });
+      showSuccess(!staff.ffPlusAccess
+        ? `Đã gán quyền FF+ cho "${staff.name}" — được nạp Credits + cho học viên.`
+        : `Đã gỡ quyền FF+ của "${staff.name}".`);
+    } catch (error) { showSuccess('❌ Lỗi: ' + error.message); }
+  };
+
+  // Bật / tắt quyền BOD — grant BAVN Credits cho nhân sự, quản lý 2 hệ quà, duyệt đơn đổi quà
+  const toggleBOD = async (staff) => {
+    try {
+      await update(ref(db, `users/${staff.id}`), { bodAccess: !staff.bodAccess });
+      showSuccess(!staff.bodAccess
+        ? `Đã gán quyền BOD cho "${staff.name}" — truy cập được BAVN Center.`
+        : `Đã gỡ quyền BOD của "${staff.name}".`);
     } catch (error) { showSuccess('❌ Lỗi: ' + error.message); }
   };
 
@@ -143,7 +173,10 @@ const StaffManager = () => {
     : ids.map(id => availableClasses.find(c => c.id === id)?.name || id).join(", ");
 
   const filteredStaffList = staffList.filter(staff => {
-    if (filterRole !== 'all' && staff.subRole !== filterRole) return false;
+    if (filterRole === 'ff') { if (!staff.ffAccess) return false; }
+    else if (filterRole === 'ffplus') { if (!staff.ffPlusAccess) return false; }
+    else if (filterRole === 'bod') { if (!staff.bodAccess) return false; }
+    else if (filterRole !== 'all' && staff.subRole !== filterRole) return false;
     if (filterClass !== 'all') {
       const assigned = staff.assignedClasses || [];
       if (!assigned.includes(filterClass)) return false;
@@ -194,11 +227,28 @@ const StaffManager = () => {
             <input className="border border-slate-200 p-3 rounded-xl w-1/2 text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition" placeholder="ID Đăng nhập" value={formData.username} onChange={e => setFormData({...formData, username: e.target.value})} />
             <input className="border border-slate-200 p-3 rounded-xl w-1/2 text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition font-mono" placeholder="Mật khẩu" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} />
           </div>
-          <select className="border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 bg-white transition" value={formData.subRole} onChange={e => setFormData({...formData, subRole: e.target.value})}>
-            <option value="teacher">Giáo viên</option>
-            <option value="cco">CCO</option>
-            <option value="cca">CCA</option>
-          </select>
+          <div className="flex gap-2 items-stretch">
+            <select className="flex-1 border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 bg-white transition" value={formData.subRole} onChange={e => setFormData({...formData, subRole: e.target.value})}>
+              <option value="teacher">Giáo viên</option>
+              <option value="cco">CCO</option>
+              <option value="cca">CCA</option>
+            </select>
+            {/* Quyền FF: truy cập menu Fresh Fit + duyệt đổi credits */}
+            <label className={`flex items-center gap-2 px-3 rounded-xl border text-sm font-bold cursor-pointer transition-colors ${formData.ffAccess ? 'bg-[#E8F4EC] border-green-300 text-[#2B6830]' : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100'}`}>
+              <input type="checkbox" className="accent-[#2B6830] w-4 h-4" checked={formData.ffAccess} onChange={e => setFormData({ ...formData, ffAccess: e.target.checked })} />
+              🌿 FF
+            </label>
+            {/* Quyền FF+: nạp Credits + cho học viên & nhân sự (nạp tiền mặt) */}
+            <label className={`flex items-center gap-2 px-3 rounded-xl border text-sm font-bold cursor-pointer transition-colors ${formData.ffPlusAccess ? 'bg-sky-50 border-sky-300 text-sky-700' : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100'}`}>
+              <input type="checkbox" className="accent-sky-600 w-4 h-4" checked={formData.ffPlusAccess} onChange={e => setFormData({ ...formData, ffPlusAccess: e.target.checked })} />
+              💳 FF+
+            </label>
+            {/* Quyền BOD: grant Credits + quản lý hệ quà + duyệt đơn quà */}
+            <label className={`flex items-center gap-2 px-3 rounded-xl border text-sm font-bold cursor-pointer transition-colors ${formData.bodAccess ? 'bg-purple-50 border-purple-300 text-purple-700' : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100'}`}>
+              <input type="checkbox" className="accent-purple-600 w-4 h-4" checked={formData.bodAccess} onChange={e => setFormData({ ...formData, bodAccess: e.target.checked })} />
+              👑 BOD
+            </label>
+          </div>
           <div className="bg-slate-50 p-4 rounded-xl h-32 overflow-y-auto border border-slate-200">
             <p className="text-xs font-bold text-slate-500 uppercase mb-2">Gán lớp:</p>
             {availableClasses.map(c => (
@@ -248,6 +298,9 @@ const StaffManager = () => {
               <option value="teacher">Giáo viên</option>
               <option value="cco">CCO</option>
               <option value="cca">CCA</option>
+              <option value="ff">🌿 Có quyền FF</option>
+              <option value="ffplus">💳 Có quyền FF+</option>
+              <option value="bod">👑 Có quyền BOD</option>
             </select>
             <select className="p-2.5 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 bg-slate-50 md:min-w-[150px]" value={filterClass} onChange={(e) => setFilterClass(e.target.value)}>
               <option value="all">Tất cả lớp</option>
@@ -275,7 +328,14 @@ const StaffManager = () => {
                   <td className="p-4 text-center text-slate-400 font-bold">{index + 1}</td>
                   <td className="p-4 font-bold text-[#2B6830]">{s.loginId || (s.email || '').split('@')[0]}</td>
                   <td className="p-4 font-medium text-gray-800">{s.name}</td>
-                  <td className="p-4 uppercase text-[10px] font-bold text-slate-400">{s.subRole}</td>
+                  <td className="p-4">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="uppercase text-[10px] font-bold text-slate-400">{s.subRole}</span>
+                      {s.ffAccess && <span className="text-[9px] font-bold bg-[#E8F4EC] text-[#2B6830] px-1.5 py-0.5 rounded border border-green-200 uppercase">🌿 FF</span>}
+                      {s.ffPlusAccess && <span className="text-[9px] font-bold bg-sky-50 text-sky-700 px-1.5 py-0.5 rounded border border-sky-200 uppercase">💳 FF+</span>}
+                      {s.bodAccess && <span className="text-[9px] font-bold bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded border border-purple-200 uppercase">👑 BOD</span>}
+                    </div>
+                  </td>
                   <td className="p-4">
                     <div className="flex items-center gap-2">
                       <span className="truncate max-w-[150px] text-xs text-slate-600">{getClassNames(s.assignedClasses)}</span>
@@ -284,6 +344,27 @@ const StaffManager = () => {
                   </td>
                   <td className="p-4 text-right">
                     <div className="flex justify-end gap-2">
+                      <button
+                        onClick={() => toggleFF(s)}
+                        title={s.ffAccess ? 'Gỡ quyền Fresh Fit' : 'Gán quyền Fresh Fit (duyệt đổi credits)'}
+                        className={`px-2 py-1 rounded-xl text-[10px] font-bold border transition-colors ${s.ffAccess ? 'text-white bg-[#2B6830] border-[#2B6830] hover:bg-[#1E5225]' : 'text-[#2B6830] border-green-300 hover:bg-[#E8F4EC]'}`}
+                      >
+                        FF {s.ffAccess ? 'ON' : 'OFF'}
+                      </button>
+                      <button
+                        onClick={() => toggleFFPlus(s)}
+                        title={s.ffPlusAccess ? 'Gỡ quyền FF+ (nạp Credits +)' : 'Gán quyền FF+ — nạp Credits + cho học viên & nhân sự'}
+                        className={`px-2 py-1 rounded-xl text-[10px] font-bold border transition-colors ${s.ffPlusAccess ? 'text-white bg-sky-600 border-sky-600 hover:bg-sky-700' : 'text-sky-600 border-sky-300 hover:bg-sky-50'}`}
+                      >
+                        FF+ {s.ffPlusAccess ? 'ON' : 'OFF'}
+                      </button>
+                      <button
+                        onClick={() => toggleBOD(s)}
+                        title={s.bodAccess ? 'Gỡ quyền BOD' : 'Gán quyền BOD — grant Credits, quản lý hệ quà, duyệt đơn quà'}
+                        className={`px-2 py-1 rounded-xl text-[10px] font-bold border transition-colors ${s.bodAccess ? 'text-white bg-purple-600 border-purple-600 hover:bg-purple-700' : 'text-purple-600 border-purple-300 hover:bg-purple-50'}`}
+                      >
+                        BOD {s.bodAccess ? 'ON' : 'OFF'}
+                      </button>
                       <button onClick={() => setChangePassTarget(s)} className="text-amber-600 border border-amber-300 px-2 py-1 rounded-xl text-[10px] font-bold hover:bg-amber-50 transition-colors">Pass</button>
                       <button onClick={() => setDeleteTarget(s.id)} className="text-red-500 border border-red-200 px-2 py-1 rounded-xl text-[10px] font-bold hover:bg-red-50 transition-colors">Xóa</button>
                     </div>
@@ -314,7 +395,12 @@ const StaffManager = () => {
                     <p className="text-xs text-slate-500">@{s.loginId || (s.email || '').split('@')[0]}</p>
                   </div>
                 </div>
-                <span className="uppercase text-[10px] font-bold bg-slate-100 text-slate-500 px-2 py-1 rounded">{s.subRole}</span>
+                <div className="flex flex-col items-end gap-1">
+                  <span className="uppercase text-[10px] font-bold bg-slate-100 text-slate-500 px-2 py-1 rounded">{s.subRole}</span>
+                  {s.ffAccess && <span className="text-[9px] font-bold bg-[#E8F4EC] text-[#2B6830] px-1.5 py-0.5 rounded border border-green-200 uppercase">🌿 FF</span>}
+                  {s.ffPlusAccess && <span className="text-[9px] font-bold bg-sky-50 text-sky-700 px-1.5 py-0.5 rounded border border-sky-200 uppercase">💳 FF+</span>}
+                  {s.bodAccess && <span className="text-[9px] font-bold bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded border border-purple-200 uppercase">👑 BOD</span>}
+                </div>
               </div>
               <div className="text-xs bg-slate-50 p-2 rounded-xl border border-slate-100">
                 <span className="font-bold text-slate-500 block mb-1 uppercase">Lớp phụ trách:</span>
@@ -323,8 +409,17 @@ const StaffManager = () => {
                   <button onClick={() => setEditingStaff(s)} className="text-[#2B6830] border border-[#2B6830] text-[10px] font-bold px-2 py-0.5 rounded-xl hover:bg-[#2B6830] hover:text-white transition-all whitespace-nowrap">Sửa</button>
                 </div>
               </div>
-              <div className="flex gap-2 border-t border-slate-100 pt-3">
-                <button onClick={() => setChangePassTarget(s)} className="flex-1 text-center py-2 text-amber-700 bg-amber-50 rounded-xl text-xs font-bold border border-amber-200 active:bg-amber-100">Đổi Pass</button>
+              <div className="flex gap-2 border-t border-slate-100 pt-3 flex-wrap">
+                <button onClick={() => toggleFF(s)} className={`flex-1 text-center py-2 rounded-xl text-xs font-bold border transition-colors ${s.ffAccess ? 'text-white bg-[#2B6830] border-[#2B6830]' : 'text-[#2B6830] bg-[#E8F4EC] border-green-200 active:bg-green-100'}`}>
+                  FF {s.ffAccess ? 'ON' : 'OFF'}
+                </button>
+                <button onClick={() => toggleFFPlus(s)} className={`flex-1 text-center py-2 rounded-xl text-xs font-bold border transition-colors ${s.ffPlusAccess ? 'text-white bg-sky-600 border-sky-600' : 'text-sky-600 bg-sky-50 border-sky-200 active:bg-sky-100'}`}>
+                  FF+ {s.ffPlusAccess ? 'ON' : 'OFF'}
+                </button>
+                <button onClick={() => toggleBOD(s)} className={`flex-1 text-center py-2 rounded-xl text-xs font-bold border transition-colors ${s.bodAccess ? 'text-white bg-purple-600 border-purple-600' : 'text-purple-600 bg-purple-50 border-purple-200 active:bg-purple-100'}`}>
+                  BOD {s.bodAccess ? 'ON' : 'OFF'}
+                </button>
+                <button onClick={() => setChangePassTarget(s)} className="flex-1 text-center py-2 text-amber-700 bg-amber-50 rounded-xl text-xs font-bold border border-amber-200 active:bg-amber-100">Pass</button>
                 <button onClick={() => setDeleteTarget(s.id)} className="flex-1 text-center py-2 text-red-600 bg-red-50 rounded-xl text-xs font-bold border border-red-200 active:bg-red-100">Xóa</button>
               </div>
             </div>

@@ -1,16 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { db } from '../../firebase';
 import { ref, onValue } from "firebase/database";
 import { useAuth } from '../../context/AuthContext';
+import { getReserveStatus, RESERVE_LABEL, RESERVE_BADGE, RESERVE_CARD } from '../../utils/reserve';
+
+// Chuẩn hoá chuỗi tiếng Việt: bỏ dấu, đổi đ->d, về chữ thường -> tìm không phân biệt dấu/hoa thường
+const viNorm = (s) => (s || '')
+  .toString()
+  .normalize('NFD')
+  .replace(/[̀-ͯ]/g, '')
+  .replace(/đ/g, 'd').replace(/Đ/g, 'D')
+  .toLowerCase()
+  .trim();
 
 const ClassList = () => {
   const { userData } = useAuth();
   const [students, setStudents] = useState([]);
   const [classes, setClasses] = useState([]);
   const [attendance, setAttendance] = useState({}); // dữ liệu điểm danh để tính chuyên cần
-  const [viewMode, setViewMode] = useState('class');
-  const [filterValue, setFilterValue] = useState('');
-  const [nameSearch, setNameSearch] = useState('');
+  const [classFilter, setClassFilter] = useState('');     // lọc theo lớp (dropdown)
+  const [programFilter, setProgramFilter] = useState(''); // lọc theo môn học (dropdown)
+  const [nameSearch, setNameSearch] = useState('');       // tìm theo tên / mã học viên
 
   useEffect(() => {
     const myClassIds = userData?.assignedClasses || [];
@@ -26,11 +36,13 @@ const ClassList = () => {
     onValue(ref(db, 'users'), (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        const list = Object.values(data).filter(u => {
-          if (u.role !== 'student') return false;
-          const studentClasses = u.classIds || (u.classId ? [u.classId] : []);
-          return studentClasses.some(id => myClassIds.includes(id));
-        });
+        const list = Object.entries(data)
+          .map(([id, val]) => ({ id, ...val })) // giữ id để tính chuyên cần & dùng làm key
+          .filter(u => {
+            if (u.role !== 'student') return false;
+            const studentClasses = u.classIds || (u.classId ? [u.classId] : []);
+            return studentClasses.some(id => myClassIds.includes(id));
+          });
         setStudents(list);
       }
     });
@@ -61,23 +73,47 @@ const ClassList = () => {
     return Math.round((present / total) * 100);
   };
 
-  const getClassInfo = (student, type) => {
-    if (!student.classIds || !Array.isArray(student.classIds)) return [];
-    return student.classIds.map(id => {
-      const foundClass = classes.find(c => c.id === id);
-      if (!foundClass) return null;
-      return type === 'name' ? foundClass.name : `${foundClass.schedule} (${foundClass.startTime}-${foundClass.endTime})`;
-    }).filter(Boolean);
-  };
+  // Map lớp theo id để tra O(1) (thay cho classes.find lặp lại mỗi lần render)
+  const classMap = useMemo(() => {
+    const m = new Map();
+    classes.forEach(c => m.set(c.id, c));
+    return m;
+  }, [classes]);
 
-  const filteredStudents = students.filter(st => {
-    const classNames = getClassInfo(st, 'name').join(' ').toLowerCase();
-    const schedules = getClassInfo(st, 'time').join(' ').toLowerCase();
-    const search = filterValue.toLowerCase();
-    const passFilter = viewMode === 'time' ? schedules.includes(search) : classNames.includes(search);
-    const passName = !nameSearch || st.name.toLowerCase().includes(nameSearch.toLowerCase()) || (st.studentCode || '').toLowerCase().includes(nameSearch.toLowerCase());
-    return passFilter && passName;
-  });
+  const getStudentClassIds = (student) =>
+    Array.isArray(student.classIds) ? student.classIds : (student.classId ? [student.classId] : []);
+
+  // Tên các lớp của học viên (A-Z) để hiển thị badge
+  const getStudentClassNames = (student) =>
+    getStudentClassIds(student)
+      .map(id => classMap.get(id)?.name)
+      .filter(Boolean)
+      .sort((a, b) => a.localeCompare(b, 'vi'));
+
+  // Môn học của 1 học viên (subject các lớp GV phụ trách)
+  const getStudentPrograms = (student) =>
+    [...new Set(getStudentClassIds(student).map(id => classMap.get(id)?.subject).filter(Boolean))];
+
+  // Dropdown lớp (A-Z) và dropdown môn học (A-Z)
+  const classOptions = useMemo(
+    () => [...classes].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'vi')),
+    [classes]
+  );
+  const programOptions = useMemo(
+    () => [...new Set(classes.map(c => c.subject).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'vi')),
+    [classes]
+  );
+
+  // Lọc + sắp xếp học viên — chỉ tính lại khi dữ liệu/bộ lọc đổi
+  const filteredStudents = useMemo(() => {
+    const nameQuery = viNorm(nameSearch); // tìm tên không dấu/hoa thường
+    return students.filter(st => {
+      const passClass = !classFilter || getStudentClassIds(st).includes(classFilter);
+      const passName = !nameQuery || viNorm(st.name).includes(nameQuery) || viNorm(st.studentCode).includes(nameQuery);
+      const passProgram = !programFilter || getStudentPrograms(st).includes(programFilter);
+      return passClass && passName && passProgram;
+    }).sort((a, b) => (a.name || '').localeCompare(b.name || '', 'vi'));
+  }, [students, classMap, classFilter, programFilter, nameSearch]);
 
   // Đếm học viên có chuyên cần thấp (< 70%)
   const lowAttCount = filteredStudents.filter(st => {
@@ -104,12 +140,17 @@ const ClassList = () => {
         </div>
 
         <div className="flex flex-wrap gap-2 w-full md:w-auto">
-          <select className="border border-slate-200 p-2 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 bg-slate-50 font-medium text-[#2B6830]" value={viewMode} onChange={(e) => setViewMode(e.target.value)}>
-            <option value="class">Xem theo Lớp</option>
-            <option value="time">Xem theo Thời gian</option>
+          {/* Lọc theo lớp (chỉ các lớp GV phụ trách) */}
+          <select className="border border-slate-200 p-2 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 bg-slate-50 font-medium text-[#2B6830] w-36" value={classFilter} onChange={(e) => setClassFilter(e.target.value)}>
+            <option value="">Tất cả lớp</option>
+            {classOptions.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
-          <input className="border border-slate-200 p-2 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 flex-1 min-w-[120px]" placeholder={viewMode === 'class' ? "Lọc lớp..." : "Lọc giờ..."} value={filterValue} onChange={(e) => setFilterValue(e.target.value)} />
-          <div className="relative flex-1 min-w-[160px]">
+          {/* Lọc theo môn học (subject admin set cho lớp) */}
+          <select className="border border-slate-200 p-2 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 bg-slate-50 font-medium text-[#2B6830] w-36" value={programFilter} onChange={(e) => setProgramFilter(e.target.value)}>
+            <option value="">Tất cả môn học</option>
+            {programOptions.map(p => <option key={p} value={p}>{p}</option>)}
+          </select>
+          <div className="relative flex-1 min-w-[180px]">
             <input
               className="w-full border border-slate-200 pl-7 pr-3 py-2 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10"
               placeholder="Tìm tên học viên..."
@@ -135,25 +176,27 @@ const ClassList = () => {
         )}
 
         {filteredStudents.map((st, idx) => {
-          const infoList = getClassInfo(st, viewMode === 'class' ? 'name' : 'time');
+          const infoList = getStudentClassNames(st);
           const attRate = getAttendanceRate(st);
           const isLowAtt = attRate !== null && attRate < 70;
+          const rsv = getReserveStatus(st); // 'active' | 'ending' | null
 
           return (
             <div
-              key={idx}
-              className={`flex justify-between items-center p-4 border rounded-xl hover:shadow-md transition-all bg-white group ${isLowAtt ? 'border-red-200 bg-red-50/30' : 'border-slate-100 hover:border-green-100'}`}
+              key={st.id || idx}
+              className={`flex justify-between items-center p-4 border rounded-xl hover:shadow-md transition-all bg-white group ${rsv ? RESERVE_CARD : isLowAtt ? 'border-red-200 bg-red-50/30' : 'border-slate-100 hover:border-green-100'}`}
             >
               <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${isLowAtt ? 'bg-red-100 text-red-600' : 'bg-slate-50 text-[#2B6830]'}`}>
-                  {st.name.charAt(0)}
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${rsv ? 'bg-yellow-100 text-yellow-700' : isLowAtt ? 'bg-red-100 text-red-600' : 'bg-slate-50 text-[#2B6830]'}`}>
+                  {(st.name || '?').charAt(0)}
                 </div>
                 <div>
-                  <div className="font-bold text-gray-800 flex items-center gap-2">
-                    {st.name}
+                  <div className="font-bold text-gray-800 flex items-center gap-2 flex-wrap">
+                    {st.name || '(chưa có tên)'}
                     {isLowAtt && (
                       <span className="text-[10px] font-bold text-red-600 bg-red-100 px-1.5 py-0.5 rounded border border-red-200">⚠️ Vắng nhiều</span>
                     )}
+                    {(() => { const rs = getReserveStatus(st); return rs ? <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${RESERVE_BADGE[rs]}`}>{RESERVE_LABEL[rs]}</span> : null; })()}
                   </div>
                   <div className="text-xs text-slate-500 font-mono">{st.studentCode}</div>
                 </div>

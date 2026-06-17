@@ -2,6 +2,86 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../../firebase';
 import { ref, onValue, update } from "firebase/database";
 import { useAuth } from '../../context/AuthContext';
+import { getReserveStatus, RESERVE_LABEL, RESERVE_BADGE } from '../../utils/reserve';
+
+// Quy ước chữ hiển thị trong báo cáo theo trạng thái điểm danh
+const STATUS_LETTER = { present: 'C', late: 'T', excused: 'P', absent: 'V' };
+const STATUS_CELL = {
+  present: 'bg-slate-100 text-slate-700',   // C - xám
+  late: 'bg-amber-50 text-amber-600',       // T - vàng/hổ phách
+  excused: 'bg-blue-50 text-blue-600',      // P - xanh dương
+  absent: 'bg-red-50 text-red-600',         // V - đỏ
+};
+
+// Bộ chọn tháng tùy biến (đẹp & đúng brand) thay cho input[type=month] mặc định của trình duyệt
+const MONTH_LABELS = ['Th 1', 'Th 2', 'Th 3', 'Th 4', 'Th 5', 'Th 6', 'Th 7', 'Th 8', 'Th 9', 'Th 10', 'Th 11', 'Th 12'];
+const MonthPicker = ({ value, onChange }) => {
+  const [open, setOpen] = useState(false);
+  const selYear = Number((value || '').slice(0, 4)) || new Date().getFullYear();
+  const selMonth = Number((value || '').slice(5, 7)); // 1-12
+  const [year, setYear] = useState(selYear);
+
+  const pick = (m) => { onChange(`${year}-${String(m).padStart(2, '0')}`); setOpen(false); };
+  const goThisMonth = () => {
+    const now = new Date();
+    setYear(now.getFullYear());
+    onChange(now.toISOString().slice(0, 7));
+    setOpen(false);
+  };
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => { setYear(selYear); setOpen(o => !o); }}
+        className="flex items-center gap-2 w-full border border-slate-200 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 bg-slate-50 hover:border-[#2B6830] focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 outline-none transition-colors"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="#2B6830" className="w-4 h-4 shrink-0"><path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
+        <span className="flex-1 text-left">{selMonth ? `Tháng ${selMonth}, ${selYear}` : 'Chọn tháng'}</span>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="#94a3b8" className={`w-4 h-4 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+      </button>
+
+      {open && (
+        <>
+          <div className="fixed inset-0 z-20" onClick={() => setOpen(false)} />
+          <div className="absolute left-0 top-full mt-2 w-72 bg-white rounded-2xl shadow-xl border border-slate-100 p-3 z-30 animate-fade-in-up">
+            {/* Điều hướng năm */}
+            <div className="flex items-center justify-between mb-3">
+              <button type="button" onClick={() => setYear(y => y - 1)} className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:bg-[#E8F4EC] hover:text-[#2B6830] transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+              </button>
+              <span className="font-bold text-[#2B6830]">{year}</span>
+              <button type="button" onClick={() => setYear(y => y + 1)} className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:bg-[#E8F4EC] hover:text-[#2B6830] transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+              </button>
+            </div>
+            {/* Lưới tháng */}
+            <div className="grid grid-cols-3 gap-1.5">
+              {MONTH_LABELS.map((m, i) => {
+                const mn = i + 1;
+                const active = year === selYear && mn === selMonth;
+                return (
+                  <button
+                    key={mn}
+                    type="button"
+                    onClick={() => pick(mn)}
+                    className={`py-2.5 rounded-xl text-sm font-semibold transition-colors ${active ? 'bg-[#2B6830] text-white shadow-sm' : 'text-slate-600 hover:bg-[#E8F4EC] hover:text-[#2B6830]'}`}
+                  >
+                    {m}
+                  </button>
+                );
+              })}
+            </div>
+            {/* Phím tắt */}
+            <div className="flex justify-end mt-3 pt-3 border-t border-slate-100">
+              <button type="button" onClick={goThisMonth} className="text-xs font-bold text-[#2B6830] hover:underline">Tháng này</button>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
 
 const Attendance = () => {
     const { currentUser } = useAuth();
@@ -13,8 +93,8 @@ const Attendance = () => {
     const [status, setStatus] = useState({});
     const [notes, setNotes] = useState({});
     const [allAttendance, setAllAttendance] = useState({});
-    const [startDate, setStartDate] = useState('');
-    const [endDate, setEndDate] = useState('');
+    // Báo cáo theo tháng (YYYY-MM), mặc định tháng hiện tại — cột ngày tự đổi khi qua tháng mới
+    const [reportMonth, setReportMonth] = useState(() => new Date().toISOString().slice(0, 7));
     const [savedAt, setSavedAt] = useState(null); // indicator trạng thái đã lưu
     const [saveError, setSaveError] = useState('');
 
@@ -29,6 +109,8 @@ const Attendance = () => {
                 const allClasses = Object.entries(data).map(([id, val]) => ({ id, ...val }));
                 const myClassIds = currentUser?.assignedClasses || [];
                 const myClasses = currentUser.role === 'admin' ? allClasses : allClasses.filter(c => myClassIds.includes(c.id));
+                // Sắp xếp tên lớp theo bảng chữ cái (có dấu tiếng Việt)
+                myClasses.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'vi'));
                 setClasses(myClasses);
             }
         });
@@ -46,7 +128,12 @@ const Attendance = () => {
         onValue(ref(db, 'users'), (snap) => {
             const data = snap.val();
             if (data) {
-                setStudents(Object.entries(data).map(([id, val]) => ({ id, ...val })).filter(u => u.role === 'student' && u.classIds && u.classIds.includes(selectedClass)));
+                setStudents(
+                    Object.entries(data).map(([id, val]) => ({ id, ...val }))
+                        .filter(u => u.role === 'student' && u.classIds && u.classIds.includes(selectedClass))
+                        // Sắp xếp tên học viên theo bảng chữ cái (có dấu tiếng Việt)
+                        .sort((a, b) => (a.name || '').localeCompare(b.name || '', 'vi'))
+                );
             }
         });
     }, [selectedClass]);
@@ -120,35 +207,39 @@ const Attendance = () => {
         const classData = allAttendance[selectedClass] || {};
         const className = classes.find(c => c.id === selectedClass)?.name || selectedClass;
 
-        // Header CSV
-        const rows = [['Họ tên', 'Mã HV', 'Có mặt', 'Đi muộn', 'Có phép', 'Vắng', 'Tổng buổi', '% Chuyên cần']];
+        // Các buổi học trong tháng đang xem (cột ngày)
+        const dates = Object.keys(classData).filter(d => d.startsWith(reportMonth)).sort();
+
+        // Header CSV: ...các cột ngày + tổng kết
+        const rows = [[
+            'Họ tên', 'Mã HV',
+            ...dates.map(d => `${d.slice(8, 10)}/${d.slice(5, 7)}`),
+            'Có mặt', 'Đi trễ', 'Có phép', 'Vắng', 'Tổng buổi', '% Chuyên cần'
+        ]];
 
         students.forEach(st => {
             let p = 0, l = 0, a = 0, ex = 0;
-            Object.entries(classData).forEach(([d, dData]) => {
-                if (startDate && d < startDate) return;
-                if (endDate && d > endDate) return;
-                const rec = dData[st.id];
-                if (!rec) return;
-                const s = typeof rec === 'object' ? rec.status : rec;
+            const cells = dates.map(d => {
+                const rec = classData[d]?.[st.id];
+                const s = rec ? (typeof rec === 'object' ? rec.status : rec) : null;
                 if (s === 'present') p++;
                 else if (s === 'late') l++;
                 else if (s === 'excused') ex++;
-                else a++;
+                else if (s === 'absent') a++;
+                return s ? (STATUS_LETTER[s] || '') : '';
             });
             const total = p + l + a + ex;
             const rate = total > 0 ? Math.round(((p + l) / total) * 100) : 0;
-            rows.push([st.name, st.studentCode || '', p, l, ex, a, total, `${rate}%`]);
+            rows.push([st.name, st.studentCode || '', ...cells, p, l, ex, a, total, `${rate}%`]);
         });
 
         const csvContent = rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n');
         const blob = new Blob(['﻿' + csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        const dateRange = startDate && endDate ? `_${startDate}_den_${endDate}` : '';
-        a.href = url;
-        a.download = `DIEMDANH_${className.replace(/\s/g,'_')}${dateRange}.csv`;
-        a.click();
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `DIEMDANH_${className.replace(/\s/g, '_')}_${reportMonth}.csv`;
+        link.click();
         URL.revokeObjectURL(url);
     };
 
@@ -158,16 +249,20 @@ const Attendance = () => {
         let p = 0, l = 0, a = 0, e = 0;
         const classData = allAttendance[selectedClass] || {};
         Object.keys(classData).forEach(d => {
-            if ((!startDate || d >= startDate) && (!endDate || d <= endDate)) {
-                const stat = classData[d][stId]?.status;
-                if (stat === 'present') p++;
-                if (stat === 'late') l++;
-                if (stat === 'absent') a++;
-                if (stat === 'excused') e++;
-            }
+            if (!d.startsWith(reportMonth)) return; // chỉ tính trong tháng đang xem
+            const stat = classData[d][stId]?.status;
+            if (stat === 'present') p++;
+            if (stat === 'late') l++;
+            if (stat === 'absent') a++;
+            if (stat === 'excused') e++;
         });
         return { present: p, late: l, absent: a, excused: e };
     };
+
+    // Các buổi học (ngày) của lớp trong tháng đang xem -> cột báo cáo, tự đổi khi qua tháng mới
+    const sessionDates = Object.keys(allAttendance[selectedClass] || {})
+        .filter(d => d.startsWith(reportMonth))
+        .sort();
 
     // SVGs mỏng và tinh tế (Minimal Outline)
     const IconPresent = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>;
@@ -218,16 +313,17 @@ const Attendance = () => {
                                                     {index + 1}. {st.name}
                                                 </button>
                                                 <div className="text-xs text-slate-400 font-mono mt-0.5">{st.studentCode}</div>
+                                                {(() => { const rs = getReserveStatus(st); return rs ? <span className={`inline-block mt-1 text-[10px] font-bold px-1.5 py-0.5 rounded border ${RESERVE_BADGE[rs]}`}>{RESERVE_LABEL[rs]}</span> : null; })()}
                                             </div>
                                             <span className={`text-[10px] font-bold px-2 py-1 rounded border uppercase ${
-                                                status[st.id] === 'present' ? 'bg-green-50 text-green-700 border-green-200' :
-                                                status[st.id] === 'late'    ? 'bg-orange-50 text-orange-700 border-orange-200' :
-                                                status[st.id] === 'excused' ? 'bg-[#E8F4EC] text-green-700 border-green-200' :
-                                                status[st.id] === 'absent'  ? 'bg-red-50 text-red-700 border-red-200' :
+                                                status[st.id] === 'present' ? 'bg-slate-100 text-slate-700 border-slate-300' :
+                                                status[st.id] === 'late'    ? 'bg-amber-50 text-amber-600 border-amber-200' :
+                                                status[st.id] === 'excused' ? 'bg-blue-50 text-blue-600 border-blue-200' :
+                                                status[st.id] === 'absent'  ? 'bg-red-50 text-red-600 border-red-200' :
                                                 'bg-slate-50 text-slate-400 border-slate-200'
                                             }`}>
                                                 {status[st.id] === 'present' ? 'Có mặt' :
-                                                 status[st.id] === 'late'    ? 'Đi muộn' :
+                                                 status[st.id] === 'late'    ? 'Đi trễ' :
                                                  status[st.id] === 'excused' ? 'Có phép' :
                                                  status[st.id] === 'absent'  ? 'Vắng' : 'Chưa ĐD'}
                                             </span>
@@ -236,9 +332,9 @@ const Attendance = () => {
                                         {/* Nút điểm danh — to hơn để dễ bấm trên mobile */}
                                         <div className="grid grid-cols-4 gap-2">
                                             {[
-                                                { val: 'present', label: '✓ Có mặt', active: 'bg-green-500 text-white border-green-500', hover: 'border-green-300 text-green-600' },
-                                                { val: 'late',    label: '⏰ Muộn',   active: 'bg-orange-500 text-white border-orange-500', hover: 'border-orange-300 text-orange-600' },
-                                                { val: 'excused', label: '📋 Phép',   active: 'bg-green-500 text-white border-green-500',   hover: 'border-green-300 text-green-600' },
+                                                { val: 'present', label: '✓ Có mặt', active: 'bg-slate-500 text-white border-slate-500', hover: 'border-slate-300 text-slate-600' },
+                                                { val: 'late',    label: '⏰ Trễ',    active: 'bg-amber-500 text-white border-amber-500', hover: 'border-amber-300 text-amber-600' },
+                                                { val: 'excused', label: '📋 Phép',   active: 'bg-blue-500 text-white border-blue-500',   hover: 'border-blue-300 text-blue-600' },
                                                 { val: 'absent',  label: '✗ Vắng',   active: 'bg-red-500 text-white border-red-500',     hover: 'border-red-300 text-red-600' },
                                             ].map(btn => (
                                                 <button
@@ -294,23 +390,23 @@ const Attendance = () => {
                                                         {st.name}
                                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3.5 h-3.5 text-slate-400 hidden md:block opacity-0 group-hover:opacity-100 transition-opacity"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                                     </button>
-                                                    <div className="text-[11px] text-slate-400 font-mono mt-0.5">{st.studentCode}</div>
+                                                    <div className="text-[11px] text-slate-400 font-mono mt-0.5 flex items-center gap-2">{st.studentCode}{(() => { const rs = getReserveStatus(st); return rs ? <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${RESERVE_BADGE[rs]}`}>{RESERVE_LABEL[rs]}</span> : null; })()}</div>
                                                 </td>
                                                 <td className="p-4 text-center">
-                                                    <span className={`px-2.5 py-1 rounded-md text-[10px] font-medium uppercase tracking-wider border ${status[st.id] === 'present' ? 'bg-green-50 text-green-700 border-green-200' :
-                                                            status[st.id] === 'late' ? 'bg-orange-50 text-orange-700 border-orange-200' :
-                                                                status[st.id] === 'excused' ? 'bg-[#E8F4EC] text-green-700 border-green-200' :
-                                                                    status[st.id] === 'absent' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-slate-50 text-slate-400 border-slate-200'
+                                                    <span className={`px-2.5 py-1 rounded-md text-[10px] font-medium uppercase tracking-wider border ${status[st.id] === 'present' ? 'bg-slate-100 text-slate-700 border-slate-300' :
+                                                            status[st.id] === 'late' ? 'bg-amber-50 text-amber-600 border-amber-200' :
+                                                                status[st.id] === 'excused' ? 'bg-blue-50 text-blue-600 border-blue-200' :
+                                                                    status[st.id] === 'absent' ? 'bg-red-50 text-red-600 border-red-200' : 'bg-slate-50 text-slate-400 border-slate-200'
                                                         }`}>
-                                                        {status[st.id] === 'present' ? 'Có mặt' : status[st.id] === 'late' ? 'Đi muộn' : status[st.id] === 'excused' ? 'Có phép' : status[st.id] === 'absent' ? 'Vắng' : 'Chưa ĐD'}
+                                                        {status[st.id] === 'present' ? 'Có mặt' : status[st.id] === 'late' ? 'Đi trễ' : status[st.id] === 'excused' ? 'Có phép' : status[st.id] === 'absent' ? 'Vắng' : 'Chưa ĐD'}
                                                     </span>
                                                 </td>
                                                 <td className="p-4 text-center">
                                                     {/* Nút bấm thiết kế nét outline tối giản */}
                                                     <div className="flex justify-center gap-2">
-                                                        <button title="Có mặt" onClick={() => handleMark(st.id, 'present')} className={`w-8 h-8 rounded-full flex items-center justify-center transition-all border ${status[st.id] === 'present' ? 'bg-green-500 border-green-500 text-white shadow-sm' : 'bg-white border-slate-200 text-slate-400 hover:border-green-400 hover:text-green-500'}`}><IconPresent /></button>
-                                                        <button title="Đi muộn" onClick={() => handleMark(st.id, 'late')} className={`w-8 h-8 rounded-full flex items-center justify-center transition-all border ${status[st.id] === 'late' ? 'bg-orange-500 border-orange-500 text-white shadow-sm' : 'bg-white border-slate-200 text-slate-400 hover:border-orange-400 hover:text-orange-500'}`}><IconLate /></button>
-                                                        <button title="Có phép" onClick={() => handleMark(st.id, 'excused')} className={`w-8 h-8 rounded-full flex items-center justify-center transition-all border ${status[st.id] === 'excused' ? 'bg-green-500 border-green-500 text-white shadow-sm' : 'bg-white border-slate-200 text-slate-400 hover:border-green-400 hover:text-green-500'}`}><IconExcused /></button>
+                                                        <button title="Có mặt" onClick={() => handleMark(st.id, 'present')} className={`w-8 h-8 rounded-full flex items-center justify-center transition-all border ${status[st.id] === 'present' ? 'bg-slate-500 border-slate-500 text-white shadow-sm' : 'bg-white border-slate-200 text-slate-400 hover:border-slate-400 hover:text-slate-600'}`}><IconPresent /></button>
+                                                        <button title="Đi trễ" onClick={() => handleMark(st.id, 'late')} className={`w-8 h-8 rounded-full flex items-center justify-center transition-all border ${status[st.id] === 'late' ? 'bg-amber-500 border-amber-500 text-white shadow-sm' : 'bg-white border-slate-200 text-slate-400 hover:border-amber-400 hover:text-amber-500'}`}><IconLate /></button>
+                                                        <button title="Có phép" onClick={() => handleMark(st.id, 'excused')} className={`w-8 h-8 rounded-full flex items-center justify-center transition-all border ${status[st.id] === 'excused' ? 'bg-blue-500 border-blue-500 text-white shadow-sm' : 'bg-white border-slate-200 text-slate-400 hover:border-blue-400 hover:text-blue-500'}`}><IconExcused /></button>
                                                         <button title="Vắng" onClick={() => handleMark(st.id, 'absent')} className={`w-8 h-8 rounded-full flex items-center justify-center transition-all border ${status[st.id] === 'absent' ? 'bg-red-500 border-red-500 text-white shadow-sm' : 'bg-white border-slate-200 text-slate-400 hover:border-red-400 hover:text-red-500'}`}><IconAbsent /></button>
                                                     </div>
                                                 </td>
@@ -366,9 +462,11 @@ const Attendance = () => {
                         </div>
                     ) : (
                         <div className="p-5">
-                            <div className="flex flex-wrap gap-4 mb-6 items-end">
-                                <div className="flex-1 min-w-[140px]"><label className="text-[10px] font-semibold text-slate-400 uppercase mb-1.5 block tracking-wide">Từ ngày</label><input type="date" className="w-full border border-slate-200 p-2.5 rounded-xl text-sm text-slate-700 bg-slate-50 outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition-colors" value={startDate} onChange={e => setStartDate(e.target.value)} /></div>
-                                <div className="flex-1 min-w-[140px]"><label className="text-[10px] font-semibold text-slate-400 uppercase mb-1.5 block tracking-wide">Đến ngày</label><input type="date" className="w-full border border-slate-200 p-2.5 rounded-xl text-sm text-slate-700 bg-slate-50 outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition-colors" value={endDate} onChange={e => setEndDate(e.target.value)} /></div>
+                            <div className="flex flex-wrap gap-4 mb-4 items-end">
+                                <div className="min-w-[180px]">
+                                    <label className="text-[10px] font-semibold text-slate-400 uppercase mb-1.5 block tracking-wide">Tháng</label>
+                                    <MonthPicker value={reportMonth} onChange={setReportMonth} />
+                                </div>
                                 <button
                                     onClick={handleExportCSV}
                                     className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white text-xs font-bold rounded-xl hover:bg-emerald-700 transition-colors shadow-sm"
@@ -379,28 +477,58 @@ const Attendance = () => {
                                     Xuất CSV
                                 </button>
                             </div>
+
+                            {/* Chú thích ký hiệu */}
+                            <div className="flex flex-wrap gap-x-4 gap-y-1 mb-4 text-[11px] text-slate-500">
+                                <span><b className="text-slate-700">C</b> Có mặt</span>
+                                <span><b className="text-amber-600">T</b> Đi trễ</span>
+                                <span><b className="text-blue-600">P</b> Có phép</span>
+                                <span><b className="text-red-600">V</b> Vắng</span>
+                            </div>
                             <div className="overflow-x-auto rounded-xl border border-slate-100 bg-white">
-                                <table className="w-full text-sm text-left">
+                                <table className="w-full text-sm text-left border-collapse">
                                     <thead className="bg-slate-50/50 text-slate-400 font-semibold text-[10px] uppercase border-b border-slate-100">
                                         <tr>
-                                            <th className="p-4">Học viên</th>
-                                            <th className="p-4 text-center"><div className="flex flex-col items-center gap-1"><IconPresent /> <span>Có mặt</span></div></th>
-                                            <th className="p-4 text-center"><div className="flex flex-col items-center gap-1"><IconLate /> <span>Đi muộn</span></div></th>
-                                            <th className="p-4 text-center"><div className="flex flex-col items-center gap-1"><IconExcused /> <span>Có phép</span></div></th>
-                                            <th className="p-4 text-center"><div className="flex flex-col items-center gap-1"><IconAbsent /> <span>Vắng</span></div></th>
+                                            <th className="p-3 sticky left-0 bg-slate-50 z-10 min-w-[150px]">Học viên</th>
+                                            {sessionDates.map(d => (
+                                                <th key={d} className="p-2 text-center whitespace-nowrap font-semibold">{d.slice(8, 10)}/{d.slice(5, 7)}</th>
+                                            ))}
+                                            <th className="p-2 text-center text-slate-600">C</th>
+                                            <th className="p-2 text-center text-amber-600">T</th>
+                                            <th className="p-2 text-center text-blue-600">P</th>
+                                            <th className="p-2 text-center text-red-600">V</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-50">
-                                        {filteredStudents.map(st => {
+                                        {sessionDates.length === 0 && (
+                                            <tr><td colSpan={5} className="p-8 text-center text-slate-400 italic">Tháng này chưa có buổi điểm danh nào.</td></tr>
+                                        )}
+                                        {sessionDates.length > 0 && filteredStudents.map(st => {
                                             const s = getSummary(st.id);
-                                            return <tr key={st.id} className="hover:bg-slate-50/50 transition-colors">
-                                                <td className="p-4 font-medium text-slate-800">{st.name}</td>
-                                                <td className="p-4 text-center font-medium text-slate-600">{s.present}</td>
-                                                <td className="p-4 text-center font-medium text-slate-600">{s.late}</td>
-                                                <td className="p-4 text-center font-medium text-slate-600">{s.excused}</td>
-                                                <td className="p-4 text-center font-medium text-slate-600">{s.absent}</td>
-                                            </tr>
+                                            return (
+                                                <tr key={st.id} className="hover:bg-slate-50/50 transition-colors">
+                                                    <td className="p-3 font-medium text-slate-800 sticky left-0 bg-white z-10 whitespace-nowrap">{st.name}</td>
+                                                    {sessionDates.map(d => {
+                                                        const rec = (allAttendance[selectedClass]?.[d] || {})[st.id];
+                                                        const stt = rec ? (typeof rec === 'object' ? rec.status : rec) : null;
+                                                        return (
+                                                            <td key={d} className="p-2 text-center">
+                                                                {stt
+                                                                    ? <span className={`inline-flex items-center justify-center w-6 h-6 rounded-md text-[11px] font-bold ${STATUS_CELL[stt] || ''}`}>{STATUS_LETTER[stt] || ''}</span>
+                                                                    : <span className="text-slate-300">·</span>}
+                                                            </td>
+                                                        );
+                                                    })}
+                                                    <td className="p-2 text-center font-bold text-slate-600">{s.present}</td>
+                                                    <td className="p-2 text-center font-bold text-amber-600">{s.late}</td>
+                                                    <td className="p-2 text-center font-bold text-blue-600">{s.excused}</td>
+                                                    <td className="p-2 text-center font-bold text-red-600">{s.absent}</td>
+                                                </tr>
+                                            );
                                         })}
+                                        {sessionDates.length > 0 && filteredStudents.length === 0 && (
+                                            <tr><td colSpan={sessionDates.length + 5} className="p-8 text-center text-slate-400 italic">Lớp chưa có học viên.</td></tr>
+                                        )}
                                     </tbody>
                                 </table>
                             </div>
@@ -415,7 +543,7 @@ const Attendance = () => {
                     <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[80vh] border border-slate-100">
                         <div className="p-5 border-b border-slate-100 flex justify-between items-center">
                             <div>
-                                <h3 className="text-lg font-bold text-[#2B6830]">Lịch sử Vắng / Muộn</h3>
+                                <h3 className="text-lg font-bold text-[#2B6830]">Lịch sử Vắng / Trễ</h3>
                                 <p className="text-xs text-slate-500 mt-1">Học viên: <span className="font-medium text-slate-800">{historyStudent.name}</span></p>
                             </div>
                             <button onClick={() => setHistoryStudent(null)} className="p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 rounded-full transition-colors">
@@ -437,7 +565,7 @@ const Attendance = () => {
                                 if (history.length === 0) return (
                                     <div className="text-center py-10">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className="w-12 h-12 text-emerald-500 mx-auto mb-3"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" /></svg>
-                                        <p className="text-slate-500 text-sm">Học viên đi học chuyên cần, chưa vắng hoặc muộn.</p>
+                                        <p className="text-slate-500 text-sm">Học viên đi học chuyên cần, chưa vắng hoặc trễ.</p>
                                     </div>
                                 );
 
@@ -446,7 +574,7 @@ const Attendance = () => {
                                         {history.map((h, i) => (
                                             <li key={i} className="flex gap-4">
                                                 <div className="flex flex-col items-center pt-1">
-                                                    <div className={`w-2.5 h-2.5 rounded-full ring-4 ${h.status === 'absent' ? 'bg-red-500 ring-red-50' : h.status === 'late' ? 'bg-orange-500 ring-orange-50' : 'bg-green-500 ring-[#E8F4EC]'}`} />
+                                                    <div className={`w-2.5 h-2.5 rounded-full ring-4 ${h.status === 'absent' ? 'bg-red-500 ring-red-50' : h.status === 'late' ? 'bg-amber-500 ring-amber-50' : 'bg-blue-500 ring-blue-50'}`} />
                                                     {i !== history.length - 1 && <div className="w-[1px] h-full bg-slate-100 mt-2" />}
                                                 </div>
                                                 <div className="flex-1 pb-4">
@@ -456,10 +584,10 @@ const Attendance = () => {
                                                         </p>
                                                         <span className={`px-2.5 py-1 rounded-md text-[10px] font-medium uppercase tracking-wider border ${
                                                             h.status === 'absent' ? 'text-red-600 bg-red-50 border-red-100' :
-                                                            h.status === 'late' ? 'text-orange-600 bg-orange-50 border-orange-100' :
-                                                            'text-green-600 bg-[#E8F4EC] border-green-100'
+                                                            h.status === 'late' ? 'text-amber-600 bg-amber-50 border-amber-100' :
+                                                            'text-blue-600 bg-blue-50 border-blue-100'
                                                         }`}>
-                                                            {h.status === 'absent' ? 'Vắng' : h.status === 'late' ? 'Đi muộn' : 'Có phép'}
+                                                            {h.status === 'absent' ? 'Vắng' : h.status === 'late' ? 'Đi trễ' : 'Có phép'}
                                                         </span>
                                                     </div>
                                                     {h.note ? (

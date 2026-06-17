@@ -22,3 +22,27 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# --- BẢO MẬT: KHÔNG đẩy khóa/credential lên GitHub ---
+serviceAccountKey.json
+*serviceAccountKey*.json
+admin.json
+.env
+.env.*
+
+# --- File backup/tạm của dev, không cần lên repo ---
+_backup-*/
+**/_backup-*/
+backup-*.json
+_parsecheck.js
+_pc*.js
+
+# --- Cache deploy & file đóng gói, không cần lên repo ---
+.firebase/
+repomix-output.xml
+
+# --- File rác 0-byte do lỡ redirect lệnh (chỉ ở thư mục gốc) ---
+/firebase
+/npm
+/vite
+/beablevn-st-app@0.0.0

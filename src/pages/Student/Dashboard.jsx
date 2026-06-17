@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { db } from '../../firebase';
 import { ref, onValue } from 'firebase/database';
@@ -36,6 +37,7 @@ const StudentDashboard = () => {
   // --- Quick stats ---
   const [attendanceStats, setAttendanceStats] = useState({ rate: null, total: 0 });
   const [latestScore, setLatestScore] = useState(null); // điểm mới nhất
+  const [totalBonus, setTotalBonus] = useState(0);      // tổng điểm Bonus mọi lớp → quy ra BAVN Credits
 
   const studentClassIds = currentUser?.classIds
     ? (Array.isArray(currentUser.classIds) ? currentUser.classIds : Object.values(currentUser.classIds))
@@ -77,17 +79,17 @@ const StudentDashboard = () => {
       checkDone();
     });
 
-    // 3. Điểm số → lấy entry mới nhất
+    // 3. Điểm số → lấy entry mới nhất + tổng Bonus
+    // Cấu trúc thật: scores/{classId}/{studentId}/{type}/{recordId}
     const unsubScores = onValue(ref(db, 'scores'), (snap) => {
       const data = snap.val() || {};
       let newest = null;
+      let bonusSum = 0;
       studentClassIds.forEach(classId => {
-        const classScores = data[classId] || {};
-        // classScores = { scoreType: { studentId: { recordId: { date, score, content } } } }
-        Object.entries(classScores).forEach(([type, byStudent]) => {
-          const myRecords = byStudent[currentUser.id];
-          if (!myRecords) return;
-          Object.values(myRecords).forEach(rec => {
+        const myTypes = data[classId]?.[currentUser.id] || {};
+        Object.entries(myTypes).forEach(([type, records]) => {
+          Object.values(records || {}).forEach(rec => {
+            if (type === 'bonus') bonusSum += Number(rec?.score) || 0;
             if (!rec?.date) return;
             if (!newest || new Date(rec.date) > new Date(newest.date)) {
               newest = { ...rec, type, classId };
@@ -96,6 +98,7 @@ const StudentDashboard = () => {
         });
       });
       setLatestScore(newest);
+      setTotalBonus(bonusSum);
       loaded.scores = true;
       checkDone();
     });
@@ -112,6 +115,7 @@ const StudentDashboard = () => {
   };
 
   const typeLabel = { bonus: 'Điểm Bonus', assignment: 'Assignment', formative: 'Formative', summative: 'Summative' };
+  const totalCredits = Math.floor(totalBonus / 2); // 2 Bonus = 1 Credit
 
   return (
     <div className="space-y-6 animate-fade-in-up pb-6">
@@ -127,7 +131,7 @@ const StudentDashboard = () => {
           {/* QUICK STATS row */}
           {loading ? (
             <div className="flex gap-3">
-              {[1,2,3].map(i => <div key={i} className="h-16 w-28 bg-white/10 rounded-xl animate-pulse" />)}
+              {[1,2,3,4].map(i => <div key={i} className="h-16 w-28 bg-white/10 rounded-xl animate-pulse" />)}
             </div>
           ) : (
             <div className="flex flex-wrap gap-3">
@@ -146,11 +150,32 @@ const StudentDashboard = () => {
                 value={attendanceStats.total || '—'}
                 color="bg-white/15 text-white"
               />
+              <Link to="/student/credits" className="block">
+                <StatChip
+                  label="BAVN Credits ⭐"
+                  value={totalCredits}
+                  color="bg-white/25 text-white ring-1 ring-white/40 hover:bg-white/30 transition-colors cursor-pointer"
+                />
+              </Link>
             </div>
           )}
         </div>
         <div className="absolute right-0 top-0 w-40 h-40 bg-white/10 rounded-full -mr-16 -mt-16 blur-3xl" />
       </div>
+
+      {/* ===== BANNER BAVN CREDITS ===== */}
+      {!loading && (
+        <Link to="/student/credits" className="block bg-white rounded-2xl border border-green-100 shadow-sm p-4 flex items-center gap-4 hover:border-[#2B6830]/40 hover:shadow-md transition-all group">
+          <div className="w-12 h-12 rounded-xl bg-[#E8F4EC] flex items-center justify-center shrink-0 text-2xl">🌿</div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Ví BAVN Credits</p>
+            <p className="font-bold text-slate-800 text-sm">
+              Bạn có <span className="text-[#2B6830]">{totalBonus} điểm Bonus</span> = <span className="text-[#2B6830]">{totalCredits} credits</span> — đổi đồ uống, đồ ăn Fresh Fit và quà tặng
+            </p>
+          </div>
+          <span className="shrink-0 text-xs font-bold text-[#2B6830] bg-[#E8F4EC] px-3.5 py-2 rounded-xl border border-green-100 group-hover:bg-green-100 transition-colors">Đổi quà →</span>
+        </Link>
+      )}
 
       {/* ===== CẢNH BÁO CHUYÊN CẦN ===== */}
       {!loading && attendanceStats.rate !== null && attendanceStats.rate < 70 && (

@@ -1,0 +1,13 @@
+{
+  "name": "beablevn-edu-functions",
+  "description": "Cloud Functions gửi push notification cho app 2SOL EDU",
+  "main": "index.js",
+  "engines": {
+    "node": "20"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.1.0",
+    "firebase-functions": "^5.1.0"
+  },
+  "private": true
+}

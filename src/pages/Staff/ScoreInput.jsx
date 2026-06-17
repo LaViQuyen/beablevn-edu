@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../../firebase';
 import { ref, onValue, push, set, update, remove } from "firebase/database";
 import { useAuth } from '../../context/AuthContext';
+import { getReserveStatus, RESERVE_LABEL, RESERVE_BADGE } from '../../utils/reserve';
 
 const ScoreInput = () => {
     const { currentUser } = useAuth();
@@ -53,6 +54,8 @@ const ScoreInput = () => {
                 const list = Object.entries(data).map(([id, val]) => ({ id, ...val }));
                 const assigned = currentUser.assignedClasses || [];
                 const filteredList = currentUser.role === 'admin' ? list : list.filter(c => assigned.includes(c.id));
+                // Sắp xếp tên lớp theo bảng chữ cái (có dấu tiếng Việt)
+                filteredList.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'vi'));
                 setClasses(filteredList);
             }
         });
@@ -73,6 +76,8 @@ const ScoreInput = () => {
                 const list = Object.entries(data)
                     .map(([id, val]) => ({ id, ...val }))
                     .filter(u => u.role === 'student' && u.classIds && u.classIds.includes(selectedClass));
+                // Sắp xếp tên học viên theo bảng chữ cái (có dấu tiếng Việt)
+                list.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'vi'));
                 setStudents(list);
                 if (list.length > 0 && !selectedStudentForView) setSelectedStudentForView(list[0].id);
             }
@@ -504,8 +509,8 @@ const ScoreInput = () => {
                                                         {st.name}
                                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3.5 h-3.5 text-green-400 hidden md:block"><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>
                                                     </button>
-                                                    <div className="text-xs text-slate-400 font-mono mt-0.5">{st.studentCode}</div>
-                                                    
+                                                    <div className="text-xs text-slate-400 font-mono mt-0.5 flex items-center gap-2 flex-wrap">{st.studentCode}{(() => { const rs = getReserveStatus(st); return rs ? <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${RESERVE_BADGE[rs]}`}>{RESERVE_LABEL[rs]}</span> : null; })()}</div>
+
                                                     {/* --- GIAO DIỆN 4 CỘT ĐIỂM DÀNH RIÊNG CHO MOBILE --- */}
                                                     <div className="grid grid-cols-4 gap-1.5 mt-2.5 md:hidden">
                                                         <div className="bg-yellow-50 text-yellow-700 text-[10px] font-bold text-center py-1 rounded border border-yellow-100" title="Bonus">B: {summary.bonus}</div>

@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { db } from '../../firebase';
-import { ref, update, get, onValue } from 'firebase/database';
+import { ref, update, get, onValue, push, set } from 'firebase/database';
 import bcrypt from 'bcryptjs'; // Import mã hóa
+import { StaffNotifyEngine } from '../NotificationEngine'; // thông báo + chuông cho FF/FF+/BOD
 
 const Icons = {
   Class: ({ active }) => (
@@ -41,6 +42,21 @@ const Icons = {
       <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 13.5h3.86a2.25 2.25 0 012.012 1.244l.256.512a2.25 2.25 0 002.013 1.244h3.218a2.25 2.25 0 002.013-1.244l.256-.512a2.25 2.25 0 012.013-1.244h3.859m-19.5.338V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 00-2.15-1.588H6.911a2.25 2.25 0 00-2.15 1.588L2.35 13.177a2.25 2.25 0 00-.1.661z" />
     </svg>
   ),
+  Credits: ({ active }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke={active ? "#2B6830" : "#64748b"} className="w-5 h-5">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+    </svg>
+  ),
+  Bavn: ({ active }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke={active ? "#7c3aed" : "#64748b"} className="w-5 h-5">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+    </svg>
+  ),
+  FreshFit: ({ active }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke={active ? "#2B6830" : "#64748b"} className="w-5 h-5">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 8.25v-1.5m0 1.5c-1.355 0-2.697.056-4.024.166C6.845 8.51 6 9.473 6 10.608v2.513m6-4.87c1.355 0 2.697.055 4.024.165C17.155 8.51 18 9.473 18 10.608v2.513m-3-4.87v-1.5m-6 1.5v-1.5m12 9.75l-1.5.75a3.354 3.354 0 01-3 0 3.354 3.354 0 00-3 0 3.354 3.354 0 01-3 0 3.354 3.354 0 00-3 0 3.354 3.354 0 01-3 0L3 16.5m15-3.38a48.474 48.474 0 00-6-.37c-2.032 0-4.034.125-6 .37m12 0c.39.049.777.102 1.163.16 1.07.16 1.837 1.094 1.837 2.175v5.17c0 .62-.504 1.124-1.125 1.124H4.125A1.125 1.125 0 013 20.625v-5.17c0-1.08.768-2.014 1.837-2.174A47.78 47.78 0 016 13.12" />
+    </svg>
+  ),
 };
 
 const StaffLayout = () => {
@@ -54,17 +70,104 @@ const StaffLayout = () => {
   const [passError, setPassError] = useState('');
   const [passSuccess, setPassSuccess] = useState('');
   const [inboxUnread, setInboxUnread] = useState(0); // badge hộp thư
+  const [ffAccess, setFfAccess] = useState(false);   // cờ quyền Fresh Fit (realtime)
+  const [ffPending, setFfPending] = useState(0);     // badge số yêu cầu đổi MÓN chờ duyệt (FF)
+  const [bodAccess, setBodAccess] = useState(false); // cờ quyền BOD (realtime)
+  const [giftPending, setGiftPending] = useState(0); // badge số đơn QUÀ chờ duyệt (BOD)
 
-  // Lắng nghe số thông báo chưa đọc trong hộp thư
+  // Badge Hộp thư = số phản ánh CHƯA xử lý (theo lớp phụ trách) + tin nhắn chưa đọc
   useEffect(() => {
     if (!currentUser?.id) return;
-    const unsubSN = onValue(ref(db, 'staffNotifications'), (snap) => {
+    const isAdmin = currentUser.role === 'admin';
+    const myClassIds = currentUser.assignedClasses || [];
+    let fbCount = 0, msgCount = 0;
+    const recompute = () => setInboxUnread(fbCount + msgCount);
+
+    const unsubFb = onValue(ref(db, 'feedback'), (snap) => {
       const data = snap.val() || {};
-      const count = Object.values(data).filter(n => n.toUserId === currentUser.id && !n.isRead).length;
-      setInboxUnread(count);
+      fbCount = Object.values(data).filter(fb => {
+        if (fb.status === 'resolved') return false; // đã xử lý thì không tính
+        if (isAdmin) return true;
+        const cls = Array.isArray(fb.classIds) ? fb.classIds : Object.values(fb.classIds || {});
+        return cls.some(c => myClassIds.includes(c));
+      }).length;
+      recompute();
     });
-    return () => unsubSN();
+    const unsubMsg = onValue(ref(db, 'messages'), (snap) => {
+      const data = snap.val() || {};
+      msgCount = Object.values(data)
+        .filter(m => isAdmin || m.recipientId === currentUser.id)
+        .reduce((s, m) => s + (m.staffUnread || 0), 0);
+      recompute();
+    });
+    return () => { unsubFb(); unsubMsg(); };
   }, [currentUser?.id]);
+
+  // Nhắc trước 1 tuần khi sắp hết bảo lưu (client-side, chạy khi mở app, có cờ chống gửi trùng)
+  useEffect(() => {
+    if (!currentUser?.id) return;
+    (async () => {
+      try {
+        const [uSnap, cSnap] = await Promise.all([get(ref(db, 'users')), get(ref(db, 'classes'))]);
+        const users = uSnap.val() || {};
+        const classes = cSnap.val() || {};
+        const now = Date.now();
+        const nowIso = new Date().toISOString();
+        const staffAll = Object.entries(users).map(([id, u]) => ({ id, ...u }));
+        for (const [sid, stu] of Object.entries(users)) {
+          if (!stu || stu.role !== 'student') continue;
+          const r = stu.reserve;
+          if (!r || !r.start || !r.end || r.weekReminderSent) continue;
+          const startT = new Date(r.start + 'T00:00:00').getTime();
+          const endT = new Date(r.end + 'T23:59:59').getTime();
+          const wb = new Date(r.end + 'T00:00:00'); wb.setDate(wb.getDate() - 7);
+          if (now >= startT && now <= endT && now >= wb.getTime()) {
+            // Đặt cờ TRƯỚC để chống gửi trùng nếu nhiều người mở app cùng lúc
+            await update(ref(db, `users/${sid}/reserve`), { weekReminderSent: true });
+            const sClasses = stu.classIds || [];
+            const classNameStr = sClasses.map(c => classes[c]?.name || c).join(', ');
+            const content = `Học viên ${stu.name}, học lớp ${classNameStr}, thời gian bảo lưu còn một tuần`;
+            const recipients = staffAll.filter(u => u.role === 'staff' && (u.assignedClasses || []).some(c => sClasses.includes(c)));
+            await Promise.all(recipients.map(staff => set(push(ref(db, 'messages')), {
+              studentId: sid, studentName: 'Admin', studentCode: '',
+              recipientId: staff.id, recipientName: staff.name, recipientRole: staff.subRole || 'staff',
+              subject: 'THÔNG TIN BẢO LƯU', lastDate: nowIso, lastMessage: content,
+              studentUnread: 0, staffUnread: 1, system: true,
+              thread: [{ from: 'student', fromName: 'Admin', content, date: nowIso }],
+            })));
+          }
+        }
+      } catch (e) { console.error('Reserve reminder error:', e); }
+    })();
+  }, [currentUser?.id]);
+
+  // Theo dõi cờ FF realtime — admin gán/gỡ là menu hiện/ẩn ngay
+  useEffect(() => {
+    if (!currentUser?.id) return;
+    if (currentUser.role === 'admin') { setFfAccess(true); return; }
+    const unsubFF = onValue(ref(db, `users/${currentUser.id}/ffAccess`), (snap) => setFfAccess(!!snap.val()));
+    return () => unsubFF();
+  }, [currentUser?.id, currentUser?.role]);
+
+  // Theo dõi cờ BOD realtime
+  useEffect(() => {
+    if (!currentUser?.id) return;
+    if (currentUser.role === 'admin') { setBodAccess(true); return; }
+    const unsubB = onValue(ref(db, `users/${currentUser.id}/bodAccess`), (snap) => setBodAccess(!!snap.val()));
+    return () => unsubB();
+  }, [currentUser?.id, currentUser?.role]);
+
+  // Badge yêu cầu chờ duyệt: FF đếm đơn MÓN, BOD đếm đơn QUÀ
+  useEffect(() => {
+    if (!ffAccess && !bodAccess) { setFfPending(0); setGiftPending(0); return; }
+    const unsubR = onValue(ref(db, 'redemptions'), (snap) => {
+      const data = snap.val() || {};
+      const all = Object.values(data).filter(r => r.status === 'pending');
+      setFfPending(all.filter(r => (r.channel || 'ff') !== 'gift').length);
+      setGiftPending(all.filter(r => r.channel === 'gift').length);
+    });
+    return () => unsubR();
+  }, [ffAccess, bodAccess]);
 
   const isActive = (path) => location.pathname.includes(path);
   const mobileLinkClass = (path) => `flex flex-col items-center justify-center w-full h-full space-y-1 ${isActive(path) ? 'text-[#2B6830]' : 'text-slate-400 hover:text-slate-600'}`;
@@ -106,6 +209,8 @@ const StaffLayout = () => {
 
   return (
     <div className="flex h-screen bg-slate-50 font-sans">
+      {/* Engine thông báo trình duyệt + âm thanh — đơn mới cho FF/BOD, trạng thái đơn của mình */}
+      <StaffNotifyEngine currentUser={currentUser} ffAccess={ffAccess} bodAccess={bodAccess} />
       {/* SIDEBAR (Desktop) */}
       <aside className="hidden md:flex flex-col w-64 bg-white border-r border-slate-200 h-full fixed left-0 top-0 z-50">
         <div className="p-6 border-b border-slate-100 flex items-center gap-3">
@@ -118,7 +223,7 @@ const StaffLayout = () => {
 
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           <p className="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 mt-2">Giảng dạy</p>
-          
+
           <Link to="/staff/classes" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('classes') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
             <Icons.Class active={isActive('classes')} /> Lớp học của tôi
           </Link>
@@ -140,6 +245,43 @@ const StaffLayout = () => {
               </span>
             )}
           </Link>
+
+          {/* Ví BAVN Credits — mọi nhân sự đều có */}
+          <p className="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 mt-4">Ưu đãi</p>
+          <Link to="/staff/credits" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('credits') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
+            <Icons.Credits active={isActive('credits')} />
+            <span className="flex-1">BAVN Credits</span>
+            <span className="text-[9px] font-bold bg-[#E8F4EC] text-[#2B6830] px-1.5 py-0.5 rounded border border-green-100 uppercase">Mới</span>
+          </Link>
+
+          {/* BAVN Center — chỉ hiện với cờ BOD (hoặc admin) */}
+          {bodAccess && (
+            <Link to="/staff/bavn" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('bavn') ? 'bg-purple-50 text-purple-700' : 'text-slate-600 hover:bg-slate-50'}`}>
+              <Icons.Bavn active={isActive('bavn')} />
+              <span className="flex-1">BAVN Center</span>
+              {giftPending > 0 && (
+                <span className="w-5 h-5 bg-purple-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shrink-0">
+                  {giftPending > 9 ? '9+' : giftPending}
+                </span>
+              )}
+            </Link>
+          )}
+
+          {/* Khu Fresh Fit — chỉ hiện với nhân sự được gán cờ FF (hoặc admin) */}
+          {ffAccess && (
+            <>
+              <p className="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 mt-4">Fresh Fit</p>
+              <Link to="/staff/freshfit" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('freshfit') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
+                <Icons.FreshFit active={isActive('freshfit')} />
+                <span className="flex-1">Menu & Đổi credits</span>
+                {ffPending > 0 && (
+                  <span className="w-5 h-5 bg-amber-400 text-amber-900 text-[10px] font-bold rounded-full flex items-center justify-center shrink-0">
+                    {ffPending > 9 ? '9+' : ffPending}
+                  </span>
+                )}
+              </Link>
+            </>
+          )}
         </nav>
 
         <div className="p-4 border-t border-slate-100 space-y-1">
@@ -182,6 +324,13 @@ const StaffLayout = () => {
         <Link to="/staff/scores" className={mobileLinkClass('scores')}><Icons.Scores active={isActive('scores')} /><span className="text-[10px] font-medium">Điểm</span></Link>
         <Link to="/staff/notifications" className={mobileLinkClass('notifications')}><Icons.Noti active={isActive('notifications')} /><span className="text-[10px] font-medium">TBáo</span></Link>
         <Link to="/staff/inbox" className={mobileLinkClass('inbox')}><Icons.Inbox active={isActive('inbox')} /><span className="text-[10px] font-medium">Hộp thư</span></Link>
+        <Link to="/staff/credits" className={mobileLinkClass('credits')}><Icons.Credits active={isActive('credits')} /><span className="text-[10px] font-medium">Credits</span></Link>
+        {ffAccess && (
+          <Link to="/staff/freshfit" className={mobileLinkClass('freshfit')}><Icons.FreshFit active={isActive('freshfit')} /><span className="text-[10px] font-medium">FreshFit</span></Link>
+        )}
+        {bodAccess && (
+          <Link to="/staff/bavn" className={mobileLinkClass('bavn')}><Icons.Bavn active={isActive('bavn')} /><span className="text-[10px] font-medium">BAVN</span></Link>
+        )}
       </nav>
 
       {/* MODAL ĐỔI MẬT KHẨU */}

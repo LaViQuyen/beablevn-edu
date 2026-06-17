@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { db } from '../../firebase';
-import { ref, update, get } from 'firebase/database';
+import { ref, update, get, onValue } from 'firebase/database';
 import bcrypt from 'bcryptjs';
+import { StudentNotifyEngine } from '../NotificationEngine'; // thông báo + chuông: báo bài, nhắc lịch học, trạng thái đổi quà
 
 const Icons = {
   Dashboard: ({ active }) => (
@@ -24,6 +25,11 @@ const Icons = {
   Noti: ({ active }) => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke={active ? "#2B6830" : "#64748b"} className="w-5 h-5">
       <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+    </svg>
+  ),
+  Credits: ({ active }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke={active ? "#2B6830" : "#64748b"} className="w-5 h-5">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
     </svg>
   ),
   Logout: () => (
@@ -58,6 +64,20 @@ const StudentLayout = () => {
   const [loadingPass, setLoadingPass] = useState(false);
   const [passError, setPassError] = useState('');
   const [passSuccess, setPassSuccess] = useState('');
+  const [feedbackUnread, setFeedbackUnread] = useState(0); // số phản hồi mới của GV cho phản ánh
+
+  // Đếm số phản hồi chưa đọc của phản ánh (badge cạnh "Phản ánh")
+  useEffect(() => {
+    if (!currentUser?.id) return;
+    const unsub = onValue(ref(db, 'feedback'), (snap) => {
+      const data = snap.val() || {};
+      const count = Object.values(data)
+        .filter(fb => fb.studentId === currentUser.id)
+        .reduce((s, fb) => s + (fb.studentUnread || 0), 0);
+      setFeedbackUnread(count);
+    });
+    return () => unsub();
+  }, [currentUser?.id]);
 
   const isActive = (path) => location.pathname.includes(path);
   const mobileLinkClass = (path) => `flex flex-col items-center justify-center w-full h-full space-y-1 ${isActive(path) ? 'text-[#2B6830]' : 'text-slate-400 hover:text-slate-600'}`;
@@ -99,6 +119,8 @@ const StudentLayout = () => {
 
   return (
     <div className="flex h-screen bg-slate-50 font-sans">
+      {/* Engine thông báo trình duyệt + âm thanh */}
+      <StudentNotifyEngine currentUser={currentUser} />
       {/* SIDEBAR (Desktop) */}
       <aside className="hidden md:flex flex-col w-64 bg-white border-r border-slate-200 h-full fixed left-0 top-0 z-50">
         <div className="p-6 border-b border-slate-100 flex items-center gap-3">
@@ -111,7 +133,7 @@ const StudentLayout = () => {
 
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           <p className="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 mt-2">Học tập</p>
-          
+
           <Link to="/student/dashboard" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('dashboard') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
             <Icons.Dashboard active={isActive('dashboard')} /> Tổng quan
           </Link>
@@ -125,9 +147,22 @@ const StudentLayout = () => {
             <Icons.Noti active={isActive('notifications')} /> Thông báo
           </Link>
 
+          <p className="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 mt-4">Ưu đãi</p>
+          <Link to="/student/credits" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('credits') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
+            <Icons.Credits active={isActive('credits')} />
+            <span className="flex-1">BAVN Credits</span>
+            <span className="text-[9px] font-bold bg-[#E8F4EC] text-[#2B6830] px-1.5 py-0.5 rounded border border-green-100 uppercase">Mới</span>
+          </Link>
+
           <p className="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 mt-4">Tương tác</p>
           <Link to="/student/feedback" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('feedback') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
-            <Icons.Feedback active={isActive('feedback')} /> Phản ánh
+            <Icons.Feedback active={isActive('feedback')} />
+            <span className="flex-1">Phản ánh</span>
+            {feedbackUnread > 0 && (
+              <span className="w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shrink-0">
+                {feedbackUnread > 9 ? '9+' : feedbackUnread}
+              </span>
+            )}
           </Link>
           <Link to="/student/contact" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('contact') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
             <Icons.Contact active={isActive('contact')} /> Liên hệ GV
@@ -170,8 +205,15 @@ const StudentLayout = () => {
         <Link to="/student/dashboard" className={mobileLinkClass('dashboard')}><Icons.Dashboard active={isActive('dashboard')} /><span className="text-[10px] font-medium">Tổng quan</span></Link>
         <Link to="/student/attendance" className={mobileLinkClass('attendance')}><Icons.Attendance active={isActive('attendance')} /><span className="text-[10px] font-medium">Đ.Danh</span></Link>
         <Link to="/student/scores" className={mobileLinkClass('scores')}><Icons.Scores active={isActive('scores')} /><span className="text-[10px] font-medium">Kết quả</span></Link>
+        <Link to="/student/credits" className={mobileLinkClass('credits')}><Icons.Credits active={isActive('credits')} /><span className="text-[10px] font-medium">Credits</span></Link>
         <Link to="/student/notifications" className={mobileLinkClass('notifications')}><Icons.Noti active={isActive('notifications')} /><span className="text-[10px] font-medium">TBáo</span></Link>
-        <Link to="/student/feedback" className={mobileLinkClass('feedback')}><Icons.Feedback active={isActive('feedback')} /><span className="text-[10px] font-medium">Phản ánh</span></Link>
+        <Link to="/student/feedback" className={mobileLinkClass('feedback')}>
+          <div className="relative">
+            <Icons.Feedback active={isActive('feedback')} />
+            {feedbackUnread > 0 && <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-1 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">{feedbackUnread > 9 ? '9+' : feedbackUnread}</span>}
+          </div>
+          <span className="text-[10px] font-medium">Phản ánh</span>
+        </Link>
         <Link to="/student/contact" className={mobileLinkClass('contact')}><Icons.Contact active={isActive('contact')} /><span className="text-[10px] font-medium">Liên hệ</span></Link>
       </nav>
 

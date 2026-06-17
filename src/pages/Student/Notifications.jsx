@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../../firebase';
 import { ref, onValue } from 'firebase/database';
 import { useAuth } from '../../context/AuthContext';
+import { getReserveStatus, fmtReserveDate } from '../../utils/reserve';
 
 const Notifications = () => {
     const { currentUser } = useAuth();
@@ -43,6 +44,19 @@ const Notifications = () => {
                 if (currentUser?.lockedAt) {
                     const lockTime = new Date(currentUser.lockedAt).getTime();
                     list = list.filter(noti => new Date(noti.date).getTime() <= lockTime);
+                }
+                // --------------------------------------------------
+
+                // --- BẢO LƯU: ẩn thông báo đăng từ ngày bắt đầu bảo lưu cho tới khi hết bảo lưu ---
+                const rsv = currentUser?.reserve;
+                if (rsv?.start && rsv?.end) {
+                    const now = Date.now();
+                    const startT = new Date(rsv.start + 'T00:00:00').getTime();
+                    const endT = new Date(rsv.end + 'T23:59:59').getTime();
+                    if (now >= startT && now <= endT) {
+                        // Đang bảo lưu: chỉ thấy thông báo đăng TRƯỚC ngày bắt đầu bảo lưu
+                        list = list.filter(noti => new Date(noti.date).getTime() < startT);
+                    }
                 }
                 // --------------------------------------------------
 
@@ -92,6 +106,21 @@ const Notifications = () => {
                                 ? <>Bạn chỉ có thể xem các thông báo được đăng trước ngày <strong>{new Date(currentUser.lockedAt).toLocaleDateString('vi-VN')}</strong>.</> 
                                 : <>Bạn chỉ có thể xem các thông báo cũ.</>
                             } Vui lòng hoàn thành học phí để nhận các thông báo và bài tập mới nhất.
+                        </p>
+                    </div>
+                </div>
+            )}
+            {/* ------------------------------------------------------------- */}
+            {/* --- BANNER BẢO LƯU --- */}
+            {getReserveStatus(currentUser) && currentUser?.reserve && (
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex gap-3 items-start shadow-sm mb-6">
+                    <div className="text-blue-600 mt-0.5 flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg>
+                    </div>
+                    <div>
+                        <h3 className="text-sm font-bold text-blue-800">Tài khoản đang trong thời gian bảo lưu</h3>
+                        <p className="text-xs text-blue-700 mt-1 leading-relaxed">
+                            Từ <strong>{fmtReserveDate(currentUser.reserve.start)}</strong> đến <strong>{fmtReserveDate(currentUser.reserve.end)}</strong>, bạn <strong>không xem được</strong> các thông báo (báo bài, quan trọng, sự kiện, links) đăng trong khoảng thời gian này. Các thông báo đó sẽ tự hiển thị lại sau khi kết thúc bảo lưu.
                         </p>
                     </div>
                 </div>
