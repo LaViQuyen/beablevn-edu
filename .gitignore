@@ -46,3 +46,6 @@ repomix-output.xml
 /npm
 /vite
 /beablevn-st-app@0.0.0
+
+# Backup credential files - KHONG day len repo
+*.bak

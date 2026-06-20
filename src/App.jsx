@@ -40,6 +40,7 @@ import StudentProfile from './pages/Student/Profile';
 import StudentFeedback from './pages/Student/Feedback';
 import StudentContact from './pages/Student/Contact';
 import StudentCredits from './pages/Student/Credits'; // ví BAVN Credits của học viên
+import StudentResources from './pages/Student/Resources'; // khu Tài nguyên & Luyện tập (link công cụ Coach)
 
 // Component: Điều hướng dựa trên Role (Khi vào trang chủ /)
 const RedirectBasedOnRole = () => {
@@ -114,6 +115,7 @@ const App = () => {
             <Route path="scores" element={<MyGrades />} />
             <Route path="notifications" element={<StudentNotifications />} />
             <Route path="credits" element={<StudentCredits />} />
+            <Route path="resources" element={<StudentResources />} />
             <Route path="profile" element={<StudentProfile />} />
             <Route path="feedback" element={<StudentFeedback />} />
             <Route path="contact" element={<StudentContact />} />
