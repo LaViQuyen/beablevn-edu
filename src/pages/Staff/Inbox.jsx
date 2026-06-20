@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { db } from '../../firebase';
 import { ref, onValue, update } from 'firebase/database';
+import { withEnByCode } from '../../utils/studentName';
 
 const CATEGORIES = {
   'hoc-tap':   { label: '📚 Học tập',        color: 'bg-[#E8F4EC] text-green-700 border-green-200' },
@@ -36,6 +37,7 @@ const Inbox = () => {
   const [sending, setSending] = useState(false);
   const [filterStatus, setFilterStatus] = useState('all');
   const messagesEndRef = useRef(null);
+  const [enMap, setEnMap] = useState({}); // mã học viên -> tên tiếng Anh (để hiển thị "Việt - English" trong hộp thư)
 
   const myClassIds = currentUser?.assignedClasses || [];
   const isAdmin = currentUser?.role === 'admin';
@@ -72,6 +74,19 @@ const Inbox = () => {
     });
     return () => unsub();
   }, [currentUser?.id]);
+
+  // Bản đồ mã học viên -> tên tiếng Anh (feedback/message chỉ lưu studentName + studentCode)
+  useEffect(() => {
+    const unsub = onValue(ref(db, 'users'), (snap) => {
+      const data = snap.val() || {};
+      const m = {};
+      Object.values(data).forEach(u => {
+        if (u.role === 'student' && u.studentCode && u.englishName) m[u.studentCode] = u.englishName;
+      });
+      setEnMap(m);
+    });
+    return () => unsub();
+  }, []);
 
   // Đồng bộ thread đang mở với dữ liệu realtime:
   // khi 'messages' cập nhật (học viên gửi tin mới), gắn lại selectedMsg
@@ -259,7 +274,7 @@ const Inbox = () => {
                         </div>
                         <p className={`text-sm font-bold truncate ${fb.status === 'pending' ? 'text-slate-900' : 'text-slate-700'}`}>{fb.title}</p>
                         <p className="text-xs text-slate-400 mt-0.5">
-                          {fb.isAnonymous ? 'Ẩn danh' : fb.studentName} · {new Date(fb.date).toLocaleDateString('vi-VN')}
+                          {fb.isAnonymous ? 'Ẩn danh' : withEnByCode(fb.studentName, fb.studentCode, enMap)} · {new Date(fb.date).toLocaleDateString('vi-VN')}
                         </p>
                       </div>
                       {fb.status === 'pending' && <div className="w-2 h-2 rounded-full bg-amber-400 shrink-0 mt-2" />}
@@ -287,7 +302,7 @@ const Inbox = () => {
                 </div>
                 <h3 className="font-bold text-slate-800 text-lg">{selectedFb.title}</h3>
                 <p className="text-xs text-slate-400">
-                  {selectedFb.isAnonymous ? 'Ẩn danh' : `${selectedFb.studentName} (${selectedFb.studentCode})`} · {new Date(selectedFb.date).toLocaleString('vi-VN')}
+                  {selectedFb.isAnonymous ? 'Ẩn danh' : `${withEnByCode(selectedFb.studentName, selectedFb.studentCode, enMap)} (${selectedFb.studentCode})`} · {new Date(selectedFb.date).toLocaleString('vi-VN')}
                 </p>
 
                 {/* Hội thoại 2 chiều */}
@@ -361,7 +376,7 @@ const Inbox = () => {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start">
-                      <p className={`text-sm font-bold truncate ${msg.staffUnread > 0 ? 'text-slate-900' : 'text-slate-700'}`}>{msg.studentName}</p>
+                      <p className={`text-sm font-bold truncate ${msg.staffUnread > 0 ? 'text-slate-900' : 'text-slate-700'}`}>{withEnByCode(msg.studentName, msg.studentCode, enMap)}</p>
                       <div className="flex items-center gap-2 shrink-0 ml-2">
                         {msg.staffUnread > 0 && <span className="w-5 h-5 bg-[#2B6830] text-white text-[10px] font-bold rounded-full flex items-center justify-center">{msg.staffUnread}</span>}
                         <span className="text-[10px] text-slate-400">{new Date(msg.lastDate).toLocaleDateString('vi-VN')}</span>
@@ -383,7 +398,7 @@ const Inbox = () => {
               <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
                 <div className="p-4 border-b border-slate-100 bg-slate-50">
                   <p className="font-bold text-[#2B6830]">{selectedMsg.subject}</p>
-                  <p className="text-xs text-slate-400 mt-0.5">Từ {selectedMsg.studentName} ({selectedMsg.studentCode})</p>
+                  <p className="text-xs text-slate-400 mt-0.5">Từ {withEnByCode(selectedMsg.studentName, selectedMsg.studentCode, enMap)} ({selectedMsg.studentCode})</p>
                 </div>
 
                 <div className="p-4 space-y-3 max-h-96 overflow-y-auto">

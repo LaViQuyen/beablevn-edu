@@ -3,6 +3,7 @@ import { db } from '../../firebase';
 import { ref, onValue, update } from "firebase/database";
 import { useAuth } from '../../context/AuthContext';
 import { getReserveStatus, RESERVE_LABEL, RESERVE_BADGE } from '../../utils/reserve';
+import { fmtStudentName, getBirthdayNotice } from '../../utils/studentName';
 
 // Quy ước chữ hiển thị trong báo cáo theo trạng thái điểm danh
 const STATUS_LETTER = { present: 'C', late: 'T', excused: 'P', absent: 'V' };
@@ -230,7 +231,7 @@ const Attendance = () => {
             });
             const total = p + l + a + ex;
             const rate = total > 0 ? Math.round(((p + l) / total) * 100) : 0;
-            rows.push([st.name, st.studentCode || '', ...cells, p, l, ex, a, total, `${rate}%`]);
+            rows.push([fmtStudentName(st.name, st.englishName), st.studentCode || '', ...cells, p, l, ex, a, total, `${rate}%`]);
         });
 
         const csvContent = rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n');
@@ -306,11 +307,12 @@ const Attendance = () => {
                                         {/* Header: tên + trạng thái */}
                                         <div className="flex justify-between items-start">
                                             <div>
+                                                {(() => { const bd = getBirthdayNotice(st); return bd.cake ? <div className="text-[11px] text-amber-600 font-medium mb-1 flex items-center gap-1">🎂 {bd.message}</div> : null; })()}
                                                 <button
                                                     onClick={() => setHistoryStudent(st)}
                                                     className="font-bold text-slate-800 text-sm hover:text-[#2B6830] transition-colors"
                                                 >
-                                                    {index + 1}. {st.name}
+                                                    {index + 1}. {fmtStudentName(st.name, st.englishName)}
                                                 </button>
                                                 <div className="text-xs text-slate-400 font-mono mt-0.5">{st.studentCode}</div>
                                                 {(() => { const rs = getReserveStatus(st); return rs ? <span className={`inline-block mt-1 text-[10px] font-bold px-1.5 py-0.5 rounded border ${RESERVE_BADGE[rs]}`}>{RESERVE_LABEL[rs]}</span> : null; })()}
@@ -382,12 +384,13 @@ const Attendance = () => {
                                             <tr key={st.id} className="hover:bg-slate-50/50 transition-colors group">
                                                 <td className="p-4 text-center text-slate-400">{index + 1}</td>
                                                 <td className="p-4">
+                                                    {(() => { const bd = getBirthdayNotice(st); return bd.cake ? <div className="text-[11px] text-amber-600 font-medium mb-1 flex items-center gap-1">🎂 {bd.message}</div> : null; })()}
                                                     <button
                                                         onClick={() => setHistoryStudent(st)}
                                                         className="font-medium text-slate-800 hover:text-[#2B6830] outline-none transition-all flex items-center gap-2 group-hover:underline decoration-slate-300 underline-offset-4"
                                                         title="Xem lịch sử"
                                                     >
-                                                        {st.name}
+                                                        {fmtStudentName(st.name, st.englishName)}
                                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3.5 h-3.5 text-slate-400 hidden md:block opacity-0 group-hover:opacity-100 transition-opacity"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                                     </button>
                                                     <div className="text-[11px] text-slate-400 font-mono mt-0.5 flex items-center gap-2">{st.studentCode}{(() => { const rs = getReserveStatus(st); return rs ? <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${RESERVE_BADGE[rs]}`}>{RESERVE_LABEL[rs]}</span> : null; })()}</div>
@@ -507,7 +510,7 @@ const Attendance = () => {
                                             const s = getSummary(st.id);
                                             return (
                                                 <tr key={st.id} className="hover:bg-slate-50/50 transition-colors">
-                                                    <td className="p-3 font-medium text-slate-800 sticky left-0 bg-white z-10 whitespace-nowrap">{st.name}</td>
+                                                    <td className="p-3 font-medium text-slate-800 sticky left-0 bg-white z-10 whitespace-nowrap">{fmtStudentName(st.name, st.englishName)}</td>
                                                     {sessionDates.map(d => {
                                                         const rec = (allAttendance[selectedClass]?.[d] || {})[st.id];
                                                         const stt = rec ? (typeof rec === 'object' ? rec.status : rec) : null;
@@ -544,7 +547,7 @@ const Attendance = () => {
                         <div className="p-5 border-b border-slate-100 flex justify-between items-center">
                             <div>
                                 <h3 className="text-lg font-bold text-[#2B6830]">Lịch sử Vắng / Trễ</h3>
-                                <p className="text-xs text-slate-500 mt-1">Học viên: <span className="font-medium text-slate-800">{historyStudent.name}</span></p>
+                                <p className="text-xs text-slate-500 mt-1">Học viên: <span className="font-medium text-slate-800">{fmtStudentName(historyStudent.name, historyStudent.englishName)}</span></p>
                             </div>
                             <button onClick={() => setHistoryStudent(null)} className="p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 rounded-full transition-colors">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>

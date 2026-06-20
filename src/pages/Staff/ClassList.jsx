@@ -3,6 +3,8 @@ import { db } from '../../firebase';
 import { ref, onValue } from "firebase/database";
 import { useAuth } from '../../context/AuthContext';
 import { getReserveStatus, RESERVE_LABEL, RESERVE_BADGE, RESERVE_CARD } from '../../utils/reserve';
+import StudentDetailModal from './StudentDetailModal';
+import { fmtStudentName, getBirthdayNotice } from '../../utils/studentName';
 
 // Chuẩn hoá chuỗi tiếng Việt: bỏ dấu, đổi đ->d, về chữ thường -> tìm không phân biệt dấu/hoa thường
 const viNorm = (s) => (s || '')
@@ -17,10 +19,12 @@ const ClassList = () => {
   const { userData } = useAuth();
   const [students, setStudents] = useState([]);
   const [classes, setClasses] = useState([]);
+  const [allClasses, setAllClasses] = useState([]); // toàn bộ lớp (để popup hiện ĐỦ lớp của HV, kể cả lớp GV không phụ trách)
   const [attendance, setAttendance] = useState({}); // dữ liệu điểm danh để tính chuyên cần
   const [classFilter, setClassFilter] = useState('');     // lọc theo lớp (dropdown)
   const [programFilter, setProgramFilter] = useState(''); // lọc theo môn học (dropdown)
   const [nameSearch, setNameSearch] = useState('');       // tìm theo tên / mã học viên
+  const [selectedStudent, setSelectedStudent] = useState(null); // học viên đang mở popup chi tiết
 
   useEffect(() => {
     const myClassIds = userData?.assignedClasses || [];
@@ -28,8 +32,9 @@ const ClassList = () => {
     onValue(ref(db, 'classes'), (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        const allClasses = Object.entries(data).map(([id, val]) => ({ id, ...val }));
-        setClasses(allClasses.filter(c => myClassIds.includes(c.id)));
+        const all = Object.entries(data).map(([id, val]) => ({ id, ...val }));
+        setAllClasses(all);
+        setClasses(all.filter(c => myClassIds.includes(c.id)));
       }
     });
 
@@ -83,10 +88,24 @@ const ClassList = () => {
   const getStudentClassIds = (student) =>
     Array.isArray(student.classIds) ? student.classIds : (student.classId ? [student.classId] : []);
 
-  // Tên các lớp của học viên (A-Z) để hiển thị badge
+  // Tên các lớp của học viên (A-Z) để hiển thị badge — chỉ trong các lớp GV phụ trách
   const getStudentClassNames = (student) =>
     getStudentClassIds(student)
       .map(id => classMap.get(id)?.name)
+      .filter(Boolean)
+      .sort((a, b) => a.localeCompare(b, 'vi'));
+
+  // Map TẤT CẢ lớp theo id (không lọc theo GV)
+  const allClassMap = useMemo(() => {
+    const m = new Map();
+    allClasses.forEach(c => m.set(c.id, c));
+    return m;
+  }, [allClasses]);
+
+  // Tên ĐỦ các lớp của học viên (kể cả lớp GV không phụ trách) — dùng cho popup chi tiết
+  const getStudentAllClassNames = (student) =>
+    getStudentClassIds(student)
+      .map(id => allClassMap.get(id)?.name)
       .filter(Boolean)
       .sort((a, b) => a.localeCompare(b, 'vi'));
 
@@ -180,11 +199,13 @@ const ClassList = () => {
           const attRate = getAttendanceRate(st);
           const isLowAtt = attRate !== null && attRate < 70;
           const rsv = getReserveStatus(st); // 'active' | 'ending' | null
+          const bd = getBirthdayNotice(st); // { cake, message } — xét cả HV lẫn PH
 
           return (
             <div
               key={st.id || idx}
-              className={`flex justify-between items-center p-4 border rounded-xl hover:shadow-md transition-all bg-white group ${rsv ? RESERVE_CARD : isLowAtt ? 'border-red-200 bg-red-50/30' : 'border-slate-100 hover:border-green-100'}`}
+              onClick={() => setSelectedStudent(st)}
+              className={`flex justify-between items-center p-4 border rounded-xl hover:shadow-md transition-all bg-white group cursor-pointer ${rsv ? RESERVE_CARD : isLowAtt ? 'border-red-200 bg-red-50/30' : 'border-slate-100 hover:border-green-100'}`}
             >
               <div className="flex items-center gap-3">
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${rsv ? 'bg-yellow-100 text-yellow-700' : isLowAtt ? 'bg-red-100 text-red-600' : 'bg-slate-50 text-[#2B6830]'}`}>
@@ -192,7 +213,10 @@ const ClassList = () => {
                 </div>
                 <div>
                   <div className="font-bold text-gray-800 flex items-center gap-2 flex-wrap">
-                    {st.name || '(chưa có tên)'}
+                    {fmtStudentName(st.name, st.englishName)}
+                    {bd.cake && (
+                      <span className="inline-flex items-center gap-1 text-[11px] text-amber-600 font-medium">🎂 {bd.message}</span>
+                    )}
                     {isLowAtt && (
                       <span className="text-[10px] font-bold text-red-600 bg-red-100 px-1.5 py-0.5 rounded border border-red-200">⚠️ Vắng nhiều</span>
                     )}
@@ -226,6 +250,15 @@ const ClassList = () => {
           );
         })}
       </div>
+
+      {/* Popup chi tiết học viên + phụ huynh */}
+      {selectedStudent && (
+        <StudentDetailModal
+          student={selectedStudent}
+          classNames={getStudentAllClassNames(selectedStudent)}
+          onClose={() => setSelectedStudent(null)}
+        />
+      )}
     </div>
   );
 };

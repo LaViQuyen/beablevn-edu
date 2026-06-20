@@ -3,6 +3,7 @@ import { db } from '../../firebase';
 import { ref, onValue, push, set, update, remove } from "firebase/database";
 import { useAuth } from '../../context/AuthContext';
 import { getReserveStatus, RESERVE_LABEL, RESERVE_BADGE } from '../../utils/reserve';
+import { fmtStudentName } from '../../utils/studentName';
 
 const ScoreInput = () => {
     const { currentUser } = useAuth();
@@ -272,7 +273,7 @@ const ScoreInput = () => {
             const gpa = (assAvg * 0.10 + formAvg * 0.20 + mmtAvg * 0.30 + eomtAvg * 0.40).toFixed(2);
 
             rows.push([
-                st.name, st.studentCode || '',
+                fmtStudentName(st.name, st.englishName), st.studentCode || '',
                 getSum('bonus'), getAvg('assignment'), getAvg('formative'),
                 mmtAvg.toFixed(1), eomtAvg.toFixed(1), gpa
             ]);
@@ -506,7 +507,7 @@ const ScoreInput = () => {
                                                         className="font-bold text-[#2B6830] hover:text-green-600 hover:underline text-left outline-none transition-all flex items-center gap-2"
                                                         title="Bấm để xem & sửa lịch sử điểm"
                                                     >
-                                                        {st.name}
+                                                        {fmtStudentName(st.name, st.englishName)}
                                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3.5 h-3.5 text-green-400 hidden md:block"><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>
                                                     </button>
                                                     <div className="text-xs text-slate-400 font-mono mt-0.5 flex items-center gap-2 flex-wrap">{st.studentCode}{(() => { const rs = getReserveStatus(st); return rs ? <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${RESERVE_BADGE[rs]}`}>{RESERVE_LABEL[rs]}</span> : null; })()}</div>
@@ -593,7 +594,7 @@ const ScoreInput = () => {
                                 <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                                     <div>
                                         <h3 className="text-lg font-bold text-[#2B6830]">Lịch sử Điểm & Chỉnh sửa</h3>
-                                        <p className="text-sm font-medium text-slate-500 mt-1">Học viên: <span className="text-[#2B6830]">{historyStudentModal.name}</span> ({historyStudentModal.studentCode})</p>
+                                        <p className="text-sm font-medium text-slate-500 mt-1">Học viên: <span className="text-[#2B6830]">{fmtStudentName(historyStudentModal.name, historyStudentModal.englishName)}</span> ({historyStudentModal.studentCode})</p>
                                     </div>
                                     <button onClick={() => { setHistoryStudentModal(null); setEditingRecordId(null); }} className="p-2 bg-slate-200 text-slate-500 rounded-full hover:bg-red-100 hover:text-red-600 transition-colors">
                                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
