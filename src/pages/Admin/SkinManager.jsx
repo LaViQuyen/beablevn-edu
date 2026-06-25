@@ -16,6 +16,7 @@ const BLANK = {
   name: '', rarity: 'common', cost: 10, emoji: '✨',
   gradFrom: '#2B6830', gradTo: '#3D8B47', ring: '#2B6830',
   available: true, unlock: 'purchase', threshold: 50, order: 99,
+  staffAllowed: false, // Admin bật để CẤP skin này cho nhân sự (staff/giáo viên)
 };
 
 const SkinManager = () => {
@@ -75,6 +76,7 @@ const SkinManager = () => {
       name: skin.name, rarity: skin.rarity, cost: skin.cost, emoji: skin.emoji,
       gradFrom: skin.gradFrom, gradTo: skin.gradTo, ring: skin.ring,
       available: skin.available, unlock: skin.unlock, threshold: skin.threshold, order: skin.order,
+      staffAllowed: !!skin.staffAllowed,
     });
     setModalOpen(true);
   };
@@ -94,6 +96,7 @@ const SkinManager = () => {
         unlock: form.unlock,
         threshold: form.unlock === 'milestone' ? (Number(form.threshold) || 0) : 0,
         order: Number(form.order) || 99,
+        staffAllowed: !!form.staffAllowed,
       };
       if (editId) {
         await update(ref(db, `skins/${editId}`), payload);
@@ -112,6 +115,14 @@ const SkinManager = () => {
   const toggleAvailable = async (skin) => {
     try { await update(ref(db, `skins/${skin.id}`), { available: !skin.available }); }
     catch (e) { showToast('❌ Lỗi: ' + e.message); }
+  };
+
+  // --- Bật/tắt CẤP cho NHÂN SỰ (kiểm soát skin của staff/giáo viên) ---
+  const toggleStaff = async (skin) => {
+    try {
+      await update(ref(db, `skins/${skin.id}`), { staffAllowed: !skin.staffAllowed });
+      showToast(!skin.staffAllowed ? `✅ Đã cấp "${skin.name}" cho nhân sự` : `🚫 Đã thu hồi "${skin.name}" khỏi nhân sự`);
+    } catch (e) { showToast('❌ Lỗi: ' + e.message); }
   };
 
   // --- Xóa skin (đã bấm xác nhận) ---
@@ -196,6 +207,11 @@ const SkinManager = () => {
                     <button onClick={() => { setDeleteId(skin.id); setTimeout(() => setDeleteId(c => c === skin.id ? null : c), 3000); }} className="px-3 py-2 rounded-lg text-xs font-bold text-red-500 bg-red-50 border border-red-100 hover:bg-red-100 transition-colors">Xóa</button>
                   )}
                 </div>
+                {/* Kiểm soát skin của NHÂN SỰ — Admin bật/tắt từng skin */}
+                <button onClick={() => toggleStaff(skin)}
+                  className={`w-full py-1.5 rounded-lg text-[11px] font-bold border transition-colors ${skin.staffAllowed ? 'bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100' : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100'}`}>
+                  {skin.staffAllowed ? '👤 Nhân sự: ĐƯỢC dùng' : '👤 Nhân sự: chưa cấp'}
+                </button>
               </div>
             );
           })}
@@ -286,6 +302,11 @@ const SkinManager = () => {
                 <span className="text-sm font-bold text-slate-600">Hiện trong cửa hàng</span>
               </label>
             </div>
+
+            <label className="flex items-center gap-2 cursor-pointer bg-indigo-50/50 border border-indigo-100 rounded-xl px-3 py-2.5">
+              <input type="checkbox" checked={form.staffAllowed} onChange={e => setForm({ ...form, staffAllowed: e.target.checked })} className="w-4 h-4 accent-indigo-600" />
+              <span className="text-sm font-bold text-indigo-700">👤 Cấp cho nhân sự (staff/giáo viên) dùng</span>
+            </label>
 
             <div className="flex gap-2 pt-2">
               <button onClick={() => setModalOpen(false)} className="flex-1 py-2.5 rounded-xl text-sm font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 transition-colors">Hủy</button>

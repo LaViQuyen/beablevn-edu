@@ -14,7 +14,7 @@ export class PlayScene extends Phaser.Scene {
     this.joyData = { active: false, x: 0, y: 0 }; this.joyJumpFired = false;
     this.leNghiaUses = 2; this.thaiDoUses = 2; this.shieldActive = false; this.shieldTimer = 0;
     this.gm = this.levelData.gm || null;
-    this.reverseCtrl=false; this.stunT=0; this.lagActive=false; this.lagNeed=0;
+    this.reverseCtrl=false; this.reverseEndT=0; this.stunT=0; this.lagActive=false; this.lagNeed=0;
     this.hudHidden=false;
     // ---- THỂ LỰC (Stamina) toàn cục: bắn tốn thể lực, không spam được ----
     this.staminaMax=100; this.stamina=100; this.staminaRegen=24; // hồi /giây
@@ -29,7 +29,7 @@ export class PlayScene extends Phaser.Scene {
     this.WORLD=3500; this.elevatedSpawns=[]; this.disciplineRoad=null;
     // reset tham chiếu đối tượng (scene instance được Phaser tái sử dụng giữa các lượt)
     this.chainText=null; this.darkOverlay=null; this.lightGlow=null; this.fireWall=null;
-    this.boss=null; this.bossGroup=null; this.bossAura=null; this.staminaBar=null;
+    this.boss=null; this.bossGroup=null; this.bossAura=null; this.staminaBar=null; this.reverseText=null;
     this.isBossStage = this.levelData.isBoss; this.isCollectStage = this.levelData.isCollectStage;
     this.layout = this.isBossStage ? 'arena'
       : this.isCollectStage ? 'flat'
@@ -452,7 +452,7 @@ export class PlayScene extends Phaser.Scene {
     const SW=this.scale.width; const r = this.levelData.rank;
     if(r === 2){ // Lỗi Chính Tả: màn tối dần + ĐẢO HƯỚNG dồn dập
       if(!this.darkOverlay) this.darkOverlay = this.add.rectangle(SW/2, H/2, SW, H, 0x05060a, 0.5).setScrollFactor(0).setDepth(44);
-      this.enrageGmTimer = this.time.addEvent({ delay:3000, loop:true, callback:()=>{ if(this._done) return; this.reverseCtrl = true; this.showFloatingText("Ảo ảnh: ĐẢO HƯỚNG!", 0x9370DB); this.time.delayedCall(1600, ()=>{ this.reverseCtrl = false; }); } });
+      this.enrageGmTimer = this.time.addEvent({ delay:3000, loop:true, callback:()=>{ if(this._done) return; this.triggerReverse(1600); } });
     } else if(r === 4){ // Đại Ma Vương: mưa "điểm số" nổ chậm
       this.enrageGmTimer = this.time.addEvent({ delay:1400, loop:true, callback:()=>{ if(this._done) return; const mx=this.player.x+Phaser.Math.Between(-220,220); const mine=this.add.circle(mx, H-46, 12, 0xff0000, 0.9).setDepth(40); this.tweens.add({targets:mine, scale:1.3, yoyo:true, repeat:-1, duration:300}); this.time.delayedCall(1200, ()=>{ if(this._done){ mine.destroy(); return; } this.poof(mine.x, mine.y); this.cameras.main.shake(120,0.008); if(Math.abs(this.player.x-mine.x)<70 && this.invuln<=0 && !this.shieldActive){ this.invuln=1000; this.hp--; this.updateHearts(); playSfx('hurt'); if(this.hp<=0) this.lose(); } mine.destroy(); }); } });
     } else if(r === 5){ // Tứ Đại Trưởng Lão: màn mờ + summon nhanh
@@ -490,9 +490,14 @@ export class PlayScene extends Phaser.Scene {
       this.tweens.add({targets:g,alpha:0,delay:850,duration:1500,onComplete:()=>g.destroy()});
     }}); this.showFloatingText("Viết Ẩu bắn mực che màn hình!", 0x111133); }
     if(gm==='hideHud'){ this.time.addEvent({delay:4500,loop:true,callback:()=>{ if(this._done)return; this.setHudVisible(false); this.time.delayedCall(2000,()=>{ if(!this._done) this.setHudVisible(true); }); }}); this.showFloatingText("Quên Nhớ: thanh máu chốc chốc biến mất!", 0x9999ff); }
-    if(gm==='reverse'){ this.time.addEvent({delay:5000,loop:true,callback:()=>{ if(this._done)return; this.reverseCtrl=true; this.showFloatingText("Ảo ảnh: ĐẢO HƯỚNG di chuyển!", 0x9370DB); this.time.delayedCall(2600,()=>{ this.reverseCtrl=false; }); }}); }
+    if(gm==='reverse'){ this.time.addEvent({delay:5000,loop:true,callback:()=>{ if(this._done)return; this.triggerReverse(2600); }}); }
     if(gm==='mines'){ this.time.addEvent({delay:1700,loop:true,callback:()=>{ if(this._done)return; const src=this.activeMonsters.find(m=>m.active && Math.abs(m.x-this.player.x)<700); if(!src)return; const mine=this.add.circle(src.x,H-46,12,0xff0000,0.9).setDepth(40); this.tweens.add({targets:mine,scale:1.3,yoyo:true,repeat:-1,duration:300}); this.time.delayedCall(1500,()=>{ if(this._done){ mine.destroy(); return; } this.poof(mine.x,mine.y); this.cameras.main.shake(120,0.008); if(Math.abs(this.player.x-mine.x)<70 && Math.abs(this.player.y-mine.y)<90 && this.invuln<=0 && !this.shieldActive){ this.invuln=1000; this.hp--; this.updateHearts(); playSfx('hurt'); if(this.hp<=0) this.lose(); } mine.destroy(); }); }}); this.showFloatingText("Quay Cóp thả phao thi nổ chậm!", 0xFF8C00); }
     if(gm==='lag'){ this.input.on('pointerdown',()=>{ if(this.lagActive) this.lagDec(); }); }
+  }
+  // Kích hoạt hiệu ứng ĐẢO HƯỚNG kèm mốc hết hạn -> update() vẽ đồng hồ đếm ngược cho người chơi
+  triggerReverse(ms){
+    this.reverseCtrl = true; this.reverseEndT = this.time.now + ms;
+    this.showFloatingText("Ảo ảnh: ĐẢO HƯỚNG di chuyển!", 0x9370DB);
   }
   triggerLag(){ this.lagActive=true; this.lagNeed=6; this.invuln=1600; this.player.setVelocity(0,0); playSfx('hurt'); this.lagText=this.add.text(this.scale.width/2,H/2,"RỚT MẠNG! Bấm W / chạm nhanh để thoát ("+this.lagNeed+")",{fontSize:'20px',fontStyle:'900',color:'#fff',backgroundColor:'#C0392B',padding:{x:10,y:6}}).setOrigin(0.5).setScrollFactor(0).setDepth(120); }
   lagDec(){ if(!this.lagActive)return; this.lagNeed--; if(this.lagText) this.lagText.setText("RỚT MẠNG! Bấm nhanh để thoát ("+Math.max(0,this.lagNeed)+")"); if(this.lagNeed<=0){ this.lagActive=false; if(this.lagText){ this.lagText.destroy(); this.lagText=null; } this.showFloatingText("Thoát Lag!", 0x7ED957); } }
@@ -515,6 +520,15 @@ export class PlayScene extends Phaser.Scene {
     if(this.staminaBar && !this.hudHidden){ this.staminaBar.width = 180*(this.stamina/this.staminaMax); this.staminaBar.fillColor = this.stamina<25?0xFF5A6E:(this.stamina<55?0xFFD23F:0x39C0ED); }
     // hết chuỗi combo
     if(this.chainText && this.time.now > this.killChainExpire && this.chainText.alpha>0){ this.tweens.add({targets:this.chainText, alpha:0, duration:300}); }
+    // ĐẢO HƯỚNG: hiện đồng hồ đếm ngược để người chơi biết khi nào điều khiển trở lại bình thường
+    if(this.reverseCtrl){
+      const remain = this.reverseEndT - this.time.now;
+      if(remain <= 0){ this.reverseCtrl = false; if(this.reverseText) this.reverseText.setVisible(false); }
+      else {
+        if(!this.reverseText){ const _SW=this.scale.width; this.reverseText=this.add.text(_SW/2, 150, '', {fontFamily:'Be Vietnam Pro', fontSize:'19px', color:'#ffffff', fontStyle:'900', backgroundColor:'#6D28D9', padding:{x:12,y:6}}).setOrigin(0.5).setScrollFactor(0).setDepth(120); }
+        this.reverseText.setVisible(true).setText('🔀 ĐẢO HƯỚNG — về bình thường sau ' + (remain/1000).toFixed(1) + 's');
+      }
+    } else if(this.reverseText && this.reverseText.visible){ this.reverseText.setVisible(false); }
 
     if(this.shieldActive){
       this.shieldTimer -= dt;

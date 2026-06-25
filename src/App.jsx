@@ -32,6 +32,7 @@ import StaffInbox from './pages/Staff/Inbox';
 import FreshFit from './pages/Staff/FreshFit'; // trang FF: duyệt đổi credits + quản lý menu
 import StaffCredits from './pages/Staff/StaffCredits'; // ví BAVN Credits của nhân sự
 import BavnCenter from './pages/Staff/BavnCenter';     // khu BOD: grant credits + 2 hệ quà + duyệt đơn quà
+import ModBonus from './pages/Staff/ModBonus';         // khu MOD: thưởng Bonus nhân sự + đánh giá thưởng quý/năm
 
 // Pages - Student
 import StudentDashboard from './pages/Student/Dashboard';
@@ -112,6 +113,11 @@ const App = () => {
             <Route path="credits" element={<StaffCredits />} />
             {/* BAVN Center — component tự chặn nếu chưa có cờ bodAccess */}
             <Route path="bavn" element={<BavnCenter />} />
+            {/* Khu MOD — component tự chặn nếu chưa có cờ modAccess */}
+            <Route path="mod-bonus" element={<ModBonus />} />
+            {/* Cửa hàng Skin + Game cho nhân sự (dùng chung component học viên, mở khóa toàn bộ + chơi không giới hạn) */}
+            <Route path="skins" element={<StudentSkins />} />
+            <Route path="games/hanh-trinh" element={<Suspense fallback={<div className="py-24 text-center text-slate-500">Đang tải game…</div>}><HanhTrinhGame /></Suspense>} />
             <Route index element={<Navigate to="classes" />} />
           </Route>
 

@@ -65,6 +65,9 @@ export default function HanhTrinhGame() {
   const navigate = useNavigate();
 
   const uid = currentUser?.id;
+  // Nhân sự (staff/admin): mở khóa sẵn + chơi KHÔNG GIỚI HẠN lượt; điều hướng theo cổng /staff.
+  const isStaff = ['staff', 'admin'].includes(currentUser?.role);
+  const base = isStaff ? '/staff' : '/student';
   const myClassIds = useMemo(() => (
     currentUser?.classIds
       ? (Array.isArray(currentUser.classIds) ? currentUser.classIds : Object.values(currentUser.classIds))
@@ -186,8 +189,8 @@ export default function HanhTrinhGame() {
 
   // Cấp độ nhân vật = theo TIẾN TRÌNH đã lưu (ải đã vượt), không theo Bonus.
   const rank = rankFromProgress(savedProgress.beaten);
-  // Bonus tích lũy vẫn dùng làm cổng MỞ KHÓA game.
-  const unlocked = lifetimeBonus >= ACCESS_BONUS;
+  // Bonus tích lũy vẫn dùng làm cổng MỞ KHÓA game (nhân sự bỏ qua cổng này).
+  const unlocked = isStaff || lifetimeBonus >= ACCESS_BONUS;
 
   // --- LƯỢT CHƠI: 1 lượt = 1 LẦN VÀO ẢI. Kiếm bằng học tập (kho) + trần mỗi ngày ---
   const earnedPlays = attendedCount * ATTEND_PLAY + Math.floor(lifetimeBonus / BONUS_PER_PLAY);
@@ -195,20 +198,26 @@ export default function HanhTrinhGame() {
   const todayUsed = (gameMeta.playLog && gameMeta.playLog[todayStr]) || 0; // số ải đã vào hôm nay
   const poolLeft = Math.max(0, earnedPlays - (gameMeta.playsUsed || 0));   // kho lượt còn (theo học tập)
   const dailyLeft = Math.max(0, DAILY_CAP - todayUsed);                    // còn vào được bao nhiêu ải hôm nay
-  const remainingPlays = Math.min(poolLeft, dailyLeft);                    // lượt thực dùng được lúc này
+  // Nhân sự: không giới hạn lượt; học viên: min(kho, trần ngày).
+  const remainingPlays = isStaff ? 999999 : Math.min(poolLeft, dailyLeft); // lượt thực dùng được lúc này
   const canPlay = unlocked && remainingPlays > 0;
 
-  // --- BẢNG XẾP HẠNG theo SAO tích lũy (mọi học viên có sao > 0) ---
+  // --- BẢNG XẾP HẠNG theo SAO tích lũy — TÁCH RIÊNG: học viên xem bảng học viên,
+  //     nhân sự (staff/admin) xem bảng nhân sự. Hai bảng không lẫn vào nhau. ---
   const leaderboard = useMemo(() => {
     return Object.entries(allGames)
       .map(([id, g]) => ({
         id,
         stars: (g && g.hanhTrinh && g.hanhTrinh.totalStars) || 0,
-        name: allUsers[id]?.name || 'Học viên',
+        name: allUsers[id]?.name || (isStaff ? 'Nhân sự' : 'Học viên'),
       }))
-      .filter(x => allUsers[x.id]?.role === 'student' && x.stars > 0)
+      .filter(x => {
+        const r = allUsers[x.id]?.role;
+        const inGroup = isStaff ? (r === 'staff' || r === 'admin') : r === 'student';
+        return inGroup && x.stars > 0;
+      })
       .sort((a, b) => b.stars - a.stars);
-  }, [allGames, allUsers]);
+  }, [allGames, allUsers, isStaff]);
   const myBoardIndex = leaderboard.findIndex(x => x.id === uid);
 
   // Bật TOÀN MÀN HÌNH + khóa XOAY NGANG ngay trong cử chỉ bấm (đa số trình duyệt yêu cầu vậy).
@@ -264,6 +273,7 @@ export default function HanhTrinhGame() {
     };
     // TRỪ 1 lượt mỗi khi VÀO 1 ẢI (MapScene gọi). Dùng increment để chống đè giá trị cũ khi chơi liên tục.
     const onConsume = () => {
+      if (isStaff) return;       // nhân sự chơi không giới hạn -> không trừ lượt
       if (uid) {
         const today = new Date().toISOString().slice(0, 10);
         update(ref(db, `studentGames/${uid}/hanhTrinh`), {
@@ -410,11 +420,13 @@ export default function HanhTrinhGame() {
               <div className="rounded-xl border border-green-100 bg-[#F2F8F4] p-4">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">Lượt chơi</span>
-                  <span className="text-xs font-bold text-slate-500">Hôm nay: {todayUsed}/{DAILY_CAP}</span>
+                  <span className="text-xs font-bold text-slate-500">{isStaff ? 'Nhân sự' : `Hôm nay: ${todayUsed}/${DAILY_CAP}`}</span>
                 </div>
-                <div className="mt-1 text-2xl font-black" style={{ color: FOREST }}>Còn {remainingPlays} lượt</div>
+                <div className="mt-1 text-2xl font-black" style={{ color: FOREST }}>{isStaff ? '♾️ Không giới hạn' : `Còn ${remainingPlays} lượt`}</div>
                 <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
-                  <b>Mỗi lần vào 1 ải = 1 lượt.</b> Nhận lượt: <b>đi học +{ATTEND_PLAY}</b> · <b>mỗi {BONUS_PER_PLAY} Bonus +1</b>. Tối đa <b>{DAILY_CAP} ải/ngày</b> để giữ cân bằng học – chơi.
+                  {isStaff
+                    ? <>Nhân sự được chơi <b>không giới hạn lượt</b> để trải nghiệm & kiểm thử game cùng học viên.</>
+                    : <><b>Mỗi lần vào 1 ải = 1 lượt.</b> Nhận lượt: <b>đi học +{ATTEND_PLAY}</b> · <b>mỗi {BONUS_PER_PLAY} Bonus +1</b>. Tối đa <b>{DAILY_CAP} ải/ngày</b> để giữ cân bằng học – chơi.</>}
                 </p>
               </div>
 
@@ -424,7 +436,7 @@ export default function HanhTrinhGame() {
                   className="w-full py-4 rounded-xl text-white text-lg font-black shadow-lg transition active:scale-95"
                   style={{ background: FOREST }}
                 >
-                  ▶ Bắt đầu chơi (còn {remainingPlays} lượt)
+                  ▶ Bắt đầu chơi{isStaff ? '' : ` (còn ${remainingPlays} lượt)`}
                 </button>
               ) : (
                 <div className="rounded-xl bg-slate-100 border border-slate-200 p-4 text-center">
@@ -442,7 +454,7 @@ export default function HanhTrinhGame() {
           {/* BẢNG XẾP HẠNG theo SAO tích lũy */}
           <div className="rounded-xl border border-slate-200 overflow-hidden">
             <div className="flex items-center justify-between px-4 py-2.5 text-white" style={{ background: FOREST }}>
-              <span className="font-black text-sm">🏆 Bảng Xếp Hạng Hành Trình</span>
+              <span className="font-black text-sm">🏆 {isStaff ? 'BXH Nhân Sự' : 'Bảng Xếp Hạng Hành Trình'}</span>
               <span className="text-xs font-bold">⭐ Sao của bạn: {gameMeta.totalStars}</span>
             </div>
             {leaderboard.length === 0 ? (
@@ -468,7 +480,7 @@ export default function HanhTrinhGame() {
           </div>
 
           <button
-            onClick={() => navigate('/student/skins')}
+            onClick={() => navigate(`${base}/skins`)}
             className="w-full py-2.5 rounded-lg font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition"
           >
             ← Về Cửa hàng Skin

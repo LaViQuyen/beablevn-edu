@@ -91,6 +91,9 @@ export const normalizeSkin = (s = {}, id) => ({
   unlock: s.unlock === 'milestone' ? 'milestone' : 'purchase',
   threshold: Number(s.threshold) || 0,
   order: Number(s.order) || 0,
+  // Skin có được cấp cho NHÂN SỰ (staff/giáo viên) dùng không — do Admin bật/tắt.
+  // Mặc định FALSE: nhân sự KHÔNG tự có skin, phải được Admin cho phép.
+  staffAllowed: !!s.staffAllowed,
 });
 
 // Lookup skin mặc định theo id (fallback khi không truyền object).

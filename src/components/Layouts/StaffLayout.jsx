@@ -57,6 +57,16 @@ const Icons = {
       <path strokeLinecap="round" strokeLinejoin="round" d="M12 8.25v-1.5m0 1.5c-1.355 0-2.697.056-4.024.166C6.845 8.51 6 9.473 6 10.608v2.513m6-4.87c1.355 0 2.697.055 4.024.165C17.155 8.51 18 9.473 18 10.608v2.513m-3-4.87v-1.5m-6 1.5v-1.5m12 9.75l-1.5.75a3.354 3.354 0 01-3 0 3.354 3.354 0 00-3 0 3.354 3.354 0 01-3 0 3.354 3.354 0 00-3 0 3.354 3.354 0 01-3 0L3 16.5m15-3.38a48.474 48.474 0 00-6-.37c-2.032 0-4.034.125-6 .37m12 0c.39.049.777.102 1.163.16 1.07.16 1.837 1.094 1.837 2.175v5.17c0 .62-.504 1.124-1.125 1.124H4.125A1.125 1.125 0 013 20.625v-5.17c0-1.08.768-2.014 1.837-2.174A47.78 47.78 0 016 13.12" />
     </svg>
   ),
+  Game: ({ active }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke={active ? "#2B6830" : "#64748b"} className="w-5 h-5">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 8.25v3m1.5-1.5h-3M15 9.75h.008v.008H15V9.75zm2.25 2.25h.008v.008h-.008V12zM4.5 6.75h15a1.5 1.5 0 011.5 1.5v7.5a1.5 1.5 0 01-1.5 1.5h-15a1.5 1.5 0 01-1.5-1.5v-7.5a1.5 1.5 0 011.5-1.5z" />
+    </svg>
+  ),
+  Mod: ({ active }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke={active ? "#e11d48" : "#64748b"} className="w-5 h-5">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
+    </svg>
+  ),
 };
 
 const StaffLayout = () => {
@@ -74,6 +84,7 @@ const StaffLayout = () => {
   const [ffPending, setFfPending] = useState(0);     // badge số yêu cầu đổi MÓN chờ duyệt (FF)
   const [bodAccess, setBodAccess] = useState(false); // cờ quyền BOD (realtime)
   const [giftPending, setGiftPending] = useState(0); // badge số đơn QUÀ chờ duyệt (BOD)
+  const [modAccess, setModAccess] = useState(false); // cờ quyền MOD (thưởng Bonus nhân sự)
 
   // Badge Hộp thư = số phản ánh CHƯA xử lý (theo lớp phụ trách) + tin nhắn chưa đọc
   useEffect(() => {
@@ -155,6 +166,14 @@ const StaffLayout = () => {
     if (currentUser.role === 'admin') { setBodAccess(true); return; }
     const unsubB = onValue(ref(db, `users/${currentUser.id}/bodAccess`), (snap) => setBodAccess(!!snap.val()));
     return () => unsubB();
+  }, [currentUser?.id, currentUser?.role]);
+
+  // Theo dõi cờ MOD realtime — admin gán/gỡ là menu Thưởng Bonus hiện/ẩn ngay
+  useEffect(() => {
+    if (!currentUser?.id) return;
+    if (currentUser.role === 'admin') { setModAccess(true); return; }
+    const unsubM = onValue(ref(db, `users/${currentUser.id}/modAccess`), (snap) => setModAccess(!!snap.val()));
+    return () => unsubM();
   }, [currentUser?.id, currentUser?.role]);
 
   // Badge yêu cầu chờ duyệt: FF đếm đơn MÓN, BOD đếm đơn QUÀ
@@ -254,6 +273,13 @@ const StaffLayout = () => {
             <span className="text-[9px] font-bold bg-[#E8F4EC] text-[#2B6830] px-1.5 py-0.5 rounded border border-green-100 uppercase">Mới</span>
           </Link>
 
+          {/* Skin & Game — nhân sự đổi skin + chơi Hành Trình Trưởng Thành không giới hạn */}
+          <Link to="/staff/skins" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('skins') || isActive('games') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
+            <Icons.Game active={isActive('skins') || isActive('games')} />
+            <span className="flex-1">Skin & Game</span>
+            <span className="text-[9px] font-bold bg-[#E8F4EC] text-[#2B6830] px-1.5 py-0.5 rounded border border-green-100 uppercase">Mới</span>
+          </Link>
+
           {/* BAVN Center — chỉ hiện với cờ BOD (hoặc admin) */}
           {bodAccess && (
             <Link to="/staff/bavn" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('bavn') ? 'bg-purple-50 text-purple-700' : 'text-slate-600 hover:bg-slate-50'}`}>
@@ -264,6 +290,15 @@ const StaffLayout = () => {
                   {giftPending > 9 ? '9+' : giftPending}
                 </span>
               )}
+            </Link>
+          )}
+
+          {/* Khu MOD — thưởng Bonus nhân sự (hiện khi có cờ modAccess hoặc admin) */}
+          {modAccess && (
+            <Link to="/staff/mod-bonus" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('mod-bonus') ? 'bg-rose-50 text-rose-700' : 'text-slate-600 hover:bg-slate-50'}`}>
+              <Icons.Mod active={isActive('mod-bonus')} />
+              <span className="flex-1">Thưởng Bonus</span>
+              <span className="text-[9px] font-bold bg-rose-50 text-rose-700 px-1.5 py-0.5 rounded border border-rose-200 uppercase">MOD</span>
             </Link>
           )}
 
@@ -325,11 +360,15 @@ const StaffLayout = () => {
         <Link to="/staff/notifications" className={mobileLinkClass('notifications')}><Icons.Noti active={isActive('notifications')} /><span className="text-[10px] font-medium">TBáo</span></Link>
         <Link to="/staff/inbox" className={mobileLinkClass('inbox')}><Icons.Inbox active={isActive('inbox')} /><span className="text-[10px] font-medium">Hộp thư</span></Link>
         <Link to="/staff/credits" className={mobileLinkClass('credits')}><Icons.Credits active={isActive('credits')} /><span className="text-[10px] font-medium">Credits</span></Link>
+        <Link to="/staff/skins" className={mobileLinkClass('skins')}><Icons.Game active={isActive('skins') || isActive('games')} /><span className="text-[10px] font-medium">Skin/Game</span></Link>
         {ffAccess && (
           <Link to="/staff/freshfit" className={mobileLinkClass('freshfit')}><Icons.FreshFit active={isActive('freshfit')} /><span className="text-[10px] font-medium">FreshFit</span></Link>
         )}
         {bodAccess && (
           <Link to="/staff/bavn" className={mobileLinkClass('bavn')}><Icons.Bavn active={isActive('bavn')} /><span className="text-[10px] font-medium">BAVN</span></Link>
+        )}
+        {modAccess && (
+          <Link to="/staff/mod-bonus" className={mobileLinkClass('mod-bonus')}><Icons.Mod active={isActive('mod-bonus')} /><span className="text-[10px] font-medium">Bonus</span></Link>
         )}
       </nav>
 
