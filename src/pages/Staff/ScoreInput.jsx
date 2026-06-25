@@ -4,6 +4,7 @@ import { ref, onValue, push, set, update, remove } from "firebase/database";
 import { useAuth } from '../../context/AuthContext';
 import { getReserveStatus, RESERVE_LABEL, RESERVE_BADGE } from '../../utils/reserve';
 import { fmtStudentName } from '../../utils/studentName';
+import { computeAutoBonus } from '../../utils/autoBonus'; // tự cộng Bonus khi nhập điểm
 
 const ScoreInput = () => {
     const { currentUser } = useAuth();
@@ -32,6 +33,13 @@ const ScoreInput = () => {
     const [pendingSaveCount, setPendingSaveCount] = useState(0);
     const [deleteRecordTarget, setDeleteRecordTarget] = useState(null);
     const [studentSearch, setStudentSearch] = useState(''); // tìm tên học viên trong bảng nhập điểm
+    const [bonusRules, setBonusRules] = useState(null); // luật tự động cộng Bonus (Admin cấu hình)
+
+    // Lắng nghe cấu hình auto-bonus
+    useEffect(() => {
+        const unsub = onValue(ref(db, 'bonusRules'), (snap) => setBonusRules(snap.val() || {}));
+        return () => unsub();
+    }, []);
 
     const showToast = (msg, isError = false) => {
         setToastMsg({ text: msg, error: isError });
@@ -167,6 +175,20 @@ const ScoreInput = () => {
 
                 // Định nghĩa đường dẫn cần cập nhật trong Firebase
                 updates[`scores/${selectedClass}/${studentId}/${activeTab}/${newRecordKey}`] = payload;
+
+                // --- TỰ ĐỘNG CỘNG BONUS theo luật (assignment / kiểm tra đạt ngưỡng) ---
+                // Chỉ chạy khi tạo cột điểm mới → mỗi cột chỉ sinh tối đa 1 Bonus tự động.
+                const auto = computeAutoBonus(activeTab, studentScores[studentId], bonusRules);
+                if (auto) {
+                    const bKey = push(ref(db, `scores/${selectedClass}/${studentId}/bonus`)).key;
+                    updates[`scores/${selectedClass}/${studentId}/bonus/${bKey}`] = {
+                        score: auto.amount,
+                        date: commonInput.date,
+                        content: `🤖 Tự động: ${auto.reason}`,
+                        auto: true, // đánh dấu Bonus do hệ thống tự cộng
+                        timestamp,
+                    };
+                }
             });
 
             // 4. Thực hiện lệnh update 1 lần duy nhất lên Firebase

@@ -105,7 +105,8 @@ const StudentManager = () => {
     try {
       await update(ref(db, `users/${editingStudent.id}`), {
         name: editingStudent.name, studentCode: editingStudent.studentCode,
-        classIds: [editingStudent.classId1, editingStudent.classId2, editingStudent.classId3].filter(Boolean)
+        classIds: [editingStudent.classId1, editingStudent.classId2, editingStudent.classId3].filter(Boolean),
+        isDemo: !!editingStudent.isDemo // tài khoản demo: ẩn khỏi leaderboard + không vào báo cáo
       });
       setEditingStudent(null);
       showSuccess(`✅ Đã cập nhật thông tin học viên.`);
@@ -477,6 +478,14 @@ const StudentManager = () => {
                    </select>
                  ))}
               </div>
+              {/* Tài khoản DEMO: dùng để thử nghiệm, không tính vào báo cáo & bảng xếp hạng */}
+              <label className="flex items-start gap-2.5 p-3 rounded-xl border border-amber-200 bg-amber-50 cursor-pointer">
+                <input type="checkbox" checked={!!editingStudent.isDemo} onChange={e => setEditingStudent({...editingStudent, isDemo: e.target.checked})} className="w-4 h-4 accent-amber-500 mt-0.5" />
+                <span className="text-xs">
+                  <span className="font-bold text-amber-700">Tài khoản DEMO (thử nghiệm)</span>
+                  <span className="block text-amber-600/80 mt-0.5">Hiện nhãn DEMO cho nhân sự, KHÔNG xuất hiện trên Bảng Vinh Danh và KHÔNG ghi vào file báo cáo đổi thưởng.</span>
+                </span>
+              </label>
             </div>
             <div className="flex gap-3 justify-end mt-6">
               <button onClick={() => setEditingStudent(null)} className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm hover:bg-slate-50 font-medium">Hủy</button>

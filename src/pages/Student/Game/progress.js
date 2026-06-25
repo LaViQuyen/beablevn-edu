@@ -1,0 +1,25 @@
+// Cầu nối tiến trình với React/Firebase
+let PROGRESS = null;
+export let EXTERNAL = { initial: { rank:1, beaten:{}, unlockedSkills:false }, onSave: null, onStars: null, onConsume: null, playsLeft: 0 };
+
+export function loadProg(){
+  if(PROGRESS) return PROGRESS;
+  let d = { rank:1, beaten:{}, unlockedSkills:false };
+  d = Object.assign(d, EXTERNAL.initial || {});
+  if(!d.beaten) d.beaten = {};
+  PROGRESS = d; return PROGRESS;
+}
+export function saveProg(p){ PROGRESS = p; if(EXTERNAL.onSave){ try{ EXTERNAL.onSave(p); }catch(e){} } }
+
+export function resetProgressCache(){ PROGRESS = null; }
+
+// Được index.js gọi trong createGame để nạp tiến trình từ Firebase
+export function configureExternal(opts){
+  opts = opts || {};
+  if (opts.initial) EXTERNAL.initial = opts.initial;
+  EXTERNAL.onSave = opts.onSave || null;
+  EXTERNAL.onStars = opts.onStars || null; // báo về React để cộng dồn sao (xếp hạng)
+  EXTERNAL.onConsume = opts.onConsume || null; // báo về React để TRỪ 1 lượt khi vào 1 ải
+  EXTERNAL.playsLeft = (typeof opts.playsLeft === 'number') ? opts.playsLeft : 0; // số lượt còn được vào ải hôm nay
+  PROGRESS = null;
+}

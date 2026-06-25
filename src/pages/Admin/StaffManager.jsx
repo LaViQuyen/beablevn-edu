@@ -275,9 +275,17 @@ const StaffManager = () => {
                 </label>
               ))}
             </div>
+            {/* Tài khoản DEMO: thử nghiệm, không tính vào báo cáo & bảng xếp hạng */}
+            <label className="flex items-start gap-2.5 p-3 mb-3 rounded-xl border border-amber-200 bg-amber-50 cursor-pointer">
+              <input type="checkbox" checked={!!editingStaff.isDemo} onChange={e => setEditingStaff({ ...editingStaff, isDemo: e.target.checked })} className="w-4 h-4 accent-amber-500 mt-0.5" />
+              <span className="text-xs">
+                <span className="font-bold text-amber-700">Tài khoản DEMO (thử nghiệm)</span>
+                <span className="block text-amber-600/80 mt-0.5">Hiện nhãn DEMO cho nhân sự, KHÔNG vào file báo cáo đổi thưởng.</span>
+              </span>
+            </label>
             <div className="flex gap-2 justify-end pt-2 border-t border-slate-100">
               <button onClick={() => setEditingStaff(null)} className="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl text-sm hover:bg-slate-200 font-bold transition-colors">Hủy</button>
-              <button onClick={() => { update(ref(db, `users/${editingStaff.id}`), { assignedClasses: editingStaff.assignedClasses }); setEditingStaff(null); showSuccess('Đã cập nhật lớp phụ trách.'); }} className="px-4 py-2 bg-[#2B6830] text-white rounded-xl text-sm font-bold hover:bg-[#1E5225] transition-colors">Lưu</button>
+              <button onClick={() => { update(ref(db, `users/${editingStaff.id}`), { assignedClasses: editingStaff.assignedClasses, isDemo: !!editingStaff.isDemo }); setEditingStaff(null); showSuccess('Đã cập nhật nhân sự.'); }} className="px-4 py-2 bg-[#2B6830] text-white rounded-xl text-sm font-bold hover:bg-[#1E5225] transition-colors">Lưu</button>
             </div>
           </div>
         </div>

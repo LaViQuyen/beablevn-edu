@@ -1,15 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { db } from '../../firebase';
-import { ref, get, update } from 'firebase/database';
+import { ref, get, update, onValue } from 'firebase/database';
 import bcrypt from 'bcryptjs';
+import StudentAvatar from '../../components/StudentAvatar';
+import { DEFAULT_SKINS, DEFAULT_SKIN_ID, getSkin, normalizeSkin, getTitle } from '../../data/skins';
 
 const Profile = () => {
   const { currentUser } = useAuth();
+  const [equipped, setEquipped] = useState(DEFAULT_SKIN_ID);
+  const [owned, setOwned] = useState({});       // skin đã sở hữu → tính danh hiệu
+  const [dbSkins, setDbSkins] = useState(null); // catalog DB
   const [form, setForm] = useState({ oldPass: '', newPass: '', confirmPass: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  // Lắng nghe skin của học viên + catalog
+  useEffect(() => {
+    if (!currentUser?.id) return;
+    const unsubMine = onValue(ref(db, `studentSkins/${currentUser.id}`), (snap) => {
+      const d = snap.val() || {};
+      setEquipped(d.equipped || DEFAULT_SKIN_ID);
+      setOwned(d.owned || {});
+    });
+    const unsubSkins = onValue(ref(db, 'skins'), (snap) => setDbSkins(snap.val() || {}));
+    return () => { unsubMine(); unsubSkins(); };
+  }, [currentUser?.id]);
+
+  // Catalog hiệu lực (DB nếu có, ngược lại mặc định)
+  const catalog = useMemo(() => {
+    if (dbSkins && Object.keys(dbSkins).length > 0)
+      return Object.entries(dbSkins).map(([id, v]) => normalizeSkin(v, id));
+    return DEFAULT_SKINS.map(s => normalizeSkin(s));
+  }, [dbSkins]);
+
+  // Skin đang trang bị (object) + danh hiệu (skin mốc cao nhất đã mở)
+  const equippedSkin = catalog.find(s => s.id === equipped) || getSkin(equipped);
+  const title = getTitle(owned, catalog);
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
@@ -70,12 +99,15 @@ const Profile = () => {
         <h2 className="text-lg font-bold text-[#2B6830] mb-4">Thông tin tài khoản</h2>
         <div className="space-y-3">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#2B6830] to-[#3D8B47] flex items-center justify-center text-white text-2xl font-extrabold shrink-0">
-              {currentUser?.name?.charAt(0) || '?'}
-            </div>
+            <StudentAvatar skin={equippedSkin} name={currentUser?.name} size={56} />
             <div>
               <p className="font-bold text-slate-800 text-lg">{currentUser?.name}</p>
-              <p className="text-xs text-slate-400 font-mono">{currentUser?.studentCode || currentUser?.loginId}</p>
+              {/* Danh hiệu: skin MỐC cao nhất đã mở khóa bằng thành tích */}
+              {title && (
+                <span className="inline-block text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5 mt-0.5">🏅 {title}</span>
+              )}
+              <p className="text-xs text-slate-400 font-mono mt-0.5">{currentUser?.studentCode || currentUser?.loginId}</p>
+              <Link to="/student/skins" className="inline-block mt-1 text-[11px] font-bold text-[#2B6830] hover:underline">🎨 Đổi skin avatar →</Link>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3 mt-4">
@@ -96,7 +128,6 @@ const Profile = () => {
         <h2 className="text-lg font-bold text-[#2B6830] mb-1">Đổi mật khẩu</h2>
         <p className="text-xs text-slate-400 mb-4">Mật khẩu phải từ 6 ký tự trở lên.</p>
 
-        {/* Thông báo lỗi / thành công */}
         {error && (
           <div className="mb-4 flex items-start gap-2 bg-red-50 text-red-700 border border-red-200 px-4 py-3 rounded-xl text-sm">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 shrink-0 mt-0.5">

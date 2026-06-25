@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { db } from '../../firebase';
@@ -57,6 +57,18 @@ const Icons = {
       <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
     </svg>
   ),
+  // Icon Skin (gương mặt cười) — khu Cửa hàng Skin
+  Skins: ({ active }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke={active ? "#2B6830" : "#64748b"} className="w-5 h-5">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15.182 15.182a4.5 4.5 0 01-6.364 0M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75zm-.375 0h.008v.015h-.008V9.75zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75zm-.375 0h.008v.015h-.008V9.75z" />
+    </svg>
+  ),
+  // Icon cúp — Bảng Vinh Danh
+  Trophy: ({ active }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke={active ? "#2B6830" : "#64748b"} className="w-5 h-5">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 01-.982-3.172M9.497 14.25a7.454 7.454 0 00.981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 007.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 002.748 1.35m8.272-6.842V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.492a46.32 46.32 0 012.916.52 6.003 6.003 0 01-5.395 4.972m0 0a6.726 6.726 0 01-2.749 1.35m0 0a6.772 6.772 0 01-3.044 0" />
+    </svg>
+  ),
 };
 
 const StudentLayout = () => {
@@ -85,7 +97,15 @@ const StudentLayout = () => {
   }, [currentUser?.id]);
 
   const isActive = (path) => location.pathname.includes(path);
-  const mobileLinkClass = (path) => `flex flex-col items-center justify-center w-full h-full space-y-1 ${isActive(path) ? 'text-[#2B6830]' : 'text-slate-400 hover:text-slate-600'}`;
+  // Mỗi thẻ có bề rộng tối thiểu cố định + không co lại (shrink-0) để thanh nav cuộn ngang được
+  const mobileLinkClass = (path) => `flex flex-col items-center justify-center shrink-0 min-w-[64px] h-full space-y-1 px-0.5 ${isActive(path) ? 'text-[#2B6830]' : 'text-slate-400 hover:text-slate-600'}`;
+
+  // Tự cuộn thẻ đang chọn vào giữa thanh nav (vì giờ nav cuộn ngang, thẻ active có thể nằm ngoài màn hình)
+  const bottomNavRef = useRef(null);
+  useEffect(() => {
+    const active = bottomNavRef.current?.querySelector('[data-active="true"]');
+    if (active) active.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+  }, [location.pathname]);
 
   const handleLogout = () => {
     logout();
@@ -158,6 +178,16 @@ const StudentLayout = () => {
             <span className="flex-1">BAVN Credits</span>
             <span className="text-[9px] font-bold bg-[#E8F4EC] text-[#2B6830] px-1.5 py-0.5 rounded border border-green-100 uppercase">Mới</span>
           </Link>
+          <Link to="/student/skins" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('skins') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
+            <Icons.Skins active={isActive('skins')} />
+            <span className="flex-1">Cửa hàng Skin</span>
+            <span className="text-[9px] font-bold bg-[#E8F4EC] text-[#2B6830] px-1.5 py-0.5 rounded border border-green-100 uppercase">Mới</span>
+          </Link>
+          <Link to="/student/leaderboard" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('leaderboard') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
+            <Icons.Trophy active={isActive('leaderboard')} />
+            <span className="flex-1">Bảng Vinh Danh</span>
+            <span className="text-[9px] font-bold bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded border border-amber-200 uppercase">Hot</span>
+          </Link>
 
           <p className="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 mt-4">Tài nguyên</p>
           <Link to="/student/resources" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('resources') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
@@ -212,22 +242,28 @@ const StudentLayout = () => {
         <div className="max-w-6xl mx-auto"><Outlet /></div>
       </main>
 
-      {/* MOBILE BOTTOM NAV */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 h-16 flex justify-around items-center z-50 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-        <Link to="/student/dashboard" className={mobileLinkClass('dashboard')}><Icons.Dashboard active={isActive('dashboard')} /><span className="text-[10px] font-medium">Tổng quan</span></Link>
-        <Link to="/student/attendance" className={mobileLinkClass('attendance')}><Icons.Attendance active={isActive('attendance')} /><span className="text-[10px] font-medium">Đ.Danh</span></Link>
-        <Link to="/student/scores" className={mobileLinkClass('scores')}><Icons.Scores active={isActive('scores')} /><span className="text-[10px] font-medium">Kết quả</span></Link>
-        <Link to="/student/credits" className={mobileLinkClass('credits')}><Icons.Credits active={isActive('credits')} /><span className="text-[10px] font-medium">Credits</span></Link>
-        <Link to="/student/resources" className={mobileLinkClass('resources')}><Icons.Practice active={isActive('resources')} /><span className="text-[10px] font-medium">Luyện tập</span></Link>
-        <Link to="/student/notifications" className={mobileLinkClass('notifications')}><Icons.Noti active={isActive('notifications')} /><span className="text-[10px] font-medium">TBáo</span></Link>
-        <Link to="/student/feedback" className={mobileLinkClass('feedback')}>
+      {/* MOBILE BOTTOM NAV — cuộn ngang (swipe) vì có nhiều thẻ; ẩn thanh cuộn cho gọn */}
+      <nav
+        ref={bottomNavRef}
+        className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 h-16 flex items-center overflow-x-auto overflow-y-hidden z-50 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] [&::-webkit-scrollbar]:hidden"
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
+      >
+        <Link to="/student/dashboard" data-active={isActive('dashboard')} className={mobileLinkClass('dashboard')}><Icons.Dashboard active={isActive('dashboard')} /><span className="text-[10px] font-medium">Tổng quan</span></Link>
+        <Link to="/student/attendance" data-active={isActive('attendance')} className={mobileLinkClass('attendance')}><Icons.Attendance active={isActive('attendance')} /><span className="text-[10px] font-medium">Đ.Danh</span></Link>
+        <Link to="/student/scores" data-active={isActive('scores')} className={mobileLinkClass('scores')}><Icons.Scores active={isActive('scores')} /><span className="text-[10px] font-medium">Kết quả</span></Link>
+        <Link to="/student/credits" data-active={isActive('credits')} className={mobileLinkClass('credits')}><Icons.Credits active={isActive('credits')} /><span className="text-[10px] font-medium">Credits</span></Link>
+        <Link to="/student/skins" data-active={isActive('skins')} className={mobileLinkClass('skins')}><Icons.Skins active={isActive('skins')} /><span className="text-[10px] font-medium">Skin</span></Link>
+        <Link to="/student/leaderboard" data-active={isActive('leaderboard')} className={mobileLinkClass('leaderboard')}><Icons.Trophy active={isActive('leaderboard')} /><span className="text-[10px] font-medium">Vinh danh</span></Link>
+        <Link to="/student/resources" data-active={isActive('resources')} className={mobileLinkClass('resources')}><Icons.Practice active={isActive('resources')} /><span className="text-[10px] font-medium">Luyện tập</span></Link>
+        <Link to="/student/notifications" data-active={isActive('notifications')} className={mobileLinkClass('notifications')}><Icons.Noti active={isActive('notifications')} /><span className="text-[10px] font-medium">TBáo</span></Link>
+        <Link to="/student/feedback" data-active={isActive('feedback')} className={mobileLinkClass('feedback')}>
           <div className="relative">
             <Icons.Feedback active={isActive('feedback')} />
             {feedbackUnread > 0 && <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-1 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">{feedbackUnread > 9 ? '9+' : feedbackUnread}</span>}
           </div>
           <span className="text-[10px] font-medium">Phản ánh</span>
         </Link>
-        <Link to="/student/contact" className={mobileLinkClass('contact')}><Icons.Contact active={isActive('contact')} /><span className="text-[10px] font-medium">Liên hệ</span></Link>
+        <Link to="/student/contact" data-active={isActive('contact')} className={mobileLinkClass('contact')}><Icons.Contact active={isActive('contact')} /><span className="text-[10px] font-medium">Liên hệ</span></Link>
       </nav>
 
       {/* MODAL */}

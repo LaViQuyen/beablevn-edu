@@ -1,0 +1,173 @@
+// src/assets.js
+// NÂNG CẤP ĐỒ HỌA SVG - HÀNH TRÌNH TRƯỞNG THÀNH (GLOSSY 3D v3.0)
+// Phong cách: 2D Vector có KHỐI NỔI — gradient nhiều chặng, highlight bóng (specular),
+// viền tối tạo chiều sâu, mắt long lanh có đốm sáng. Giữ nguyên viewBox + key + SIZES.
+
+const commonDefs = `<defs>
+  <radialGradient id="skinGrad" cx="40%" cy="30%" r="72%"><stop offset="0%" stop-color="#FFF2E0"/><stop offset="60%" stop-color="#FFD9A8"/><stop offset="100%" stop-color="#E6A468"/></radialGradient>
+  <linearGradient id="hairGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#5A3A22"/><stop offset="55%" stop-color="#38230F"/><stop offset="100%" stop-color="#150B05"/></linearGradient>
+  <radialGradient id="headShine" cx="34%" cy="24%" r="55%"><stop offset="0%" stop-color="#ffffff" stop-opacity="0.6"/><stop offset="55%" stop-color="#ffffff" stop-opacity="0"/></radialGradient>
+  <radialGradient id="irisGrad" cx="50%" cy="32%" r="68%"><stop offset="0%" stop-color="#6E4C2C"/><stop offset="100%" stop-color="#241405"/></radialGradient>
+  <radialGradient id="cheek" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FF9E9E" stop-opacity="0.6"/><stop offset="100%" stop-color="#FF9E9E" stop-opacity="0"/></radialGradient>
+</defs>`;
+
+const genericHeadAndFeet = `
+<ellipse cx="50" cy="123" rx="27" ry="6" fill="#000" opacity="0.18"/>
+<rect x="34" y="94" width="13" height="24" rx="6" fill="#2E4D6B"/><rect x="53" y="94" width="13" height="24" rx="6" fill="#2E4D6B"/>
+<ellipse cx="40" cy="119" rx="11" ry="5" fill="#16242F"/><ellipse cx="60" cy="119" rx="11" ry="5" fill="#16242F"/>
+<ellipse cx="37" cy="116" rx="4" ry="1.5" fill="#ffffff" opacity="0.22"/><ellipse cx="57" cy="116" rx="4" ry="1.5" fill="#ffffff" opacity="0.22"/>
+<circle cx="26.5" cy="39" r="5" fill="url(#skinGrad)" stroke="#d9985f" stroke-width="1"/><circle cx="73.5" cy="39" r="5" fill="url(#skinGrad)" stroke="#d9985f" stroke-width="1"/>
+<circle cx="50" cy="36" r="24" fill="url(#skinGrad)" stroke="#dd9c63" stroke-width="1.5"/>
+<path d="M26 35 Q23 8 50 7 Q77 8 74 35 Q67 18 50 17 Q33 18 26 35 Z" fill="url(#hairGrad)"/>
+<path d="M31 17 Q42 11 53 14" fill="none" stroke="#8a5a34" stroke-width="2" opacity="0.45" stroke-linecap="round"/>
+<circle cx="33" cy="46" r="6" fill="url(#cheek)"/><circle cx="67" cy="46" r="6" fill="url(#cheek)"/>
+<ellipse cx="40" cy="38" rx="6.5" ry="7.5" fill="#fff"/><ellipse cx="60" cy="38" rx="6.5" ry="7.5" fill="#fff"/>
+<circle cx="40.5" cy="39" r="4.2" fill="url(#irisGrad)"/><circle cx="60.5" cy="39" r="4.2" fill="url(#irisGrad)"/>
+<circle cx="42" cy="37.3" r="1.7" fill="#fff"/><circle cx="62" cy="37.3" r="1.7" fill="#fff"/>
+<circle cx="38.8" cy="40.6" r="0.9" fill="#fff" opacity="0.7"/><circle cx="58.8" cy="40.6" r="0.9" fill="#fff" opacity="0.7"/>
+<path d="M42 48 Q50 53 58 48" fill="none" stroke="#7a4a2b" stroke-width="2" stroke-linecap="round"/>
+<circle cx="50" cy="36" r="24" fill="url(#headShine)"/>`;
+
+export const SVG = {
+  player_1: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 128" width="100" height="128">${commonDefs}
+    <defs><linearGradient id="p1body" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#8FF3B8"/><stop offset="100%" stop-color="#33B567"/></linearGradient></defs>
+    ${genericHeadAndFeet}
+    <path d="M24 62 Q24 57 32 57 L68 57 Q76 57 76 62 L74 98 Q50 106 26 98 Z" fill="url(#p1body)" stroke="#1E7A3A" stroke-width="2"/>
+    <path d="M30 61 Q50 67 70 61" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.45" stroke-linecap="round"/>
+    <circle cx="50" cy="78" r="8" fill="#FFD23F" stroke="#E0A800" stroke-width="1"/>
+    <circle cx="47.4" cy="75.4" r="2.4" fill="#fff" opacity="0.75"/>
+    <path d="M50 78 L47 85 M50 78 L53 85" stroke="#E0A800" stroke-width="1"/>
+    <path d="M50 13 L50 2" stroke="#2E8B3A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M50 7 Q42 0 38 8 Q46 11 50 7 Z" fill="#7CF0A0" stroke="#2E8B3A" stroke-width="1.2"/>
+    <path d="M50 7 Q58 0 62 8 Q54 11 50 7 Z" fill="#5FD98A" stroke="#2E8B3A" stroke-width="1.2"/>
+  </svg>`,
+
+  player_2: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 128" width="100" height="128">${commonDefs}
+    <defs><linearGradient id="p2shirt" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#DCE6F0"/></linearGradient>
+    <linearGradient id="p2pant" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3C84CC"/><stop offset="100%" stop-color="#22568C"/></linearGradient>
+    <linearGradient id="p2scarf" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#F0503F"/><stop offset="100%" stop-color="#B81E12"/></linearGradient></defs>
+    ${genericHeadAndFeet}
+    <path d="M24 60 Q24 56 32 56 L68 56 Q76 56 76 60 L76 100 L24 100 Z" fill="url(#p2shirt)" stroke="#9fb3c8" stroke-width="2"/>
+    <rect x="24" y="90" width="52" height="10" fill="url(#p2pant)"/>
+    <path d="M30 59 L34 96" stroke="#ffffff" stroke-width="2" opacity="0.5" stroke-linecap="round"/>
+    <path d="M40 56 L60 56 L50 68 Z" fill="#ffffff" stroke="#cdd9e5" stroke-width="1"/>
+    <path d="M43 56 L57 56 Q50 72 43 56 Z" fill="url(#p2scarf)"/>
+    <path d="M47 62 L50 78 L53 62 Z" fill="url(#p2scarf)" stroke="#a3160c" stroke-width="1"/>
+    <circle cx="48" cy="60" r="1.6" fill="#fff" opacity="0.7"/>
+  </svg>`,
+
+  player_3: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 128" width="100" height="128">${commonDefs}
+    <defs><linearGradient id="p3shirt" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#D8E2EE"/></linearGradient>
+    <linearGradient id="p3tie" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#D8483B"/><stop offset="100%" stop-color="#8E2018"/></linearGradient>
+    <linearGradient id="p3pant" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#34475C"/><stop offset="100%" stop-color="#1E2B38"/></linearGradient></defs>
+    ${genericHeadAndFeet}
+    <path d="M24 58 Q24 55 32 55 L68 55 Q76 55 76 58 L76 102 L24 102 Z" fill="url(#p3shirt)" stroke="#9fb3c8" stroke-width="2"/>
+    <rect x="24" y="88" width="52" height="14" fill="url(#p3pant)"/>
+    <path d="M30 57 L33 98" stroke="#ffffff" stroke-width="2" opacity="0.5" stroke-linecap="round"/>
+    <path d="M48 55 L52 55 L54 62 L50 70 L46 62 Z" fill="url(#p3tie)"/>
+    <rect x="48" y="70" width="4" height="12" fill="url(#p3tie)"/>
+    <circle cx="65" cy="65" r="3.4" fill="#FFD23F" stroke="#E0A800" stroke-width="1"/>
+    <circle cx="64" cy="64" r="1" fill="#fff" opacity="0.8"/>
+  </svg>`,
+
+  player_4: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 128" width="100" height="128">${commonDefs}
+    <defs><linearGradient id="p4shirt" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#DCE6F0"/></linearGradient>
+    <linearGradient id="p4pant" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#2A3744"/><stop offset="100%" stop-color="#141C24"/></linearGradient></defs>
+    <ellipse cx="50" cy="123" rx="27" ry="6" fill="#000" opacity="0.18"/>
+    <rect x="34" y="94" width="13" height="24" rx="6" fill="#2E4D6B"/><rect x="53" y="94" width="13" height="24" rx="6" fill="#2E4D6B"/>
+    <ellipse cx="40" cy="119" rx="11" ry="5" fill="#16242F"/><ellipse cx="60" cy="119" rx="11" ry="5" fill="#16242F"/>
+    <circle cx="26.5" cy="39" r="5" fill="url(#skinGrad)" stroke="#d9985f" stroke-width="1"/><circle cx="73.5" cy="39" r="5" fill="url(#skinGrad)" stroke="#d9985f" stroke-width="1"/>
+    <circle cx="50" cy="36" r="24" fill="url(#skinGrad)" stroke="#dd9c63" stroke-width="1.5"/>
+    <path d="M25 32 Q30 5 50 3 Q70 5 75 32 Q67 15 50 14 Q33 15 25 32 Z" fill="url(#hairGrad)"/>
+    <path d="M32 14 Q46 7 58 11" fill="none" stroke="#8a5a34" stroke-width="2" opacity="0.45" stroke-linecap="round"/>
+    <circle cx="33" cy="46" r="6" fill="url(#cheek)"/><circle cx="67" cy="46" r="6" fill="url(#cheek)"/>
+    <ellipse cx="40" cy="38" rx="6" ry="7" fill="#fff"/><ellipse cx="60" cy="38" rx="6" ry="7" fill="#fff"/>
+    <circle cx="40.5" cy="39" r="4" fill="url(#irisGrad)"/><circle cx="60.5" cy="39" r="4" fill="url(#irisGrad)"/>
+    <circle cx="42" cy="37.4" r="1.5" fill="#fff"/><circle cx="62" cy="37.4" r="1.5" fill="#fff"/>
+    <rect x="32" y="34" width="14" height="10" rx="2.5" fill="#bfe3ff" fill-opacity="0.35" stroke="#2c3e50" stroke-width="1.6"/>
+    <rect x="54" y="34" width="14" height="10" rx="2.5" fill="#bfe3ff" fill-opacity="0.35" stroke="#2c3e50" stroke-width="1.6"/>
+    <line x1="46" y1="39" x2="54" y2="39" stroke="#2c3e50" stroke-width="1.6"/>
+    <path d="M42 49 Q50 52 58 49" fill="none" stroke="#7a4a2b" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="50" cy="36" r="24" fill="url(#headShine)"/>
+    <path d="M24 58 L76 58 L76 104 L24 104 Z" fill="url(#p4shirt)" stroke="#9fb3c8" stroke-width="2"/>
+    <rect x="24" y="86" width="52" height="18" fill="url(#p4pant)"/>
+    <rect x="47" y="58" width="6" height="30" fill="#E23B2E" opacity="0.85"/>
+    <path d="M30 59 L32 84" stroke="#ffffff" stroke-width="2" opacity="0.5" stroke-linecap="round"/>
+  </svg>`,
+
+  player_5: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 128" width="100" height="128">${commonDefs}
+    <defs><linearGradient id="p5gown" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3A3358"/><stop offset="100%" stop-color="#1A1428"/></linearGradient>
+    <linearGradient id="p5cap" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#2A2838"/><stop offset="100%" stop-color="#0E0C18"/></linearGradient>
+    <linearGradient id="p5sash" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#2E9D52"/><stop offset="100%" stop-color="#176030"/></linearGradient></defs>
+    <ellipse cx="50" cy="123" rx="27" ry="6" fill="#000" opacity="0.18"/>
+    <rect x="34" y="94" width="13" height="24" rx="6" fill="#1c0f30"/><rect x="53" y="94" width="13" height="24" rx="6" fill="#1c0f30"/>
+    <ellipse cx="40" cy="119" rx="11" ry="5" fill="#10081c"/><ellipse cx="60" cy="119" rx="11" ry="5" fill="#10081c"/>
+    <circle cx="26.5" cy="39" r="5" fill="url(#skinGrad)" stroke="#d9985f" stroke-width="1"/><circle cx="73.5" cy="39" r="5" fill="url(#skinGrad)" stroke="#d9985f" stroke-width="1"/>
+    <circle cx="50" cy="36" r="24" fill="url(#skinGrad)" stroke="#dd9c63" stroke-width="1.5"/>
+    <circle cx="33" cy="46" r="6" fill="url(#cheek)"/><circle cx="67" cy="46" r="6" fill="url(#cheek)"/>
+    <ellipse cx="40" cy="40" rx="6.2" ry="7" fill="#fff"/><ellipse cx="60" cy="40" rx="6.2" ry="7" fill="#fff"/>
+    <circle cx="40.5" cy="41" r="4" fill="url(#irisGrad)"/><circle cx="60.5" cy="41" r="4" fill="url(#irisGrad)"/>
+    <circle cx="42" cy="39.4" r="1.6" fill="#fff"/><circle cx="62" cy="39.4" r="1.6" fill="#fff"/>
+    <path d="M42 50 Q50 54 58 50" fill="none" stroke="#7a4a2b" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="50" cy="36" r="24" fill="url(#headShine)"/>
+    <polygon points="50,2 88,14 50,26 12,14" fill="url(#p5cap)" stroke="#000" stroke-width="1"/>
+    <polygon points="50,4 80,14 50,24 20,14" fill="#ffffff" opacity="0.08"/>
+    <path d="M44 23 Q50 30 56 23 L56 26 Q50 32 44 26 Z" fill="url(#p5cap)"/>
+    <line x1="50" y1="14" x2="80" y2="14" stroke="#FFD23F" stroke-width="1.5"/>
+    <circle cx="80" cy="26" r="3" fill="#FFD23F"/><circle cx="79" cy="25" r="1" fill="#fff" opacity="0.8"/>
+    <path d="M22 60 L78 60 L80 106 L20 106 Z" fill="url(#p5gown)" stroke="#15101f" stroke-width="2"/>
+    <path d="M42 60 L38 106 L46 106 L48 60 Z" fill="url(#p5sash)"/>
+    <path d="M58 60 L62 106 L54 106 L52 60 Z" fill="url(#p5sash)"/>
+    <path d="M26 62 L24 104" stroke="#ffffff" stroke-width="2" opacity="0.18" stroke-linecap="round"/>
+    <rect x="10" y="80" width="18" height="6" rx="2" fill="#fff" stroke="#ccc" stroke-width="1"/>
+    <rect x="18" y="80" width="2" height="6" fill="#E23B2E"/>
+  </svg>`,
+
+  khoc: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 108" width="100" height="108"><defs><radialGradient id="waterGrad" cx="38%" cy="28%" r="72%"><stop offset="0%" stop-color="#E2F7FF"/><stop offset="55%" stop-color="#3FA6E0"/><stop offset="100%" stop-color="#16466A"/></radialGradient><radialGradient id="eyeRed" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ff9999" stop-opacity="0"/><stop offset="100%" stop-color="#ff0000" stop-opacity="0.7"/></radialGradient><radialGradient id="kspec" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ffffff" stop-opacity="0.9"/><stop offset="100%" stop-color="#ffffff" stop-opacity="0"/></radialGradient></defs><ellipse cx="50" cy="101" rx="24" ry="5.5" fill="#000" opacity="0.2"/><path d="M50 5 C80 40 90 60 90 75 A40 40 0 1 1 10 75 C10 60 20 40 50 5 Z" fill="url(#waterGrad)" stroke="#1b4f73" stroke-width="2.5"/><ellipse cx="36" cy="40" rx="13" ry="18" fill="url(#kspec)" opacity="0.8"/><circle cx="36" cy="65" r="12" fill="#fff"/><circle cx="64" cy="65" r="12" fill="#fff"/><circle cx="36" cy="65" r="12" fill="url(#eyeRed)"/><circle cx="64" cy="65" r="12" fill="url(#eyeRed)"/><circle cx="38" cy="67" r="5" fill="#111"/><circle cx="66" cy="67" r="5" fill="#111"/><circle cx="40" cy="64.5" r="1.8" fill="#fff"/><circle cx="68" cy="64.5" r="1.8" fill="#fff"/><path d="M30 75 Q30 95 25 102 M70 75 Q70 95 75 102" fill="none" stroke="#a9d6ff" stroke-width="4" stroke-linecap="round" opacity="0.85"/><path d="M42 88 Q50 78 58 88" fill="none" stroke="#111" stroke-width="3" stroke-linecap="round"/></svg>`,
+
+  giành: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 104 100" width="104" height="100"><defs><radialGradient id="greedGrad" cx="42%" cy="32%" r="68%"><stop offset="0%" stop-color="#FFE0A8"/><stop offset="80%" stop-color="#F39C12"/><stop offset="100%" stop-color="#C44E02"/></radialGradient></defs><ellipse cx="52" cy="94" rx="28" ry="6" fill="#000" opacity="0.25"/><rect x="12" y="15" width="80" height="75" rx="16" fill="url(#greedGrad)" stroke="#8c3e03" stroke-width="3"/><path d="M22 22 Q52 16 82 22" fill="none" stroke="#ffffff" stroke-width="4" opacity="0.4" stroke-linecap="round"/><circle cx="35" cy="45" r="13" fill="#fff"/><circle cx="69" cy="45" r="13" fill="#fff"/><circle cx="38" cy="48" r="6" fill="#111"/><circle cx="72" cy="48" r="6" fill="#111"/><circle cx="40" cy="45.5" r="2" fill="#fff"/><circle cx="74" cy="45.5" r="2" fill="#fff"/><path d="M25 30 L45 38 M79 30 L59 38" stroke="#111" stroke-width="4" stroke-linecap="round"/><path d="M35 75 Q52 88 69 75 Z" fill="#8c3e03"/><polygon points="38,76 42,80 46,76" fill="#fff"/><polygon points="66,76 62,80 58,76" fill="#fff"/><path d="M5 50 Q0 30 15 35 Z M99 50 Q104 30 89 35 Z" fill="#d35400" stroke="#8c3e03"/></svg>`,
+
+  vietau: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" width="50" height="50"><defs><radialGradient id="inkGrad" cx="42%" cy="34%" r="64%"><stop offset="0%" stop-color="#7C8A99"/><stop offset="60%" stop-color="#2C3A47"/><stop offset="100%" stop-color="#10171E"/></radialGradient></defs><ellipse cx="25" cy="46" rx="20" ry="4" fill="#000" opacity="0.3"/><path d="M5 25 Q0 5 20 10 T35 5 T45 20 T35 45 T10 40 Z" fill="url(#inkGrad)" stroke="#000" stroke-width="2"/><ellipse cx="17" cy="17" rx="6" ry="8" fill="#ffffff" opacity="0.22"/><circle cx="16" cy="25" r="7" fill="#fff"/><circle cx="34" cy="25" r="7" fill="#fff"/><circle cx="18" cy="27" r="3.5" fill="#e74c3c"/><circle cx="36" cy="27" r="3.5" fill="#e74c3c"/><circle cx="19.4" cy="25.6" r="1.2" fill="#fff"/><circle cx="37.4" cy="25.6" r="1.2" fill="#fff"/><path d="M10 15 Q20 20 25 10 M40 15 Q30 20 25 10" stroke="#fff" stroke-width="2"/><path d="M18 38 Q25 45 32 38" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>`,
+
+  boss_1: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="120" height="120"><defs><radialGradient id="boss1Grad" cx="35%" cy="30%" r="70%"><stop offset="0%" stop-color="#FFE0E6"/><stop offset="60%" stop-color="#FF4D6D"/><stop offset="100%" stop-color="#8E0F33"/></radialGradient><radialGradient id="b1spec" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#fff" stop-opacity="0.95"/><stop offset="100%" stop-color="#fff" stop-opacity="0"/></radialGradient></defs><ellipse cx="50" cy="96" rx="34" ry="6" fill="#000" opacity="0.18"/><circle cx="50" cy="50" r="48" fill="url(#boss1Grad)" stroke="#590d22" stroke-width="4"/><ellipse cx="34" cy="30" rx="15" ry="11" fill="url(#b1spec)"/><circle cx="32" cy="42" r="10" fill="#fff"/><circle cx="68" cy="42" r="10" fill="#fff"/><circle cx="35" cy="45" r="5" fill="#111"/><circle cx="71" cy="45" r="5" fill="#111"/><circle cx="37" cy="43" r="1.6" fill="#fff"/><circle cx="73" cy="43" r="1.6" fill="#fff"/><path d="M25 70 Q50 90 75 70" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/><path d="M46 55 Q46 65 42 68 M54 55 Q54 65 58 68" fill="none" stroke="#7ed957" stroke-width="3" opacity="0.7"/></svg>`,
+
+  boss_2: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="120" height="120"><defs><linearGradient id="b2page" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#E7ECF2"/></linearGradient><linearGradient id="b2red" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#F0503F"/><stop offset="100%" stop-color="#B81E12"/></linearGradient></defs><ellipse cx="50" cy="96" rx="34" ry="5" fill="#000" opacity="0.18"/><rect x="10" y="5" width="80" height="90" rx="5" fill="url(#b2page)" stroke="#333" stroke-width="2"/><line x1="20" y1="5" x2="20" y2="95" stroke="#ffd0d0" stroke-width="1.2"/><line x1="10" y1="20" x2="90" y2="20" stroke="#dbe6f0" stroke-width="1"/><line x1="10" y1="40" x2="90" y2="40" stroke="#dbe6f0" stroke-width="1"/><line x1="10" y1="60" x2="90" y2="60" stroke="#dbe6f0" stroke-width="1"/><line x1="10" y1="80" x2="90" y2="80" stroke="#dbe6f0" stroke-width="1"/><path d="M10 50 L30 45 L25 55 L40 50 L35 60 L10 55 Z" fill="#b9c2cc" stroke="#333" stroke-width="1"/><path d="M20 20 L80 80 M80 20 L20 80" stroke="url(#b2red)" stroke-width="12" stroke-linecap="round" opacity="0.92"/><path d="M24 22 L76 74" stroke="#fff" stroke-width="2" opacity="0.35" stroke-linecap="round"/><ellipse cx="35" cy="45" rx="8" ry="12" fill="#e74c3c"/><ellipse cx="65" cy="45" rx="8" ry="12" fill="#e74c3c"/><circle cx="35" cy="45" r="3" fill="#111"/><circle cx="65" cy="45" r="3" fill="#111"/><circle cx="36.5" cy="43.5" r="1.1" fill="#fff"/><circle cx="66.5" cy="43.5" r="1.1" fill="#fff"/></svg>`,
+
+  boss_3: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="120" height="120"><defs><linearGradient id="paperGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#E4E8ED"/></linearGradient></defs><ellipse cx="50" cy="92" rx="34" ry="5" fill="#000" opacity="0.18"/><rect x="20" y="15" width="60" height="70" rx="2" fill="url(#paperGrad)" stroke="#bbb" stroke-width="1" transform="rotate(-10 50 50)"/><rect x="25" y="10" width="60" height="70" rx="2" fill="url(#paperGrad)" stroke="#bbb" stroke-width="1" transform="rotate(5 50 50)"/><rect x="20" y="10" width="60" height="70" rx="2" fill="url(#paperGrad)" stroke="#999" stroke-width="2"/><path d="M24 14 L24 76" stroke="#fff" stroke-width="2" opacity="0.6"/><text x="50" y="56" font-size="38" font-weight="900" fill="#e23b2e" text-anchor="middle" font-family="Arial">10</text><path d="M35 40 L30 30 M65 40 L70 30 M50 66 L50 76" stroke="#e23b2e" stroke-width="3" stroke-linecap="round"/><path d="M30 46 Q35 41 40 46 M60 46 Q65 41 70 46" fill="none" stroke="#111" stroke-width="3" stroke-linecap="round"/></svg>`,
+
+  boss_4: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="120" height="120"><defs><linearGradient id="sandGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFE07A"/><stop offset="100%" stop-color="#C44E02"/></linearGradient><linearGradient id="glassGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#D6DDF7"/><stop offset="100%" stop-color="#8E99C9"/></linearGradient></defs><ellipse cx="50" cy="93" rx="30" ry="5" fill="#000" opacity="0.18"/><path d="M30 10 L70 10 L65 45 Q50 50 35 45 Z" fill="url(#glassGrad)" stroke="#2c3e50" stroke-width="2"/><path d="M30 90 L70 90 L65 55 Q50 50 35 55 Z" fill="url(#glassGrad)" stroke="#2c3e50" stroke-width="2"/><path d="M34 13 L40 13 L37 30 Z" fill="#fff" opacity="0.5"/><path d="M35 15 L65 15 L60 40 Q50 45 40 40 Z" fill="url(#sandGrad)"/><rect x="49" y="45" width="2" height="10" fill="#C44E02"/><path d="M40 85 Q50 70 60 85 Z" fill="url(#sandGrad)"/><circle cx="38" cy="65" r="8" fill="#e74c3c" stroke="#8b0000" stroke-width="2"/><circle cx="62" cy="65" r="8" fill="#e74c3c" stroke="#8b0000" stroke-width="2"/><circle cx="40" cy="63" r="2" fill="#111"/><circle cx="64" cy="63" r="2" fill="#111"/><path d="M45 75 Q50 80 55 75" fill="none" stroke="#111" stroke-width="2" stroke-linecap="round"/></svg>`,
+
+  boss_5: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="120" height="120"><defs><linearGradient id="cubeTop" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#6A6A78"/><stop offset="100%" stop-color="#3A3A46"/></linearGradient><linearGradient id="cubeL" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#2C2C36"/><stop offset="100%" stop-color="#121218"/></linearGradient><linearGradient id="cubeR" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#43434F"/><stop offset="100%" stop-color="#222230"/></linearGradient></defs><ellipse cx="50" cy="94" rx="30" ry="5" fill="#000" opacity="0.2"/><polygon points="50,10 90,30 50,50 10,30" fill="url(#cubeTop)" stroke="#000" stroke-width="2"/><polygon points="10,30 50,50 50,90 10,70" fill="url(#cubeL)" stroke="#000" stroke-width="2"/><polygon points="90,30 50,50 50,90 90,70" fill="url(#cubeR)" stroke="#000" stroke-width="2"/><polygon points="50,12 84,30 50,48 16,30" fill="#ffffff" opacity="0.08"/><circle cx="30" cy="52" r="10" fill="#fff" stroke="#e23b2e" stroke-width="2"/><circle cx="28" cy="52" r="4" fill="#111"/><circle cx="29.4" cy="50.6" r="1.2" fill="#fff"/><circle cx="70" cy="52" r="10" fill="#fff" stroke="#e23b2e" stroke-width="2"/><circle cx="72" cy="52" r="4" fill="#111"/><circle cx="73.4" cy="50.6" r="1.2" fill="#fff"/><ellipse cx="50" cy="30" rx="12" ry="6" fill="#fff" stroke="#e23b2e" stroke-width="1.5"/><circle cx="50" cy="30" r="3" fill="#111"/><circle cx="51" cy="29" r="0.9" fill="#fff"/></svg>`,
+
+  w_lenghia: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40"><defs><radialGradient id="heartGlow" cx="40%" cy="32%" r="60%"><stop offset="0%" stop-color="#fff"/><stop offset="60%" stop-color="#ffc0cb"/><stop offset="100%" stop-color="#ff7aa0"/></radialGradient></defs><path d="M20 35 C-5 20 5 5 20 10 C35 5 45 20 20 35 Z" fill="url(#heartGlow)" stroke="#ff69b4" stroke-width="2"/><ellipse cx="14" cy="15" rx="3.2" ry="2.2" fill="#fff" opacity="0.8"/></svg>`,
+
+  w_thaido: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40"><defs><radialGradient id="bubbleGrad" cx="42%" cy="36%" r="60%"><stop offset="0%" stop-color="#fff" stop-opacity="0.95"/><stop offset="75%" stop-color="#ffd700" stop-opacity="0.5"/><stop offset="100%" stop-color="#daa520" stop-opacity="0.85"/></radialGradient></defs><circle cx="20" cy="20" r="18" fill="url(#bubbleGrad)" stroke="#daa520" stroke-width="2"/><circle cx="14" cy="14" r="5" fill="#fff" opacity="0.7"/><circle cx="27" cy="26" r="2" fill="#fff" opacity="0.5"/></svg>`,
+
+  w_tay: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 26" width="40" height="26"><defs><linearGradient id="tayG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ff9ecb"/><stop offset="100%" stop-color="#e3609b"/></linearGradient></defs><rect x="2" y="2" width="25" height="22" rx="3" fill="url(#tayG)" stroke="#d65a96" stroke-width="2"/><rect x="20" y="2" width="18" height="22" rx="3" fill="#fff" stroke="#ccc" stroke-width="2"/><rect x="5" y="5" width="18" height="3" rx="1.5" fill="#fff" opacity="0.5"/></svg>`,
+
+  w_vo: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 40" width="30" height="40"><defs><linearGradient id="voG" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#66B5FF"/><stop offset="100%" stop-color="#1D6CC2"/></linearGradient></defs><rect x="2" y="2" width="26" height="36" rx="2" fill="url(#voG)" stroke="#1d6cc2" stroke-width="2"/><line x1="8" y1="2" x2="8" y2="38" stroke="#1d6cc2" stroke-width="1"/><line x1="12" y1="10" x2="24" y2="10" stroke="#fff" stroke-width="1"/><line x1="12" y1="20" x2="24" y2="20" stroke="#fff" stroke-width="1"/><line x1="12" y1="30" x2="24" y2="30" stroke="#fff" stroke-width="1"/><rect x="4" y="4" width="2" height="32" fill="#fff" opacity="0.4"/></svg>`,
+
+  w_but: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 10" width="40" height="10"><rect x="10" y="2" width="28" height="6" rx="1" fill="#bfe3f2" opacity="0.8" stroke="#999" stroke-width="1"/><rect x="12" y="4" width="24" height="2" fill="#111"/><rect x="12" y="2.6" width="20" height="1" fill="#fff" opacity="0.7"/><polygon points="0,5 10,1 10,9" fill="#111"/></svg>`,
+
+  w_kienthuc: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40"><defs><radialGradient id="ktG" cx="38%" cy="32%" r="65%"><stop offset="0%" stop-color="#FFF6C0"/><stop offset="65%" stop-color="#FFD700"/><stop offset="100%" stop-color="#C8920A"/></radialGradient></defs><circle cx="20" cy="20" r="16" fill="url(#ktG)" stroke="#DAA520" stroke-width="2"/><ellipse cx="14" cy="13" rx="4.5" ry="3" fill="#fff" opacity="0.8"/></svg>`,
+
+  w_kynang: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 40" width="30" height="40"><defs><linearGradient id="knG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#BFFFFF"/><stop offset="100%" stop-color="#00C8C8"/></linearGradient></defs><path d="M15 2 L2 20 L12 20 L10 38 L28 16 L16 16 Z" fill="url(#knG)" stroke="#008B8B" stroke-width="2"/><path d="M13 5 L6 17" stroke="#fff" stroke-width="1.5" opacity="0.7" stroke-linecap="round"/></svg>`,
+
+  w_trinhdo: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 30" width="40" height="30"><defs><linearGradient id="tdG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFF0A0"/><stop offset="100%" stop-color="#D4A50A"/></linearGradient></defs><path d="M2 28 L8 10 L20 20 L32 10 L38 28 Z" fill="url(#tdG)" stroke="#DAA520" stroke-width="2"/><circle cx="20" cy="20" r="2" fill="#fff" opacity="0.8"/></svg>`,
+
+  flag: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 88" width="52" height="88"><defs><linearGradient id="flagG" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#FFE57A"/><stop offset="100%" stop-color="#E0A800"/></linearGradient></defs><rect x="6" y="2" width="6" height="86" rx="3" fill="#a0b1c5"/><rect x="7" y="2" width="2" height="86" fill="#fff" opacity="0.4"/><path d="M12 6 L50 18 L12 32 Z" fill="url(#flagG)"/></svg>`,
+  heart: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 32" width="34" height="32"><defs><radialGradient id="hG" cx="40%" cy="32%" r="62%"><stop offset="0%" stop-color="#FF95A3"/><stop offset="100%" stop-color="#E6394F"/></radialGradient></defs><path d="M17 30 C2 19 2 7 10 6 C14 5 17 9 17 11 C17 9 20 5 24 6 C32 7 32 19 17 30 Z" fill="url(#hG)"/><ellipse cx="11" cy="11" rx="2.6" ry="1.8" fill="#fff" opacity="0.7"/></svg>`,
+  lock: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 44" width="40" height="44"><defs><linearGradient id="lkG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#A5B0BE"/><stop offset="100%" stop-color="#76828F"/></linearGradient></defs><rect x="6" y="18" width="28" height="22" rx="5" fill="url(#lkG)"/><path d="M12 18 v-5 a8 8 0 0 1 16 0 v5" fill="none" stroke="#5d6877" stroke-width="3"/><rect x="9" y="20" width="3" height="16" fill="#fff" opacity="0.3"/></svg>`,
+  block: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 70 32" width="70" height="32"><defs><linearGradient id="blkG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#66B5FF"/><stop offset="100%" stop-color="#1D6CC2"/></linearGradient></defs><rect x="2" y="8" width="66" height="22" rx="6" fill="url(#blkG)" stroke="#1d6cc2" stroke-width="2"/><rect x="6" y="11" width="58" height="3" rx="1.5" fill="#fff" opacity="0.4"/></svg>`,
+  ground: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40"><defs><linearGradient id="grdG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#A56E2E"/><stop offset="100%" stop-color="#7A4E20"/></linearGradient></defs><rect width="40" height="40" fill="url(#grdG)"/><path d="M0 16 Q10 8 20 16 T40 16 V0 H0 Z" fill="#5fb948"/><path d="M0 14 Q10 7 20 14 T40 14" fill="none" stroke="#7CF0A0" stroke-width="1.5" opacity="0.5"/></svg>`,
+  water: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40"><defs><linearGradient id="watG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4FB0FF"/><stop offset="100%" stop-color="#1E73C8"/></linearGradient></defs><rect width="40" height="40" fill="url(#watG)" opacity="0.9"/><path d="M0 8 Q10 0 20 8 T40 8 M0 22 Q10 14 20 22 T40 22" fill="none" stroke="#FFF" stroke-width="2" opacity="0.5"/></svg>`,
+  mud: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40"><defs><linearGradient id="mudG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7C4E2C"/><stop offset="100%" stop-color="#583620"/></linearGradient></defs><rect width="40" height="40" fill="url(#mudG)"/><circle cx="12" cy="16" r="3" fill="#52321A"/><circle cx="28" cy="24" r="4" fill="#52321A"/><circle cx="11" cy="15" r="1" fill="#9C7048" opacity="0.6"/></svg>`,
+  boat: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 24" width="80" height="24"><defs><linearGradient id="boatG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#A06A38"/><stop offset="100%" stop-color="#6B4423"/></linearGradient></defs><path d="M0 4 L80 4 L70 24 L10 24 Z" fill="url(#boatG)" stroke="#5C3A21" stroke-width="2"/><line x1="5" y1="10" x2="75" y2="10" stroke="#5C3A21" stroke-width="3"/><line x1="10" y1="17" x2="70" y2="17" stroke="#3A2210" stroke-width="2"/><rect x="15" y="0" width="50" height="4" fill="#CD853F"/></svg>`,
+  cloud: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 60" width="120" height="60"><defs><linearGradient id="cldG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#E2EAF2"/></linearGradient></defs><path d="M20 45 A20 20 0 0 1 40 15 A25 25 0 0 1 80 15 A20 20 0 0 1 100 45 Z" fill="url(#cldG)" opacity="0.95"/></svg>`,
+  bush: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 54" width="96" height="54"><ellipse cx="24" cy="40" rx="22" ry="18" fill="#5FB948"/><ellipse cx="50" cy="32" rx="26" ry="22" fill="#6FCB52"/><ellipse cx="74" cy="42" rx="20" ry="16" fill="#5FB948"/><ellipse cx="46" cy="22" rx="10" ry="5" fill="#8FE070" opacity="0.5"/></svg>`,
+  stone: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 24" width="40" height="24"><defs><linearGradient id="stnG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#9AA7B4"/><stop offset="100%" stop-color="#5C6A78"/></linearGradient></defs><rect x="0" y="2" width="40" height="22" rx="4" fill="url(#stnG)" stroke="#3E4A56" stroke-width="2"/><rect x="3" y="4" width="34" height="4" rx="2" fill="#C7D2DC" opacity="0.55"/><circle cx="10" cy="16" r="2" fill="#46525E" opacity="0.6"/><circle cx="28" cy="18" r="2.4" fill="#46525E" opacity="0.6"/></svg>`,
+  dust: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10" width="10" height="10"><circle cx="5" cy="5" r="5" fill="#ffffff" opacity="0.6"/></svg>`,
+  star: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="20" height="20"><path d="M10 0 L13 7 L20 10 L13 13 L10 20 L7 13 L0 10 L7 7 Z" fill="#FFD23F"/></svg>`
+};
+
+export const SIZES = { player_1: [40, 51], player_2: [45, 57], player_3: [50, 64], player_4: [52, 67], player_5: [55, 70], khoc: [52, 56], giành: [52, 50], vietau: [50, 50], boss_1: [120, 120], boss_2: [120, 120], boss_3: [120, 120], boss_4: [120, 120], boss_5: [120, 120], w_lenghia: [30, 30], w_thaido: [30, 30], w_tay: [30, 20], w_vo: [24, 32], w_but: [40, 10], w_kienthuc: [30, 30], w_kynang: [24, 32], w_trinhdo: [32, 24], flag: [50, 84], heart: [26, 24], lock: [34, 38], ground: [40, 40], water: [40, 40], mud: [40, 40], boat: [80, 24], cloud: [120, 60], bush: [96, 54], stone: [40, 24], dust: [10, 10], star: [20, 20] };

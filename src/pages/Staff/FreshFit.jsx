@@ -314,8 +314,10 @@ const FreshFit = () => {
   const periodNote = (mode, anchor) => `${TIME_LABEL[mode]}${mode !== 'all' ? ' · neo ' + anchor : ''}`;
 
   // Nút 1: chỉ Yêu cầu đổi trong kỳ
+  // LOẠI tài khoản DEMO khỏi file báo cáo (giao dịch demo không được ghi nhận)
   const exportOrdersXlsx = (mode, anchor) => {
-    const orderRows = redemptions
+    const realRedemptions = redemptions.filter(r => !users[r.studentId]?.isDemo);
+    const orderRows = realRedemptions
       .filter(r => inPeriod(r.date, mode, anchor))
       .map(r => ({
         'Ngày': new Date(r.date).toLocaleString('vi-VN'),
@@ -330,11 +332,11 @@ const FreshFit = () => {
       }));
     if (orderRows.length === 0) return showToast('⚠️ Không có yêu cầu đổi nào trong kỳ đã chọn.');
 
-    const confirmedTotal = redemptions
+    const confirmedTotal = realRedemptions
       .filter(r => inPeriod(r.date, mode, anchor) && r.status === 'confirmed')
       .reduce((a, r) => a + (Number(r.totalCredits) || 0), 0);
-    const pendingNum = redemptions.filter(r => inPeriod(r.date, mode, anchor) && r.status === 'pending').length;
-    const rejectedNum = redemptions.filter(r => inPeriod(r.date, mode, anchor) && r.status === 'rejected').length;
+    const pendingNum = realRedemptions.filter(r => inPeriod(r.date, mode, anchor) && r.status === 'pending').length;
+    const rejectedNum = realRedemptions.filter(r => inPeriod(r.date, mode, anchor) && r.status === 'rejected').length;
 
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.json_to_sheet(orderRows);
@@ -353,6 +355,7 @@ const FreshFit = () => {
   // Nút 2: chỉ Lịch sử nạp/trừ Credits + trong kỳ (bản đầy đủ, không cắt 30 dòng)
   const exportTopupXlsx = (mode, anchor) => {
     const plusRows = topupRowsAll
+      .filter(h => !users[h.studentId]?.isDemo) // loại giao dịch demo khỏi báo cáo
       .filter(h => inPeriod(h.date, mode, anchor))
       .map(h => ({
         'Ngày': new Date(h.date).toLocaleString('vi-VN'),
@@ -661,6 +664,8 @@ const FreshFit = () => {
                         <p className="font-bold text-slate-800 text-sm">
                           {r.studentName}
                           {r.userType === 'staff' && <span className="ml-2 text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase bg-purple-50 text-purple-700 border-purple-200">Nhân sự</span>}
+                          {/* Nhãn DEMO: giúp nhân sự FF nhận biết đơn thử nghiệm, không tính vào báo cáo */}
+                          {users[r.studentId]?.isDemo && <span className="ml-2 text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase bg-amber-100 text-amber-700 border-amber-300">🧪 Demo</span>}
                         </p>
                         <p className="text-xs text-slate-500 mt-0.5">{itemsText(r.items)}</p>
                         {/* Ghi chú điều chỉnh món của học viên — nổi bật cho quầy dễ thấy */}

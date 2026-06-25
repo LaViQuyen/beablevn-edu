@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
@@ -19,6 +19,8 @@ import NotificationManager from './pages/Admin/NotificationManager';
 import FeedbackManager from './pages/Admin/FeedbackManager';
 import BulkImport from './pages/Admin/BulkImport';
 import ClassStats from './pages/Admin/ClassStats';
+import SkinManager from './pages/Admin/SkinManager'; // Admin quản lý skin (catalog + cột mốc)
+import AutoBonusManager from './pages/Admin/AutoBonusManager'; // Admin cấu hình tự động cộng Bonus
 import NotFound from './pages/NotFound';
 
 // Pages - Staff (Be Able)
@@ -41,6 +43,9 @@ import StudentFeedback from './pages/Student/Feedback';
 import StudentContact from './pages/Student/Contact';
 import StudentCredits from './pages/Student/Credits'; // ví BAVN Credits của học viên
 import StudentResources from './pages/Student/Resources'; // khu Tài nguyên & Luyện tập (link công cụ Coach)
+import StudentSkins from './pages/Student/Skins'; // Cửa hàng Skin: đổi Credits lấy avatar
+import StudentLeaderboard from './pages/Student/Leaderboard'; // Bảng vinh danh toàn hệ thống
+const HanhTrinhGame = lazy(() => import('./pages/Student/Game/HanhTrinhGame')); // Game Phaser — lazy load (Phaser nặng)
 
 // Component: Điều hướng dựa trên Role (Khi vào trang chủ /)
 const RedirectBasedOnRole = () => {
@@ -86,6 +91,8 @@ const App = () => {
             <Route path="students" element={<StudentManager />} />
             <Route path="data" element={<DataManager />} />
             <Route path="stats" element={<ClassStats />} />
+            <Route path="skins" element={<SkinManager />} />
+            <Route path="autobonus" element={<AutoBonusManager />} />
             <Route path="notifications" element={<NotificationManager />} />
             <Route path="feedback" element={<FeedbackManager />} />
             <Route path="import" element={<BulkImport />} />
@@ -115,6 +122,9 @@ const App = () => {
             <Route path="scores" element={<MyGrades />} />
             <Route path="notifications" element={<StudentNotifications />} />
             <Route path="credits" element={<StudentCredits />} />
+            <Route path="skins" element={<StudentSkins />} />
+            <Route path="games/hanh-trinh" element={<Suspense fallback={<div className="py-24 text-center text-slate-500">Đang tải game…</div>}><HanhTrinhGame /></Suspense>} />
+            <Route path="leaderboard" element={<StudentLeaderboard />} />
             <Route path="resources" element={<StudentResources />} />
             <Route path="profile" element={<StudentProfile />} />
             <Route path="feedback" element={<StudentFeedback />} />
