@@ -225,7 +225,6 @@ exports.issueToken = onCall({ region: 'asia-southeast1' }, async (req) => {
   const claims = {
     role,
     bod: !!user.bodAccess,
-    mod: !!user.modAccess,
     ff: !!user.ffAccess,
     ffPlus: !!user.ffPlusAccess,
   };

@@ -69,7 +69,29 @@ const Icons = {
       <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 01-.982-3.172M9.497 14.25a7.454 7.454 0 00.981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 007.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 002.748 1.35m8.272-6.842V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.492a46.32 46.32 0 012.916.52 6.003 6.003 0 01-5.395 4.972m0 0a6.726 6.726 0 01-2.749 1.35m0 0a6.772 6.772 0 01-3.044 0" />
     </svg>
   ),
+  Lock: () => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="#94a3b8" className="w-3.5 h-3.5 shrink-0">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 00-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+    </svg>
+  ),
 };
+
+// ─── Popup bị chặn do quá hạn ────────────────────────────────────────────────
+const OverdueBlockPopup = ({ onClose }) => (
+  <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[80] p-4" onClick={onClose}>
+    <div className="bg-slate-700 text-white rounded-2xl shadow-2xl p-6 max-w-sm w-full text-center space-y-4" onClick={(e) => e.stopPropagation()}>
+      <div className="w-12 h-12 rounded-full bg-slate-600 flex items-center justify-center mx-auto">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6 text-slate-300">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 00-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+        </svg>
+      </div>
+      <p className="text-sm leading-relaxed text-slate-200">
+        BE ABLE xin lỗi vì bất tiện này. Bạn cần thanh toán học phí để mở lại các tính năng.
+      </p>
+      <button onClick={onClose} className="px-5 py-2.5 bg-slate-600 hover:bg-slate-500 text-white rounded-xl text-sm font-bold transition-colors">Đóng</button>
+    </div>
+  </div>
+);
 
 const StudentLayout = () => {
   const location = useLocation();
@@ -81,9 +103,34 @@ const StudentLayout = () => {
   const [loadingPass, setLoadingPass] = useState(false);
   const [passError, setPassError] = useState('');
   const [passSuccess, setPassSuccess] = useState('');
-  const [feedbackUnread, setFeedbackUnread] = useState(0); // số phản hồi mới của GV cho phản ánh
+  const [feedbackUnread, setFeedbackUnread] = useState(0); // số phản hồi mới của GV
 
-  // Đếm số phản hồi chưa đọc của phản ánh (badge cạnh "Phản ánh")
+  // ─── Trạng thái học phí để khoá menu khi Quá hạn ─────────────────────────
+  const [tuitionStatus, setTuitionStatus] = useState(null); // null | 'Chờ' | 'Quá hạn' | 'Đã đóng'
+  const [overdueBlockPopup, setOverdueBlockPopup] = useState(false);
+
+  // Subscribe trạng thái học phí
+  useEffect(() => {
+    if (!currentUser?.studentCode) return;
+    const unsub = onValue(ref(db, 'tuitionRecords'), (snap) => {
+      const data = snap.val() || {};
+      const entry = Object.values(data).find((v) => v.studentCode === currentUser.studentCode);
+      setTuitionStatus(entry?.status || null);
+    });
+    return () => unsub();
+  }, [currentUser?.studentCode]);
+
+  const isOverdue = tuitionStatus === 'Quá hạn';
+
+  // Xử lý click menu bị khoá khi quá hạn
+  const handleBlockedMenuClick = (e) => {
+    if (isOverdue) {
+      e.preventDefault();
+      setOverdueBlockPopup(true);
+    }
+  };
+
+  // Đếm số phản hồi chưa đọc (badge cạnh "Phản ánh")
   useEffect(() => {
     if (!currentUser?.id) return;
     const unsub = onValue(ref(db, 'feedback'), (snap) => {
@@ -100,17 +147,14 @@ const StudentLayout = () => {
   // Mỗi thẻ có bề rộng tối thiểu cố định + không co lại (shrink-0) để thanh nav cuộn ngang được
   const mobileLinkClass = (path) => `flex flex-col items-center justify-center shrink-0 min-w-[64px] h-full space-y-1 px-0.5 ${isActive(path) ? 'text-[#2B6830]' : 'text-slate-400 hover:text-slate-600'}`;
 
-  // Tự cuộn thẻ đang chọn vào giữa thanh nav (vì giờ nav cuộn ngang, thẻ active có thể nằm ngoài màn hình)
+  // Tự cuộn thẻ đang chọn vào giữa thanh nav
   const bottomNavRef = useRef(null);
   useEffect(() => {
     const active = bottomNavRef.current?.querySelector('[data-active="true"]');
     if (active) active.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
   }, [location.pathname]);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
+  const handleLogout = () => { logout(); navigate('/'); };
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
@@ -122,23 +166,23 @@ const StudentLayout = () => {
 
     setLoadingPass(true);
     try {
-        const userRef = ref(db, `users/${currentUser.id}`);
-        const snapshot = await get(userRef);
-        const userData = snapshot.val();
-        const isMatch = bcrypt.compareSync(passForm.oldPass, userData.password);
-        if (!isMatch) { setPassError("Mật khẩu cũ không đúng!"); setLoadingPass(false); return; }
+      const userRef = ref(db, `users/${currentUser.id}`);
+      const snapshot = await get(userRef);
+      const userData = snapshot.val();
+      const isMatch = bcrypt.compareSync(passForm.oldPass, userData.password);
+      if (!isMatch) { setPassError("Mật khẩu cũ không đúng!"); setLoadingPass(false); return; }
 
-        const salt = bcrypt.genSaltSync(10);
-        const newHash = bcrypt.hashSync(passForm.newPass, salt);
-        await update(userRef, { password: newHash });
+      const salt = bcrypt.genSaltSync(10);
+      const newHash = bcrypt.hashSync(passForm.newPass, salt);
+      await update(userRef, { password: newHash });
 
-        setPassSuccess("Đổi mật khẩu thành công!");
-        setPassForm({ oldPass: '', newPass: '', confirmPass: '' });
-        setTimeout(() => { setShowPassModal(false); setPassSuccess(''); }, 1800);
+      setPassSuccess("Đổi mật khẩu thành công!");
+      setPassForm({ oldPass: '', newPass: '', confirmPass: '' });
+      setTimeout(() => { setShowPassModal(false); setPassSuccess(''); }, 1800);
     } catch (error) {
-        setPassError("Lỗi: " + error.message);
+      setPassError("Lỗi: " + error.message);
     } finally {
-        setLoadingPass(false);
+      setLoadingPass(false);
     }
   };
 
@@ -146,6 +190,10 @@ const StudentLayout = () => {
     <div className="flex h-screen bg-slate-50 font-sans">
       {/* Engine thông báo trình duyệt + âm thanh */}
       <StudentNotifyEngine currentUser={currentUser} />
+
+      {/* Popup bị khoá do quá hạn */}
+      {overdueBlockPopup && <OverdueBlockPopup onClose={() => setOverdueBlockPopup(false)} />}
+
       {/* SIDEBAR (Desktop) */}
       <aside className="hidden md:flex flex-col w-64 bg-white border-r border-slate-200 h-full fixed left-0 top-0 z-50">
         <div className="p-6 border-b border-slate-100 flex items-center gap-3">
@@ -168,15 +216,63 @@ const StudentLayout = () => {
           <Link to="/student/scores" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('scores') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
             <Icons.Scores active={isActive('scores')} /> Bảng điểm
           </Link>
-          <Link to="/student/notifications" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('notifications') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
-            <Icons.Noti active={isActive('notifications')} /> Thông báo
+          {/* Thông báo — khoá khi Quá hạn */}
+          <Link
+            to="/student/notifications"
+            onClick={handleBlockedMenuClick}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('notifications') ? 'bg-[#2B6830]/5 text-[#2B6830]' : isOverdue ? 'text-slate-300 cursor-not-allowed' : 'text-slate-600 hover:bg-slate-50'}`}
+          >
+            <Icons.Noti active={isActive('notifications') && !isOverdue} />
+            <span className="flex-1">Thông báo</span>
+            {isOverdue && <Icons.Lock />}
           </Link>
 
           <p className="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 mt-4">Ưu đãi</p>
-          <Link to="/student/credits" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('credits') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
-            <Icons.Credits active={isActive('credits')} />
+          {/* BAVN Credits — khoá khi Quá hạn */}
+          <Link
+            to="/student/credits"
+            onClick={handleBlockedMenuClick}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('credits') ? 'bg-[#2B6830]/5 text-[#2B6830]' : isOverdue ? 'text-slate-300 cursor-not-allowed' : 'text-slate-600 hover:bg-slate-50'}`}
+          >
+            <Icons.Credits active={isActive('credits') && !isOverdue} />
             <span className="flex-1">BAVN Credits</span>
-            <span className="text-[9px] font-bold bg-[#E8F4EC] text-[#2B6830] px-1.5 py-0.5 rounded border border-green-100 uppercase">Mới</span>
+            {isOverdue
+              ? <Icons.Lock />
+              : <span className="text-[9px] font-bold bg-[#E8F4EC] text-[#2B6830] px-1.5 py-0.5 rounded border border-green-100 uppercase">Mới</span>
+            }
+          </Link>
+          {/* Cửa hàng Skin — khoá khi Quá hạn */}
+          <Link
+            to="/student/skins"
+            onClick={handleBlockedMenuClick}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('skins') ? 'bg-[#2B6830]/5 text-[#2B6830]' : isOverdue ? 'text-slate-300 cursor-not-allowed' : 'text-slate-600 hover:bg-slate-50'}`}
+          >
+            <Icons.Skins active={isActive('skins') && !isOverdue} />
+            <span className="flex-1">Cửa hàng Skin</span>
+            {isOverdue
+              ? <Icons.Lock />
+              : <span className="text-[9px] font-bold bg-[#E8F4EC] text-[#2B6830] px-1.5 py-0.5 rounded border border-green-100 uppercase">Mới</span>
+            }
+          </Link>
+          <Link to="/student/leaderboard" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('leaderboard') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
+            <Icons.Trophy active={isActive('leaderboard')} />
+            <span className="flex-1">Bảng Vinh Danh</span>
+            <span className="text-[9px] font-bold bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded border border-amber-200 uppercase">Hot</span>
+          </Link>
+
+          <p className="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 mt-4">Tài nguyên</p>
+          {/* Luyện tập IELTS — khoá khi Quá hạn */}
+          <Link
+            to="/student/resources"
+            onClick={handleBlockedMenuClick}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('resources') ? 'bg-[#2B6830]/5 text-[#2B6830]' : isOverdue ? 'text-slate-300 cursor-not-allowed' : 'text-slate-600 hover:bg-slate-50'}`}
+          >
+            <Icons.Practice active={isActive('resources') && !isOverdue} />
+            <span className="flex-1">Luyện tập IELTS</span>
+            {isOverdue
+              ? <Icons.Lock />
+              : <span className="text-[9px] font-bold bg-[#E8F4EC] text-[#2B6830] px-1.5 py-0.5 rounded border border-green-100 uppercase">Mới</span>
+            }
           </Link>
           <Link to="/student/skins" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('skins') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
             <Icons.Skins active={isActive('skins')} />
@@ -212,12 +308,12 @@ const StudentLayout = () => {
         </nav>
 
         <div className="p-4 border-t border-slate-100 space-y-1">
-           <Link to="/student/profile" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('profile') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-500 hover:bg-[#E8F4EC] hover:text-[#2B6830]'}`}>
-             <Icons.Key /> Tài khoản & Bảo mật
-           </Link>
-           <button onClick={handleLogout} className="flex items-center gap-3 px-4 py-3 rounded-xl w-full text-slate-500 hover:bg-red-50 hover:text-red-600 transition-all font-medium text-sm">
-             <Icons.Logout /> Đăng xuất
-           </button>
+          <Link to="/student/profile" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('profile') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-500 hover:bg-[#E8F4EC] hover:text-[#2B6830]'}`}>
+            <Icons.Key /> Tài khoản & Bảo mật
+          </Link>
+          <button onClick={handleLogout} className="flex items-center gap-3 px-4 py-3 rounded-xl w-full text-slate-500 hover:bg-red-50 hover:text-red-600 transition-all font-medium text-sm">
+            <Icons.Logout /> Đăng xuất
+          </button>
         </div>
       </aside>
 
@@ -228,12 +324,12 @@ const StudentLayout = () => {
           <span className="text-[#2B6830] font-bold text-sm">CỔNG HỌC VIÊN</span>
         </div>
         <div className="flex items-center gap-1">
-            <button onClick={() => setShowPassModal(true)} className="p-2 text-slate-400 hover:text-[#2B6830]">
-                <Icons.Key />
-            </button>
-            <button onClick={handleLogout} className="p-2 text-slate-400 hover:text-red-500">
-                <Icons.Logout />
-            </button>
+          <button onClick={() => setShowPassModal(true)} className="p-2 text-slate-400 hover:text-[#2B6830]">
+            <Icons.Key />
+          </button>
+          <button onClick={handleLogout} className="p-2 text-slate-400 hover:text-red-500">
+            <Icons.Logout />
+          </button>
         </div>
       </header>
 
@@ -251,11 +347,23 @@ const StudentLayout = () => {
         <Link to="/student/dashboard" data-active={isActive('dashboard')} className={mobileLinkClass('dashboard')}><Icons.Dashboard active={isActive('dashboard')} /><span className="text-[10px] font-medium">Tổng quan</span></Link>
         <Link to="/student/attendance" data-active={isActive('attendance')} className={mobileLinkClass('attendance')}><Icons.Attendance active={isActive('attendance')} /><span className="text-[10px] font-medium">Đ.Danh</span></Link>
         <Link to="/student/scores" data-active={isActive('scores')} className={mobileLinkClass('scores')}><Icons.Scores active={isActive('scores')} /><span className="text-[10px] font-medium">Kết quả</span></Link>
-        <Link to="/student/credits" data-active={isActive('credits')} className={mobileLinkClass('credits')}><Icons.Credits active={isActive('credits')} /><span className="text-[10px] font-medium">Credits</span></Link>
-        <Link to="/student/skins" data-active={isActive('skins')} className={mobileLinkClass('skins')}><Icons.Skins active={isActive('skins')} /><span className="text-[10px] font-medium">Skin</span></Link>
+        {/* Credits — khoá khi Quá hạn */}
+        <Link to="/student/credits" data-active={isActive('credits')} onClick={handleBlockedMenuClick} className={mobileLinkClass('credits') + (isOverdue ? ' opacity-40' : '')}>
+          <Icons.Credits active={isActive('credits') && !isOverdue} /><span className="text-[10px] font-medium">Credits</span>
+        </Link>
+        {/* Skins — khoá khi Quá hạn */}
+        <Link to="/student/skins" data-active={isActive('skins')} onClick={handleBlockedMenuClick} className={mobileLinkClass('skins') + (isOverdue ? ' opacity-40' : '')}>
+          <Icons.Skins active={isActive('skins') && !isOverdue} /><span className="text-[10px] font-medium">Skin</span>
+        </Link>
         <Link to="/student/leaderboard" data-active={isActive('leaderboard')} className={mobileLinkClass('leaderboard')}><Icons.Trophy active={isActive('leaderboard')} /><span className="text-[10px] font-medium">Vinh danh</span></Link>
-        <Link to="/student/resources" data-active={isActive('resources')} className={mobileLinkClass('resources')}><Icons.Practice active={isActive('resources')} /><span className="text-[10px] font-medium">Luyện tập</span></Link>
-        <Link to="/student/notifications" data-active={isActive('notifications')} className={mobileLinkClass('notifications')}><Icons.Noti active={isActive('notifications')} /><span className="text-[10px] font-medium">TBáo</span></Link>
+        {/* Luyện tập IELTS — khoá khi Quá hạn */}
+        <Link to="/student/resources" data-active={isActive('resources')} onClick={handleBlockedMenuClick} className={mobileLinkClass('resources') + (isOverdue ? ' opacity-40' : '')}>
+          <Icons.Practice active={isActive('resources') && !isOverdue} /><span className="text-[10px] font-medium">Luyện tập</span>
+        </Link>
+        {/* Thông báo — khoá khi Quá hạn */}
+        <Link to="/student/notifications" data-active={isActive('notifications')} onClick={handleBlockedMenuClick} className={mobileLinkClass('notifications') + (isOverdue ? ' opacity-40' : '')}>
+          <Icons.Noti active={isActive('notifications') && !isOverdue} /><span className="text-[10px] font-medium">TBáo</span>
+        </Link>
         <Link to="/student/feedback" data-active={isActive('feedback')} className={mobileLinkClass('feedback')}>
           <div className="relative">
             <Icons.Feedback active={isActive('feedback')} />
@@ -266,55 +374,52 @@ const StudentLayout = () => {
         <Link to="/student/contact" data-active={isActive('contact')} className={mobileLinkClass('contact')}><Icons.Contact active={isActive('contact')} /><span className="text-[10px] font-medium">Liên hệ</span></Link>
       </nav>
 
-      {/* MODAL */}
+      {/* MODAL ĐỔI MẬT KHẨU */}
       {showPassModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
-                <h3 className="text-lg font-bold text-[#2B6830] mb-4 flex items-center gap-2">
-                    <Icons.Key /> Đổi Mật Khẩu
-                </h3>
-                <form onSubmit={handleChangePassword} className="space-y-4">
-                    {passError && (
-                        <div className="flex items-start gap-2 bg-red-50 text-red-700 border border-red-200 px-3 py-2.5 rounded-xl text-sm">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 shrink-0 mt-0.5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>
-                            {passError}
-                        </div>
-                    )}
-                    {passSuccess && (
-                        <div className="flex items-center gap-2 bg-green-50 text-green-700 border border-green-200 px-3 py-2.5 rounded-xl text-sm font-medium">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 shrink-0"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
-                            {passSuccess}
-                        </div>
-                    )}
-                    <div>
-                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Mật khẩu cũ</label>
-                        <input type="password" className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition"
-                            value={passForm.oldPass} onChange={e => { setPassForm({...passForm, oldPass: e.target.value}); setPassError(''); }}
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Mật khẩu mới</label>
-                        <input type="password" className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition"
-                            value={passForm.newPass} onChange={e => { setPassForm({...passForm, newPass: e.target.value}); setPassError(''); }}
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Xác nhận mật khẩu mới</label>
-                        <input type="password" className={`w-full p-3 border rounded-xl outline-none focus:ring-2 transition ${passForm.confirmPass && passForm.newPass !== passForm.confirmPass ? 'border-red-300 focus:ring-red-100' : 'border-slate-200 focus:border-[#2B6830] focus:ring-[#2B6830]/10'}`}
-                            value={passForm.confirmPass} onChange={e => { setPassForm({...passForm, confirmPass: e.target.value}); setPassError(''); }}
-                        />
-                        {passForm.confirmPass && passForm.newPass !== passForm.confirmPass && (
-                            <p className="text-red-500 text-xs mt-1">Mật khẩu không khớp</p>
-                        )}
-                    </div>
-                    <div className="flex gap-3 pt-2">
-                        <button type="button" onClick={() => { setShowPassModal(false); setPassError(''); setPassSuccess(''); setPassForm({ oldPass:'', newPass:'', confirmPass:'' }); }} className="flex-1 py-3 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition-colors">Hủy</button>
-                        <button type="submit" disabled={loadingPass} className="flex-1 py-3 bg-[#2B6830] text-white rounded-xl font-bold hover:bg-[#1E5225] transition-colors disabled:opacity-50">
-                            {loadingPass ? "Đang xử lý..." : "Lưu thay đổi"}
-                        </button>
-                    </div>
-                </form>
-            </div>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+            <h3 className="text-lg font-bold text-[#2B6830] mb-4 flex items-center gap-2">
+              <Icons.Key /> Đổi Mật Khẩu
+            </h3>
+            <form onSubmit={handleChangePassword} className="space-y-4">
+              {passError && (
+                <div className="flex items-start gap-2 bg-red-50 text-red-700 border border-red-200 px-3 py-2.5 rounded-xl text-sm">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 shrink-0 mt-0.5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>
+                  {passError}
+                </div>
+              )}
+              {passSuccess && (
+                <div className="flex items-center gap-2 bg-green-50 text-green-700 border border-green-200 px-3 py-2.5 rounded-xl text-sm font-medium">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 shrink-0"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                  {passSuccess}
+                </div>
+              )}
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Mật khẩu cũ</label>
+                <input type="password" className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition"
+                  value={passForm.oldPass} onChange={e => { setPassForm({...passForm, oldPass: e.target.value}); setPassError(''); }} />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Mật khẩu mới</label>
+                <input type="password" className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition"
+                  value={passForm.newPass} onChange={e => { setPassForm({...passForm, newPass: e.target.value}); setPassError(''); }} />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Xác nhận mật khẩu mới</label>
+                <input type="password" className={`w-full p-3 border rounded-xl outline-none focus:ring-2 transition ${passForm.confirmPass && passForm.newPass !== passForm.confirmPass ? 'border-red-300 focus:ring-red-100' : 'border-slate-200 focus:border-[#2B6830] focus:ring-[#2B6830]/10'}`}
+                  value={passForm.confirmPass} onChange={e => { setPassForm({...passForm, confirmPass: e.target.value}); setPassError(''); }} />
+                {passForm.confirmPass && passForm.newPass !== passForm.confirmPass && (
+                  <p className="text-red-500 text-xs mt-1">Mật khẩu không khớp</p>
+                )}
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={() => { setShowPassModal(false); setPassError(''); setPassSuccess(''); setPassForm({ oldPass:'', newPass:'', confirmPass:'' }); }} className="flex-1 py-3 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition-colors">Hủy</button>
+                <button type="submit" disabled={loadingPass} className="flex-1 py-3 bg-[#2B6830] text-white rounded-xl font-bold hover:bg-[#1E5225] transition-colors disabled:opacity-50">
+                  {loadingPass ? "Đang xử lý..." : "Lưu thay đổi"}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>

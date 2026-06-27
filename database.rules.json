@@ -1,0 +1,160 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "users": {
+      ".read": "auth != null",
+      "$uid": {
+        ".write": "auth != null && (auth.token.role === 'staff' || auth.token.role === 'admin')",
+        "password": {
+          ".write": "auth != null && (auth.token.role === 'admin' || auth.token.role === 'staff' || auth.uid === $uid)"
+        }
+      }
+    },
+
+    "scores": {
+      ".read": "auth != null",
+      "$cid": {
+        "$sid": {
+          ".write": "auth != null && (auth.token.role === 'staff' || auth.token.role === 'admin')",
+          "bonus": {
+            "$rid": {
+              ".write": "auth != null && auth.uid === $sid && auth.token.role === 'student' && !data.exists() && newData.child('score').isNumber() && newData.child('score').val() <= 0",
+              "score": { ".validate": "newData.isNumber()" }
+            }
+          }
+        }
+      }
+    },
+
+    "staffBonus": {
+      ".read": "auth != null",
+      "$uid": {
+        "$rid": {
+          ".write": "auth != null && !data.exists() && ( (auth.uid === $uid && (auth.token.role === 'staff' || auth.token.role === 'admin') && newData.child('score').isNumber() && newData.child('score').val() <= 0) || ((auth.token.role === 'admin' || auth.token.bod === true || auth.token.mod === true) && $uid !== auth.uid) )",
+          "score": { ".validate": "newData.isNumber()" }
+        }
+      }
+    },
+
+    "attendance": {
+      ".read": "auth != null",
+      ".write": "auth != null && (auth.token.role === 'staff' || auth.token.role === 'admin')"
+    },
+
+    "classes": {
+      ".read": "auth != null",
+      ".write": "auth != null && (auth.token.role === 'staff' || auth.token.role === 'admin')"
+    },
+
+    "bonusRules": {
+      ".read": "auth != null",
+      ".write": "auth != null && auth.token.role === 'admin'"
+    },
+
+    "skins": {
+      ".read": "auth != null",
+      ".write": "auth != null && (auth.token.role === 'staff' || auth.token.role === 'admin')"
+    },
+
+    "ffMenu": {
+      ".read": "auth != null",
+      ".write": "auth != null && (auth.token.role === 'staff' || auth.token.role === 'admin')"
+    },
+
+    "gifts": {
+      ".read": "auth != null",
+      ".write": "auth != null && (auth.token.role === 'staff' || auth.token.role === 'admin')"
+    },
+
+    "creditPlus": {
+      ".read": "auth != null",
+      ".write": "auth != null && (auth.token.role === 'staff' || auth.token.role === 'admin')"
+    },
+
+    "staffCredits": {
+      ".read": "auth != null",
+      ".write": "auth != null && (auth.token.role === 'admin' || auth.token.bod === true)"
+    },
+
+    "redemptions": {
+      ".read": "auth != null",
+      "$rid": {
+        ".write": "auth != null && (((auth.token.role === 'staff' || auth.token.role === 'admin')) || (!data.exists() && newData.child('studentId').val() === auth.uid) || (data.child('studentId').val() === auth.uid))"
+      }
+    },
+
+    "messages": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+
+    "feedback": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+
+    "notifications": {
+      ".read": "auth != null",
+      ".write": "auth != null && (auth.token.role === 'staff' || auth.token.role === 'admin')"
+    },
+
+    "notifications_files": {
+      ".read": "auth != null",
+      ".write": "auth != null && (auth.token.role === 'staff' || auth.token.role === 'admin')"
+    },
+
+    "staffNotifications": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+
+    "fcmTokens": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || auth.token.role === 'admin')",
+        ".write": "auth != null && (auth.uid === $uid || auth.token.role === 'admin')"
+      }
+    },
+
+    "classReminders": {
+      ".read": "auth != null",
+      ".write": "auth != null && auth.token.role === 'admin'"
+    },
+
+    "studentSkins": {
+      ".read": "auth != null",
+      "$uid": {
+        ".write": "auth != null && (auth.uid === $uid || auth.token.role === 'staff' || auth.token.role === 'admin')"
+      }
+    },
+
+    "studentGames": {
+      ".read": "auth != null",
+      "$uid": {
+        ".write": "auth != null && (auth.uid === $uid || auth.token.role === 'staff' || auth.token.role === 'admin')"
+      }
+    },
+
+    "tuitionRecords": {
+      ".read": "auth != null",
+      ".write": "auth != null && auth.token.role === 'admin'",
+      "$id": {
+        "extensionRequested":   { ".write": "auth != null && (auth.token.role === 'admin' || (auth.token.role === 'student' && root.child('users').child(auth.uid).child('studentCode').val() === root.child('tuitionRecords').child($id).child('studentCode').val()))", ".validate": "newData.isBoolean()" },
+        "extensionRequestedAt": { ".write": "auth != null && (auth.token.role === 'admin' || (auth.token.role === 'student' && root.child('users').child(auth.uid).child('studentCode').val() === root.child('tuitionRecords').child($id).child('studentCode').val()))", ".validate": "newData.isString()" },
+        "extensionApproved":    { ".write": "auth != null && (auth.token.role === 'admin' || (auth.token.role === 'student' && root.child('users').child(auth.uid).child('studentCode').val() === root.child('tuitionRecords').child($id).child('studentCode').val() && newData.val() === false))" },
+        "status":               { ".write": "auth != null && (auth.token.role === 'admin' || (auth.token.role === 'student' && root.child('users').child(auth.uid).child('studentCode').val() === root.child('tuitionRecords').child($id).child('studentCode').val() && newData.val() === 'Chờ duyệt gia hạn'))" }
+      }
+    },
+
+    "tuitionSnapshots": {
+      ".read": "auth != null && auth.token.role === 'admin'",
+      ".write": "auth != null && auth.token.role === 'admin'"
+    },
+
+    "playLog": {
+      ".read": "auth != null && (auth.token.role === 'staff' || auth.token.role === 'admin')",
+      ".write": "auth != null"
+    }
+  }
+}

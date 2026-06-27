@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { db } from '../firebase';
-import { ref, get } from 'firebase/database';
+import { auth, functions } from '../firebase';
+import { signInWithCustomToken } from 'firebase/auth';
+import { httpsCallable } from 'firebase/functions';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import bcrypt from 'bcryptjs';
 import { Alert, Button } from '../components/UI';
 
 const REMEMBER_KEY = 'bavn_remember_id';
@@ -26,44 +26,36 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(''); setLoading(true);
+    const inputId = formData.id.trim();
     try {
-      const snapshot = await get(ref(db, 'users'));
-      if (!snapshot.exists()) { setError("Hệ thống đang bảo trì."); setLoading(false); return; }
+      // XÁC THỰC PHÍA SERVER: function issueToken kiểm tra mật khẩu (admin SDK) và
+      // cấp Firebase custom token mang claim vai trò. Client KHÔNG còn đọc cả node `users`
+      // (tránh lộ hash) và KHÔNG còn so mật khẩu phía client.
+      const issueToken = httpsCallable(functions, 'issueToken');
+      const res = await issueToken({ loginId: inputId, password: formData.password });
+      const { token, user } = res.data || {};
+      if (!token || !user) { setError("Sai tên đăng nhập hoặc mật khẩu."); setLoading(false); return; }
 
-      const userList = Object.entries(snapshot.val()).map(([key, value]) => ({ ...value, id: key }));
-      const inputId = formData.id.trim();
-      const foundUser = userList.find(u =>
-        u.username === inputId || u.loginId === inputId || u.email === inputId || u.studentCode === inputId
-      );
+      // Mở phiên Firebase Auth THẬT → từ đây Rules nhận diện được vai trò.
+      await signInWithCustomToken(auth, token);
 
-      if (!foundUser) { setError("Sai tên đăng nhập hoặc mật khẩu."); setLoading(false); return; }
+      if (rememberMe) localStorage.setItem(REMEMBER_KEY, inputId);
+      else localStorage.removeItem(REMEMBER_KEY);
 
-      if (foundUser.lockedAt) {
-        const lockDate = new Date(foundUser.lockedAt);
-        if (new Date() >= lockDate) {
-          setError(`Tài khoản bị khóa từ ${lockDate.toLocaleDateString('vi-VN')}. Liên hệ trung tâm.`);
-          setLoading(false); return;
-        }
-      }
-
-      const storedPass = foundUser.password || "";
-      const isValid = storedPass.startsWith('$2')
-        ? bcrypt.compareSync(formData.password, storedPass)
-        : String(storedPass) === String(formData.password);
-
-      if (isValid) {
-        if (rememberMe) localStorage.setItem(REMEMBER_KEY, inputId);
-        else localStorage.removeItem(REMEMBER_KEY);
-        const { password, ...safeUser } = foundUser;
-        login(safeUser);
-        if (foundUser.role === 'admin') navigate('/admin/dashboard');
-        else if (foundUser.role === 'staff') navigate('/staff/classes');
-        else navigate('/student/dashboard');
-      } else {
-        setError("Sai tên đăng nhập hoặc mật khẩu.");
-      }
+      login(user); // user đã được loại bỏ password ở server
+      if (user.role === 'admin') navigate('/admin/dashboard');
+      else if (user.role === 'staff') navigate('/staff/classes');
+      else navigate('/student/dashboard');
     } catch (err) {
-      setError("Lỗi kết nối máy chủ. Vui lòng thử lại.");
+      // HttpsError chuyển message qua err.message; lỗi mạng/khác → thông báo chung
+      const code = err?.code || '';
+      if (code === 'functions/unauthenticated' || code === 'functions/invalid-argument') {
+        setError("Sai tên đăng nhập hoặc mật khẩu.");
+      } else if (code === 'functions/permission-denied') {
+        setError(err.message || "Tài khoản đã bị khóa. Liên hệ trung tâm.");
+      } else {
+        setError("Lỗi kết nối máy chủ. Vui lòng thử lại.");
+      }
     } finally {
       setLoading(false);
     }
