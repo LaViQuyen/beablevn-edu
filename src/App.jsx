@@ -21,6 +21,7 @@ import BulkImport from './pages/Admin/BulkImport';
 import ClassStats from './pages/Admin/ClassStats';
 import SkinManager from './pages/Admin/SkinManager'; // Admin quản lý skin (catalog + cột mốc)
 import AutoBonusManager from './pages/Admin/AutoBonusManager'; // Admin cấu hình tự động cộng Bonus
+import TuitionManager from './pages/Admin/TuitionManager';     // Admin quản lý học phí
 import NotFound from './pages/NotFound';
 
 // Pages - Staff (Be Able)
@@ -97,6 +98,7 @@ const App = () => {
             <Route path="notifications" element={<NotificationManager />} />
             <Route path="feedback" element={<FeedbackManager />} />
             <Route path="import" element={<BulkImport />} />
+            <Route path="tuition" element={<TuitionManager />} />
             <Route index element={<Navigate to="dashboard" />} />
           </Route>
 
