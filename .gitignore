@@ -26,6 +26,11 @@ dist-ssr
 # --- BẢO MẬT: KHÔNG đẩy khóa/credential lên GitHub ---
 serviceAccountKey.json
 *serviceAccountKey*.json
+service-account.json
+*service-account*.json
+functions/admin-scripts/service-account.json
+msg-service-account.json
+functions/msg-service-account.json
 admin.json
 .env
 .env.*
