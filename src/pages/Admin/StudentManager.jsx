@@ -51,7 +51,7 @@ const StudentManager = () => {
   const [classes, setClasses] = useState([]);
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [formData, setFormData] = useState({ name: '', password: 'BAVNbavn', studentCode: '', classId1: '', classId2: '', classId3: '', role: 'student' });
+  const [formData, setFormData] = useState({ name: '', password: 'BAVNbavn', studentCode: '', classId1: '', classId2: '', classId3: '', classId4: '', role: 'student' });
   // Modal states
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [unlockTarget, setUnlockTarget] = useState(null);
@@ -81,7 +81,7 @@ const StudentManager = () => {
     e.preventDefault();
     if (!formData.name || !formData.password || !formData.studentCode) return showSuccess('⚠️ Thiếu thông tin!');
 
-    const classIds = [formData.classId1, formData.classId2, formData.classId3].filter(id => id);
+    const classIds = [formData.classId1, formData.classId2, formData.classId3, formData.classId4].filter(id => id);
     const loginEmail = `${formData.studentCode.trim()}@beable.vn`;
 
     try {
@@ -95,7 +95,7 @@ const StudentManager = () => {
         role: 'student', classIds, createdAt: new Date().toISOString()
       });
       showSuccess(`✅ Đã thêm "${formData.name}" · ID: ${formData.studentCode}`);
-      setFormData({ name: '', password: 'BAVNbavn', studentCode: '', classId1: '', classId2: '', classId3: '', role: 'student' });
+      setFormData({ name: '', password: 'BAVNbavn', studentCode: '', classId1: '', classId2: '', classId3: '', classId4: '', role: 'student' });
     } catch (error) { showSuccess('❌ Lỗi: ' + error.message); }
   };
 
@@ -104,7 +104,7 @@ const StudentManager = () => {
     try {
       await update(ref(db, `users/${editingStudent.id}`), {
         name: editingStudent.name, studentCode: editingStudent.studentCode,
-        classIds: [editingStudent.classId1, editingStudent.classId2, editingStudent.classId3].filter(Boolean),
+        classIds: [editingStudent.classId1, editingStudent.classId2, editingStudent.classId3, editingStudent.classId4].filter(Boolean),
         isDemo: !!editingStudent.isDemo // tài khoản demo: ẩn khỏi leaderboard + không vào báo cáo
       });
       setEditingStudent(null);
@@ -329,9 +329,9 @@ const StudentManager = () => {
                  <input className="w-full border p-3 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 text-sm" type="password" placeholder="••••••" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} />
             </div>
             <div className="space-y-1">
-                 <label className="text-xs font-bold text-slate-500 uppercase">Chọn Lớp (Tối đa 3)</label>
-                 <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                    {[1,2,3].map(i => (
+                 <label className="text-xs font-bold text-slate-500 uppercase">Chọn Lớp (Tối đa 4)</label>
+                 <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
+                    {[1,2,3,4].map(i => (
                         <select key={i} className="border p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 bg-white w-full" value={formData[`classId${i}`]} onChange={e => setFormData({...formData, [`classId${i}`]: e.target.value})}>
                             <option value="">-- Lớp {i} --</option>
                             {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -389,7 +389,7 @@ const StudentManager = () => {
                      </td>
                      <td className="p-4 text-slate-600 max-w-xs truncate">{getClassNames(st.classIds)}</td>
                      <td className="p-4 text-right flex justify-end gap-2">
-                        <button onClick={() => setEditingStudent({...st, classId1: st.classIds?.[0]||'', classId2: st.classIds?.[1]||'', classId3: st.classIds?.[2]||''})} className="text-[#2B6830] border border-[#2B6830] px-2 py-1 rounded text-xs font-bold hover:bg-[#2B6830] hover:text-white transition-all">Sửa</button>
+                        <button onClick={() => setEditingStudent({...st, classId1: st.classIds?.[0]||'', classId2: st.classIds?.[1]||'', classId3: st.classIds?.[2]||'', classId4: st.classIds?.[3]||''})} className="text-[#2B6830] border border-[#2B6830] px-2 py-1 rounded text-xs font-bold hover:bg-[#2B6830] hover:text-white transition-all">Sửa</button>
                         <button onClick={() => handleResetPassword(st)} className="text-yellow-600 border border-yellow-600 px-2 py-1 rounded text-xs font-bold hover:bg-yellow-600 hover:text-white transition-colors">Pass</button>
                         <button 
                             onClick={() => handleToggleLock(st)} 
@@ -442,7 +442,7 @@ const StudentManager = () => {
                         </div>
 
                         <div className="flex flex-wrap gap-2 border-t border-slate-100 pt-3 mt-1">
-                            <button onClick={() => setEditingStudent({...st, classId1: st.classIds?.[0]||'', classId2: st.classIds?.[1]||'', classId3: st.classIds?.[2]||''})} className="flex-1 min-w-[60px] py-2 text-[#2B6830] bg-[#E8F4EC] rounded-xl text-xs font-bold border border-green-200 active:bg-green-100">Sửa</button>
+                            <button onClick={() => setEditingStudent({...st, classId1: st.classIds?.[0]||'', classId2: st.classIds?.[1]||'', classId3: st.classIds?.[2]||'', classId4: st.classIds?.[3]||''})} className="flex-1 min-w-[60px] py-2 text-[#2B6830] bg-[#E8F4EC] rounded-xl text-xs font-bold border border-green-200 active:bg-green-100">Sửa</button>
                             <button onClick={() => handleResetPassword(st)} className="flex-1 min-w-[60px] py-2 text-yellow-700 bg-yellow-50 rounded-xl text-xs font-bold border border-yellow-200 active:bg-yellow-100">Pass</button>
                             <button
                                   onClick={() => handleToggleLock(st)}
@@ -470,7 +470,7 @@ const StudentManager = () => {
               <input className="w-full border p-3 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 text-sm" value={editingStudent.studentCode} onChange={e => setEditingStudent({...editingStudent, studentCode: e.target.value})} placeholder="Mã HV" />
               <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 space-y-2">
                  <p className="text-xs font-bold text-slate-400 uppercase">Cập nhật lớp</p>
-                 {[1,2,3].map(i => (
+                 {[1,2,3,4].map(i => (
                    <select key={i} className="border p-2 rounded text-sm w-full bg-white outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10" value={editingStudent[`classId${i}`]} onChange={e => setEditingStudent({...editingStudent, [`classId${i}`]: e.target.value})}>
                      <option value="">-- Lớp {i} --</option>
                      {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -530,7 +530,7 @@ const StudentManager = () => {
                 className="px-5 py-2.5 bg-orange-500 text-white rounded-xl text-xs font-bold hover:bg-orange-600 transition-all shadow-md active:scale-95 flex items-center gap-1.5"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 00-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
-                Xác nhận khóa
+                óa
               </button>
             </div>
           </div>
