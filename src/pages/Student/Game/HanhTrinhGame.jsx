@@ -101,21 +101,31 @@ export default function HanhTrinhGame() {
   // Phát hiện điện thoại đang ở chiều DỌC (để nhắc xoay ngang) + trạng thái toàn màn hình
   const [isPortrait, setIsPortrait] = useState(false);
   const [isFs, setIsFs] = useState(false);
+  // iPhone (iOS Safari) KHONG co Fullscreen API cho element -> toan man hinh GIA LAP bang CSS
+  const [pseudoFs, setPseudoFs] = useState(false);
+  // Da tai xong tien trinh tu DB chua. CHAN choi khi chua tai xong: neu choi voi tien trinh
+  // rong roi luu, truoc day se ghi de mat sach tien trinh that (bug tut cap).
+  const [progLoaded, setProgLoaded] = useState(false);
+  // Ban ref cua `playing` de listener DB doc dung gia tri hien tai (closure chi thay gia tri luc mount)
+  const playingRef = useRef(false);
+  useEffect(() => { playingRef.current = playing; }, [playing]);
 
   useEffect(() => {
     const updateOrient = () => {
       // Coi là "điện thoại dọc" khi cao > rộng và bề rộng nhỏ (màn hình hẹp)
       setIsPortrait(window.innerHeight > window.innerWidth && window.innerWidth < 1024);
     };
-    const onFsChange = () => setIsFs(!!document.fullscreenElement);
+    const onFsChange = () => setIsFs(!!(document.fullscreenElement || document.webkitFullscreenElement));
     updateOrient();
     window.addEventListener('resize', updateOrient);
     window.addEventListener('orientationchange', updateOrient);
     document.addEventListener('fullscreenchange', onFsChange);
+    document.addEventListener('webkitfullscreenchange', onFsChange); // iPad Safari dung prefix webkit
     return () => {
       window.removeEventListener('resize', updateOrient);
       window.removeEventListener('orientationchange', updateOrient);
       document.removeEventListener('fullscreenchange', onFsChange);
+      document.removeEventListener('webkitfullscreenchange', onFsChange);
     };
   }, []);
 
@@ -130,9 +140,31 @@ export default function HanhTrinhGame() {
         if (window.screen?.orientation?.lock) {
           window.screen.orientation.lock('landscape').catch(() => {});
         }
-      }).catch(() => {});
+      }).catch(() => { setPseudoFs(true); }); // bị từ chối -> rơi về giả lập
+    } else {
+      // iPhone: không có Fullscreen API -> giả lập bằng CSS (fixed inset-0)
+      setPseudoFs(true);
     }
   };
+
+  // Thoát toàn màn hình (cả thật lẫn giả lập). Cần nút riêng vì iOS không có phím ESC.
+  const exitFullscreen = () => {
+    try {
+      if (document.fullscreenElement || document.webkitFullscreenElement) {
+        const ex = document.exitFullscreen || document.webkitExitFullscreen;
+        if (ex) Promise.resolve(ex.call(document)).catch(() => {});
+      }
+    } catch (e) { /* bỏ qua */ }
+    setPseudoFs(false);
+  };
+
+  // Khi vào/ra toàn màn hình: khóa cuộn trang + báo Phaser tính lại kích thước khung
+  useEffect(() => {
+    const anyFs = isFs || pseudoFs;
+    document.body.style.overflow = anyFs ? 'hidden' : '';
+    const t = setTimeout(() => { try { gameRef.current?.scale?.refresh(); } catch (e) { /* bỏ qua */ } }, 60);
+    return () => { clearTimeout(t); document.body.style.overflow = ''; };
+  }, [isFs, pseudoFs]);
 
   // --- Đọc điểm Bonus (mọi lớp) + tiến trình game đã lưu ---
   useEffect(() => {
@@ -145,14 +177,23 @@ export default function HanhTrinhGame() {
       const v = snap.val() || {};
       const prog = { beaten: v.beaten || {}, unlockedSkills: !!v.unlockedSkills };
       setSavedProgress(prog);
+      setProgLoaded(true); // có dữ liệu tiến trình rồi mới cho phép bấm chơi
       // Lưu thêm phần lượt chơi + sao tích lũy (đếm lượt theo NGÀY bằng playLog/{YYYY-MM-DD})
       setGameMeta({
         playsUsed: v.playsUsed || 0,
         totalStars: v.totalStars || 0,
         playLog: v.playLog || {},
       });
-      // Chỉ cập nhật ref khi CHƯA chơi (tránh ghi đè trạng thái game đang chạy)
-      if (!playing) progressRef.current = prog;
+      // CHƯA chơi: nhận nguyên snapshot. ĐANG chơi: chỉ HỢP NHẤT thêm, không cho snapshot
+      // (có thể cũ hơn) xóa mất ải vừa vượt trong phiên đang chạy.
+      if (!playingRef.current) {
+        progressRef.current = prog;
+      } else {
+        progressRef.current = {
+          beaten: { ...prog.beaten, ...(progressRef.current.beaten || {}) },
+          unlockedSkills: progressRef.current.unlockedSkills || prog.unlockedSkills,
+        };
+      }
     }, (err) => { console.warn('studentGames read denied (tiến trình sẽ không lưu được):', err); });
 
     // Đếm số buổi ĐI HỌC (có mặt/đi trễ) trên mọi lớp -> dùng để cấp lượt chơi
@@ -200,7 +241,7 @@ export default function HanhTrinhGame() {
   const dailyLeft = Math.max(0, DAILY_CAP - todayUsed);                    // còn vào được bao nhiêu ải hôm nay
   // Nhân sự: không giới hạn lượt; học viên: min(kho, trần ngày).
   const remainingPlays = isStaff ? 999999 : Math.min(poolLeft, dailyLeft); // lượt thực dùng được lúc này
-  const canPlay = unlocked && remainingPlays > 0;
+  const canPlay = unlocked && remainingPlays > 0 && progLoaded;
 
   // --- BẢNG XẾP HẠNG theo SAO tích lũy — TÁCH RIÊNG: học viên xem bảng học viên,
   //     nhân sự (staff/admin) xem bảng nhân sự. Hai bảng không lẫn vào nhau. ---
@@ -225,17 +266,19 @@ export default function HanhTrinhGame() {
   const goImmersive = () => {
     try {
       const el = document.documentElement;
-      if (!document.fullscreenElement) {
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
         const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
         if (req) {
           const r = req.call(el);
-          if (r && r.then) r.then(() => { window.screen?.orientation?.lock?.('landscape').catch(() => {}); }).catch(() => {});
+          if (r && r.then) r.then(() => { window.screen?.orientation?.lock?.('landscape').catch(() => {}); }).catch(() => { setPseudoFs(true); });
           else window.screen?.orientation?.lock?.('landscape').catch(() => {});
+        } else {
+          setPseudoFs(true); // iPhone: giả lập toàn màn hình bằng CSS
         }
       } else {
         window.screen?.orientation?.lock?.('landscape').catch(() => {});
       }
-    } catch (e) { /* bỏ qua trên trình duyệt không hỗ trợ */ }
+    } catch (e) { setPseudoFs(true); }
   };
 
   // Vào game (màn bản đồ). KHÔNG trừ lượt ở đây — lượt bị trừ khi VÀO TỪNG ẢI (trong MapScene).
@@ -254,16 +297,33 @@ export default function HanhTrinhGame() {
       beaten: progressRef.current.beaten || {},
       unlockedSkills: !!progressRef.current.unlockedSkills,
     };
-    const onSave = (p) => {
+    // meta.reset = true khi học viên tự bấm "Chơi lại từ đầu" trong bản đồ.
+    const onSave = (p, meta) => {
       progressRef.current = { beaten: p.beaten || {}, unlockedSkills: !!p.unlockedSkills };
-      if (uid) {
-        update(ref(db, `studentGames/${uid}/hanhTrinh`), {
-          beaten: p.beaten || {},
-          unlockedSkills: !!p.unlockedSkills,
-          rank: p.rank || rank, // cấp độ theo tiến trình chơi (do win() cập nhật khi vượt ải)
+      if (!uid) return;
+      const node = ref(db, `studentGames/${uid}/hanhTrinh`);
+      if (meta && meta.reset) {
+        // Reset CHỦ ĐỘNG: trường hợp DUY NHẤT được phép xóa tiến trình
+        update(node, {
+          beaten: null,
+          unlockedSkills: false,
+          rank: Number(p.rank) || 1,
           updatedAt: new Date().toISOString(),
         }).catch(() => {});
+        setSavedProgress({ beaten: {}, unlockedSkills: false });
+        return;
       }
+      // GHI HỢP NHẤT từng ải (beaten/<i>) thay vì thay cả object `beaten`.
+      // Trước đây ghi đè cả object: client cầm dữ liệu cũ (mạng chậm, tab mở lâu,
+      // chơi 2 thiết bị) sẽ XÓA ải đã vượt làm học viên tụt cấp. Ghi từng key
+      // thì tiến trình chỉ có thể TĂNG, không bao giờ mất.
+      const payload = { updatedAt: new Date().toISOString() };
+      Object.keys(p.beaten || {}).forEach((k) => { if (p.beaten[k]) payload[`beaten/${k}`] = true; });
+      if (p.unlockedSkills) payload.unlockedSkills = true;
+      // rank chỉ ghi TĂNG, không ghi tụt (phòng client cầm tiến trình thiếu)
+      const mergedBeaten = { ...(savedProgress.beaten || {}), ...(p.beaten || {}) };
+      payload.rank = Math.max(Number(p.rank) || 1, rankFromProgress(mergedBeaten));
+      update(node, payload).catch(() => {});
     };
     // Cộng dồn SAO sau mỗi lượt chơi (thắng/thua đều tính) -> phục vụ bảng xếp hạng
     const onStars = (stars) => {
@@ -300,13 +360,16 @@ export default function HanhTrinhGame() {
     );
   }
 
+  // Toàn màn hình đang bật (thật hoặc giả lập iOS)
+  const fsActive = isFs || pseudoFs;
+
   // Màn chơi: full-bleed khung game
   if (playing) {
     return (
       <div className="max-w-5xl mx-auto px-3 py-4">
         <div className="flex items-center justify-between gap-2 mb-3">
           <button
-            onClick={() => setPlaying(false)}
+            onClick={() => { exitFullscreen(); setPlaying(false); }}
             className="px-4 py-2 rounded-lg font-bold text-white shrink-0"
             style={{ background: FOREST }}
           >
@@ -330,13 +393,25 @@ export default function HanhTrinhGame() {
         {/* Wrapper xin fullscreen; khi fullscreen thì lấp đầy màn hình */}
         <div
           ref={stageWrapRef}
-          className={`relative ${isFs ? 'w-screen h-screen flex items-center justify-center bg-[#1a2a40]' : ''}`}
+          className={fsActive
+            ? 'fixed inset-0 z-[70] flex items-center justify-center bg-[#1a2a40]'
+            : 'relative'}
         >
           <div
             ref={hostRef}
-            className={`bg-[#1a2a40] ${isFs ? 'w-full h-full' : 'w-full rounded-2xl overflow-hidden shadow-2xl'}`}
-            style={isFs ? { touchAction: 'none' } : { aspectRatio: landscapeAspect, touchAction: 'none' }}
+            className={`bg-[#1a2a40] ${fsActive ? 'w-full h-full' : 'w-full rounded-2xl overflow-hidden shadow-2xl'}`}
+            style={fsActive ? { touchAction: 'none' } : { aspectRatio: landscapeAspect, touchAction: 'none' }}
           />
+
+          {/* Nút thoát toàn màn hình (bắt buộc cho iOS vì không có phím ESC) */}
+          {fsActive && (
+            <button
+              onClick={exitFullscreen}
+              className="absolute top-2 right-2 z-40 px-3 py-1.5 rounded-lg text-white text-xs font-bold bg-black/50 active:scale-95"
+            >
+              ✕ Thu nhỏ
+            </button>
+          )}
 
           {/* Overlay NHẮC XOAY NGANG — chỉ hiện khi điện thoại đang để dọc */}
           {isPortrait && (
@@ -442,9 +517,11 @@ export default function HanhTrinhGame() {
                 <div className="rounded-xl bg-slate-100 border border-slate-200 p-4 text-center">
                   <div className="text-2xl mb-1">⏳</div>
                   <p className="font-bold text-slate-600 text-sm">
-                    {todayUsed >= DAILY_CAP
-                      ? 'Đã hết lượt chơi hôm nay — hẹn gặp lại ngày mai nhé!'
-                      : 'Bạn đã dùng hết lượt — đi học và tích Bonus để có thêm lượt chơi.'}
+                    {!progLoaded
+                      ? 'Đang tải tiến trình của bạn... chờ một chút nhé!'
+                      : todayUsed >= DAILY_CAP
+                      ? 'Đã hết lượt chơi hôm nay - hẹn gặp lại ngày mai nhé!'
+                      : 'Bạn đã dùng hết lượt - đi học và tích Bonus để có thêm lượt chơi.'}
                   </p>
                 </div>
               )}

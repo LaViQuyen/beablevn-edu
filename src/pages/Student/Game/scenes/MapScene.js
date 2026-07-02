@@ -31,7 +31,7 @@ export class MapScene extends Phaser.Scene {
       if (window.confirm('Xóa toàn bộ tiến trình và chơi lại từ Mầm Non?')) {
         const keepRank = (EXTERNAL.initial && EXTERNAL.initial.rank) || 1;
         EXTERNAL.initial = { rank: keepRank, beaten: {}, unlockedSkills: false };
-        saveProg({ rank: keepRank, beaten: {}, unlockedSkills: false });
+        saveProg({ rank: keepRank, beaten: {}, unlockedSkills: false }, { reset: true }); // reset CHỦ ĐỘNG: cho phép xóa tiến trình trên DB
         resetProgressCache();
         this.scene.start('Map', { page: 0 });
       }

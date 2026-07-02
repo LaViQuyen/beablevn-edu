@@ -9,7 +9,9 @@ export function loadProg(){
   if(!d.beaten) d.beaten = {};
   PROGRESS = d; return PROGRESS;
 }
-export function saveProg(p){ PROGRESS = p; if(EXTERNAL.onSave){ try{ EXTERNAL.onSave(p); }catch(e){} } }
+// meta: { reset: true } khi người chơi chủ động xóa tiến trình (Chơi lại từ đầu).
+// React dựa vào cờ này để phân biệt reset thật với lưu thường (lưu thường chỉ HỢP NHẤT).
+export function saveProg(p, meta){ PROGRESS = p; if(EXTERNAL.onSave){ try{ EXTERNAL.onSave(p, meta); }catch(e){} } }
 
 export function resetProgressCache(){ PROGRESS = null; }
 

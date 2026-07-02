@@ -21,7 +21,7 @@
           "bonus": {
             "$rid": {
               ".write": "auth != null && auth.uid === $sid && auth.token.role === 'student' && !data.exists() && newData.child('score').isNumber() && newData.child('score').val() <= 0",
-              "score": { ".validate": "newData.isNumber()" }
+              "score": { ".validate": "newData.isNumber() || newData.isString()" }
             }
           }
         }
@@ -33,7 +33,7 @@
       "$uid": {
         "$rid": {
           ".write": "auth != null && !data.exists() && ( (auth.uid === $uid && (auth.token.role === 'staff' || auth.token.role === 'admin') && newData.child('score').isNumber() && newData.child('score').val() <= 0) || ((auth.token.role === 'admin' || auth.token.bod === true || auth.token.mod === true) && $uid !== auth.uid) )",
-          "score": { ".validate": "newData.isNumber()" }
+          "score": { ".validate": "newData.isNumber() || newData.isString()" }
         }
       }
     },
