@@ -201,8 +201,8 @@ const Inbox = () => {
           </svg>
         </div>
         <div>
-          <h2 className="text-xl font-bold text-[#2B6830]">Hộp thư</h2>
-          <p className="text-xs text-slate-400 mt-0.5">Phản ánh và tin nhắn từ học viên.</p>
+          <h2 className="page-title">Hộp thư</h2>
+          <p className="page-sub">Phản ánh và tin nhắn từ học viên.</p>
         </div>
       </div>
 
@@ -291,7 +291,7 @@ const Inbox = () => {
                 Quay lại
               </button>
 
-              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 space-y-4">
+              <div className="card-std p-5 space-y-4">
                 <div className="flex flex-wrap gap-2">
                   <span className={`text-[10px] font-bold px-2 py-1 rounded border ${(CATEGORIES[selectedFb.category] || CATEGORIES.khac).color}`}>
                     {(CATEGORIES[selectedFb.category] || CATEGORIES.khac).label}
@@ -300,7 +300,7 @@ const Inbox = () => {
                     {selectedFb.status === 'pending' ? 'Chờ xử lý' : selectedFb.status === 'read' ? 'Đã xem' : 'Đã xử lý'}
                   </span>
                 </div>
-                <h3 className="font-bold text-slate-800 text-lg">{selectedFb.title}</h3>
+                <h3 className="section-title">{selectedFb.title}</h3>
                 <p className="text-xs text-slate-400">
                   {selectedFb.isAnonymous ? 'Ẩn danh' : `${withEnByCode(selectedFb.studentName, selectedFb.studentCode, enMap)} (${selectedFb.studentCode})`} · {new Date(selectedFb.date).toLocaleString('vi-VN')}
                 </p>
@@ -324,7 +324,7 @@ const Inbox = () => {
                 {/* Ô trả lời + nút đánh dấu đã xử lý (tách riêng) */}
                 <div className="space-y-3 pt-3 border-t border-slate-100">
                   <textarea
-                    className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 resize-none transition"
+                    className="input-base resize-none"
                     rows={3}
                     placeholder="Nhập phản hồi (có thể hỏi thêm nếu chưa đủ thông tin)..."
                     value={reply}
@@ -334,14 +334,14 @@ const Inbox = () => {
                     <button
                       onClick={handleFeedbackReply}
                       disabled={!reply.trim() || sending}
-                      className="bg-[#2B6830] text-white px-5 py-2.5 rounded-xl font-bold hover:bg-[#1E5225] transition-all disabled:opacity-50 text-sm"
+                      className="btn-primary"
                     >
                       {sending ? 'Đang gửi...' : 'Gửi phản hồi'}
                     </button>
                     {selectedFb.status !== 'resolved' ? (
                       <button
                         onClick={handleResolveFeedback}
-                        className="border border-emerald-600 text-emerald-600 px-5 py-2.5 rounded-xl font-bold hover:bg-emerald-600 hover:text-white transition-all text-sm"
+                        className="btn-outline"
                       >
                         ✅ Đánh dấu đã xử lý
                       </button>
@@ -395,7 +395,7 @@ const Inbox = () => {
                 Quay lại
               </button>
 
-              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+              <div className="card-std overflow-hidden">
                 <div className="p-4 border-b border-slate-100 bg-slate-50">
                   <p className="font-bold text-[#2B6830]">{selectedMsg.subject}</p>
                   <p className="text-xs text-slate-400 mt-0.5">Từ {withEnByCode(selectedMsg.studentName, selectedMsg.studentCode, enMap)} ({selectedMsg.studentCode})</p>
@@ -420,7 +420,7 @@ const Inbox = () => {
 
                 <div className="p-4 border-t border-slate-100 flex gap-3">
                   <input
-                    className="flex-1 border border-slate-200 px-4 py-2.5 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition"
+                    className="input-base flex-1"
                     placeholder="Nhập phản hồi..."
                     value={reply}
                     onChange={e => setReply(e.target.value)}
@@ -429,7 +429,7 @@ const Inbox = () => {
                   <button
                     onClick={handleMessageReply}
                     disabled={!reply.trim() || sending}
-                    className="bg-[#2B6830] text-white px-4 py-2.5 rounded-xl font-bold hover:bg-[#1E5225] transition-all disabled:opacity-40 flex items-center gap-1.5 text-sm"
+                    className="btn-primary"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" /></svg>
                     Gửi

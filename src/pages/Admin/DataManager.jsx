@@ -15,8 +15,8 @@ const ConfirmModal = ({ message, onConfirm, onCancel }) => (
         <p className="text-sm font-medium text-slate-700">{message}</p>
       </div>
       <div className="flex gap-3 justify-end">
-        <button onClick={onCancel} className="px-4 py-2 rounded-xl text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">Hủy</button>
-        <button onClick={onConfirm} className="px-4 py-2 rounded-xl text-sm font-bold text-white bg-red-500 hover:bg-red-600 transition-colors">Xóa</button>
+        <button onClick={onCancel} className="btn-secondary">Hủy</button>
+        <button onClick={onConfirm} className="btn-danger">Xóa</button>
       </div>
     </div>
   </div>
@@ -122,8 +122,8 @@ const DataManager = () => {
           </svg>
         </div>
         <div>
-          <h2 className="text-xl font-bold text-[#2B6830]">Dữ liệu Lớp học</h2>
-          <p className="text-xs text-slate-400 mt-0.5">Quản lý danh sách lớp và lịch học.</p>
+          <h2 className="page-title">Dữ liệu Lớp học</h2>
+          <p className="page-sub">Quản lý danh sách lớp và lịch học.</p>
         </div>
       </div>
 
@@ -137,29 +137,29 @@ const DataManager = () => {
       )}
 
       {/* FORM NHẬP LIỆU */}
-      <div className="bg-white p-5 md:p-6 rounded-2xl border border-slate-100 shadow-sm">
-        <h2 className="text-lg font-bold text-[#2B6830] mb-4">{editingId ? '✏️ Cập nhật Lớp' : '➕ Thêm Lớp Mới'}</h2>
+      <div className="card-std p-5 md:p-6">
+        <h2 className="section-title mb-4">{editingId ? '✏️ Cập nhật Lớp' : '➕ Thêm Lớp Mới'}</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
           <input
-            className="border p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition"
+            className="input-base"
             placeholder="Tên Lớp (VD: Kids 1)"
             value={formData.name}
             onChange={e => setFormData({...formData, name: e.target.value})}
           />
           <input
-            className="border p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition"
+            className="input-base"
             placeholder="Phòng (VD: P.101)"
             value={formData.room}
             onChange={e => setFormData({...formData, room: e.target.value})}
           />
           <input
-            className="border p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition"
+            className="input-base"
             placeholder="Môn (VD: Tiếng Anh)"
             value={formData.subject}
             onChange={e => setFormData({...formData, subject: e.target.value})}
           />
           <input
-            className="border p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition"
+            className="input-base"
             placeholder="Lịch học (VD: T2-T4-T6)"
             value={formData.schedule}
             onChange={e => setFormData({...formData, schedule: e.target.value})}
@@ -167,9 +167,9 @@ const DataManager = () => {
 
           {/* DROPDOWN CHỌN GIÁO VIÊN — tính năng mới */}
           <div className="flex flex-col">
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Giáo viên phụ trách</label>
+            <label className="stat-label mb-1">Giáo viên phụ trách</label>
             <select
-              className="border p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 bg-white transition"
+              className="input-base"
               value={formData.teacherId}
               onChange={e => handleTeacherSelect(e.target.value)}
             >
@@ -182,12 +182,12 @@ const DataManager = () => {
 
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col">
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Giờ bắt đầu</label>
-              <input className="border p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition" type="time" value={formData.startTime} onChange={e => setFormData({...formData, startTime: e.target.value})} />
+              <label className="stat-label mb-1">Giờ bắt đầu</label>
+              <input className="input-base" type="time" value={formData.startTime} onChange={e => setFormData({...formData, startTime: e.target.value})} />
             </div>
             <div className="flex flex-col">
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Giờ kết thúc</label>
-              <input className="border p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition" type="time" value={formData.endTime} onChange={e => setFormData({...formData, endTime: e.target.value})} />
+              <label className="stat-label mb-1">Giờ kết thúc</label>
+              <input className="input-base" type="time" value={formData.endTime} onChange={e => setFormData({...formData, endTime: e.target.value})} />
             </div>
           </div>
         </div>
@@ -199,13 +199,13 @@ const DataManager = () => {
           </p>
         )}
         <div className="flex gap-2">
-          <button onClick={handleSubmit} className="flex-1 md:flex-none bg-[#2B6830] text-white px-8 py-3 rounded-xl font-bold shadow-md shadow-green-900/10 hover:bg-[#1E5225] transition-all active:scale-[0.98]">
+          <button onClick={handleSubmit} className="btn-primary flex-1 md:flex-none">
             {editingId ? 'Lưu Thay Đổi' : 'Thêm Lớp'}
           </button>
           {editingId && (
             <button
               onClick={() => { setEditingId(null); setFormData(EMPTY_FORM); }}
-              className="flex-1 md:flex-none bg-slate-100 text-slate-600 px-6 py-3 rounded-xl font-medium hover:bg-slate-200 transition-all"
+              className="btn-secondary flex-1 md:flex-none"
             >
               Hủy
             </button>
@@ -214,52 +214,52 @@ const DataManager = () => {
       </div>
 
       {/* DANH SÁCH LỚP */}
-      <div className="bg-white p-5 md:p-6 rounded-2xl border border-slate-100 shadow-sm">
+      <div className="card-std p-5 md:p-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-          <h2 className="text-lg font-bold text-[#2B6830]">Danh sách Lớp học ({filteredClasses.length})</h2>
+          <h2 className="section-title">Danh sách Lớp học ({filteredClasses.length})</h2>
           <div className="flex flex-col md:flex-row gap-3">
             <select className="p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 bg-slate-50 md:min-w-[180px]" value={selectedClassFilter} onChange={(e) => setSelectedClassFilter(e.target.value)}>
               <option value="all">-- Tất cả các lớp --</option>
               {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
             <div className="grid grid-cols-2 gap-3 md:flex">
-              <input className="w-full p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 md:w-32" placeholder="Lọc Phòng..." value={filters.room} onChange={e => setFilters({...filters, room: e.target.value})} />
-              <input className="w-full p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 md:w-32" placeholder="Lọc Lịch..." value={filters.schedule} onChange={e => setFilters({...filters, schedule: e.target.value})} />
+              <input className="input-base md:w-32" placeholder="Lọc Phòng..." value={filters.room} onChange={e => setFilters({...filters, room: e.target.value})} />
+              <input className="input-base md:w-32" placeholder="Lọc Lịch..." value={filters.schedule} onChange={e => setFilters({...filters, schedule: e.target.value})} />
             </div>
           </div>
         </div>
 
         {/* DESKTOP TABLE */}
         <div className="hidden md:block overflow-x-auto rounded-xl border border-slate-200">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 text-slate-500 border-b border-slate-200 text-xs uppercase font-bold">
+          <table className="table-std">
+            <thead>
               <tr>
-                <th className="p-4 w-10 text-center">STT</th>
-                <th className="p-4">Tên Lớp</th>
-                <th className="p-4">Phòng</th>
-                <th className="p-4">Môn học</th>
-                <th className="p-4">Giáo viên</th>
-                <th className="p-4">Lịch</th>
-                <th className="p-4">Giờ</th>
-                <th className="p-4 text-right">Thao tác</th>
+                <th className="w-10 text-center">STT</th>
+                <th>Tên Lớp</th>
+                <th>Phòng</th>
+                <th>Môn học</th>
+                <th>Giáo viên</th>
+                <th>Lịch</th>
+                <th>Giờ</th>
+                <th className="text-right">Thao tác</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody>
               {filteredClasses.map((c, index) => (
-                <tr key={c.id} className="hover:bg-slate-50 transition-colors">
-                  <td className="p-4 text-center text-slate-400 font-bold">{index + 1}</td>
-                  <td className="p-4 font-bold text-[#2B6830]">{c.name}</td>
-                  <td className="p-4 text-slate-600">{c.room || '—'}</td>
-                  <td className="p-4 text-slate-600">{c.subject || '—'}</td>
-                  <td className="p-4">
+                <tr key={c.id}>
+                  <td className="text-center text-slate-400 font-bold">{index + 1}</td>
+                  <td className="font-bold text-[#2B6830]">{c.name}</td>
+                  <td className="text-slate-600">{c.room || '—'}</td>
+                  <td className="text-slate-600">{c.subject || '—'}</td>
+                  <td>
                     {c.teacherName
                       ? <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded border border-emerald-200">{c.teacherName}</span>
                       : <span className="text-xs text-slate-300 italic">Chưa phân công</span>
                     }
                   </td>
-                  <td className="p-4"><span className="text-[10px] font-bold bg-[#E8F4EC] text-[#2B6830] px-2 py-1 rounded border border-green-100 whitespace-nowrap">{c.schedule || '—'}</span></td>
-                  <td className="p-4 text-xs text-slate-500 font-mono whitespace-nowrap">{c.startTime || '—'} - {c.endTime || '—'}</td>
-                  <td className="p-4 text-right space-x-2">
+                  <td><span className="text-[10px] font-bold bg-[#E8F4EC] text-[#2B6830] px-2 py-1 rounded border border-green-100 whitespace-nowrap">{c.schedule || '—'}</span></td>
+                  <td className="text-xs text-slate-500 font-mono whitespace-nowrap">{c.startTime || '—'} - {c.endTime || '—'}</td>
+                  <td className="text-right space-x-2">
                     <button onClick={() => handleEdit(c)} className="text-[#2B6830] text-xs font-bold border border-[#2B6830] px-3 py-1.5 rounded-xl hover:bg-[#2B6830] hover:text-white transition-all">Sửa</button>
                     <button onClick={() => handleDelete(c.id)} className="text-red-500 text-xs font-bold border border-red-300 px-3 py-1.5 rounded-xl hover:bg-red-500 hover:text-white transition-all">Xóa</button>
                   </td>
@@ -267,7 +267,7 @@ const DataManager = () => {
               ))}
               {loading && [1,2,3].map(i => (
                 <tr key={i} className="animate-pulse">
-                  {[1,2,3,4,5,6,7,8].map(j => <td key={j} className="p-4"><div className="h-4 bg-slate-100 rounded w-full" /></td>)}
+                  {[1,2,3,4,5,6,7,8].map(j => <td key={j}><div className="h-4 bg-slate-100 rounded w-full" /></td>)}
                 </tr>
               ))}
               {!loading && filteredClasses.length === 0 && (

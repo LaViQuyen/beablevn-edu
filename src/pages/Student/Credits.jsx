@@ -306,7 +306,7 @@ const StudentCredits = () => {
       </div>
 
       {/* ===== BONUS THEO TỪNG LỚP ===== */}
-      <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+      <div className="card-std p-5">
         <h3 className="text-sm font-bold text-[#2B6830] mb-3 uppercase tracking-wide">Điểm Bonus theo lớp</h3>
         {bonusByClass.length === 0 ? (
           <p className="text-xs text-slate-400 italic">Bạn chưa được gán vào lớp nào.</p>
@@ -323,7 +323,7 @@ const StudentCredits = () => {
       </div>
 
       {/* ===== MENU ĐỔI QUÀ FRESH FIT ===== */}
-      <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+      <div className="card-std p-5">
         <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
           <h3 className="text-sm font-bold text-[#2B6830] uppercase tracking-wide">🌿 Đổi quà Fresh Fit</h3>
           <div className="flex gap-1.5 flex-wrap">
@@ -346,7 +346,7 @@ const StudentCredits = () => {
           </div>
           <input
             type="text"
-            className="w-full pl-10 p-3 border border-slate-200 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 text-sm text-slate-700 bg-slate-50 focus:bg-white transition-colors"
+            className="input-base pl-10"
             placeholder="Tìm nhanh món cần đổi (VD: trà sữa, cơm gà...)..."
             value={searchKeyword}
             onChange={e => setSearchKeyword(e.target.value)}
@@ -443,7 +443,7 @@ const StudentCredits = () => {
       </div>
 
       {/* ===== LỊCH SỬ ĐỔI QUÀ ===== */}
-      <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+      <div className="card-std p-5">
         <h3 className="text-sm font-bold text-[#2B6830] mb-3 uppercase tracking-wide">Lịch sử đổi quà</h3>
         {myRedemptions.length === 0 ? (
           <p className="text-xs text-slate-400 italic">Chưa có yêu cầu đổi quà nào.</p>

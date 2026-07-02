@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useSwipeTabs } from '../useSwipeTabs';
 import { db } from '../../firebase';
 import { ref, update, get, onValue } from 'firebase/database';
 import bcrypt from 'bcryptjs';
@@ -147,6 +148,23 @@ const StudentLayout = () => {
   // Mỗi thẻ có bề rộng tối thiểu cố định + không co lại (shrink-0) để thanh nav cuộn ngang được
   const mobileLinkClass = (path) => `flex flex-col items-center justify-center shrink-0 min-w-[64px] h-full space-y-1 px-0.5 ${isActive(path) ? 'text-[#2B6830]' : 'text-slate-400 hover:text-slate-600'}`;
 
+  // Thu tu the bottom nav - dung cho VUOT NGANG chuyen the;
+  // khi Qua han hoc phi thi BO cac the bi khoa khoi day vuot (khong lach duoc popup)
+  const LOCKED_WHEN_OVERDUE = ['credits', 'skins', 'resources', 'notifications'];
+  const TABS = [
+    { key: 'dashboard',     to: '/student/dashboard' },
+    { key: 'attendance',    to: '/student/attendance' },
+    { key: 'scores',        to: '/student/scores' },
+    { key: 'credits',       to: '/student/credits' },
+    { key: 'skins',         to: '/student/skins' },
+    { key: 'leaderboard',   to: '/student/leaderboard' },
+    { key: 'resources',     to: '/student/resources' },
+    { key: 'notifications', to: '/student/notifications' },
+    { key: 'feedback',      to: '/student/feedback' },
+    { key: 'contact',       to: '/student/contact' },
+  ].filter((tb) => !isOverdue || !LOCKED_WHEN_OVERDUE.includes(tb.key));
+  const { onTouchStart, onTouchEnd, slideKey, slideClass } = useSwipeTabs(TABS);
+
   // Tự cuộn thẻ đang chọn vào giữa thanh nav
   const bottomNavRef = useRef(null);
   useEffect(() => {
@@ -274,23 +292,6 @@ const StudentLayout = () => {
               : <span className="text-[9px] font-bold bg-[#E8F4EC] text-[#2B6830] px-1.5 py-0.5 rounded border border-green-100 uppercase">Mới</span>
             }
           </Link>
-          <Link to="/student/skins" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('skins') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
-            <Icons.Skins active={isActive('skins')} />
-            <span className="flex-1">Cửa hàng Skin</span>
-            <span className="text-[9px] font-bold bg-[#E8F4EC] text-[#2B6830] px-1.5 py-0.5 rounded border border-green-100 uppercase">Mới</span>
-          </Link>
-          <Link to="/student/leaderboard" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('leaderboard') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
-            <Icons.Trophy active={isActive('leaderboard')} />
-            <span className="flex-1">Bảng Vinh Danh</span>
-            <span className="text-[9px] font-bold bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded border border-amber-200 uppercase">Hot</span>
-          </Link>
-
-          <p className="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 mt-4">Tài nguyên</p>
-          <Link to="/student/resources" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('resources') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
-            <Icons.Practice active={isActive('resources')} />
-            <span className="flex-1">Luyện tập IELTS</span>
-            <span className="text-[9px] font-bold bg-[#E8F4EC] text-[#2B6830] px-1.5 py-0.5 rounded border border-green-100 uppercase">Mới</span>
-          </Link>
 
           <p className="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 mt-4">Tương tác</p>
           <Link to="/student/feedback" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('feedback') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
@@ -333,9 +334,9 @@ const StudentLayout = () => {
         </div>
       </header>
 
-      {/* MAIN CONTENT */}
-      <main className="flex-1 md:ml-64 px-4 pt-20 pb-24 md:p-8 md:pb-8 overflow-auto">
-        <div className="max-w-6xl mx-auto"><Outlet /></div>
+      {/* MAIN CONTENT - vuot ngang tren mobile de chuyen the truoc/sau */}
+      <main className="flex-1 md:ml-64 px-4 pt-20 pb-24 md:p-8 md:pb-8 overflow-auto" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+        <div key={slideKey} className={`max-w-6xl mx-auto ${slideClass}`}><Outlet /></div>
       </main>
 
       {/* MOBILE BOTTOM NAV — cuộn ngang (swipe) vì có nhiều thẻ; ẩn thanh cuộn cho gọn */}

@@ -200,7 +200,7 @@ const StudentDetailModal = ({ student, classNames = [], onClose }) => {
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -210,7 +210,7 @@ const StudentDetailModal = ({ student, classNames = [], onClose }) => {
               {(student.name || '?').charAt(0)}
             </div>
             <div>
-              <h3 className="font-bold text-slate-800 flex items-center gap-2">
+              <h3 className="section-title flex items-center gap-2">
                 {fmtStudentName(student.name, englishName)}
                 {stBirthday && <span title="Sinh nhật tháng này">🎂</span>}
               </h3>

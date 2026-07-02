@@ -111,14 +111,14 @@ const MyAttendance = () => {
             <path strokeLinecap="round" strokeLinejoin="round" d="M11.35 3.836c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
           </svg>
         </div>
-        <h2 className="text-xl font-bold text-[#2B6830]">Theo dõi Chuyên cần</h2>
+        <h2 className="page-title">Theo dõi Chuyên cần</h2>
       </div>
 
       {/* SKELETON */}
       {loading && (
         <div className="space-y-4">
           {[1, 2].map(i => (
-            <div key={i} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 animate-pulse space-y-3">
+            <div key={i} className="card-std p-5 animate-pulse space-y-3">
               <div className="h-5 bg-slate-100 rounded w-32" />
               <div className="h-3 bg-slate-100 rounded w-full" />
               <div className="h-3 bg-slate-100 rounded w-3/4" />
@@ -135,7 +135,7 @@ const MyAttendance = () => {
             attendanceData.map(item => {
               const { bar, text } = diligenceColor(item.diligence);
               return (
-                <div key={item.classId} className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div key={item.classId} className="card-std overflow-hidden">
                     {/* Header Lớp + Progress Bar */}
                     <div className="p-4 bg-slate-50 border-b border-slate-100">
                         <div className="flex justify-between items-start mb-3">
@@ -144,8 +144,8 @@ const MyAttendance = () => {
                                 <p className="text-xs text-slate-500">{item.totalSessions} buổi đã điểm danh</p>
                             </div>
                             <div className="text-right">
-                                <div className={`text-2xl font-extrabold ${text}`}>{item.diligence}%</div>
-                                <p className="text-[10px] uppercase font-bold text-slate-400">Chuyên cần</p>
+                                <div className={`text-3xl font-extrabold leading-tight ${text}`}>{item.diligence}%</div>
+                                <p className="stat-label">Chuyên cần</p>
                             </div>
                         </div>
                         {/* Progress bar */}

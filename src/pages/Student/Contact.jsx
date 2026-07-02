@@ -157,8 +157,8 @@ const Contact = () => {
             </svg>
           </div>
           <div>
-            <h2 className="text-xl font-bold text-[#2B6830]">Liên hệ</h2>
-            <p className="text-xs text-slate-400 mt-0.5">Nhắn tin trực tiếp đến giáo viên hoặc CCO phụ trách.</p>
+            <h2 className="page-title">Liên hệ</h2>
+            <p className="page-sub">Nhắn tin trực tiếp đến giáo viên hoặc CCO phụ trách.</p>
           </div>
         </div>
         <button
@@ -173,13 +173,13 @@ const Contact = () => {
 
       {/* === FORM TIN NHẮN MỚI === */}
       {view === 'new' && (
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 md:p-6 max-w-2xl">
+        <div className="card-std p-5 md:p-6 max-w-2xl">
           <h3 className="font-bold text-[#2B6830] mb-4">Gửi tin nhắn mới</h3>
           <form onSubmit={handleNewConversation} className="space-y-4">
             <div>
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Gửi đến *</label>
+              <label className="stat-label block mb-1.5">Gửi đến *</label>
               <select
-                className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 bg-white transition"
+                className="input-base"
                 value={selectedRecipient}
                 onChange={e => setSelectedRecipient(e.target.value)}
                 required
@@ -196,9 +196,9 @@ const Contact = () => {
               )}
             </div>
             <div>
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Tiêu đề *</label>
+              <label className="stat-label block mb-1.5">Tiêu đề *</label>
               <input
-                className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition"
+                className="input-base"
                 placeholder="VD: Hỏi về bài tập tuần này"
                 value={subject}
                 onChange={e => setSubject(e.target.value)}
@@ -206,9 +206,9 @@ const Contact = () => {
               />
             </div>
             <div>
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Nội dung *</label>
+              <label className="stat-label block mb-1.5">Nội dung *</label>
               <textarea
-                className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 resize-none transition"
+                className="input-base resize-none"
                 rows={4}
                 placeholder="Nhập nội dung tin nhắn..."
                 value={firstMsg}
@@ -219,7 +219,7 @@ const Contact = () => {
             <button
               type="submit"
               disabled={sending || staffList.length === 0}
-              className="w-full bg-[#2B6830] text-white py-3 rounded-xl font-bold hover:bg-[#1E5225] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+              className="btn-primary w-full"
             >
               {sending ? 'Đang gửi...' : '📨 Gửi tin nhắn'}
             </button>
@@ -242,7 +242,7 @@ const Contact = () => {
             <button
               key={conv.id}
               onClick={() => openConversation(conv)}
-              className="w-full bg-white rounded-2xl border border-slate-100 shadow-sm p-4 text-left hover:shadow-md hover:border-green-100 transition-all flex items-start gap-3"
+              className="w-full card-std p-4 text-left hover:shadow-md hover:border-green-100 transition-all flex items-start gap-3"
             >
               {/* Avatar GV */}
               <div className="w-10 h-10 rounded-full bg-[#2B6830]/10 text-[#2B6830] font-bold text-sm flex items-center justify-center shrink-0">
@@ -277,7 +277,7 @@ const Contact = () => {
             Quay lại
           </button>
 
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+          <div className="card-std overflow-hidden">
             {/* Header cuộc trò chuyện */}
             <div className="p-4 border-b border-slate-100 bg-slate-50">
               <p className="font-bold text-[#2B6830]">{selectedConv.subject}</p>
@@ -318,7 +318,7 @@ const Contact = () => {
               <button
                 onClick={handleReply}
                 disabled={!newMsg.trim() || sending}
-                className="bg-[#2B6830] text-white px-4 py-2.5 rounded-xl font-bold hover:bg-[#1E5225] transition-all disabled:opacity-40 flex items-center gap-1.5 text-sm"
+                className="btn-primary"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" /></svg>
                 Gửi

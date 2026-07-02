@@ -422,13 +422,13 @@ const ScoreInput = () => {
                 <div className="p-2 bg-[#E8F4EC] rounded-xl text-[#2B6830]">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
                 </div>
-                <h2 className="text-xl font-bold text-[#2B6830]">Nhập Điểm Chi Tiết</h2>
+                <h2 className="page-title">Nhập Điểm Chi Tiết</h2>
             </div>
 
-            <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+            <div className="card-std p-5">
                 <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Chọn Lớp học (Được phân công)</label>
                 <select
-                    className="w-full md:w-1/2 p-2.5 border border-slate-200 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 font-medium"
+                    className="input-base md:w-1/2 font-medium"
                     value={selectedClass}
                     onChange={e => setSelectedClass(e.target.value)}
                 >
@@ -439,7 +439,7 @@ const ScoreInput = () => {
 
             {selectedClass && (
                 <>
-                    <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div className="card-std overflow-hidden">
                         <div className="flex border-b border-slate-200 bg-slate-50 overflow-x-auto custom-scrollbar">
                             {TABS.map(tab => (
                                 <button
@@ -456,12 +456,12 @@ const ScoreInput = () => {
                         <div className="p-5 bg-[#E8F4EC]/50 border-b border-slate-100 grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                             <div className="md:col-span-3">
                                 <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Ngày ghi nhận</label>
-                                <input type="date" className="w-full p-2 border border-slate-200 rounded outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10" value={commonInput.date} onChange={e => setCommonInput({ ...commonInput, date: e.target.value })} />
+                                <input type="date" className="input-base" value={commonInput.date} onChange={e => setCommonInput({ ...commonInput, date: e.target.value })} />
                             </div>
                             {activeTab === 'summative' && (
                                 <div className="md:col-span-2">
                                     <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Kỳ thi</label>
-                                    <select className="w-full p-2 border border-slate-200 rounded outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 font-bold text-[#2B6830]" value={commonInput.examType} onChange={e => setCommonInput({ ...commonInput, examType: e.target.value })}>
+                                    <select className="input-base font-bold text-[#2B6830]" value={commonInput.examType} onChange={e => setCommonInput({ ...commonInput, examType: e.target.value })}>
                                         <option value="MMT">MMT</option>
                                         <option value="EOMT">EOMT</option>
                                     </select>
@@ -469,7 +469,7 @@ const ScoreInput = () => {
                             )}
                             <div className={activeTab === 'summative' ? "md:col-span-7" : "md:col-span-9"}>
                                 <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Nội dung ghi nhận (Bắt buộc)</label>
-                                <input type="text" placeholder="VD: Làm bài tập về nhà đầy đủ..." className="w-full p-2 border border-slate-200 rounded outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10" value={commonInput.content} onChange={e => setCommonInput({ ...commonInput, content: e.target.value })} />
+                                <input type="text" placeholder="VD: Làm bài tập về nhà đầy đủ..." className="input-base" value={commonInput.content} onChange={e => setCommonInput({ ...commonInput, content: e.target.value })} />
                             </div>
                         </div>
 
@@ -505,25 +505,25 @@ const ScoreInput = () => {
                         </div>
 
                         <div className="overflow-x-auto">
-                            <table className="w-full text-left text-sm">
-                                <thead className="bg-white text-slate-500 uppercase text-[10px] font-bold border-b border-slate-200 shadow-sm">
+                            <table className="table-std">
+                                <thead>
                                     <tr>
-                                        <th className="p-4 w-10">#</th>
-                                        <th className="p-4">Học Viên (Bấm để xem lịch sử)</th>
-                                        <th className="p-4 text-center text-yellow-700 bg-yellow-50/50 hidden md:table-cell">Bonus</th>
-                                        <th className="p-4 text-center text-green-700 bg-green-50/50 hidden md:table-cell">Assign</th>
-                                        <th className="p-4 text-center text-green-700 bg-[#E8F4EC]/50 hidden md:table-cell">Format</th>
-                                        <th className="p-4 text-center text-green-700 bg-[#E8F4EC]/50 hidden md:table-cell">Summa</th>
-                                        <th className="p-4 w-40 text-center border-l border-slate-200 bg-slate-50">Nhập Điểm</th>
+                                        <th className="w-10">#</th>
+                                        <th>Học Viên (Bấm để xem lịch sử)</th>
+                                        <th className="!text-center !text-yellow-700 !bg-yellow-50/50 hidden md:table-cell">Bonus</th>
+                                        <th className="!text-center !text-green-700 !bg-green-50/50 hidden md:table-cell">Assign</th>
+                                        <th className="!text-center !text-green-700 !bg-[#E8F4EC]/50 hidden md:table-cell">Format</th>
+                                        <th className="!text-center !text-green-700 !bg-[#E8F4EC]/50 hidden md:table-cell">Summa</th>
+                                        <th className="w-40 !text-center border-l border-slate-200">Nhập Điểm</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-50">
+                                <tbody>
                                     {students.filter(s => !studentSearch || s.name.toLowerCase().includes(studentSearch.toLowerCase()) || (s.studentCode||'').toLowerCase().includes(studentSearch.toLowerCase())).map((st, index) => {
                                         const summary = getSummary(st.id);
                                         return (
-                                            <tr key={st.id} className="hover:bg-slate-50 transition-colors">
-                                                <td className="p-4 text-slate-400">{index + 1}</td>
-                                                <td className="p-4">
+                                            <tr key={st.id}>
+                                                <td className="text-slate-400">{index + 1}</td>
+                                                <td>
                                                     <button
                                                         onClick={() => setHistoryStudentModal(st)}
                                                         className="font-bold text-[#2B6830] hover:text-green-600 hover:underline text-left outline-none transition-all flex items-center gap-2"
@@ -543,11 +543,11 @@ const ScoreInput = () => {
                                                     </div>
                                                     {/* ------------------------------------------------ */}
                                                 </td>
-                                                <td className="p-4 text-center font-bold text-yellow-700 bg-yellow-50/30 hidden md:table-cell">{summary.bonus}</td>
-                                                <td className="p-4 text-center font-bold text-green-700 bg-green-50/30 hidden md:table-cell">{summary.assignment}</td>
-                                                <td className="p-4 text-center font-bold text-green-700 bg-[#E8F4EC]/30 hidden md:table-cell">{summary.formative}</td>
-                                                <td className="p-4 text-center font-bold text-green-700 bg-[#E8F4EC]/30 hidden md:table-cell">{summary.summative}</td>
-                                                <td className="p-4 border-l border-slate-100 bg-slate-50/50">
+                                                <td className="text-center font-bold !text-yellow-700 bg-yellow-50/30 hidden md:table-cell">{summary.bonus}</td>
+                                                <td className="text-center font-bold !text-green-700 bg-green-50/30 hidden md:table-cell">{summary.assignment}</td>
+                                                <td className="text-center font-bold !text-green-700 bg-[#E8F4EC]/30 hidden md:table-cell">{summary.formative}</td>
+                                                <td className="text-center font-bold !text-green-700 bg-[#E8F4EC]/30 hidden md:table-cell">{summary.summative}</td>
+                                                <td className="border-l border-slate-100 bg-slate-50/50">
                                                     <div className="flex justify-center">
                                                         <input
                                                             id={`score-input-${index}`} // Cấp ID duy nhất dựa trên index của mảng
@@ -615,7 +615,7 @@ const ScoreInput = () => {
                             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl overflow-hidden flex flex-col max-h-[90vh]">
                                 <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                                     <div>
-                                        <h3 className="text-lg font-bold text-[#2B6830]">Lịch sử Điểm & Chỉnh sửa</h3>
+                                        <h3 className="section-title">Lịch sử Điểm & Chỉnh sửa</h3>
                                         <p className="text-sm font-medium text-slate-500 mt-1">Học viên: <span className="text-[#2B6830]">{fmtStudentName(historyStudentModal.name, historyStudentModal.englishName)}</span> ({historyStudentModal.studentCode})</p>
                                     </div>
                                     <button onClick={() => { setHistoryStudentModal(null); setEditingRecordId(null); }} className="p-2 bg-slate-200 text-slate-500 rounded-full hover:bg-red-100 hover:text-red-600 transition-colors">

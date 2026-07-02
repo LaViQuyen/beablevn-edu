@@ -282,7 +282,7 @@ const StaffCredits = () => {
 
       {/* ===== LỊCH SỬ ĐƯỢC CẤP CREDITS (có lý do) ===== */}
       {myGrantHistory.length > 0 && (
-        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+        <div className="card-std p-5">
           <h3 className="text-sm font-bold text-purple-700 mb-3 uppercase tracking-wide">⭐ Lịch sử Credits của bạn</h3>
           <div className="space-y-1.5 max-h-56 overflow-y-auto">
             {myGrantHistory.map(h => (
@@ -299,7 +299,7 @@ const StaffCredits = () => {
       )}
 
       {/* ===== MENU ĐỔI: MÓN FRESH FIT + QUÀ NHÂN SỰ ===== */}
-      <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+      <div className="card-std p-5">
         <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
           <h3 className="text-sm font-bold text-[#2B6830] uppercase tracking-wide">🌿 Đổi món Fresh Fit & 🎁 quà nhân sự</h3>
           <div className="flex gap-1.5 flex-wrap">
@@ -317,7 +317,7 @@ const StaffCredits = () => {
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-slate-400"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
           </div>
           <input type="text"
-            className="w-full pl-10 p-3 border border-slate-200 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 text-sm text-slate-700 bg-slate-50 focus:bg-white transition-colors"
+            className="input-base pl-10"
             placeholder="Tìm nhanh món hoặc quà..."
             value={searchKeyword} onChange={e => setSearchKeyword(e.target.value)}
           />
@@ -393,7 +393,7 @@ const StaffCredits = () => {
       </div>
 
       {/* ===== LỊCH SỬ ĐỔI ===== */}
-      <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+      <div className="card-std p-5">
         <h3 className="text-sm font-bold text-[#2B6830] mb-3 uppercase tracking-wide">Lịch sử đổi của bạn</h3>
         {myRedemptions.length === 0 ? (
           <p className="text-xs text-slate-400 italic">Chưa có yêu cầu nào.</p>

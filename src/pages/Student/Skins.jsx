@@ -266,7 +266,7 @@ const StudentSkins = () => {
       </button>
 
       {/* ===== BỘ SƯU TẬP ===== */}
-      <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+      <div className="card-std p-5">
         <h3 className="text-sm font-bold text-[#2B6830] mb-3 uppercase tracking-wide">🎒 Bộ sưu tập của tôi ({ownedSkins.length})</h3>
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
           {ownedSkins.map(skin => {
@@ -286,7 +286,7 @@ const StudentSkins = () => {
 
       {/* ===== CỬA HÀNG SKIN NHÂN SỰ — đổi bằng Bonus nhân sự (MOD thưởng) ===== */}
       {isStaff && (
-      <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+      <div className="card-std p-5">
         <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
           <h3 className="text-sm font-bold text-[#2B6830] uppercase tracking-wide">🛍️ Cửa hàng Skin (nhân sự)</h3>
           <span className="text-xs font-bold text-slate-500">Bonus: <span className="text-[#2B6830]">{staffBonusBalance}</span></span>
@@ -326,7 +326,7 @@ const StudentSkins = () => {
 
       {/* ===== SKIN MỐC HỌC TẬP (chỉ học viên — nhân sự không có kinh tế Bonus) ===== */}
       {!isStaff && milestoneSkins.length > 0 && (
-        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+        <div className="card-std p-5">
           <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
             <h3 className="text-sm font-bold text-emerald-700 uppercase tracking-wide">🎯 Mở khóa theo nỗ lực</h3>
             <span className="text-xs font-bold text-slate-500">Bonus tích lũy: <span className="text-emerald-700">{lifetimeBonus}</span></span>
@@ -369,7 +369,7 @@ const StudentSkins = () => {
 
       {/* ===== CỬA HÀNG (mua bằng Credit) — chỉ học viên ===== */}
       {!isStaff && (
-      <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+      <div className="card-std p-5">
         <h3 className="text-sm font-bold text-[#2B6830] mb-4 uppercase tracking-wide">🛍️ Cửa hàng Skin</h3>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
           {purchaseSkins.map(skin => {
@@ -400,7 +400,7 @@ const StudentSkins = () => {
       )}
 
       {/* ===== LỊCH SỬ đổi skin ===== */}
-      <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+      <div className="card-std p-5">
         <h3 className="text-sm font-bold text-[#2B6830] mb-3 uppercase tracking-wide">Lịch sử nhận skin</h3>
         {purchases.length === 0 ? (
           <p className="text-xs text-slate-400 italic">{isStaff ? 'Chưa đổi skin nào. Tích Bonus do MOD thưởng để đổi nhé!' : 'Chưa nhận skin nào. Học chăm để gom Credit và đạt mốc nhé!'}</p>

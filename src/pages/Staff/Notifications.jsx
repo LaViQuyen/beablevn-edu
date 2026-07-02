@@ -372,7 +372,7 @@ const Notifications = () => {
                         <div>
                             <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Tiêu đề</label>
                             <input
-                                className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition"
+                                className="input-base"
                                 value={editTarget.title || ''}
                                 onChange={e => setEditTarget({ ...editTarget, title: e.target.value })}
                             />
@@ -382,7 +382,7 @@ const Notifications = () => {
                             <div>
                                 <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Đường dẫn (URL)</label>
                                 <input
-                                    className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition font-mono"
+                                    className="input-base font-mono"
                                     value={editTarget.linkUrl || ''}
                                     onChange={e => setEditTarget({ ...editTarget, linkUrl: e.target.value })}
                                 />
@@ -464,10 +464,10 @@ const Notifications = () => {
                 <div className="p-2 bg-[#E8F4EC] rounded-xl text-[#2B6830]">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 01-1.44-4.282m3.102.069a18.03 18.03 0 01-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 018.835 2.535M10.34 6.66a23.847 23.847 0 008.835-2.535m0 0A23.74 23.74 0 0018.795 3m.38 1.125a23.91 23.91 0 011.014 5.795c0 1.94-.254 3.82-.734 5.622m-4.731.213a23.87 23.87 0 005.932 2.535m0 0A23.753 23.753 0 0122.5 6" /></svg>
                 </div>
-                <h2 className="text-xl font-bold text-[#2B6830]">Đăng Thông Báo Mới</h2>
+                <h2 className="page-title">Đăng Thông Báo Mới</h2>
             </div>
 
-            <div className="bg-white p-5 md:p-6 rounded-2xl border border-slate-100 shadow-sm max-w-3xl">
+            <div className="card-std p-5 md:p-6 max-w-3xl">
                 <div className="flex gap-3 mb-6">
                     <button
                         onClick={() => setPostMode('content')}
@@ -492,7 +492,7 @@ const Notifications = () => {
                 <div className="mb-4">
                     <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Phạm vi hiển thị</label>
                     <select
-                        className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 text-sm transition-colors bg-slate-50 focus:bg-white"
+                        className="input-base"
                         value={scope}
                         onChange={(e) => setScope(e.target.value)}
                     >
@@ -520,7 +520,7 @@ const Notifications = () => {
                         <div className="mb-4">
                             <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Tiêu đề</label>
                             <input
-                                className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 text-sm bg-slate-50 focus:bg-white transition-colors"
+                                className="input-base"
                                 placeholder="Nhập tiêu đề thông báo..."
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
@@ -540,7 +540,7 @@ const Notifications = () => {
                             <div className="mb-4 animate-fade-in">
                                 <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Tên hiển thị cho File đính kèm</label>
                                 <input
-                                    className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 text-sm bg-slate-50 focus:bg-white transition-colors"
+                                    className="input-base"
                                     placeholder="Ví dụ: Tài liệu ôn tập Body Paragraph..."
                                     value={attachmentTitle}
                                     onChange={(e) => setAttachmentTitle(e.target.value)}
@@ -581,7 +581,7 @@ const Notifications = () => {
                         <div className="mb-4">
                             <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Tiêu đề</label>
                             <input
-                                className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 text-sm bg-slate-50 focus:bg-white transition-colors"
+                                className="input-base"
                                 placeholder="Nhập tiêu đề thông báo..."
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
@@ -600,7 +600,7 @@ const Notifications = () => {
                             <div className="mb-4 animate-fade-in">
                                 <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Tên hiển thị cho File đính kèm</label>
                                 <input
-                                    className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 text-sm bg-slate-50 focus:bg-white transition-colors"
+                                    className="input-base"
                                     placeholder="Ví dụ: Tài liệu ôn tập Body Paragraph..."
                                     value={attachmentTitle}
                                     onChange={(e) => setAttachmentTitle(e.target.value)}
@@ -614,7 +614,7 @@ const Notifications = () => {
                                 onChange={(e) => setCodeHtml(e.target.value)}
                                 placeholder={'Dán code HTML vào đây, ví dụ:\n<h3 style="color:#2B6830;">1. THEORY MASTERY</h3>\n<ol><li>The 4 Main Comma Rules...</li></ol>'}
                                 spellCheck={false}
-                                className="w-full h-44 p-3 border border-slate-200 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 text-xs font-mono text-slate-700 bg-slate-50 focus:bg-white transition-colors resize-y"
+                                className="input-base h-44 text-xs font-mono resize-y"
                             />
                         </div>
                         <div className="mb-6">
@@ -641,7 +641,7 @@ const Notifications = () => {
                         <div className="mb-4">
                             <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Tiêu đề liên kết</label>
                             <select
-                                className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 text-sm font-semibold text-[#2B6830] bg-slate-50 focus:bg-white transition-colors"
+                                className="input-base font-semibold text-[#2B6830]"
                                 value={linkTitle}
                                 onChange={(e) => setLinkTitle(e.target.value)}
                             >
@@ -651,7 +651,7 @@ const Notifications = () => {
                         <div className="mb-6">
                             <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Đường dẫn (URL)</label>
                             <input
-                                className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 text-sm font-mono text-green-600 bg-slate-50 focus:bg-white transition-colors"
+                                className="input-base font-mono text-green-600"
                                 placeholder="https://..."
                                 value={linkUrl}
                                 onChange={(e) => setLinkUrl(e.target.value)}
@@ -663,7 +663,7 @@ const Notifications = () => {
                 <button
                     onClick={handlePost}
                     disabled={loading}
-                    className="w-full bg-[#2B6830] text-white py-3.5 rounded-xl text-sm font-bold hover:bg-[#1E5225] transition-all shadow-md flex justify-center items-center gap-2 active:scale-[0.98]"
+                    className="btn-primary w-full"
                 >
                     {loading ? "Đang xử lý..." : (
                         <>
@@ -675,11 +675,11 @@ const Notifications = () => {
             </div>
 
             <div className="border-t border-slate-200 pt-8">
-                <h3 className="text-lg font-bold text-[#2B6830] mb-4">Danh sách Thông báo đã tạo</h3>
+                <h3 className="section-title mb-4">Danh sách Thông báo đã tạo</h3>
 
                 <div className="flex flex-col md:flex-row gap-3 mb-6">
                     <select
-                        className="w-full md:w-auto p-2.5 border border-slate-200 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 text-sm text-slate-700 bg-slate-50 transition-colors hover:border-slate-200"
+                        className="input-base md:w-auto"
                         value={filterClass}
                         onChange={e => setFilterClass(e.target.value)}
                     >
@@ -688,7 +688,7 @@ const Notifications = () => {
                     </select>
 
                     <select
-                        className="w-full md:w-auto p-2.5 border border-slate-200 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 text-sm text-slate-700 bg-slate-50 transition-colors hover:border-slate-200"
+                        className="input-base md:w-auto"
                         value={filterLabel}
                         onChange={e => setFilterLabel(e.target.value)}
                     >
@@ -705,7 +705,7 @@ const Notifications = () => {
                         </div>
                         <input
                             type="text"
-                            className="w-full pl-10 p-2.5 border border-slate-200 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 text-sm text-slate-700 bg-slate-50 transition-colors hover:border-slate-200"
+                            className="input-base pl-10"
                             placeholder="Tìm kiếm theo tiêu đề..."
                             value={searchKeyword}
                             onChange={e => setSearchKeyword(e.target.value)}

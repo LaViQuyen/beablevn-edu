@@ -56,8 +56,8 @@ const AutoBonusManager = () => {
           </svg>
         </div>
         <div>
-          <h2 className="text-xl font-bold text-[#2B6830]">Tự động cộng Bonus</h2>
-          <p className="text-xs text-slate-400 mt-0.5">Cấu hình luật thưởng Bonus tự động khi giáo viên nhập điểm.</p>
+          <h2 className="page-title">Tự động cộng Bonus</h2>
+          <p className="page-sub">Cấu hình luật thưởng Bonus tự động khi giáo viên nhập điểm.</p>
         </div>
       </div>
 
@@ -72,14 +72,14 @@ const AutoBonusManager = () => {
 
       <div className={rules.enabled ? '' : 'opacity-50 pointer-events-none'}>
         {/* Assignment */}
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 mb-4">
+        <div className="card-std p-5 mb-4">
           <h3 className="text-sm font-bold text-[#2B6830] uppercase tracking-wide mb-1">📝 Nộp đủ bài tập (Assignment)</h3>
           <p className="text-xs text-slate-400 mb-3">Mỗi cột điểm Assignment giáo viên nhập (xem như học viên đã nộp/hoàn thành) sẽ tự cộng Bonus.</p>
           <div className="max-w-xs"><NumField label="Bonus mỗi cột Assignment" k="assignmentBonus" suffix="Bonus" /></div>
         </div>
 
         {/* Kiểm tra đạt ngưỡng */}
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 mb-4">
+        <div className="card-std p-5 mb-4">
           <h3 className="text-sm font-bold text-[#2B6830] uppercase tracking-wide mb-1">🎯 Kiểm tra đạt ngưỡng</h3>
           <p className="text-xs text-slate-400 mb-3">Khi điểm kiểm tra đạt ngưỡng, tự cộng Bonus. Đạt ngưỡng cao thì áp mức cao.</p>
           <div className="grid grid-cols-2 gap-4">
@@ -102,7 +102,7 @@ const AutoBonusManager = () => {
       </div>
 
       <button onClick={save} disabled={saving}
-        className="w-full py-3 rounded-xl text-sm font-bold text-white bg-[#2B6830] hover:bg-[#1E5225] transition-colors disabled:opacity-50">
+        className="btn-primary w-full disabled:opacity-50">
         {saving ? 'Đang lưu...' : 'Lưu cấu hình'}
       </button>
     </div>

@@ -115,7 +115,7 @@ const TuitionHistory = () => {
     return (
       <div className="space-y-3">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm animate-pulse">
+          <div key={i} className="card-std p-5 animate-pulse">
             <div className="h-3 bg-slate-100 rounded w-24 mb-2" />
             <div className="h-4 bg-slate-100 rounded w-48" />
           </div>
@@ -140,7 +140,7 @@ const TuitionHistory = () => {
     <div className="space-y-4">
       <p className="text-xs text-slate-400 font-medium">{snapshots.length} lần chốt — mới nhất trước</p>
       {snapshots.map((snap) => (
-        <div key={snap.id} className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+        <div key={snap.id} className="card-std p-5 hover:shadow-md transition-shadow">
           <div className="flex items-start justify-between gap-4 flex-wrap">
             {/* Thông tin snapshot */}
             <div>
@@ -150,7 +150,7 @@ const TuitionHistory = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Thời điểm chốt</p>
+                <p className="stat-label">Thời điểm chốt</p>
               </div>
               <p className="font-bold text-slate-800 text-base ml-9">
                 {new Date(snap.createdAt).toLocaleString('vi-VN', {
@@ -166,7 +166,7 @@ const TuitionHistory = () => {
             {/* Nút Trích xuất PDF */}
             <button
               onClick={() => exportToPDF(snap)}
-              className="flex items-center gap-2 px-4 py-2.5 bg-red-500 text-white rounded-xl text-sm font-bold hover:bg-red-600 transition-all shadow-sm active:scale-95 shrink-0"
+              className="btn-danger shrink-0"
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />

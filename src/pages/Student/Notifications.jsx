@@ -131,8 +131,8 @@ const Notifications = () => {
                     <IconBell />
                 </div>
                 <div>
-                    <h2 className="text-xl font-bold text-[#2B6830]">Bảng Tin & Sự Kiện</h2>
-                    <p className="text-xs text-slate-400 font-medium hidden md:block">Cập nhật tin tức mới nhất từ hệ thống</p>
+                    <h2 className="page-title">Bảng Tin & Sự Kiện</h2>
+                    <p className="page-sub hidden md:block">Cập nhật tin tức mới nhất từ hệ thống</p>
                 </div>
             </div>
 
@@ -173,7 +173,7 @@ const Notifications = () => {
             {loading ? (
                 <div className="space-y-3">
                     {[1,2,3].map(i => (
-                        <div key={i} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 animate-pulse space-y-2">
+                        <div key={i} className="card-std p-5 animate-pulse space-y-2">
                             <div className="flex gap-2"><div className="h-5 bg-slate-100 rounded w-16" /><div className="h-5 bg-slate-100 rounded w-24" /></div>
                             <div className="h-4 bg-slate-100 rounded w-3/4" />
                             <div className="h-3 bg-slate-100 rounded w-full" />
@@ -193,7 +193,7 @@ const Notifications = () => {
                             const isExpanded = expandedId === noti.id;
 
                             return (
-                                <div key={noti.id} className="bg-white p-5 md:p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex flex-col gap-3 group">
+                                <div key={noti.id} className="card-std p-5 md:p-6 hover:shadow-md transition-all flex flex-col gap-3 group">
 
                                     <div className="flex items-center gap-2 mb-1">
                                         {noti.type === 'link' ? (

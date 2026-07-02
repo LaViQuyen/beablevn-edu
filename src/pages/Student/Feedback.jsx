@@ -221,8 +221,8 @@ const Feedback = () => {
           </svg>
         </div>
         <div>
-          <h2 className="text-xl font-bold text-[#2B6830]">Phản ánh</h2>
-          <p className="text-xs text-slate-400 mt-0.5">Ý kiến của bạn giúp chúng tôi cải thiện chất lượng dạy và học.</p>
+          <h2 className="page-title">Phản ánh</h2>
+          <p className="page-sub">Ý kiến của bạn giúp chúng tôi cải thiện chất lượng dạy và học.</p>
         </div>
       </div>
 
@@ -241,11 +241,11 @@ const Feedback = () => {
 
       {/* === FORM GỬI MỚI === */}
       {tab === 'new' && (
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 md:p-6 max-w-2xl">
+        <div className="card-std p-5 md:p-6 max-w-2xl">
           <form onSubmit={handleSubmit} className="space-y-5">
 
             {errorMsg && (
-              <div className="flex items-start gap-2 bg-red-50 text-red-700 border border-red-200 px-4 py-3 rounded-xl text-sm">
+              <div className="alert-error">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 shrink-0 mt-0.5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>
                 {errorMsg}
               </div>
@@ -253,7 +253,7 @@ const Feedback = () => {
 
             {/* Danh mục */}
             <div>
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">Danh mục</label>
+              <label className="stat-label block mb-2">Danh mục</label>
               <div className="flex flex-wrap gap-2">
                 {CATEGORIES.map(cat => (
                   <button
@@ -272,9 +272,9 @@ const Feedback = () => {
 
             {/* Tiêu đề */}
             <div>
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Tiêu đề *</label>
+              <label className="stat-label block mb-1.5">Tiêu đề *</label>
               <input
-                className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition"
+                className="input-base"
                 placeholder="Tóm tắt vấn đề bạn muốn phản ánh..."
                 value={form.title}
                 onChange={e => { setForm({ ...form, title: e.target.value }); setErrorMsg(''); }}
@@ -285,9 +285,9 @@ const Feedback = () => {
 
             {/* Nội dung */}
             <div>
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Nội dung chi tiết *</label>
+              <label className="stat-label block mb-1.5">Nội dung chi tiết *</label>
               <textarea
-                className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 resize-none transition"
+                className="input-base resize-none"
                 rows={5}
                 placeholder="Mô tả chi tiết vấn đề, thời gian xảy ra, và kỳ vọng của bạn..."
                 value={form.content}
@@ -311,7 +311,7 @@ const Feedback = () => {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full bg-[#2B6830] text-white py-3 rounded-xl font-bold hover:bg-[#1E5225] transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
+              className="btn-primary w-full"
             >
               {submitting ? (
                 <><svg className="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>Đang gửi...</>
@@ -337,7 +337,7 @@ const Feedback = () => {
             const st = STATUS_MAP[fb.status] || STATUS_MAP.pending;
             const isOpen = expandedId === fb.id;
             return (
-              <div key={fb.id} className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+              <div key={fb.id} className="card-std overflow-hidden">
                 <button
                   className="w-full p-4 text-left flex items-start gap-3 hover:bg-slate-50 transition-colors"
                   onClick={() => toggleHistoryItem(fb)}
@@ -388,7 +388,7 @@ const Feedback = () => {
                       <button
                         onClick={() => handleStudentReply(fb)}
                         disabled={!replyText.trim() || sendingReply}
-                        className="bg-[#2B6830] text-white px-4 py-2.5 rounded-xl font-bold hover:bg-[#1E5225] transition-all disabled:opacity-40 text-sm shrink-0"
+                        className="btn-primary shrink-0"
                       >
                         {sendingReply ? '...' : 'Gửi'}
                       </button>

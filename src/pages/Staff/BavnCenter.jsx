@@ -280,7 +280,7 @@ const BavnCenter = () => {
 
   if (!bodAccess) {
     return (
-      <div className="bg-white p-10 rounded-2xl border border-slate-100 shadow-sm text-center">
+      <div className="card-std p-10 text-center">
         <p className="text-4xl mb-3">👑</p>
         <p className="font-bold text-slate-700">BAVN Center</p>
         <p className="text-sm text-slate-400 mt-1">Khu vực dành cho BOD. Liên hệ Admin để được gán quyền.</p>
@@ -373,8 +373,8 @@ const BavnCenter = () => {
       <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
         <div className="p-2 bg-purple-50 rounded-xl text-purple-700 text-xl leading-none">👑</div>
         <div>
-          <h2 className="text-xl font-bold text-purple-700">BAVN Center</h2>
-          <p className="text-xs text-slate-400 mt-0.5">Grant Credits nhân sự · quản lý 2 hệ quà · duyệt đơn đổi quà.</p>
+          <h2 className="page-title text-purple-700">BAVN Center</h2>
+          <p className="page-sub">Grant Credits nhân sự · quản lý 2 hệ quà · duyệt đơn đổi quà.</p>
         </div>
       </div>
 
@@ -390,7 +390,7 @@ const BavnCenter = () => {
       </div>
 
       {activeTab === 'grant' ? (
-        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
+        <div className="card-std p-5 space-y-4">
           <div>
             <h3 className="text-sm font-bold text-purple-700 uppercase tracking-wide">⭐ Grant BAVN Credits cho nhân sự</h3>
             <p className="text-xs text-slate-400 mt-1">Cấp credits thưởng (1 credit = 1.000đ), bắt buộc nhập lý do — grant được cho cả chính mình.</p>
@@ -471,7 +471,7 @@ const BavnCenter = () => {
           </div>
         </div>
       ) : activeTab === 'orders' ? (
-        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+        <div className="card-std p-5">
           <div className="flex gap-1.5 flex-wrap mb-4">
             {['pending', 'confirmed', 'rejected', 'all'].map(st => (
               <button key={st} onClick={() => setStatusFilter(st)}
@@ -536,7 +536,7 @@ const BavnCenter = () => {
       ) : (
         /* ===== QUẢN LÝ QUÀ (học viên / nhân sự theo tab) ===== */
         <div className="space-y-5">
-          <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+          <div className="card-std p-5">
             <h3 className="text-sm font-bold text-purple-700 uppercase tracking-wide mb-3">
               Thêm quà cho {audience === 'staff' ? 'nhân sự' : 'học viên'}
             </h3>
@@ -550,7 +550,7 @@ const BavnCenter = () => {
             <p className="text-[11px] text-slate-400 mt-2">💡 Ảnh và mô tả quà thêm qua nút <b>Sửa</b>. Hệ quà học viên và nhân sự hoàn toàn tách biệt.</p>
           </div>
 
-          <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+          <div className="card-std p-5">
             <h3 className="text-sm font-bold text-purple-700 uppercase tracking-wide mb-3">Danh sách quà {audience === 'staff' ? 'nhân sự' : 'học viên'} ({giftList.length})</h3>
             {giftList.length === 0 ? (
               <p className="text-xs text-slate-400 italic text-center py-6 bg-slate-50 rounded-xl border border-dashed border-slate-200">Chưa có quà nào — thêm quà đầu tiên ở trên.</p>

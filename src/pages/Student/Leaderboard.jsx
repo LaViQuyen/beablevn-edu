@@ -175,7 +175,7 @@ const StudentLeaderboard = () => {
       <div className="bg-gradient-to-r from-[#2B6830] to-[#3D8B47] rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
         <div className="relative z-10">
           <p className="text-green-200 text-xs font-bold uppercase tracking-wider">Bảng Vinh Danh Be Able VN</p>
-          <h2 className="text-2xl font-extrabold mt-1">🏆 Học viên ưu tú toàn hệ thống</h2>
+          <h2 className="text-xl font-bold mt-1">🏆 Học viên ưu tú toàn hệ thống</h2>
           <p className="text-green-200/90 text-[12px] mt-2 max-w-xl">Nhiều hạng mục — mỗi bạn một thế mạnh. Chăm chỉ, học giỏi, đi đều hay sưu tầm thành tích, ai cũng có bảng để toả sáng.</p>
         </div>
         <div className="absolute right-0 top-0 w-40 h-40 bg-white/10 rounded-full -mr-16 -mt-16 blur-3xl" />
@@ -224,7 +224,7 @@ const StudentLeaderboard = () => {
           </div>
 
           {/* DANH SÁCH TOP 20 */}
-          <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+          <div className="card-std p-4">
             <h3 className="text-sm font-bold text-[#2B6830] mb-3 uppercase tracking-wide px-1">Top 20 — {activeTab.label}</h3>
             <div className="space-y-1.5">
               {top.map(r => (

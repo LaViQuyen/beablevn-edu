@@ -18,8 +18,8 @@ const ConfirmModal = ({ message, onConfirm, onCancel }) => (
         <p className="text-sm font-medium text-slate-700">{message}</p>
       </div>
       <div className="flex gap-3 justify-end">
-        <button onClick={onCancel} className="px-4 py-2 rounded-xl text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">Hủy</button>
-        <button onClick={onConfirm} className="px-4 py-2 rounded-xl text-sm font-bold text-white bg-red-500 hover:bg-red-600 transition-colors">Xóa</button>
+        <button onClick={onCancel} className="btn-secondary">Hủy</button>
+        <button onClick={onConfirm} className="btn-danger">Xóa</button>
       </div>
     </div>
   </div>
@@ -44,10 +44,10 @@ const ChangePasswordModal = ({ staff, onConfirm, onCancel }) => {
         <h3 className="font-bold text-[#2B6830] text-base">Đổi mật khẩu: {staff.name}</h3>
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Mật khẩu mới</label>
+            <label className="stat-label block mb-1">Mật khẩu mới</label>
             <input
               type="text"
-              className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition font-mono"
+              className="input-base font-mono"
               value={newPass}
               onChange={e => { setNewPass(e.target.value); setError(''); }}
               autoFocus
@@ -55,8 +55,8 @@ const ChangePasswordModal = ({ staff, onConfirm, onCancel }) => {
             {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
           </div>
           <div className="flex gap-3 justify-end pt-1">
-            <button type="button" onClick={onCancel} className="px-4 py-2 rounded-xl text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">Hủy</button>
-            <button type="submit" className="px-4 py-2 rounded-xl text-sm font-bold text-white bg-[#2B6830] hover:bg-[#1E5225] transition-colors">Xác nhận</button>
+            <button type="button" onClick={onCancel} className="btn-secondary">Hủy</button>
+            <button type="submit" className="btn-primary">Xác nhận</button>
           </div>
         </form>
       </div>
@@ -225,21 +225,21 @@ const StaffManager = () => {
       )}
 
       {/* FORM TẠO MỚI */}
-      <div className="bg-white p-5 md:p-6 rounded-2xl border border-slate-100 shadow-sm">
+      <div className="card-std p-5 md:p-6">
         <div className="flex items-center gap-2 mb-6 border-b border-slate-100 pb-4">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="#2B6830" className="w-6 h-6">
             <path strokeLinecap="round" strokeLinejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM3.75 15a2.25 2.25 0 012.25-2.25h2.93a2.625 2.625 0 011.603.543c.47.372.673.855.567 1.348l-.053.25c-.29.988-1.2 1.609-2.227 1.609H6.262c-1.026 0-1.936-.621-2.226-1.61l-.054-.25a1.884 1.884 0 01.568-1.348z" />
           </svg>
-          <h2 className="text-lg font-bold text-[#2B6830]">Tạo Nhân sự Mới</h2>
+          <h2 className="section-title">Tạo Nhân sự Mới</h2>
         </div>
         <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input className="border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition" placeholder="Họ tên" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+          <input className="input-base" placeholder="Họ tên" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
           <div className="flex gap-2">
             <input className="border border-slate-200 p-3 rounded-xl w-1/2 text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition" placeholder="ID Đăng nhập" value={formData.username} onChange={e => setFormData({...formData, username: e.target.value})} />
             <input className="border border-slate-200 p-3 rounded-xl w-1/2 text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition font-mono" placeholder="Mật khẩu" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} />
           </div>
           <div className="flex gap-2 items-stretch">
-            <select className="flex-1 border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 bg-white transition" value={formData.subRole} onChange={e => setFormData({...formData, subRole: e.target.value})}>
+            <select className="input-base flex-1" value={formData.subRole} onChange={e => setFormData({...formData, subRole: e.target.value})}>
               <option value="teacher">Giáo viên</option>
               <option value="cco">CCO</option>
               <option value="cca">CCA</option>
@@ -274,7 +274,7 @@ const StaffManager = () => {
               </label>
             ))}
           </div>
-          <button className="md:col-span-2 bg-[#2B6830] text-white py-3 rounded-xl font-bold shadow-sm hover:bg-[#1E5225] transition-all active:scale-[0.98]">Tạo Tài khoản</button>
+          <button className="btn-primary md:col-span-2">Tạo Tài khoản</button>
         </form>
       </div>
 
@@ -282,14 +282,14 @@ const StaffManager = () => {
       {editingStaff && (
         <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white p-6 rounded-2xl w-full max-w-md shadow-2xl flex flex-col max-h-[90vh]">
-            <h3 className="font-bold text-lg mb-4 text-[#2B6830]">Điều chỉnh nhân sự: {editingStaff.name}</h3>
+            <h3 className="section-title mb-4">Điều chỉnh nhân sự: {editingStaff.name}</h3>
             {/* Đổi VAI TRÒ (title) cho tài khoản đã tạo */}
             <div className="mb-4">
               <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Vai trò (title)</label>
               <select
                 value={editingStaff.subRole || 'teacher'}
                 onChange={e => setEditingStaff({ ...editingStaff, subRole: e.target.value })}
-                className="w-full p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 bg-white transition"
+                className="input-base"
               >
                 <option value="teacher">Giáo viên</option>
                 <option value="cco">CCO</option>
@@ -314,21 +314,21 @@ const StaffManager = () => {
               </span>
             </label>
             <div className="flex gap-2 justify-end pt-2 border-t border-slate-100">
-              <button onClick={() => setEditingStaff(null)} className="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl text-sm hover:bg-slate-200 font-bold transition-colors">Hủy</button>
-              <button onClick={() => { update(ref(db, `users/${editingStaff.id}`), { assignedClasses: editingStaff.assignedClasses, isDemo: !!editingStaff.isDemo, subRole: editingStaff.subRole || 'teacher' }); setEditingStaff(null); showSuccess('Đã cập nhật nhân sự.'); }} className="px-4 py-2 bg-[#2B6830] text-white rounded-xl text-sm font-bold hover:bg-[#1E5225] transition-colors">Lưu</button>
+              <button onClick={() => setEditingStaff(null)} className="btn-secondary">Hủy</button>
+              <button onClick={() => { update(ref(db, `users/${editingStaff.id}`), { assignedClasses: editingStaff.assignedClasses, isDemo: !!editingStaff.isDemo, subRole: editingStaff.subRole || 'teacher' }); setEditingStaff(null); showSuccess('Đã cập nhật nhân sự.'); }} className="btn-primary">Lưu</button>
             </div>
           </div>
         </div>
       )}
 
       {/* DANH SÁCH NHÂN SỰ */}
-      <div className="bg-white p-5 md:p-6 rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+      <div className="card-std p-5 md:p-6 overflow-hidden">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="#2B6830" className="w-5 h-5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
             </svg>
-            <h2 className="text-lg font-bold text-[#2B6830]">Danh sách Nhân sự ({filteredStaffList.length})</h2>
+            <h2 className="section-title">Danh sách Nhân sự ({filteredStaffList.length})</h2>
           </div>
           <div className="flex flex-col md:flex-row gap-2">
             <select className="p-2.5 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 bg-slate-50" value={filterRole} onChange={(e) => setFilterRole(e.target.value)}>
@@ -350,24 +350,24 @@ const StaffManager = () => {
 
         {/* DESKTOP TABLE */}
         <div className="hidden md:block overflow-x-auto rounded-xl border border-slate-200">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 text-slate-500 border-b border-slate-200 text-xs uppercase font-bold">
+          <table className="table-std">
+            <thead>
               <tr>
-                <th className="p-4 w-12 text-center">STT</th>
-                <th className="p-4">ID Đăng nhập</th>
-                <th className="p-4">Tên</th>
-                <th className="p-4">Vai trò</th>
-                <th className="p-4">Lớp</th>
-                <th className="p-4 text-right">Thao tác</th>
+                <th className="w-12 text-center">STT</th>
+                <th>ID Đăng nhập</th>
+                <th>Tên</th>
+                <th>Vai trò</th>
+                <th>Lớp</th>
+                <th className="text-right">Thao tác</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody>
               {filteredStaffList.map((s, index) => (
-                <tr key={s.id} className="hover:bg-slate-50 transition-colors">
-                  <td className="p-4 text-center text-slate-400 font-bold">{index + 1}</td>
-                  <td className="p-4 font-bold text-[#2B6830]">{s.loginId || (s.email || '').split('@')[0]}</td>
-                  <td className="p-4 font-medium text-gray-800">{s.name}</td>
-                  <td className="p-4">
+                <tr key={s.id}>
+                  <td className="text-center text-slate-400 font-bold">{index + 1}</td>
+                  <td className="font-bold text-[#2B6830]">{s.loginId || (s.email || '').split('@')[0]}</td>
+                  <td className="font-medium text-gray-800">{s.name}</td>
+                  <td>
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <span className="uppercase text-[10px] font-bold text-slate-400">{s.subRole}</span>
                       {s.ffAccess && <span className="text-[9px] font-bold bg-[#E8F4EC] text-[#2B6830] px-1.5 py-0.5 rounded border border-green-200 uppercase">🌿 FF</span>}
@@ -376,13 +376,13 @@ const StaffManager = () => {
                       {s.modAccess && <span className="text-[9px] font-bold bg-rose-50 text-rose-700 px-1.5 py-0.5 rounded border border-rose-200 uppercase">🛡️ MOD</span>}
                     </div>
                   </td>
-                  <td className="p-4">
+                  <td>
                     <div className="flex items-center gap-2">
                       <span className="truncate max-w-[150px] text-xs text-slate-600">{getClassNames(s.assignedClasses)}</span>
                       <button onClick={() => setEditingStaff(s)} className="text-[#2B6830] border border-[#2B6830] text-[10px] font-bold px-2 py-0.5 rounded-xl hover:bg-[#2B6830] hover:text-white transition-all">Sửa</button>
                     </div>
                   </td>
-                  <td className="p-4 text-right">
+                  <td className="text-right">
                     <div className="flex justify-end gap-2">
                       <button
                         onClick={() => toggleFF(s)}
@@ -420,7 +420,7 @@ const StaffManager = () => {
               ))}
               {loading && [1,2,3].map(i => (
                 <tr key={i} className="animate-pulse">
-                  {[1,2,3,4,5,6].map(j => <td key={j} className="p-4"><div className="h-4 bg-slate-100 rounded w-full" /></td>)}
+                  {[1,2,3,4,5,6].map(j => <td key={j}><div className="h-4 bg-slate-100 rounded w-full" /></td>)}
                 </tr>
               ))}
               {!loading && filteredStaffList.length === 0 && (

@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useSwipeTabs } from '../useSwipeTabs';
 import { db } from '../../firebase';
 import { ref, update, get, onValue, push, set } from 'firebase/database';
 import bcrypt from 'bcryptjs'; // Import mã hóa
@@ -189,7 +190,31 @@ const StaffLayout = () => {
   }, [ffAccess, bodAccess]);
 
   const isActive = (path) => location.pathname.includes(path);
-  const mobileLinkClass = (path) => `flex flex-col items-center justify-center w-full h-full space-y-1 ${isActive(path) ? 'text-[#2B6830]' : 'text-slate-400 hover:text-slate-600'}`;
+  // Moi the co be rong toi thieu co dinh + khong co lai (shrink-0) de thanh nav cuon ngang duoc
+  const mobileLinkClass = (path) => `flex flex-col items-center justify-center shrink-0 min-w-[64px] h-full space-y-1 px-0.5 ${isActive(path) ? 'text-[#2B6830]' : 'text-slate-400 hover:text-slate-600'}`;
+
+  // Thu tu the tren bottom nav - dung cho VUOT NGANG chuyen the (mobile);
+  // cac the theo co quyen (FF/BOD/MOD) chi vao day khi duoc cap quyen
+  const TABS = [
+    { key: 'classes',       to: '/staff/classes' },
+    { key: 'attendance',    to: '/staff/attendance' },
+    { key: 'scores',        to: '/staff/scores' },
+    { key: 'notifications', to: '/staff/notifications' },
+    { key: 'inbox',         to: '/staff/inbox' },
+    { key: 'credits',       to: '/staff/credits' },
+    { key: 'skins',         to: '/staff/skins' },
+    ...(ffAccess ? [{ key: 'freshfit', to: '/staff/freshfit' }] : []),
+    ...(bodAccess ? [{ key: 'bavn', to: '/staff/bavn' }] : []),
+    ...(modAccess ? [{ key: 'mod-bonus', to: '/staff/mod-bonus' }] : []),
+  ];
+  const { onTouchStart, onTouchEnd, slideKey, slideClass } = useSwipeTabs(TABS);
+
+  // Tu cuon the dang chon vao giua thanh nav
+  const bottomNavRef = useRef(null);
+  useEffect(() => {
+    const active = bottomNavRef.current?.querySelector('[data-active="true"]');
+    if (active) active.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+  }, [location.pathname]);
 
   const handleLogout = () => {
     logout();
@@ -347,28 +372,32 @@ const StaffLayout = () => {
         </div>
       </header>
 
-      {/* MAIN CONTENT */}
-      <main className="flex-1 md:ml-64 px-4 pt-20 pb-24 md:p-8 md:pb-8 overflow-auto">
-        <div className="max-w-6xl mx-auto"><Outlet /></div>
+      {/* MAIN CONTENT - vuot ngang tren mobile de chuyen the truoc/sau */}
+      <main className="flex-1 md:ml-64 px-4 pt-20 pb-24 md:p-8 md:pb-8 overflow-auto" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+        <div key={slideKey} className={`max-w-6xl mx-auto ${slideClass}`}><Outlet /></div>
       </main>
 
-      {/* MOBILE BOTTOM NAV */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 h-16 flex justify-around items-center z-50 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-        <Link to="/staff/classes" className={mobileLinkClass('classes')}><Icons.Class active={isActive('classes')} /><span className="text-[10px] font-medium">Học viên</span></Link>
-        <Link to="/staff/attendance" className={mobileLinkClass('attendance')}><Icons.Attendance active={isActive('attendance')} /><span className="text-[10px] font-medium">Đ.Danh</span></Link>
-        <Link to="/staff/scores" className={mobileLinkClass('scores')}><Icons.Scores active={isActive('scores')} /><span className="text-[10px] font-medium">Điểm</span></Link>
-        <Link to="/staff/notifications" className={mobileLinkClass('notifications')}><Icons.Noti active={isActive('notifications')} /><span className="text-[10px] font-medium">TBáo</span></Link>
-        <Link to="/staff/inbox" className={mobileLinkClass('inbox')}><Icons.Inbox active={isActive('inbox')} /><span className="text-[10px] font-medium">Hộp thư</span></Link>
-        <Link to="/staff/credits" className={mobileLinkClass('credits')}><Icons.Credits active={isActive('credits')} /><span className="text-[10px] font-medium">Credits</span></Link>
-        <Link to="/staff/skins" className={mobileLinkClass('skins')}><Icons.Game active={isActive('skins') || isActive('games')} /><span className="text-[10px] font-medium">Skin/Game</span></Link>
+      {/* MOBILE BOTTOM NAV - cuon ngang duoc vi nhieu the; an thanh cuon cho gon */}
+      <nav
+        ref={bottomNavRef}
+        className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 h-16 flex items-center overflow-x-auto overflow-y-hidden z-50 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] [&::-webkit-scrollbar]:hidden"
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
+      >
+        <Link to="/staff/classes" data-active={isActive('classes')} className={mobileLinkClass('classes')}><Icons.Class active={isActive('classes')} /><span className="text-[10px] font-medium">Học viên</span></Link>
+        <Link to="/staff/attendance" data-active={isActive('attendance')} className={mobileLinkClass('attendance')}><Icons.Attendance active={isActive('attendance')} /><span className="text-[10px] font-medium">Đ.Danh</span></Link>
+        <Link to="/staff/scores" data-active={isActive('scores')} className={mobileLinkClass('scores')}><Icons.Scores active={isActive('scores')} /><span className="text-[10px] font-medium">Điểm</span></Link>
+        <Link to="/staff/notifications" data-active={isActive('notifications')} className={mobileLinkClass('notifications')}><Icons.Noti active={isActive('notifications')} /><span className="text-[10px] font-medium">TBáo</span></Link>
+        <Link to="/staff/inbox" data-active={isActive('inbox')} className={mobileLinkClass('inbox')}><Icons.Inbox active={isActive('inbox')} /><span className="text-[10px] font-medium">Hộp thư</span></Link>
+        <Link to="/staff/credits" data-active={isActive('credits')} className={mobileLinkClass('credits')}><Icons.Credits active={isActive('credits')} /><span className="text-[10px] font-medium">Credits</span></Link>
+        <Link to="/staff/skins" data-active={isActive('skins')} className={mobileLinkClass('skins')}><Icons.Game active={isActive('skins') || isActive('games')} /><span className="text-[10px] font-medium">Skin/Game</span></Link>
         {ffAccess && (
-          <Link to="/staff/freshfit" className={mobileLinkClass('freshfit')}><Icons.FreshFit active={isActive('freshfit')} /><span className="text-[10px] font-medium">FreshFit</span></Link>
+          <Link to="/staff/freshfit" data-active={isActive('freshfit')} className={mobileLinkClass('freshfit')}><Icons.FreshFit active={isActive('freshfit')} /><span className="text-[10px] font-medium">FreshFit</span></Link>
         )}
         {bodAccess && (
-          <Link to="/staff/bavn" className={mobileLinkClass('bavn')}><Icons.Bavn active={isActive('bavn')} /><span className="text-[10px] font-medium">BAVN</span></Link>
+          <Link to="/staff/bavn" data-active={isActive('bavn')} className={mobileLinkClass('bavn')}><Icons.Bavn active={isActive('bavn')} /><span className="text-[10px] font-medium">BAVN</span></Link>
         )}
         {modAccess && (
-          <Link to="/staff/mod-bonus" className={mobileLinkClass('mod-bonus')}><Icons.Mod active={isActive('mod-bonus')} /><span className="text-[10px] font-medium">Bonus</span></Link>
+          <Link to="/staff/mod-bonus" data-active={isActive('mod-bonus')} className={mobileLinkClass('mod-bonus')}><Icons.Mod active={isActive('mod-bonus')} /><span className="text-[10px] font-medium">Bonus</span></Link>
         )}
       </nav>
 

@@ -89,14 +89,14 @@ const Profile = () => {
           </svg>
         </div>
         <div>
-          <h2 className="text-xl font-bold text-[#2B6830]">Hồ sơ cá nhân</h2>
-          <p className="text-xs text-slate-400 mt-0.5">Thông tin tài khoản của bạn.</p>
+          <h2 className="page-title">Hồ sơ cá nhân</h2>
+          <p className="page-sub">Thông tin tài khoản của bạn.</p>
         </div>
       </div>
 
       {/* Thông tin cá nhân */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-        <h2 className="text-lg font-bold text-[#2B6830] mb-4">Thông tin tài khoản</h2>
+      <div className="card-std p-6">
+        <h2 className="section-title mb-4">Thông tin tài khoản</h2>
         <div className="space-y-3">
           <div className="flex items-center gap-4">
             <StudentAvatar skin={equippedSkin} name={currentUser?.name} size={56} />
@@ -112,11 +112,11 @@ const Profile = () => {
           </div>
           <div className="grid grid-cols-2 gap-3 mt-4">
             <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Vai trò</p>
+              <p className="stat-label">Vai trò</p>
               <p className="font-bold text-slate-700 text-sm mt-0.5">Học viên</p>
             </div>
             <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Mã học viên</p>
+              <p className="stat-label">Mã học viên</p>
               <p className="font-bold text-[#2B6830] text-sm font-mono mt-0.5">{currentUser?.studentCode || '—'}</p>
             </div>
           </div>
@@ -124,12 +124,12 @@ const Profile = () => {
       </div>
 
       {/* Đổi mật khẩu */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-        <h2 className="text-lg font-bold text-[#2B6830] mb-1">Đổi mật khẩu</h2>
+      <div className="card-std p-6">
+        <h2 className="section-title mb-1">Đổi mật khẩu</h2>
         <p className="text-xs text-slate-400 mb-4">Mật khẩu phải từ 6 ký tự trở lên.</p>
 
         {error && (
-          <div className="mb-4 flex items-start gap-2 bg-red-50 text-red-700 border border-red-200 px-4 py-3 rounded-xl text-sm">
+          <div className="alert-error mb-4">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 shrink-0 mt-0.5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
             </svg>
@@ -137,7 +137,7 @@ const Profile = () => {
           </div>
         )}
         {success && (
-          <div className="mb-4 flex items-center gap-2 bg-green-50 text-green-700 border border-green-200 px-4 py-3 rounded-xl text-sm font-medium">
+          <div className="alert-success mb-4">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 shrink-0">
               <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
             </svg>
@@ -147,27 +147,27 @@ const Profile = () => {
 
         <form onSubmit={handleChangePassword} className="space-y-4">
           <div>
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Mật khẩu hiện tại</label>
+            <label className="stat-label block mb-1">Mật khẩu hiện tại</label>
             <input
               type="password"
-              className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition"
+              className="input-base"
               value={form.oldPass}
               onChange={e => { setForm({...form, oldPass: e.target.value}); setError(''); }}
               placeholder="••••••"
             />
           </div>
           <div>
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Mật khẩu mới</label>
+            <label className="stat-label block mb-1">Mật khẩu mới</label>
             <input
               type="password"
-              className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition"
+              className="input-base"
               value={form.newPass}
               onChange={e => { setForm({...form, newPass: e.target.value}); setError(''); }}
               placeholder="••••••"
             />
           </div>
           <div>
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Xác nhận mật khẩu mới</label>
+            <label className="stat-label block mb-1">Xác nhận mật khẩu mới</label>
             <input
               type="password"
               className={`w-full border p-3 rounded-xl text-sm outline-none focus:ring-2 transition ${
@@ -186,7 +186,7 @@ const Profile = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#2B6830] text-white py-3 rounded-xl font-bold hover:bg-[#1E5225] transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
+            className="btn-primary w-full"
           >
             {loading ? (
               <>

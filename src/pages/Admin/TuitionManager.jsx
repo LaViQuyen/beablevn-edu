@@ -152,40 +152,40 @@ const EditModal = ({ record, onSave, onClose }) => {
 
         <div className="space-y-3">
           <div className="space-y-1">
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Họ và tên</label>
+            <label className="stat-label">Họ và tên</label>
             <input className="w-full border border-slate-200 p-2.5 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10" value={form.name} onChange={f('name')} />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Mã HV</label>
+              <label className="stat-label">Mã HV</label>
               <input className="w-full border border-slate-200 p-2.5 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 font-mono" value={form.studentCode} onChange={f('studentCode')} />
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Lớp</label>
+              <label className="stat-label">Lớp</label>
               <input className="w-full border border-slate-200 p-2.5 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10" value={form.className} onChange={f('className')} />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Buổi còn lại</label>
+              <label className="stat-label">Buổi còn lại</label>
               <input type="number" min="0" className="w-full border border-slate-200 p-2.5 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10" value={form.remainingSessions} onChange={f('remainingSessions')} />
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Buổi cộng thêm</label>
+              <label className="stat-label">Buổi cộng thêm</label>
               <input type="number" min="0" className="w-full border border-slate-200 p-2.5 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10" value={form.addedSessions} onChange={f('addedSessions')} />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Hạn thanh toán</label>
+              <label className="stat-label">Hạn thanh toán</label>
               <input type="date" className="w-full border border-slate-200 p-2.5 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10" value={form.paymentDeadline} onChange={handleDeadlineChange} />
               <p className="text-[10px] text-slate-400">Để trống → tự động "Đã thanh toán"</p>
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Tình trạng</label>
+              <label className="stat-label">Tình trạng</label>
               <select className="w-full border border-slate-200 p-2.5 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 bg-white" value={form.status} onChange={f('status')}>
                 {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
               </select>
@@ -194,8 +194,8 @@ const EditModal = ({ record, onSave, onClose }) => {
         </div>
 
         <div className="flex gap-3 justify-end mt-5">
-          <button onClick={onClose} className="px-4 py-2 rounded-xl text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">Hủy</button>
-          <button onClick={() => onSave(form)} className="px-5 py-2 rounded-xl text-sm font-bold text-white bg-[#2B6830] hover:bg-[#1E5225] transition-colors shadow-sm">Lưu thay đổi</button>
+          <button onClick={onClose} className="btn-secondary">Hủy</button>
+          <button onClick={() => onSave(form)} className="btn-primary">Lưu thay đổi</button>
         </div>
       </div>
     </div>
@@ -210,8 +210,8 @@ const ConfirmModal = ({ title, message, onConfirm, onCancel }) => (
       <p className="text-base font-bold text-slate-800">{title}</p>
       {message && <p className="text-sm text-slate-500">{message}</p>}
       <div className="flex gap-3 justify-end">
-        <button onClick={onCancel} className="px-4 py-2 rounded-xl text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">Hủy</button>
-        <button onClick={onConfirm} className="px-4 py-2 rounded-xl text-sm font-bold text-white bg-red-500 hover:bg-red-600 transition-colors">Xóa</button>
+        <button onClick={onCancel} className="btn-secondary">Hủy</button>
+        <button onClick={onConfirm} className="btn-danger">Xóa</button>
       </div>
     </div>
   </div>
@@ -418,8 +418,8 @@ const TuitionManager = () => {
 
       {/* Page header */}
       <div>
-        <h1 className="text-2xl font-extrabold text-[#2B6830]">Học phí</h1>
-        <p className="text-slate-400 text-sm mt-0.5">Thống kê buổi học trả trước và lịch sử chốt</p>
+        <h1 className="page-title">Học phí</h1>
+        <p className="page-sub">Thống kê buổi học trả trước và lịch sử chốt</p>
       </div>
 
       {/* Sub-tab nav */}
@@ -450,17 +450,17 @@ const TuitionManager = () => {
         <div className="space-y-4">
 
           {/* Bộ lọc */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Bộ lọc</p>
+          <div className="card-std p-5">
+            <p className="stat-label mb-3">Bộ lọc</p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <input
-                className="p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10"
+                className="input-base"
                 placeholder="Tìm tên hoặc mã học viên..."
                 value={filterName}
                 onChange={(e) => setFilterName(e.target.value)}
               />
               <select
-                className="p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 bg-white"
+                className="input-base"
                 value={filterClass}
                 onChange={(e) => setFilterClass(e.target.value)}
               >
@@ -468,7 +468,7 @@ const TuitionManager = () => {
                 {distinctClasses.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
               <select
-                className="p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 bg-white"
+                className="input-base"
                 value={filterSessions}
                 onChange={(e) => setFilterSessions(e.target.value)}
               >
@@ -483,7 +483,7 @@ const TuitionManager = () => {
             <input type="file" ref={fileInputRef} accept=".xlsx,.xls,.csv" onChange={handleImport} className="hidden" />
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-2 px-5 py-2.5 bg-[#2B6830] text-white rounded-xl text-sm font-bold hover:bg-[#1E5225] shadow-sm transition-all active:scale-95"
+              className="btn-primary"
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
@@ -492,7 +492,7 @@ const TuitionManager = () => {
             </button>
             <button
               onClick={handleChot}
-              className="flex items-center gap-2 px-5 py-2.5 bg-red-500 text-white rounded-xl text-sm font-bold hover:bg-red-600 shadow-sm transition-all active:scale-95"
+              className="btn-danger"
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -519,22 +519,22 @@ const TuitionManager = () => {
           </div>
 
           {/* Bảng */}
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+          <div className="card-std overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm min-w-[900px]">
-                <thead className="bg-slate-50 text-slate-500 border-b border-slate-200 text-xs uppercase font-bold">
+              <table className="table-std min-w-[900px]">
+                <thead>
                   <tr>
-                    <th className="p-4">Mã HV</th>
-                    <th className="p-4">Họ và tên</th>
-                    <th className="p-4">Lớp</th>
-                    <th className="p-4 text-center">Buổi còn lại</th>
-                    <th className="p-4 text-center">Buổi cộng thêm</th>
-                    <th className="p-4">Hạn thanh toán</th>
-                    <th className="p-4">Tình trạng</th>
-                    <th className="p-4 text-right">Thao tác</th>
+                    <th>Mã HV</th>
+                    <th>Họ và tên</th>
+                    <th>Lớp</th>
+                    <th className="text-center">Buổi còn lại</th>
+                    <th className="text-center">Buổi cộng thêm</th>
+                    <th>Hạn thanh toán</th>
+                    <th>Tình trạng</th>
+                    <th className="text-right">Thao tác</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody>
                   {filteredRecords.length === 0 ? (
                     <tr>
                       <td colSpan="8" className="p-10 text-center text-slate-400 italic">
@@ -548,22 +548,22 @@ const TuitionManager = () => {
                       key={r.id}
                       className={`hover:bg-slate-50 transition-colors ${r.status === 'Chờ duyệt gia hạn' ? 'bg-purple-50/50' : ''}`}
                     >
-                      <td className="p-4 font-bold text-[#2B6830] font-mono text-xs">{r.studentCode || '—'}</td>
-                      <td className="p-4 font-medium text-slate-800">{r.name || '—'}</td>
-                      <td className="p-4 text-slate-600 text-xs">{r.className || '—'}</td>
-                      <td className="p-4 text-center">
+                      <td className="font-bold text-[#2B6830] font-mono text-xs">{r.studentCode || '—'}</td>
+                      <td className="font-medium text-slate-800">{r.name || '—'}</td>
+                      <td className="text-slate-600 text-xs">{r.className || '—'}</td>
+                      <td className="text-center">
                         <span className="font-bold text-slate-700">{r.remainingSessions ?? '—'}</span>
                       </td>
-                      <td className="p-4 text-center">
+                      <td className="text-center">
                         <span className="font-bold text-blue-600">{r.addedSessions ?? 0}</span>
                       </td>
-                      <td className="p-4 text-slate-700 whitespace-nowrap">{fmtDate(r.paymentDeadline)}</td>
-                      <td className="p-4">
+                      <td className="text-slate-700 whitespace-nowrap">{fmtDate(r.paymentDeadline)}</td>
+                      <td>
                         <span className={`text-xs font-bold px-2 py-1 rounded-lg whitespace-nowrap ${statusStyle(r.status)}`}>
                           {r.status || 'Chờ'}
                         </span>
                       </td>
-                      <td className="p-4">
+                      <td>
                         <div className="flex gap-2 justify-end">
                           <button
                             onClick={() => setEditTarget(r)}
@@ -623,10 +623,10 @@ const TuitionManager = () => {
           ) : (
             <div className="space-y-3">
               {filteredSnapshots.map((snap) => (
-                <div key={snap.id} className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+                <div key={snap.id} className="card-std p-5 hover:shadow-md transition-shadow">
                   <div className="flex items-start justify-between gap-4 flex-wrap">
                     <div>
-                      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Thời điểm chốt</p>
+                      <p className="stat-label mb-1">Thời điểm chốt</p>
                       <p className="font-bold text-slate-800 text-sm md:text-base">
                         {new Date(snap.createdAt).toLocaleString('vi-VN', {
                           weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric',
@@ -639,7 +639,7 @@ const TuitionManager = () => {
                     </div>
                     <button
                       onClick={() => exportToPDF(snap.records, 'Thống kê Buổi học trả trước còn lại')}
-                      className="flex items-center gap-2 px-4 py-2.5 bg-red-500 text-white rounded-xl text-sm font-bold hover:bg-red-600 transition-all shadow-sm active:scale-95 shrink-0"
+                      className="btn-danger shrink-0"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/>

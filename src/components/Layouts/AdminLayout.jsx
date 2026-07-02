@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useSwipeTabs } from '../useSwipeTabs';
 
 const Icons = {
   Dashboard: ({ active }) => (
@@ -71,7 +72,31 @@ const AdminLayout = () => {
   const { logout } = useAuth(); // Lấy hàm logout từ context
 
   const isActive = (path) => location.pathname.includes(path);
-  const mobileLinkClass = (path) => `flex flex-col items-center justify-center w-full h-full space-y-1 ${isActive(path) ? 'text-[#2B6830]' : 'text-slate-400 hover:text-slate-600'}`;
+  // Moi the co be rong toi thieu co dinh + khong co lai (shrink-0) de thanh nav cuon ngang duoc
+  const mobileLinkClass = (path) => `flex flex-col items-center justify-center shrink-0 min-w-[64px] h-full space-y-1 px-0.5 ${isActive(path) ? 'text-[#2B6830]' : 'text-slate-400 hover:text-slate-600'}`;
+
+  // Thu tu the tren bottom nav - dung cho VUOT NGANG chuyen the (mobile)
+  const TABS = [
+    { key: 'dashboard',     to: '/admin/dashboard' },
+    { key: 'staff',         to: '/admin/staff' },
+    { key: 'students',      to: '/admin/students' },
+    { key: 'data',          to: '/admin/data' },
+    { key: 'stats',         to: '/admin/stats' },
+    { key: 'skins',         to: '/admin/skins' },
+    { key: 'autobonus',     to: '/admin/autobonus' },
+    { key: 'notifications', to: '/admin/notifications' },
+    { key: 'feedback',      to: '/admin/feedback' },
+    { key: 'import',        to: '/admin/import' },
+    { key: 'tuition',       to: '/admin/tuition' },
+  ];
+  const { onTouchStart, onTouchEnd, slideKey, slideClass } = useSwipeTabs(TABS);
+
+  // Tu cuon the dang chon vao giua thanh nav
+  const bottomNavRef = useRef(null);
+  useEffect(() => {
+    const active = bottomNavRef.current?.querySelector('[data-active="true"]');
+    if (active) active.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+  }, [location.pathname]);
 
   const handleLogout = () => {
     logout();
@@ -146,18 +171,28 @@ const AdminLayout = () => {
         <button onClick={handleLogout} className="p-2 text-slate-400 hover:text-red-500"><Icons.Logout /></button>
       </header>
 
-      {/* MAIN CONTENT */}
-      <main className="flex-1 md:ml-64 px-4 pt-20 pb-24 md:p-8 md:pb-8 overflow-auto">
-        <div className="max-w-6xl mx-auto"><Outlet /></div>
+      {/* MAIN CONTENT - vuot ngang tren mobile de chuyen the truoc/sau */}
+      <main className="flex-1 md:ml-64 px-4 pt-20 pb-24 md:p-8 md:pb-8 overflow-auto" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+        <div key={slideKey} className={`max-w-6xl mx-auto ${slideClass}`}><Outlet /></div>
       </main>
 
-      {/* MOBILE BOTTOM NAV */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 h-16 flex justify-around items-center z-50 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-        <Link to="/admin/dashboard" className={mobileLinkClass('dashboard')}><Icons.Dashboard active={isActive('dashboard')} /><span className="text-[10px] font-medium">Dashboard</span></Link>
-        <Link to="/admin/staff" className={mobileLinkClass('staff')}><Icons.Staff active={isActive('staff')} /><span className="text-[10px] font-medium">Nhân sự</span></Link>
-        <Link to="/admin/students" className={mobileLinkClass('students')}><Icons.Student active={isActive('students')} /><span className="text-[10px] font-medium">Học viên</span></Link>
-        <Link to="/admin/skins" className={mobileLinkClass('skins')}><Icons.Skins active={isActive('skins')} /><span className="text-[10px] font-medium">Skin</span></Link>
-        <Link to="/admin/notifications" className={mobileLinkClass('notifications')}><Icons.Noti active={isActive('notifications')} /><span className="text-[10px] font-medium">Thông báo</span></Link>
+      {/* MOBILE BOTTOM NAV - cuon ngang duoc vi nhieu the; an thanh cuon cho gon */}
+      <nav
+        ref={bottomNavRef}
+        className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 h-16 flex items-center overflow-x-auto overflow-y-hidden z-50 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] [&::-webkit-scrollbar]:hidden"
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
+      >
+        <Link to="/admin/dashboard" data-active={isActive('dashboard')} className={mobileLinkClass('dashboard')}><Icons.Dashboard active={isActive('dashboard')} /><span className="text-[10px] font-medium">Dashboard</span></Link>
+        <Link to="/admin/staff" data-active={isActive('staff')} className={mobileLinkClass('staff')}><Icons.Staff active={isActive('staff')} /><span className="text-[10px] font-medium">Nhân sự</span></Link>
+        <Link to="/admin/students" data-active={isActive('students')} className={mobileLinkClass('students')}><Icons.Student active={isActive('students')} /><span className="text-[10px] font-medium">Học viên</span></Link>
+        <Link to="/admin/data" data-active={isActive('data')} className={mobileLinkClass('data')}><Icons.Data active={isActive('data')} /><span className="text-[10px] font-medium">Dữ liệu</span></Link>
+        <Link to="/admin/stats" data-active={isActive('stats')} className={mobileLinkClass('stats')}><Icons.Stats active={isActive('stats')} /><span className="text-[10px] font-medium">Thống kê</span></Link>
+        <Link to="/admin/skins" data-active={isActive('skins')} className={mobileLinkClass('skins')}><Icons.Skins active={isActive('skins')} /><span className="text-[10px] font-medium">Skin</span></Link>
+        <Link to="/admin/autobonus" data-active={isActive('autobonus')} className={mobileLinkClass('autobonus')}><Icons.Bonus active={isActive('autobonus')} /><span className="text-[10px] font-medium">AutoBonus</span></Link>
+        <Link to="/admin/notifications" data-active={isActive('notifications')} className={mobileLinkClass('notifications')}><Icons.Noti active={isActive('notifications')} /><span className="text-[10px] font-medium">TBáo</span></Link>
+        <Link to="/admin/feedback" data-active={isActive('feedback')} className={mobileLinkClass('feedback')}><Icons.Feedback active={isActive('feedback')} /><span className="text-[10px] font-medium">Phản ánh</span></Link>
+        <Link to="/admin/import" data-active={isActive('import')} className={mobileLinkClass('import')}><Icons.Import active={isActive('import')} /><span className="text-[10px] font-medium">Import</span></Link>
+        <Link to="/admin/tuition" data-active={isActive('tuition')} className={mobileLinkClass('tuition')}><Icons.Tuition active={isActive('tuition')} /><span className="text-[10px] font-medium">Học phí</span></Link>
       </nav>
     </div>
   );

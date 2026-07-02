@@ -222,7 +222,7 @@ const MyGrades = () => {
       <div className="bg-white rounded-xl border border-slate-200 p-4">
         <div className="flex items-start justify-between gap-2 mb-2">
           <div>
-            <p className="text-lg font-bold text-slate-800">{meta.label}</p>
+            <p className="section-title">{meta.label}</p>
             <p className="text-sm font-semibold" style={{ color: meta.color }}>{meta.meaning}</p>
           </div>
           {data.length > 0 && (
@@ -291,22 +291,22 @@ const MyGrades = () => {
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg>
             </div>
             <div>
-                <h2 className="text-xl font-bold text-[#2B6830]">Bảng Kết Quả Học Tập</h2>
-                <p className="text-xs text-slate-400 font-medium hidden md:block">Chi tiết lịch sử nhận điểm và xếp hạng lớp</p>
+                <h2 className="page-title">Bảng Kết Quả Học Tập</h2>
+                <p className="page-sub hidden md:block">Chi tiết lịch sử nhận điểm và xếp hạng lớp</p>
             </div>
       </div>
 
       {loading ? (
         <div className="flex justify-center p-8"><span className="animate-spin h-6 w-6 border-2 border-[#2B6830] border-t-transparent rounded-full"></span></div>
       ) : myClasses.length > 0 ? (
-        <div className="bg-white p-4 md:p-6 rounded-xl border border-slate-200 shadow-sm">
+        <div className="card-std p-4 md:p-6">
 
             {/* Thanh công cụ: Chọn lớp & Hiển thị Xếp hạng */}
             <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-5 mb-6">
                 <div className="w-full md:w-1/3">
                     <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Lọc xem theo Lớp</label>
                     <select
-                        className="w-full p-2.5 border border-slate-200 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 font-medium bg-white"
+                        className="input-base font-medium"
                         value={selectedClass}
                         onChange={e => setSelectedClass(e.target.value)}
                     >
@@ -317,12 +317,12 @@ const MyGrades = () => {
                 {selectedClass && rankInfo && (
                     <div className="flex gap-4 md:gap-8 bg-white px-5 py-3 rounded-xl border border-slate-200 shadow-sm w-full md:w-auto">
                         <div className="text-center pr-4 md:pr-8 border-r border-slate-100">
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1" title="Assignment(10%) + Formative(20%) + MMT(30%) + EOMT(40%)">Điểm Tổng Kết</p>
-                            <p className="text-2xl font-black text-[#2B6830]">{rankInfo.totalScore}</p>
+                            <p className="stat-label mb-1" title="Assignment(10%) + Formative(20%) + MMT(30%) + EOMT(40%)">Điểm Tổng Kết</p>
+                            <p className="text-3xl font-extrabold leading-tight text-[#2B6830]">{rankInfo.totalScore}</p>
                         </div>
                         <div className="text-center pr-2">
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Xếp hạng của bạn</p>
-                            <p className="text-2xl font-black text-emerald-600">#{rankInfo.rank} <span className="text-sm font-bold text-slate-400">/ {rankInfo.totalStudents}</span></p>
+                            <p className="stat-label mb-1">Xếp hạng của bạn</p>
+                            <p className="text-3xl font-extrabold leading-tight text-emerald-600">#{rankInfo.rank} <span className="text-sm font-bold text-slate-400">/ {rankInfo.totalStudents}</span></p>
                         </div>
                     </div>
                 )}
@@ -330,7 +330,7 @@ const MyGrades = () => {
 
             {/* ===== CƠ CHẾ TÍNH ĐIỂM & XẾP HẠNG — minh bạch cho Phụ huynh & Học viên ===== */}
             <div className="bg-[#E8F4EC]/60 rounded-xl border border-green-200 p-4 md:p-5 mb-6">
-                <h3 className="text-lg font-bold text-[#2B6830] uppercase tracking-wide mb-3">📐 Cơ chế tính điểm & xếp hạng</h3>
+                <h3 className="section-title mb-3">📐 Cơ chế tính điểm & xếp hạng</h3>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     {/* Công thức điểm tổng kết */}
                     <div className="bg-white rounded-xl border border-green-100 p-4">

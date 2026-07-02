@@ -56,8 +56,8 @@ const ConfirmModal = ({ title, message, onConfirm, onCancel }) => (
       <p className="text-base font-bold text-slate-800">{title}</p>
       {message && <p className="text-sm text-slate-500">{message}</p>}
       <div className="flex gap-3 justify-end">
-        <button onClick={onCancel} className="px-4 py-2 rounded-xl text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">Hủy</button>
-        <button onClick={onConfirm} className="px-4 py-2 rounded-xl text-sm font-bold text-white bg-red-500 hover:bg-red-600 transition-colors">Xóa</button>
+        <button onClick={onCancel} className="btn-secondary">Hủy</button>
+        <button onClick={onConfirm} className="btn-danger">Xóa</button>
       </div>
     </div>
   </div>
@@ -231,17 +231,17 @@ const TuitionStats = () => {
       )}
 
       {/* ─── Bộ lọc ────────────────────────────────── */}
-      <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
-        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Bộ lọc</p>
+      <div className="card-std p-5">
+        <p className="stat-label mb-3">Bộ lọc</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <input
-            className="p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10"
+            className="input-base"
             placeholder="Tìm tên hoặc mã học viên..."
             value={filterName}
             onChange={(e) => setFilterName(e.target.value)}
           />
           <select
-            className="p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 bg-white"
+            className="input-base"
             value={filterClass}
             onChange={(e) => setFilterClass(e.target.value)}
           >
@@ -249,7 +249,7 @@ const TuitionStats = () => {
             {classes.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
           <select
-            className="p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 bg-white"
+            className="input-base"
             value={filterSessions}
             onChange={(e) => setFilterSessions(e.target.value)}
           >
@@ -270,7 +270,7 @@ const TuitionStats = () => {
         />
         <button
           onClick={() => fileInputRef.current?.click()}
-          className="flex items-center gap-2 px-5 py-2.5 bg-[#2B6830] text-white rounded-xl text-sm font-bold hover:bg-[#1E5225] shadow-sm transition-all active:scale-95"
+          className="btn-primary"
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
             <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
@@ -279,7 +279,7 @@ const TuitionStats = () => {
         </button>
         <button
           onClick={handleChot}
-          className="flex items-center gap-2 px-5 py-2.5 bg-red-500 text-white rounded-xl text-sm font-bold hover:bg-red-600 shadow-sm transition-all active:scale-95"
+          className="btn-danger"
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -294,22 +294,22 @@ const TuitionStats = () => {
       </div>
 
       {/* ─── Bảng danh sách ────────────────────────── */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+      <div className="card-std overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 text-slate-500 border-b border-slate-200 text-xs uppercase font-bold">
+          <table className="table-std">
+            <thead>
               <tr>
-                <th className="p-4 w-10 text-center">STT</th>
-                <th className="p-4">Mã HV</th>
-                <th className="p-4">Họ và tên</th>
-                <th className="p-4 text-center">Buổi còn lại</th>
-                <th className="p-4 text-center">Buổi cộng thêm</th>
-                <th className="p-4">Hạn thanh toán</th>
-                <th className="p-4">Tình trạng</th>
-                <th className="p-4 text-right">Thao tác</th>
+                <th className="w-10 text-center">STT</th>
+                <th>Mã HV</th>
+                <th>Họ và tên</th>
+                <th className="text-center">Buổi còn lại</th>
+                <th className="text-center">Buổi cộng thêm</th>
+                <th>Hạn thanh toán</th>
+                <th>Tình trạng</th>
+                <th className="text-right">Thao tác</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody>
               {filteredRecords.length === 0 ? (
                 <tr>
                   <td colSpan="8" className="p-10 text-center text-slate-400 italic">
@@ -320,22 +320,22 @@ const TuitionStats = () => {
                 </tr>
               ) : (
                 filteredRecords.map((r, idx) => (
-                  <tr key={r.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="p-4 text-center text-slate-400 font-bold text-xs">{idx + 1}</td>
-                    <td className="p-4 font-bold text-[#2B6830] font-mono text-xs">{r.studentCode || '—'}</td>
-                    <td className="p-4 font-medium text-slate-800">
+                  <tr key={r.id}>
+                    <td className="text-center text-slate-400 font-bold text-xs">{idx + 1}</td>
+                    <td className="font-bold text-[#2B6830] font-mono text-xs">{r.studentCode || '—'}</td>
+                    <td className="font-medium text-slate-800">
                       {r.name || '—'}
                       {r.extensionRequested && !r.extensionApproved && (
                         <span className="ml-1.5 text-[10px] font-bold bg-purple-50 text-purple-600 border border-purple-200 px-1.5 py-0.5 rounded">Xin gia hạn</span>
                       )}
                     </td>
-                    <td className="p-4 text-center">
+                    <td className="text-center">
                       <span className="font-bold text-slate-700">{r.remainingSessions ?? '—'}</span>
                     </td>
-                    <td className="p-4 text-center">
+                    <td className="text-center">
                       <span className="font-bold text-blue-600">{r.addedSessions ?? 0}</span>
                     </td>
-                    <td className="p-4">
+                    <td>
                       {editingDeadline?.id === r.id ? (
                         <div className="flex items-center gap-2 flex-wrap">
                           <input
@@ -362,12 +362,12 @@ const TuitionStats = () => {
                         <span className="text-slate-700">{fmtDate(r.paymentDeadline)}</span>
                       )}
                     </td>
-                    <td className="p-4">
+                    <td>
                       <span className={`text-xs font-bold px-2 py-1 rounded-lg ${statusStyle(r.status)}`}>
                         {r.status || 'Chờ'}
                       </span>
                     </td>
-                    <td className="p-4">
+                    <td>
                       <div className="flex gap-2 justify-end">
                         <button
                           onClick={() => setEditingDeadline({ id: r.id, value: r.paymentDeadline || '' })}

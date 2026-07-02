@@ -8,7 +8,7 @@ import { ref, onValue, update } from 'firebase/database';
 // SKELETON CARD — thay thế "Đang tải..."
 // ============================================================
 const SkeletonCard = () => (
-  <div className="bg-white p-5 md:p-6 rounded-2xl border border-slate-100 shadow-sm animate-pulse">
+  <div className="card-std p-5 md:p-6 animate-pulse">
     <div className="h-3 bg-slate-100 rounded w-16 mb-3" />
     <div className="h-5 bg-slate-100 rounded w-32 mb-2" />
     <div className="h-3 bg-slate-100 rounded w-24 mb-4" />
@@ -259,7 +259,7 @@ const StudentDashboard = () => {
           <p className="text-green-200 text-sm font-medium">
             {new Date().toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit' })}
           </p>
-          <h1 className="text-2xl font-bold mt-1 mb-3">Xin chào, {currentUser?.name}! 👋</h1>
+          <h1 className="text-xl font-bold mt-1 mb-3">Xin chào, {currentUser?.name}! 👋</h1>
 
           {/* QUICK STATS row */}
           {loading ? (
@@ -359,11 +359,11 @@ const StudentDashboard = () => {
         isOverdue ? (
           <button
             onClick={() => setCreditsBlockedPopup(true)}
-            className="w-full text-left bg-white rounded-2xl border border-slate-100 shadow-sm p-4 flex items-center gap-4 cursor-pointer hover:bg-slate-50 transition-all group opacity-70"
+            className="w-full text-left card-std p-4 flex items-center gap-4 cursor-pointer hover:bg-slate-50 transition-all group opacity-70"
           >
             <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center shrink-0 text-2xl">🌿</div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Ví BAVN Credits</p>
+              <p className="stat-label">Ví BAVN Credits</p>
               <p className="font-bold text-slate-500 text-sm">
                 Bạn có <span className="text-slate-400">{totalBonus} điểm Bonus</span> = <span className="text-slate-400">{totalCredits} credits</span>
               </p>
@@ -374,7 +374,7 @@ const StudentDashboard = () => {
           <Link to="/student/credits" className="block bg-white rounded-2xl border border-green-100 shadow-sm p-4 flex items-center gap-4 hover:border-[#2B6830]/40 hover:shadow-md transition-all group">
             <div className="w-12 h-12 rounded-xl bg-[#E8F4EC] flex items-center justify-center shrink-0 text-2xl">🌿</div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Ví BAVN Credits</p>
+              <p className="stat-label">Ví BAVN Credits</p>
               <p className="font-bold text-slate-800 text-sm">
                 Bạn có <span className="text-[#2B6830]">{totalBonus} điểm Bonus</span> = <span className="text-[#2B6830]">{totalCredits} credits</span> — đổi đồ uống, đồ ăn Fresh Fit và quà tặng
               </p>
@@ -399,14 +399,14 @@ const StudentDashboard = () => {
 
       {/* ===== ĐIỂM MỚI NHẤT ===== */}
       {!loading && latestScore && (
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 flex items-center gap-4">
+        <div className="card-std p-4 flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center shrink-0">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="#d97706" className="w-6 h-6">
               <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
             </svg>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Điểm gần nhất</p>
+            <p className="stat-label">Điểm gần nhất</p>
             <p className="font-bold text-slate-800 text-sm truncate">{latestScore.content || '—'}</p>
             <p className="text-xs text-slate-400">{typeLabel[latestScore.type] || latestScore.type} · {new Date(latestScore.date).toLocaleDateString('vi-VN')}</p>
           </div>
@@ -432,7 +432,7 @@ const StudentDashboard = () => {
         ) : myClasses.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {myClasses.map((cls) => (
-              <div key={cls.id} className="bg-white p-5 md:p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all group">
+              <div key={cls.id} className="card-std p-5 md:p-6 hover:shadow-md transition-all group">
                 <div className="flex justify-between items-start mb-3">
                   <div className="bg-[#E8F4EC] text-[#2B6830] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">
                     {cls.room || 'Online'}

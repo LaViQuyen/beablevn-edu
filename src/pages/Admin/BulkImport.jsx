@@ -138,13 +138,13 @@ const BulkImport = () => {
             </svg>
           </div>
           <div>
-            <h2 className="text-xl font-bold text-[#2B6830]">Import học viên từ CSV</h2>
-            <p className="text-xs text-slate-400 mt-0.5">Tạo nhiều tài khoản học viên cùng lúc.</p>
+            <h2 className="page-title">Import học viên từ CSV</h2>
+            <p className="page-sub">Tạo nhiều tài khoản học viên cùng lúc.</p>
           </div>
         </div>
         <button
           onClick={downloadTemplate}
-          className="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-200 transition-colors border border-slate-200"
+          className="btn-secondary"
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
             <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
@@ -173,7 +173,7 @@ const BulkImport = () => {
 
         {/* Nhập CSV */}
         <div className="space-y-4">
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+          <div className="card-std p-5">
             <h3 className="font-bold text-[#2B6830] mb-3">1. Nhập dữ liệu</h3>
 
             {/* Upload file */}
@@ -221,14 +221,14 @@ const BulkImport = () => {
         </div>
 
         {/* Preview */}
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+        <div className="card-std p-5">
           <div className="flex justify-between items-center mb-4">
             <h3 className="font-bold text-[#2B6830]">2. Xem trước ({preview.length} học viên)</h3>
             {preview.length > 0 && (
               <button
                 onClick={handleImport}
                 disabled={importing}
-                className="flex items-center gap-2 bg-emerald-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-emerald-700 transition-all disabled:opacity-50"
+                className="btn-primary disabled:opacity-50"
               >
                 {importing ? (
                   <><svg className="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>Đang import...</>
@@ -247,24 +247,24 @@ const BulkImport = () => {
           ) : (
             <>
             <div className="hidden md:block overflow-auto max-h-96 rounded-xl border border-slate-100">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-slate-50 text-slate-500 uppercase font-bold border-b border-slate-200 sticky top-0">
+              <table className="table-std">
+                <thead className="sticky top-0">
                   <tr>
-                    <th className="p-3">#</th>
-                    <th className="p-3">Họ tên</th>
-                    <th className="p-3">Mã HV</th>
-                    <th className="p-3">Mật khẩu</th>
-                    <th className="p-3">Lớp</th>
+                    <th>#</th>
+                    <th>Họ tên</th>
+                    <th>Mã HV</th>
+                    <th>Mật khẩu</th>
+                    <th>Lớp</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody>
                   {preview.map((row, i) => (
-                    <tr key={i} className="hover:bg-slate-50">
-                      <td className="p-3 text-slate-400">{i + 1}</td>
-                      <td className="p-3 font-bold text-slate-700">{row.name}</td>
-                      <td className="p-3 font-mono text-[#2B6830]">{row.studentCode}</td>
-                      <td className="p-3 font-mono text-slate-500">{row.password}</td>
-                      <td className="p-3">
+                    <tr key={i}>
+                      <td className="text-slate-400">{i + 1}</td>
+                      <td className="font-bold">{row.name}</td>
+                      <td className="font-mono text-[#2B6830]">{row.studentCode}</td>
+                      <td className="font-mono text-slate-500">{row.password}</td>
+                      <td>
                         {row.classNames.length > 0 ? (
                           <div className="flex flex-wrap gap-1">
                             {row.classNames.map((cn, j) => (

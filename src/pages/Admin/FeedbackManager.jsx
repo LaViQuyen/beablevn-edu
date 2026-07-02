@@ -104,8 +104,8 @@ const FeedbackManager = () => {
           </svg>
         </div>
         <div>
-          <h2 className="text-xl font-bold text-[#2B6830]">Quản lý Phản ánh</h2>
-          <p className="text-xs text-slate-400 mt-0.5">Toàn bộ phản ánh từ học viên trong hệ thống.</p>
+          <h2 className="page-title">Quản lý Phản ánh</h2>
+          <p className="page-sub">Toàn bộ phản ánh từ học viên trong hệ thống.</p>
         </div>
       </div>
 
@@ -212,7 +212,7 @@ const FeedbackManager = () => {
             Quay lại
           </button>
 
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 space-y-4">
+          <div className="card-std p-5 space-y-4">
             <div className="flex flex-wrap gap-2">
               <span className={`text-[10px] font-bold px-2 py-1 rounded border ${(CATEGORIES[selectedFb.category] || CATEGORIES.khac).color}`}>
                 {(CATEGORIES[selectedFb.category] || CATEGORIES.khac).label}
@@ -222,7 +222,7 @@ const FeedbackManager = () => {
               </span>
             </div>
 
-            <h3 className="font-bold text-slate-800 text-lg">{selectedFb.title}</h3>
+            <h3 className="section-title">{selectedFb.title}</h3>
 
             <div className="text-xs text-slate-400 space-y-0.5">
               <p>Học viên: <span className="font-medium text-slate-600">{selectedFb.isAnonymous ? 'Ẩn danh' : `${selectedFb.studentName} (${selectedFb.studentCode})`}</span></p>
@@ -250,9 +250,9 @@ const FeedbackManager = () => {
               </div>
             ) : (
               <div className="space-y-3">
-                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Phản hồi học viên</label>
+                <label className="stat-label block">Phản hồi học viên</label>
                 <textarea
-                  className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 resize-none transition"
+                  className="input-base resize-none"
                   rows={4}
                   placeholder="Nhập phản hồi của bạn..."
                   value={reply}
@@ -261,7 +261,7 @@ const FeedbackManager = () => {
                 <button
                   onClick={handleReply}
                   disabled={!reply.trim() || sending}
-                  className="bg-emerald-600 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-emerald-700 transition-all disabled:opacity-50 text-sm"
+                  className="btn-primary disabled:opacity-50"
                 >
                   {sending ? 'Đang gửi...' : '✅ Gửi phản hồi & Đánh dấu đã xử lý'}
                 </button>

@@ -458,7 +458,7 @@ const FreshFit = () => {
   // --- Chặn truy cập nếu không có quyền FF / FF+ ---
   if (!ffAccess && !ffPlus) {
     return (
-      <div className="bg-white p-10 rounded-2xl border border-slate-100 shadow-sm text-center">
+      <div className="card-std p-10 text-center">
         <p className="text-4xl mb-3">🔒</p>
         <p className="font-bold text-slate-700">Khu vực Fresh Fit</p>
         <p className="text-sm text-slate-400 mt-1">Bạn chưa được cấp quyền FF / FF+. Liên hệ Admin để được gán quyền trên thẻ nhân sự.</p>
@@ -568,8 +568,8 @@ const FreshFit = () => {
       <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
         <div className="p-2 bg-[#E8F4EC] rounded-xl text-[#2B6830] text-xl leading-none">🌿</div>
         <div>
-          <h2 className="text-xl font-bold text-[#2B6830]">Fresh Fit — BAVN Credits</h2>
-          <p className="text-xs text-slate-400 mt-0.5">Duyệt yêu cầu đổi credits, quản lý menu{ffPlus && ', nạp Credits +'} · 1 credit = 1.000đ.</p>
+          <h2 className="page-title">Fresh Fit — BAVN Credits</h2>
+          <p className="page-sub">Duyệt yêu cầu đổi credits, quản lý menu{ffPlus && ', nạp Credits +'} · 1 credit = 1.000đ.</p>
         </div>
       </div>
 
@@ -599,7 +599,7 @@ const FreshFit = () => {
       </div>
 
       {activeTab === 'orders' ? (
-        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+        <div className="card-std p-5">
           <div className="flex gap-1.5 flex-wrap mb-2">
             {['pending', 'confirmed', 'rejected', 'all'].map(st => (
               <button key={st} onClick={() => setStatusFilter(st)}
@@ -717,7 +717,7 @@ const FreshFit = () => {
         </div>
       ) : activeTab === 'topup' && ffPlus ? (
         /* ===== TAB NẠP CREDITS + ===== */
-        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
+        <div className="card-std p-5 space-y-4">
           <div>
             <h3 className="text-sm font-bold text-sky-700 uppercase tracking-wide">💳 Nạp Credits + cho học viên</h3>
             <p className="text-xs text-slate-400 mt-1">Học viên nạp tiền mặt tại quầy → nhập số credits tương ứng (1.000đ = 1 Credit +). Credits + hiển thị riêng với Credits từ Bonus.</p>
@@ -865,7 +865,7 @@ const FreshFit = () => {
       ) : (
         <div className="space-y-5">
           {/* FORM THÊM MÓN + NHẬP MENU CÓ SẴN */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+          <div className="card-std p-5">
             <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
               <h3 className="text-sm font-bold text-[#2B6830] uppercase tracking-wide">Thêm món mới</h3>
             </div>
@@ -888,13 +888,13 @@ const FreshFit = () => {
                 placeholder="Nhóm món" value={menuForm.group} onChange={e => setMenuForm({ ...menuForm, group: e.target.value })} />
               <input type="number" min="1" className="w-full md:w-28 border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] transition"
                 placeholder="Giá (⭐)" value={menuForm.price} onChange={e => setMenuForm({ ...menuForm, price: e.target.value })} />
-              <button type="submit" className="bg-[#2B6830] text-white px-6 py-3 rounded-xl text-sm font-bold hover:bg-[#1E5225] transition-colors">+ Thêm</button>
+              <button type="submit" className="btn-primary">+ Thêm</button>
             </form>
             <p className="text-[11px] text-slate-400 mt-2">💡 Giá credit = giá tiền ÷ 1.000 (1 credit = 1.000đ). Ảnh và mô tả món thêm qua nút <b>Sửa</b> trên từng món.</p>
           </div>
 
           {/* DANH SÁCH MÓN */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+          <div className="card-std p-5">
             <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
               <h3 className="text-sm font-bold text-[#2B6830] uppercase tracking-wide">Menu hiện tại ({filteredMenu.length})</h3>
               <div className="flex gap-1.5 flex-wrap">
@@ -915,7 +915,7 @@ const FreshFit = () => {
               </div>
               <input
                 type="text"
-                className="w-full pl-10 p-3 border border-slate-200 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 text-sm text-slate-700 bg-slate-50 focus:bg-white transition-colors"
+                className="input-base pl-10"
                 placeholder="Tìm nhanh món theo tên hoặc nhóm (VD: trà sữa, latte, món chính...)..."
                 value={menuSearch}
                 onChange={e => setMenuSearch(e.target.value)}

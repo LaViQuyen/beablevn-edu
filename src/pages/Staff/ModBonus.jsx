@@ -103,7 +103,7 @@ export default function ModBonus() {
 
   if (!isMod) {
     return (
-      <div className="max-w-md mx-auto mt-10 bg-white border border-slate-200 rounded-2xl p-8 text-center shadow-sm">
+      <div className="card-std max-w-md mx-auto mt-10 p-8 text-center">
         <div className="text-4xl mb-2">🛡️</div>
         <p className="font-bold text-slate-700">Khu vực Moderation</p>
         <p className="text-sm text-slate-400 mt-1">Bạn chưa được cấp quyền thưởng Bonus. Liên hệ Admin nếu cần.</p>
@@ -125,20 +125,20 @@ export default function ModBonus() {
         <div className="flex items-center gap-3">
           <div className="text-3xl">🛡️</div>
           <div>
-            <h1 className="text-xl font-black tracking-wide">Thưởng Bonus Nhân sự</h1>
+            <h1 className="text-xl font-bold tracking-wide">Thưởng Bonus Nhân sự</h1>
             <p className="text-green-100/90 text-sm mt-0.5">Ghi nhận đóng góp của đồng nghiệp — minh bạch, có lý do. Không tự thưởng cho mình.</p>
           </div>
         </div>
       </div>
 
       {/* FORM THƯỞNG */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 space-y-4">
+      <div className="card-std p-5 space-y-4">
         <h2 className="text-sm font-bold uppercase tracking-wide" style={{ color: FOREST }}>➕ Ghi nhận thưởng</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div className="md:col-span-2">
             <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Nhân sự nhận thưởng</label>
             <select value={targetId} onChange={(e) => setTargetId(e.target.value)}
-              className="w-full p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#2B6830] bg-white">
+              className="input-base">
               <option value="">— Chọn nhân sự —</option>
               {awardable.map((s) => (
                 <option key={s.id} value={s.id}>{s.name} · {s.subRole}{s.modAccess ? ' · MOD' : ''}</option>
@@ -148,17 +148,17 @@ export default function ModBonus() {
           <div>
             <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Số Bonus</label>
             <input type="number" min="1" value={amount} onChange={(e) => setAmount(e.target.value)}
-              className="w-full p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#2B6830]" placeholder="VD: 50" />
+              className="input-base" placeholder="VD: 50" />
           </div>
         </div>
         <div>
           <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Lý do thưởng (bắt buộc)</label>
           <textarea value={reason} onChange={(e) => setReason(e.target.value)} rows={2}
-            className="w-full p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#2B6830] resize-none"
+            className="input-base resize-none"
             placeholder="VD: Hỗ trợ phụ huynh ngoài giờ, sáng kiến cải tiến lớp học..." />
         </div>
         <button onClick={award} disabled={busy}
-          className="w-full md:w-auto px-6 py-3 rounded-xl text-white font-bold transition active:scale-95 disabled:opacity-50"
+          className="btn-primary w-full md:w-auto"
           style={{ background: FOREST }}>
           {busy ? 'Đang ghi nhận...' : '✔ Thưởng Bonus'}
         </button>
@@ -166,7 +166,7 @@ export default function ModBonus() {
       </div>
 
       {/* BẢNG ĐÁNH GIÁ QUÝ / NĂM */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+      <div className="card-std overflow-hidden">
         <div className="px-5 py-3 border-b border-slate-100 flex items-center justify-between">
           <h2 className="text-sm font-bold uppercase tracking-wide" style={{ color: FOREST }}>📊 Đánh giá thưởng · Quý {curQ}/{curY}</h2>
           <span className="text-[11px] text-slate-400">Sắp theo thưởng năm</span>
@@ -175,29 +175,29 @@ export default function ModBonus() {
           <p className="text-center text-sm text-slate-400 py-8">Đang tải…</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-slate-50 text-slate-500 text-xs uppercase font-bold">
+            <table className="table-std">
+              <thead>
                 <tr>
-                  <th className="p-3 text-left">Nhân sự</th>
-                  <th className="p-3 text-right">Số dư</th>
-                  <th className="p-3 text-right">Thưởng Quý {curQ}</th>
-                  <th className="p-3 text-right">Thưởng Năm {curY}</th>
+                  <th>Nhân sự</th>
+                  <th className="!text-right">Số dư</th>
+                  <th className="!text-right">Thưởng Quý {curQ}</th>
+                  <th className="!text-right">Thưởng Năm {curY}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody>
                 {staffStats.map((s) => (
                   <tr key={s.id} className={s.id === uid ? 'bg-[#E8F4EC]/40' : ''}>
-                    <td className="p-3">
+                    <td>
                       <span className="font-bold text-slate-700">{s.name}</span>
                       <span className="text-[10px] text-slate-400 ml-1 uppercase">{s.subRole}{s.id === uid ? ' · Bạn' : ''}</span>
                     </td>
-                    <td className="p-3 text-right font-bold" style={{ color: FOREST }}>{s.balance}</td>
-                    <td className="p-3 text-right font-bold text-amber-600">{s.qEarned}</td>
-                    <td className="p-3 text-right font-extrabold text-slate-800">{s.yEarned}</td>
+                    <td className="text-right font-bold" style={{ color: FOREST }}>{s.balance}</td>
+                    <td className="text-right font-bold !text-amber-600">{s.qEarned}</td>
+                    <td className="text-right font-extrabold !text-slate-800">{s.yEarned}</td>
                   </tr>
                 ))}
                 {staffStats.length === 0 && (
-                  <tr><td colSpan="4" className="p-6 text-center text-slate-400 italic">Chưa có dữ liệu.</td></tr>
+                  <tr><td colSpan="4" className="text-center text-slate-400 italic">Chưa có dữ liệu.</td></tr>
                 )}
               </tbody>
             </table>
@@ -206,7 +206,7 @@ export default function ModBonus() {
       </div>
 
       {/* NHẬT KÝ THƯỞNG */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+      <div className="card-std p-5">
         <h2 className="text-sm font-bold uppercase tracking-wide mb-3" style={{ color: FOREST }}>🧾 Nhật ký thưởng gần đây</h2>
         {recentLog.length === 0 ? (
           <p className="text-xs text-slate-400 italic">Chưa có lượt thưởng nào.</p>

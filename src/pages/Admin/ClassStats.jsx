@@ -23,8 +23,8 @@ const calcGPA = (sData) => {
 // ============================================================
 const StatCard = ({ label, value, sub, color }) => (
   <div className={`rounded-2xl p-4 text-center border border-slate-100 ${color}`}>
-    <p className="text-3xl font-extrabold text-slate-800">{value}</p>
-    <p className="text-xs font-bold text-slate-500 mt-1">{label}</p>
+    <p className="stat-value">{value}</p>
+    <p className="stat-label mt-1">{label}</p>
     {sub && <p className="text-[10px] text-slate-400 mt-0.5">{sub}</p>}
   </div>
 );
@@ -174,14 +174,14 @@ const ClassStats = () => {
             </svg>
           </div>
           <div>
-            <h2 className="text-xl font-bold text-[#2B6830]">Thống kê Lớp học</h2>
-            <p className="text-xs text-slate-400 mt-0.5">Điểm số + chuyên cần tổng hợp theo lớp.</p>
+            <h2 className="page-title">Thống kê Lớp học</h2>
+            <p className="page-sub">Điểm số + chuyên cần tổng hợp theo lớp.</p>
           </div>
         </div>
         {selectedClass && sorted.length > 0 && (
           <button
             onClick={handleExport}
-            className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white text-sm font-bold rounded-xl hover:bg-emerald-700 transition-colors"
+            className="btn-primary"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
@@ -192,10 +192,10 @@ const ClassStats = () => {
       </div>
 
       {/* Selector lớp */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
-        <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">Chọn lớp cần xem thống kê</label>
+      <div className="card-std p-5">
+        <label className="stat-label block mb-2">Chọn lớp cần xem thống kê</label>
         <select
-          className="w-full md:w-80 border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 bg-white transition"
+          className="input-base md:w-80"
           value={selectedClass}
           onChange={e => setSelectedClass(e.target.value)}
         >
@@ -232,7 +232,7 @@ const ClassStats = () => {
               <p className="text-slate-400 text-sm">Lớp này chưa có học viên nào.</p>
             </div>
           ) : (
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+            <div className="card-std overflow-hidden">
               <div className="p-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-2">
                 <h3 className="font-bold text-[#2B6830] text-sm">Bảng xếp hạng ({sorted.length} học viên)</h3>
                 <p className="text-xs text-slate-400">Bấm vào tiêu đề cột để sắp xếp</p>
@@ -240,24 +240,24 @@ const ClassStats = () => {
 
               {/* Desktop table */}
               <div className="hidden md:block overflow-x-auto">
-                <table className="w-full text-sm text-left">
-                  <thead className="bg-slate-50 text-slate-500 text-xs uppercase font-bold border-b border-slate-100">
+                <table className="table-std">
+                  <thead>
                     <tr>
-                      <th className="p-4 w-12 text-center">Hạng</th>
-                      <th className="p-4 cursor-pointer hover:text-[#2B6830] transition-colors" onClick={() => toggleSort('name')}>
+                      <th className="w-12 text-center">Hạng</th>
+                      <th className="cursor-pointer hover:text-[#2B6830] transition-colors" onClick={() => toggleSort('name')}>
                         Học viên <SortIcon col="name" />
                       </th>
-                      <th className="p-4 text-center cursor-pointer hover:text-[#2B6830] transition-colors" onClick={() => toggleSort('gpa')}>
+                      <th className="text-center cursor-pointer hover:text-[#2B6830] transition-colors" onClick={() => toggleSort('gpa')}>
                         Điểm TK <SortIcon col="gpa" />
                       </th>
-                      <th className="p-4 text-center cursor-pointer hover:text-[#2B6830] transition-colors" onClick={() => toggleSort('att')}>
+                      <th className="text-center cursor-pointer hover:text-[#2B6830] transition-colors" onClick={() => toggleSort('att')}>
                         Chuyên cần <SortIcon col="att" />
                       </th>
-                      <th className="p-4 text-center">Bonus</th>
-                      <th className="p-4 text-center">Chi tiết điểm</th>
+                      <th className="text-center">Bonus</th>
+                      <th className="text-center">Chi tiết điểm</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-50">
+                  <tbody>
                     {sorted.map((st, idx) => {
                       const sData = scores[st.id] || {};
                       const getAvg = (cat) => {
@@ -269,21 +269,21 @@ const ClassStats = () => {
 
                       return (
                         <tr key={st.id} className={`hover:bg-slate-50 transition-colors ${rank <= 3 ? 'bg-amber-50/20' : ''}`}>
-                          <td className="p-4 text-center">
+                          <td className="text-center">
                             <span className={`text-lg font-extrabold ${medalClass}`}>
                               {rank <= 3 ? ['🥇','🥈','🥉'][rank-1] : rank}
                             </span>
                           </td>
-                          <td className="p-4">
+                          <td>
                             <p className="font-bold text-slate-800">{st.name}</p>
                             <p className="text-xs text-slate-400 font-mono">{st.studentCode}</p>
                           </td>
-                          <td className="p-4 text-center">
+                          <td className="text-center">
                             <span className={`text-lg font-extrabold ${gpaColor(st.gpa)}`}>
                               {st.gpa > 0 ? st.gpa.toFixed(2) : '—'}
                             </span>
                           </td>
-                          <td className="p-4 text-center">
+                          <td className="text-center">
                             {st.att !== null ? (
                               <div className="flex flex-col items-center gap-1">
                                 <span className={`font-bold ${attColor(st.att)}`}>{st.att}%</span>
@@ -293,10 +293,10 @@ const ClassStats = () => {
                               </div>
                             ) : <span className="text-slate-300 text-xs">—</span>}
                           </td>
-                          <td className="p-4 text-center">
+                          <td className="text-center">
                             <span className="font-bold text-amber-600">{st.bonus || 0}</span>
                           </td>
-                          <td className="p-4 text-center">
+                          <td className="text-center">
                             <div className="flex justify-center gap-2 text-[10px] font-bold">
                               {[
                                 { label: 'A', val: getAvg('assignment'), color: 'bg-green-50 text-green-700' },

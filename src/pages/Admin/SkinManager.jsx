@@ -155,13 +155,13 @@ const SkinManager = () => {
             </svg>
           </div>
           <div>
-            <h2 className="text-xl font-bold text-[#2B6830]">Quản lý Skin</h2>
-            <p className="text-xs text-slate-400 mt-0.5">Thêm/sửa/xóa avatar học viên đổi bằng Credit hoặc mốc học tập.</p>
+            <h2 className="page-title">Quản lý Skin</h2>
+            <p className="page-sub">Thêm/sửa/xóa avatar học viên đổi bằng Credit hoặc mốc học tập.</p>
           </div>
         </div>
         <div className="flex gap-2">
           {!isEmpty && (
-            <button onClick={openAdd} className="px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-[#2B6830] hover:bg-[#1E5225] transition-colors">+ Thêm skin</button>
+            <button onClick={openAdd} className="btn-primary">+ Thêm skin</button>
           )}
         </div>
       </div>
@@ -173,7 +173,7 @@ const SkinManager = () => {
           <p className="font-bold text-slate-700">Chưa có skin nào trong hệ thống</p>
           <p className="text-sm text-slate-400 mt-1 mb-5">Nạp bộ 13 skin mặc định để bắt đầu, sau đó tùy ý chỉnh sửa.</p>
           <button onClick={seedDefaults} disabled={seeding}
-            className="px-6 py-3 rounded-xl text-sm font-bold text-white bg-[#2B6830] hover:bg-[#1E5225] transition-colors disabled:opacity-50">
+            className="btn-primary disabled:opacity-50">
             {seeding ? 'Đang nạp...' : '⬇️ Nạp 13 skin mặc định'}
           </button>
         </div>
@@ -309,8 +309,8 @@ const SkinManager = () => {
             </label>
 
             <div className="flex gap-2 pt-2">
-              <button onClick={() => setModalOpen(false)} className="flex-1 py-2.5 rounded-xl text-sm font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 transition-colors">Hủy</button>
-              <button onClick={saveSkin} disabled={saving} className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white bg-[#2B6830] hover:bg-[#1E5225] transition-colors disabled:opacity-50">
+              <button onClick={() => setModalOpen(false)} className="btn-secondary flex-1">Hủy</button>
+              <button onClick={saveSkin} disabled={saving} className="btn-primary flex-1 disabled:opacity-50">
                 {saving ? 'Đang lưu...' : editId ? 'Cập nhật' : 'Thêm skin'}
               </button>
             </div>

@@ -10,7 +10,7 @@ const ConfirmModal = ({ title, message, confirmLabel = 'Xác nhận', confirmCol
       <p className="text-base font-bold text-slate-800">{title}</p>
       {message && <p className="text-sm text-slate-500">{message}</p>}
       <div className="flex gap-3 justify-end">
-        <button onClick={onCancel} className="px-4 py-2 rounded-xl text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">Hủy</button>
+        <button onClick={onCancel} className="btn-secondary">Hủy</button>
         <button onClick={onConfirm} className={`px-4 py-2 rounded-xl text-sm font-bold text-white transition-colors ${confirmColor}`}>{confirmLabel}</button>
       </div>
     </div>
@@ -32,13 +32,13 @@ const ChangePasswordModal = ({ student, onConfirm, onCancel }) => {
         <h3 className="font-bold text-[#2B6830] text-base">Đổi mật khẩu: {student.name}</h3>
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Mật khẩu mới</label>
-            <input type="text" className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 font-mono transition" value={newPass} onChange={e => { setNewPass(e.target.value); setError(''); }} autoFocus />
+            <label className="stat-label block mb-1">Mật khẩu mới</label>
+            <input type="text" className="input-base font-mono" value={newPass} onChange={e => { setNewPass(e.target.value); setError(''); }} autoFocus />
             {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
           </div>
           <div className="flex gap-3 justify-end pt-1">
-            <button type="button" onClick={onCancel} className="px-4 py-2 rounded-xl text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">Hủy</button>
-            <button type="submit" className="px-4 py-2 rounded-xl text-sm font-bold text-white bg-[#2B6830] hover:bg-[#1E5225] transition-colors">Xác nhận</button>
+            <button type="button" onClick={onCancel} className="btn-secondary">Hủy</button>
+            <button type="submit" className="btn-primary">Xác nhận</button>
           </div>
         </form>
       </div>
@@ -311,41 +311,41 @@ const StudentManager = () => {
       </div>
 
       {activeTab === 'create' && (
-        <div className="bg-white p-5 md:p-6 rounded-2xl border border-slate-100 shadow-sm animate-fade-in-up">
-          <h2 className="text-lg font-bold text-[#2B6830] mb-4">Thông tin Học viên mới</h2>
+        <div className="card-std p-5 md:p-6 animate-fade-in-up">
+          <h2 className="section-title mb-4">Thông tin Học viên mới</h2>
           <form onSubmit={handleCreate} className="space-y-4 max-w-2xl">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                <div className="space-y-1">
-                 <label className="text-xs font-bold text-slate-500 uppercase">Họ và Tên</label>
-                 <input className="w-full border p-3 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 text-sm" placeholder="Nguyễn Văn A" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+                 <label className="stat-label">Họ và Tên</label>
+                 <input className="input-base" placeholder="Nguyễn Văn A" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
                </div>
                <div className="space-y-1">
-                 <label className="text-xs font-bold text-slate-500 uppercase">Mã HV (Login ID)</label>
-                 <input className="w-full border p-3 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 text-sm" placeholder="HV001" value={formData.studentCode} onChange={e => setFormData({...formData, studentCode: e.target.value})} />
+                 <label className="stat-label">Mã HV (Login ID)</label>
+                 <input className="input-base" placeholder="HV001" value={formData.studentCode} onChange={e => setFormData({...formData, studentCode: e.target.value})} />
                </div>
             </div>
             <div className="space-y-1">
-                 <label className="text-xs font-bold text-slate-500 uppercase">Mật khẩu</label>
-                 <input className="w-full border p-3 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 text-sm" type="password" placeholder="••••••" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} />
+                 <label className="stat-label">Mật khẩu</label>
+                 <input className="input-base" type="password" placeholder="••••••" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} />
             </div>
             <div className="space-y-1">
-                 <label className="text-xs font-bold text-slate-500 uppercase">Chọn Lớp (Tối đa 4)</label>
+                 <label className="stat-label">Chọn Lớp (Tối đa 4)</label>
                  <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
                     {[1,2,3,4].map(i => (
-                        <select key={i} className="border p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 bg-white w-full" value={formData[`classId${i}`]} onChange={e => setFormData({...formData, [`classId${i}`]: e.target.value})}>
+                        <select key={i} className="input-base" value={formData[`classId${i}`]} onChange={e => setFormData({...formData, [`classId${i}`]: e.target.value})}>
                             <option value="">-- Lớp {i} --</option>
                             {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                         </select>
                     ))}
                  </div>
             </div>
-            <button className="w-full md:w-auto bg-[#2B6830] text-white py-3 px-8 rounded-xl font-bold shadow-lg shadow-green-900/20 hover:bg-[#1E5225] transition-all active:scale-[0.98]">Lưu Học Viên</button>
+            <button className="btn-primary w-full md:w-auto">Lưu Học Viên</button>
           </form>
         </div>
       )}
 
       {activeTab === 'list' && (
-        <div className="bg-white p-5 md:p-6 rounded-2xl border border-slate-100 shadow-sm">
+        <div className="card-std p-5 md:p-6">
            {/* --- BỘ LỌC (Responsive) --- */}
            <div className="flex flex-col md:flex-row gap-3 mb-4">
                <select 
@@ -366,29 +366,29 @@ const StudentManager = () => {
 
            {/* DESKTOP TABLE */}
            <div className="hidden md:block overflow-x-auto rounded-xl border border-slate-200">
-             <table className="w-full text-left text-sm">
-               <thead className="bg-slate-50 text-slate-500 border-b border-slate-200 text-xs uppercase font-bold">
+             <table className="table-std">
+               <thead>
                  <tr>
-                    <th className="p-4 w-12 text-center">STT</th>
-                    <th className="p-4">Mã HV</th>
-                    <th className="p-4">Tên</th>
-                    <th className="p-4">Lớp đang học</th>
-                    <th className="p-4 text-right">Thao tác</th>
+                    <th className="w-12 text-center">STT</th>
+                    <th>Mã HV</th>
+                    <th>Tên</th>
+                    <th>Lớp đang học</th>
+                    <th className="text-right">Thao tác</th>
                  </tr>
                </thead>
-               <tbody className="divide-y divide-slate-100">
+               <tbody>
                  {filteredStudents.map((st, index) => (
-                   <tr key={st.id} className="hover:bg-slate-50 transition-colors">
-                     <td className="p-4 text-center text-slate-400 font-bold">{index + 1}</td>
-                     <td className="p-4 font-bold text-[#2B6830]">{st.studentCode}</td>
-                     <td className="p-4 font-medium">
+                   <tr key={st.id}>
+                     <td className="text-center text-slate-400 font-bold">{index + 1}</td>
+                     <td className="font-bold text-[#2B6830]">{st.studentCode}</td>
+                     <td className="font-medium">
                        <div className="flex items-center gap-2 flex-wrap">
                          <span>{st.name}</span>
                          {(() => { const rs = getReserveStatus(st); return rs ? <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${RESERVE_BADGE[rs]}`}>{RESERVE_LABEL[rs]}</span> : null; })()}
                        </div>
                      </td>
-                     <td className="p-4 text-slate-600 max-w-xs truncate">{getClassNames(st.classIds)}</td>
-                     <td className="p-4 text-right flex justify-end gap-2">
+                     <td className="text-slate-600 max-w-xs truncate">{getClassNames(st.classIds)}</td>
+                     <td className="text-right flex justify-end gap-2">
                         <button onClick={() => setEditingStudent({...st, classId1: st.classIds?.[0]||'', classId2: st.classIds?.[1]||'', classId3: st.classIds?.[2]||'', classId4: st.classIds?.[3]||''})} className="text-[#2B6830] border border-[#2B6830] px-2 py-1 rounded text-xs font-bold hover:bg-[#2B6830] hover:text-white transition-all">Sửa</button>
                         <button onClick={() => handleResetPassword(st)} className="text-yellow-600 border border-yellow-600 px-2 py-1 rounded text-xs font-bold hover:bg-yellow-600 hover:text-white transition-colors">Pass</button>
                         <button 
@@ -409,7 +409,7 @@ const StudentManager = () => {
                  ))}
                  {loading && [1,2,3].map(i => (
                    <tr key={i} className="animate-pulse">
-                     {[1,2,3,4,5].map(j => <td key={j} className="p-4"><div className="h-4 bg-slate-100 rounded w-full" /></td>)}
+                     {[1,2,3,4,5].map(j => <td key={j}><div className="h-4 bg-slate-100 rounded w-full" /></td>)}
                    </tr>
                  ))}
                  {!loading && filteredStudents.length === 0 && <tr><td colSpan="5" className="p-8 text-center text-slate-400 italic">Không tìm thấy dữ liệu.</td></tr>}
@@ -464,10 +464,10 @@ const StudentManager = () => {
       {editingStudent && (
         <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-2xl animate-fade-in-up flex flex-col max-h-[90vh] overflow-y-auto">
-            <h3 className="font-bold text-lg mb-4 text-[#2B6830]">Chỉnh sửa: {editingStudent.name}</h3>
+            <h3 className="section-title mb-4">Chỉnh sửa: {editingStudent.name}</h3>
             <div className="space-y-3">
-              <input className="w-full border p-3 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 text-sm" value={editingStudent.name} onChange={e => setEditingStudent({...editingStudent, name: e.target.value})} placeholder="Tên" />
-              <input className="w-full border p-3 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 text-sm" value={editingStudent.studentCode} onChange={e => setEditingStudent({...editingStudent, studentCode: e.target.value})} placeholder="Mã HV" />
+              <input className="input-base" value={editingStudent.name} onChange={e => setEditingStudent({...editingStudent, name: e.target.value})} placeholder="Tên" />
+              <input className="input-base" value={editingStudent.studentCode} onChange={e => setEditingStudent({...editingStudent, studentCode: e.target.value})} placeholder="Mã HV" />
               <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 space-y-2">
                  <p className="text-xs font-bold text-slate-400 uppercase">Cập nhật lớp</p>
                  {[1,2,3,4].map(i => (
@@ -488,7 +488,7 @@ const StudentManager = () => {
             </div>
             <div className="flex gap-3 justify-end mt-6">
               <button onClick={() => setEditingStudent(null)} className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm hover:bg-slate-50 font-medium">Hủy</button>
-              <button onClick={handleUpdate} className="px-5 py-2 bg-[#2B6830] text-white rounded-xl text-sm font-bold hover:bg-[#1E5225] shadow-sm">Lưu</button>
+              <button onClick={handleUpdate} className="btn-primary">Lưu</button>
             </div>
           </div>
         </div>

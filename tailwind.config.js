@@ -9,15 +9,15 @@ export default {
       colors: {
         // === Brand colors — wire vào CSS variables ===
         primary: {
-          DEFAULT: '#003366',
-          hover:   '#002244',
-          light:   '#EEF3FA',
+          DEFAULT: '#2B6830',
+          hover:   '#1E5225',
+          light:   '#E8F4EC',
         },
         // === Semantic colors ===
         success: '#059669',
         warning: '#D97706',
         danger:  '#DC2626',
-        info:    '#2563EB',
+        info:    '#2B6830',
       },
       borderRadius: {
         // Đồng nhất border radius theo design system
@@ -35,7 +35,7 @@ export default {
         modal: '0 20px 50px -10px rgb(0 0 0 / 0.18)',
       },
       fontFamily: {
-        sans: ['Josefin Sans', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        sans: ['Be Vietnam Pro', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       animation: {
         'fade-in-up': 'fade-in-up 0.25s ease-out',

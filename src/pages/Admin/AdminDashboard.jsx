@@ -6,13 +6,13 @@ import { ref, onValue } from 'firebase/database';
 // STAT CARD — hiển thị 1 chỉ số tổng quan
 // ============================================================
 const StatCard = ({ title, value, sub, icon, color }) => (
-  <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex items-center gap-4">
+  <div className="card-std p-5 flex items-center gap-4">
     <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${color}`}>
       {icon}
     </div>
     <div>
-      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">{title}</p>
-      <p className="text-3xl font-extrabold text-slate-800 leading-tight">{value}</p>
+      <p className="stat-label">{title}</p>
+      <p className="stat-value">{value}</p>
       {sub && <p className="text-xs text-slate-400 mt-0.5">{sub}</p>}
     </div>
   </div>
@@ -22,7 +22,7 @@ const StatCard = ({ title, value, sub, icon, color }) => (
 // SKELETON — hiển thị khi đang tải
 // ============================================================
 const Skeleton = () => (
-  <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex items-center gap-4 animate-pulse">
+  <div className="card-std p-5 flex items-center gap-4 animate-pulse">
     <div className="w-12 h-12 rounded-xl bg-slate-100 shrink-0" />
     <div className="space-y-2 flex-1">
       <div className="h-3 bg-slate-100 rounded w-24" />
@@ -131,7 +131,7 @@ const AdminDashboard = () => {
       <div className="bg-gradient-to-r from-[#2B6830] to-[#3D8B47] rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
         <div className="relative z-10">
           <p className="text-green-200 text-sm font-medium capitalize">{todayLabel}</p>
-          <h1 className="text-2xl font-extrabold mt-1">Tổng quan hệ thống</h1>
+          <h1 className="text-xl font-bold mt-1">Tổng quan hệ thống</h1>
           <p className="text-green-200 text-sm mt-1">Be Able VN — 2Sol EDU</p>
         </div>
         <div className="absolute right-0 top-0 w-40 h-40 bg-white/10 rounded-full -mr-16 -mt-16 blur-3xl" />
@@ -195,7 +195,7 @@ const AdminDashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
         {/* Danh sách lớp */}
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+        <div className="card-std p-5">
           <h2 className="text-sm font-bold text-[#2B6830] uppercase tracking-wider mb-4">
             Các lớp đang hoạt động
           </h2>
@@ -223,7 +223,7 @@ const AdminDashboard = () => {
         </div>
 
         {/* Thông báo gần nhất */}
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+        <div className="card-std p-5">
           <h2 className="text-sm font-bold text-[#2B6830] uppercase tracking-wider mb-4">
             Thông báo gần nhất
           </h2>

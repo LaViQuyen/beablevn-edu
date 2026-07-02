@@ -37,10 +37,10 @@ const ConfirmModal = ({ message, onConfirm, onCancel }) => (
         <p className="text-sm font-medium text-slate-700">{message}</p>
       </div>
       <div className="flex gap-3 justify-end">
-        <button onClick={onCancel} className="px-4 py-2 rounded-xl text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">
+        <button onClick={onCancel} className="btn-secondary">
           Hủy
         </button>
-        <button onClick={onConfirm} className="px-4 py-2 rounded-xl text-sm font-bold text-white bg-red-500 hover:bg-red-600 transition-colors">
+        <button onClick={onConfirm} className="btn-danger">
           Xóa
         </button>
       </div>
@@ -230,8 +230,8 @@ const NotificationManager = () => {
           </svg>
         </div>
         <div>
-          <h2 className="text-xl font-bold text-[#2B6830]">Quản lý Thông báo</h2>
-          <p className="text-xs text-slate-400 mt-0.5">Tạo và gửi thông báo đến học viên.</p>
+          <h2 className="page-title">Quản lý Thông báo</h2>
+          <p className="page-sub">Tạo và gửi thông báo đến học viên.</p>
         </div>
       </div>
 
@@ -310,7 +310,7 @@ const NotificationManager = () => {
               </button>
               <button
                 onClick={() => setViewTarget(null)}
-                className="px-4 py-2 rounded-xl text-sm font-bold text-white bg-[#2B6830] hover:bg-[#1E5225] transition-colors"
+                className="btn-primary"
               >
                 Đóng
               </button>
@@ -326,9 +326,9 @@ const NotificationManager = () => {
             <h3 className="font-bold text-[#2B6830]">✏️ Sửa thông báo — {editTarget.scope === 'all' ? 'Toàn hệ thống' : `Lớp ${classes[editTarget.scope]?.name || editTarget.scope}`}</h3>
 
             <div>
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Tiêu đề</label>
+              <label className="stat-label block mb-1.5">Tiêu đề</label>
               <input
-                className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition"
+                className="input-base"
                 value={editTarget.title || ''}
                 onChange={e => setEditTarget({ ...editTarget, title: e.target.value })}
               />
@@ -336,9 +336,9 @@ const NotificationManager = () => {
 
             {editTarget.type === 'link' ? (
               <div>
-                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Đường dẫn (URL)</label>
+                <label className="stat-label block mb-1.5">Đường dẫn (URL)</label>
                 <input
-                  className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition font-mono"
+                  className="input-base font-mono"
                   value={editTarget.linkUrl || ''}
                   onChange={e => setEditTarget({ ...editTarget, linkUrl: e.target.value })}
                 />
@@ -346,7 +346,7 @@ const NotificationManager = () => {
             ) : (
               <>
                 <div>
-                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Nhãn</label>
+                  <label className="stat-label block mb-1.5">Nhãn</label>
                   <div className="flex gap-2 flex-wrap">
                     {LABELS.map(l => (
                       <button key={l.id} type="button"
@@ -358,7 +358,7 @@ const NotificationManager = () => {
                   </div>
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Nội dung</label>
+                  <label className="stat-label block mb-1.5">Nội dung</label>
                   <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
                     <ReactQuill theme="snow" modules={quillModules}
                       value={editTarget.content || ''}
@@ -370,8 +370,8 @@ const NotificationManager = () => {
             )}
 
             <div className="flex gap-3 justify-end pt-1">
-              <button onClick={() => setEditTarget(null)} className="px-4 py-2 rounded-xl text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">Hủy</button>
-              <button onClick={handleSaveEdit} disabled={savingEdit} className="px-4 py-2 rounded-xl text-sm font-bold text-white bg-[#2B6830] hover:bg-[#1E5225] transition-colors disabled:opacity-50">
+              <button onClick={() => setEditTarget(null)} className="btn-secondary">Hủy</button>
+              <button onClick={handleSaveEdit} disabled={savingEdit} className="btn-primary disabled:opacity-50">
                 {savingEdit ? 'Đang lưu...' : 'Lưu thay đổi'}
               </button>
             </div>
@@ -380,8 +380,8 @@ const NotificationManager = () => {
       )}
 
       {/* ===== FORM TẠO THÔNG BÁO MỚI ===== */}
-      <div className="bg-white p-5 md:p-6 rounded-2xl border border-slate-100 shadow-sm">
-        <h2 className="text-lg font-bold text-[#2B6830] mb-4 flex items-center gap-2">
+      <div className="card-std p-5 md:p-6">
+        <h2 className="section-title mb-4 flex items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
           </svg>
@@ -390,7 +390,7 @@ const NotificationManager = () => {
 
         {/* Flash success */}
         {successMsg && (
-          <div className="mb-4 flex items-center gap-2 bg-green-50 text-green-700 border border-green-200 px-4 py-3 rounded-xl text-sm font-medium">
+          <div className="alert-success mb-4">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 shrink-0">
               <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
             </svg>
@@ -401,9 +401,9 @@ const NotificationManager = () => {
         <form onSubmit={handleCreate} className="space-y-4">
           {/* Tiêu đề */}
           <div>
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Tiêu đề *</label>
+            <label className="stat-label block mb-1">Tiêu đề *</label>
             <input
-              className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition"
+              className="input-base"
               placeholder="VD: Lịch nghỉ lễ 30/4 - 1/5"
               value={form.title}
               onChange={e => setForm({ ...form, title: e.target.value })}
@@ -414,7 +414,7 @@ const NotificationManager = () => {
           {/* Loại + Phạm vi */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Loại nội dung</label>
+              <label className="stat-label block mb-1">Loại nội dung</label>
               <div className="flex gap-2">
                 {['content', 'link'].map(t => (
                   <button
@@ -434,9 +434,9 @@ const NotificationManager = () => {
             </div>
 
             <div>
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Gửi đến</label>
+              <label className="stat-label block mb-1">Gửi đến</label>
               <select
-                className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 bg-white transition"
+                className="input-base"
                 value={form.scope}
                 onChange={e => setForm({ ...form, scope: e.target.value })}
               >
@@ -452,7 +452,7 @@ const NotificationManager = () => {
           {form.type === 'content' ? (
             <div>
               {/* Nhãn dán — giống cổng Giáo vụ */}
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1.5">Nhãn dán (Label)</label>
+              <label className="stat-label block mb-1.5">Nhãn dán (Label)</label>
               <div className="flex gap-2 mb-4">
                 {LABELS.map(lbl => (
                   <button
@@ -465,7 +465,7 @@ const NotificationManager = () => {
                   </button>
                 ))}
               </div>
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Nội dung *</label>
+              <label className="stat-label block mb-1">Nội dung *</label>
               {/* Style cho bullet/số trong editor — giống form Giáo vụ */}
               <style>{`
                 .ql-editor ul { list-style-type: disc !important; padding-left: 1.5rem !important; margin-bottom: 0.5rem !important; }
@@ -485,10 +485,10 @@ const NotificationManager = () => {
             </div>
           ) : (
             <div>
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">URL *</label>
+              <label className="stat-label block mb-1">URL *</label>
               <input
                 type="url"
-                className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition"
+                className="input-base"
                 placeholder="https://..."
                 value={form.linkUrl}
                 onChange={e => setForm({ ...form, linkUrl: e.target.value })}
@@ -501,7 +501,7 @@ const NotificationManager = () => {
             <button
               type="submit"
               disabled={submitting}
-              className="bg-[#2B6830] text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-[#1E5225] active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {submitting ? (
                 <>
@@ -518,8 +518,8 @@ const NotificationManager = () => {
       </div>
 
       {/* ===== BẢNG QUẢN LÝ ===== */}
-      <div className="bg-white p-5 md:p-6 rounded-2xl border border-slate-100 shadow-sm">
-        <h2 className="text-lg font-bold text-[#2B6830] mb-4 flex items-center gap-2">
+      <div className="card-std p-5 md:p-6">
+        <h2 className="section-title mb-4 flex items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
           </svg>
@@ -589,25 +589,25 @@ const NotificationManager = () => {
 
         {/* DESKTOP TABLE */}
         <div className="hidden md:block overflow-x-auto rounded-xl border border-slate-200">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 text-slate-500 border-b border-slate-200 text-xs uppercase font-bold">
+          <table className="table-std">
+            <thead>
               <tr>
-                <th className="p-4 w-32">Ngày đăng</th>
-                <th className="p-4">Tiêu đề / Loại</th>
-                <th className="p-4">Phạm vi</th>
-                <th className="p-4">Người đăng</th>
-                <th className="p-4 text-right">Thao tác</th>
+                <th className="w-32">Ngày đăng</th>
+                <th>Tiêu đề / Loại</th>
+                <th>Phạm vi</th>
+                <th>Người đăng</th>
+                <th className="text-right">Thao tác</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody>
               {pagedNotifs.map(n => (
                 <tr
                   key={n.id}
-                  className="hover:bg-slate-50 transition-colors cursor-pointer"
+                  className="cursor-pointer"
                   onClick={() => setViewTarget(n)}
                 >
-                  <td className="p-4 text-slate-500 text-xs font-mono">{new Date(n.date).toLocaleDateString('vi-VN')}</td>
-                  <td className="p-4">
+                  <td className="text-slate-500 text-xs font-mono">{new Date(n.date).toLocaleDateString('vi-VN')}</td>
+                  <td>
                     <div className="font-bold text-slate-800">{n.title}</div>
                     <div className="text-xs text-slate-500 mt-1 flex items-center gap-2">
                       {n.type === 'link'
@@ -618,9 +618,9 @@ const NotificationManager = () => {
                       <span className="truncate max-w-[280px]">{n.type === 'link' ? n.linkUrl : stripHtml(n.content)}</span>
                     </div>
                   </td>
-                  <td className="p-4 font-medium">{renderTargets(n)}</td>
-                  <td className="p-4 text-slate-500 text-xs font-medium">{n.author || 'Admin'}</td>
-                  <td className="p-4 text-right whitespace-nowrap" onClick={e => e.stopPropagation()}>
+                  <td className="font-medium">{renderTargets(n)}</td>
+                  <td className="text-slate-500 text-xs font-medium">{n.author || 'Admin'}</td>
+                  <td className="text-right whitespace-nowrap" onClick={e => e.stopPropagation()}>
                     <button
                       onClick={() => setViewTarget(n)}
                       className="text-[#2B6830] hover:bg-[#E8F4EC] px-3 py-1.5 rounded-xl transition-colors text-xs font-bold border border-green-100 mr-2"

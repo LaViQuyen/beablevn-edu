@@ -85,7 +85,7 @@ const ToolCard = ({ tool }) => {
         )}
       </div>
       <p className="mt-4 text-[11px] font-bold text-[#3D8B47] uppercase tracking-wide">{tool.tag}</p>
-      <h3 className="mt-1 text-lg font-extrabold text-[#2B6830]">{tool.title}</h3>
+      <h3 className="mt-1 section-title">{tool.title}</h3>
       <p className="mt-2 text-sm text-slate-500 leading-relaxed flex-1">{tool.desc}</p>
       <span className="mt-5 inline-flex items-center gap-2 self-start bg-[#2B6830] text-white rounded-xl px-4 py-2.5 text-sm font-bold shadow-sm group-hover:bg-[#1E5225] transition-colors">
         Mở công cụ
@@ -100,8 +100,8 @@ const Resources = () => {
     <div className="space-y-6">
       {/* Tiêu đề trang */}
       <div>
-        <h1 className="text-2xl font-extrabold text-[#2B6830]">Tài nguyên &amp; Luyện tập</h1>
-        <p className="text-sm text-slate-500 mt-1">
+        <h1 className="page-title">Tài nguyên &amp; Luyện tập</h1>
+        <p className="page-sub">
           Các công cụ luyện tập có AI chấm của Be Able VN. Bấm vào một công cụ để mở và bắt đầu luyện.
         </p>
       </div>
