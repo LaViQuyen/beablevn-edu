@@ -66,6 +66,10 @@ const StudentManager = () => {
   const [reserveTarget, setReserveTarget] = useState(null);
   const [reserveStart, setReserveStart] = useState('');
   const [reserveEnd, setReserveEnd] = useState('');
+  // Chuyển lớp
+  const [transferTarget, setTransferTarget] = useState(null); // { student, fromClassId, toClassId }
+  const [transferFrom, setTransferFrom] = useState('');
+  const [transferTo, setTransferTo] = useState('');
 
   useEffect(() => {
     onValue(ref(db, 'classes'), (snap) => setClasses(snap.val() ? Object.entries(snap.val()).map(([id, val]) => ({ id, ...val })).sort((a, b) => (a.name || '').localeCompare(b.name || '', 'vi')) : []));
@@ -229,6 +233,32 @@ const StudentManager = () => {
     } catch (e) { showSuccess('❌ Lỗi: ' + e.message); }
   };
 
+  // ===== CHUYỂN LỚP =====
+  const handleTransfer = async () => {
+    if (!transferTarget || !transferFrom || !transferTo) return showSuccess('⚠️ Vui lòng chọn lớp chuyển đi và lớp đến.');
+    if (transferFrom === transferTo) return showSuccess('⚠️ Lớp chuyển đi và lớp đến phải khác nhau.');
+    try {
+      const student = transferTarget;
+      // 1. Đọc điểm Bonus của học viên tại lớp cũ
+      const bonusSnap = await get(ref(db, `scores/${transferFrom}/${student.id}/bonus`));
+      // 2. Ghi điểm Bonus sang lớp mới (nếu có)
+      if (bonusSnap.val()) {
+        await set(ref(db, `scores/${transferTo}/${student.id}/bonus`), bonusSnap.val());
+      }
+      // 3. Xóa toàn bộ điểm của học viên tại lớp cũ (bonus + assignment + formative + summative)
+      await remove(ref(db, `scores/${transferFrom}/${student.id}`));
+      // 4. Cập nhật classIds: thay thế fromClassId bằng toClassId
+      const newClassIds = (student.classIds || []).map(id => id === transferFrom ? transferTo : id);
+      await update(ref(db, `users/${student.id}`), { classIds: newClassIds });
+      const fromName = classes.find(c => c.id === transferFrom)?.name || transferFrom;
+      const toName = classes.find(c => c.id === transferTo)?.name || transferTo;
+      showSuccess(`✅ Đã chuyển "${student.name}" từ lớp "${fromName}" sang lớp "${toName}".`);
+      setTransferTarget(null);
+      setTransferFrom('');
+      setTransferTo('');
+    } catch (e) { showSuccess('❌ Lỗi: ' + e.message); }
+  };
+
   const getClassNames = (ids) => {
     if (!ids || !ids.length) return "--";
     return ids.map(id => classes.find(c => c.id === id)?.name || id).join(", ");
@@ -292,6 +322,59 @@ const StudentManager = () => {
                 <button onClick={() => setReserveTarget(null)} className="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 transition-all active:scale-95">Hủy bỏ</button>
                 <button onClick={confirmReserve} className="px-5 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-700 transition-all shadow-md active:scale-95">Xác nhận</button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* POPUP CHUYỂN LỚP */}
+      {transferTarget && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4 animate-fade-in">
+          <div className="bg-white rounded-2xl border border-slate-100 p-6 w-full max-w-md shadow-xl animate-scale-up">
+            <div className="flex items-center gap-3 mb-4 text-violet-600">
+              <div className="p-2 bg-violet-50 rounded-xl">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" /></svg>
+              </div>
+              <h3 className="text-base font-bold text-slate-800">Chuyển lớp học viên</h3>
+            </div>
+
+            <p className="text-slate-500 text-xs leading-relaxed mb-4">
+              Học viên <strong className="text-slate-700">{transferTarget.name}</strong>. Điểm <strong>Bonus</strong> sẽ chuyển theo sang lớp mới. Toàn bộ điểm còn lại tại lớp cũ sẽ bị xóa.
+            </p>
+
+            <div className="space-y-3 mb-6">
+              <div>
+                <label className="block text-xs font-bold text-slate-400 uppercase mb-1.5">Từ lớp</label>
+                <select
+                  className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/10 text-sm bg-slate-50 focus:bg-white transition-colors"
+                  value={transferFrom}
+                  onChange={e => { setTransferFrom(e.target.value); setTransferTo(''); }}
+                >
+                  <option value="">-- Chọn lớp chuyển đi --</option>
+                  {(transferTarget.classIds || []).map(id => {
+                    const cls = classes.find(c => c.id === id);
+                    return <option key={id} value={id}>{cls?.name || id}</option>;
+                  })}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-400 uppercase mb-1.5">Sang lớp</label>
+                <select
+                  className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/10 text-sm bg-slate-50 focus:bg-white transition-colors"
+                  value={transferTo}
+                  onChange={e => setTransferTo(e.target.value)}
+                >
+                  <option value="">-- Chọn lớp đến --</option>
+                  {classes.filter(c => c.id !== transferFrom).map(c => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="flex gap-3 justify-end">
+              <button onClick={() => { setTransferTarget(null); setTransferFrom(''); setTransferTo(''); }} className="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 transition-all active:scale-95">Hủy bỏ</button>
+              <button onClick={handleTransfer} className="px-5 py-2.5 bg-violet-600 text-white rounded-xl text-xs font-bold hover:bg-violet-700 transition-all shadow-md active:scale-95">Xác nhận chuyển</button>
             </div>
           </div>
         </div>
@@ -403,6 +486,12 @@ const StudentManager = () => {
                         >
                             Bảo lưu
                         </button>
+                        <button
+                            onClick={() => { setTransferTarget(st); setTransferFrom(''); setTransferTo(''); }}
+                            className="text-violet-600 border border-violet-400 px-2 py-1 rounded text-xs font-bold hover:bg-violet-600 hover:text-white transition-colors"
+                        >
+                            Chuyển
+                        </button>
                         <button onClick={() => handleDelete(st.id)} className="text-red-500 hover:text-red-700 font-bold text-xs px-2">Xóa</button>
                      </td>
                    </tr>
@@ -451,6 +540,7 @@ const StudentManager = () => {
                                   {(st.lockedAt || st.isLocked) ? 'Mở Khóa' : 'Khóa'}
                               </button>
                             <button onClick={() => handleOpenReserve(st)} className={`flex-1 min-w-[60px] py-2 rounded-xl text-xs font-bold border transition-colors ${st.reserve ? 'text-blue-600 bg-blue-50 border-blue-200 active:bg-blue-100' : 'text-slate-600 bg-slate-50 border-slate-200 active:bg-slate-100'}`}>Bảo lưu</button>
+                            <button onClick={() => { setTransferTarget(st); setTransferFrom(''); setTransferTo(''); }} className="flex-1 min-w-[60px] py-2 text-violet-600 bg-violet-50 rounded-xl text-xs font-bold border border-violet-200 active:bg-violet-100">Chuyển</button>
                             <button onClick={() => handleDelete(st.id)} className="flex-1 min-w-[60px] py-2 text-red-600 bg-red-50 rounded-xl text-xs font-bold border border-red-200 active:bg-red-100">Xóa</button>
                         </div>
                     </div>
@@ -503,34 +593,31 @@ const StudentManager = () => {
               </div>
               <h3 className="text-base font-bold text-slate-800">Cài đặt ngày giới hạn thông báo</h3>
             </div>
-            
             <p className="text-slate-500 text-xs leading-relaxed mb-4">
               Học viên <strong className="text-slate-700">{selectedStudentToLock.name}</strong> sẽ <strong>không thể xem</strong> bất kỳ thông báo, báo bài hay tài liệu nào được đăng <strong>từ ngày đã chọn trở về sau</strong>. Các bài đăng trước ngày này vẫn xem được bình thường.
             </p>
-
             <div className="mb-6">
               <label className="block text-xs font-bold text-slate-400 uppercase mb-1.5">Chọn ngày áp dụng khóa</label>
-              <input 
-                type="date" 
+              <input
+                type="date"
                 className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 text-sm font-semibold bg-slate-50 focus:bg-white transition-colors cursor-pointer"
                 value={customLockDate}
                 onChange={(e) => setCustomLockDate(e.target.value)}
               />
             </div>
-
             <div className="flex gap-3 justify-end">
-              <button 
-                onClick={() => setSelectedStudentToLock(null)} 
+              <button
+                onClick={() => setSelectedStudentToLock(null)}
                 className="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 transition-all active:scale-95"
               >
                 Hủy bỏ
               </button>
-              <button 
-                onClick={handleConfirmLockWithDate} 
+              <button
+                onClick={handleConfirmLockWithDate}
                 className="px-5 py-2.5 bg-orange-500 text-white rounded-xl text-xs font-bold hover:bg-orange-600 transition-all shadow-md active:scale-95 flex items-center gap-1.5"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 00-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
-                óa
+                Khóa
               </button>
             </div>
           </div>
