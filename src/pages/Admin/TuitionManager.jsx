@@ -230,6 +230,8 @@ const TuitionManager = () => {
   const [editTarget, setEditTarget]       = useState(null);
   const [deleteTarget, setDeleteTarget]   = useState(null);
   const [successMsg, setSuccessMsg]       = useState('');
+  const [sortKey, setSortKey]             = useState('');
+  const [sortDir, setSortDir]             = useState('asc');
   const fileInputRef = useRef(null);
 
   // History state
@@ -361,12 +363,34 @@ const TuitionManager = () => {
     }
   };
 
+  // ── Sort handler ─────────────────────────────────────────────────────────
+  const handleSort = (key) => {
+    if (sortKey === key) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    else { setSortKey(key); setSortDir('asc'); }
+  };
+
   // ── Display: sort + filter ────────────────────────────────────────────────
   const sortedRecords = [...records].sort((a, b) => {
-    // "Chờ duyệt gia hạn" lên đầu
+    // "Chờ duyệt gia hạn" luôn lên đầu (priority cố định)
     const aPri = a.status === 'Chờ duyệt gia hạn' ? 0 : 1;
     const bPri = b.status === 'Chờ duyệt gia hạn' ? 0 : 1;
     if (aPri !== bPri) return aPri - bPri;
+    // Nếu user chọn sort cột
+    if (sortKey) {
+      let aVal = a[sortKey] ?? '';
+      let bVal = b[sortKey] ?? '';
+      // Số
+      if (sortKey === 'remainingSessions' || sortKey === 'addedSessions') {
+        aVal = Number(aVal); bVal = Number(bVal);
+        return sortDir === 'asc' ? aVal - bVal : bVal - aVal;
+      }
+      // Ngày
+      if (sortKey === 'paymentDeadline') {
+        aVal = aVal || '9999'; bVal = bVal || '9999';
+      }
+      const cmp = String(aVal).localeCompare(String(bVal), 'vi');
+      return sortDir === 'asc' ? cmp : -cmp;
+    }
     return (a.name || '').localeCompare(b.name || '', 'vi');
   });
 
@@ -524,13 +548,27 @@ const TuitionManager = () => {
               <table className="table-std min-w-[900px]">
                 <thead>
                   <tr>
-                    <th>Mã HV</th>
-                    <th>Họ và tên</th>
-                    <th>Lớp</th>
-                    <th className="text-center">Buổi còn lại</th>
-                    <th className="text-center">Buổi cộng thêm</th>
-                    <th>Hạn thanh toán</th>
-                    <th>Tình trạng</th>
+                    {[
+                      { key: 'studentCode',       label: 'Mã HV',           cls: '' },
+                      { key: 'name',              label: 'Họ và tên',       cls: '' },
+                      { key: 'className',         label: 'Lớp',             cls: '' },
+                      { key: 'remainingSessions', label: 'Buổi còn lại',    cls: 'text-center' },
+                      { key: 'addedSessions',     label: 'Buổi cộng thêm',  cls: 'text-center' },
+                      { key: 'paymentDeadline',   label: 'Hạn thanh toán',  cls: '' },
+                      { key: 'status',            label: 'Tình trạng',      cls: '' },
+                    ].map(({ key, label, cls }) => (
+                      <th key={key} className={cls}>
+                        <button
+                          onClick={() => handleSort(key)}
+                          className="flex items-center gap-1 hover:text-white/80 transition-colors font-bold uppercase text-[11px] tracking-wide"
+                        >
+                          {label}
+                          <span className="text-[10px] leading-none">
+                            {sortKey === key ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}
+                          </span>
+                        </button>
+                      </th>
+                    ))}
                     <th className="text-right">Thao tác</th>
                   </tr>
                 </thead>

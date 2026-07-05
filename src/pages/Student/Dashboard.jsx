@@ -182,8 +182,8 @@ const StudentDashboard = () => {
     if (tuitionStatus === 'Quá hạn') return 3;
     // "Chờ" và "Chờ duyệt gia hạn" đều hiện banner (đang chờ thanh toán)
     if (tuitionStatus === 'Chờ' || tuitionStatus === 'Chờ duyệt gia hạn') {
-      if (daysLeft !== null && daysLeft <= 2) return 2;  // ≤2 ngày → đỏ (urgent)
-      return 1;  // ≥3 ngày → vàng (nhắc nhở)
+      if (daysLeft !== null && daysLeft <= 3) return 2;  // ≤3 ngày → đỏ (urgent)
+      return 1;  // >3 ngày → vàng (nhắc nhở)
     }
     return 0; // Đã thanh toán hoặc trạng thái khác
   })();
