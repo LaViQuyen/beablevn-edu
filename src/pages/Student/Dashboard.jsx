@@ -175,15 +175,16 @@ const StudentDashboard = () => {
   // Cấp độ banner
   // 3 = Quá hạn (status = 'Quá hạn')
   // 2 = Chờ + còn <= 3 ngày
-  // 1 = Chờ + còn > 3 ngày
-  // 0 = Không hiển thị (không có record, hoặc Đã đóng)
+  // 1 = Chờ + còn <= 7 ngày (và > 3 ngày)
+  // 0 = Không hiển thị (không có record, Đã đóng, hoặc còn > 7 ngày)
   const bannerLevel = (() => {
     if (!tuitionRecord) return 0;
     if (tuitionStatus === 'Quá hạn') return 3;
     // "Chờ" và "Chờ duyệt gia hạn" đều hiện banner (đang chờ thanh toán)
     if (tuitionStatus === 'Chờ' || tuitionStatus === 'Chờ duyệt gia hạn') {
-      if (daysLeft !== null && daysLeft <= 2) return 2;  // ≤2 ngày → đỏ (urgent)
-      return 1;  // ≥3 ngày → vàng (nhắc nhở)
+      if (daysLeft !== null && daysLeft <= 3) return 2;  // ≤3 ngày → đỏ (urgent)
+      if (daysLeft === null || daysLeft <= 7) return 1;  // ≤7 ngày (hoặc chưa rõ hạn) → vàng (nhắc nhở)
+      return 0; // >7 ngày → chưa cần nhắc
     }
     return 0; // Đã thanh toán hoặc trạng thái khác
   })();
@@ -231,7 +232,7 @@ const StudentDashboard = () => {
             </p>
             <div className="flex gap-3 justify-center">
               <button onClick={() => setExtensionPopup(false)} className="px-4 py-2 bg-slate-100 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-200 transition-colors">Hủy</button>
-              <button onClick={handleRequestExtension} className="px-5 py-2 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 transition-colors">Xác nhận gửi</button>
+              <button onClick={handleRequestExtension} className="px-5 py-2 bg-[#2B6830] text-white rounded-xl text-sm font-bold hover:bg-[#1E5225] transition-colors">Xác nhận gửi</button>
             </div>
           </div>
         </div>
