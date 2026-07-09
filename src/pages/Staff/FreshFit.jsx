@@ -90,7 +90,7 @@ const FreshFit = () => {
   const showToast = (msg) => { setToastMsg(msg); setTimeout(() => setToastMsg(''), 4000); };
 
   // --- Form menu ---
-  const [menuForm, setMenuForm] = useState({ name: '', category: 'sothich', group: '', price: '' });
+  const [menuForm, setMenuForm] = useState({ name: '', category: 'sothich', group: '', price: '', prepMinutes: '' });
   const [editItem, setEditItem] = useState(null);
   const [deleteItem, setDeleteItem] = useState(null);
 
@@ -164,7 +164,11 @@ const FreshFit = () => {
       const updates = {};
       const timestamp = new Date().toISOString();
 
-      if (wallet === 'plus') {
+      if (wallet === 'cash') {
+        // Tiền mặt: KHÔNG trừ ví nào, nhân sự thu tiền mặt khi giao món
+        // Ghi cờ paidCash để đối soát sau này
+        updates[`redemptions/${r.id}/paidCash`] = true;
+      } else if (wallet === 'plus') {
         // Trừ ví Credits + (nạp tiền)
         const bal = getPlusBalance(r.studentId);
         if (bal < need) {
@@ -228,7 +232,9 @@ const FreshFit = () => {
       updates[`redemptions/${r.id}/confirmedAt`] = timestamp;
 
       await update(ref(db), updates);
-      showToast(`✅ Đã xác nhận — trừ ${need} credits (ví ${wallet === 'plus' ? 'Credits +' : 'Credits'}) của ${r.studentName}.`);
+      showToast(wallet === 'cash'
+        ? `✅ Đã xác nhận đơn TIỀN MẶT, nhớ thu ${(need * 1000).toLocaleString('vi-VN')}đ của ${r.studentName} khi giao món.`
+        : `✅ Đã xác nhận, trừ ${need} credits (ví ${wallet === 'plus' ? 'Credits +' : 'Credits'}) của ${r.studentName}.`);
     } catch (e) {
       showToast('❌ Lỗi: ' + e.message);
     } finally {
@@ -325,7 +331,7 @@ const FreshFit = () => {
         'Món': itemsText(r.items),
         'Ghi chú': r.note || '',
         'Số credits': Number(r.totalCredits) || 0,
-        'Ví': r.wallet === 'plus' ? 'Credits +' : 'Credits (Bonus)',
+        'Ví': r.wallet === 'plus' ? 'Credits +' : r.wallet === 'cash' ? 'Tiền mặt' : 'Credits (Bonus)',
         'Trạng thái': (STATUS_META[r.status] || STATUS_META.pending).label,
         'Lý do từ chối': r.rejectReason || '',
         'Người xử lý': r.confirmedBy || r.rejectedBy || '',
@@ -405,10 +411,12 @@ const FreshFit = () => {
         category: menuForm.category,
         group: menuForm.group.trim() || null,
         price: Number(menuForm.price),
+        // Thời gian chuẩn bị (phút), tùy chọn: chỉ lưu khi là số dương
+        prepMinutes: Number(menuForm.prepMinutes) > 0 ? Number(menuForm.prepMinutes) : null,
         available: true,
         createdAt: new Date().toISOString(),
       });
-      setMenuForm({ name: '', category: menuForm.category, group: menuForm.group, price: '' });
+      setMenuForm({ name: '', category: menuForm.category, group: menuForm.group, price: '', prepMinutes: '' });
       showToast('✅ Đã thêm món vào menu.');
     } catch (e2) { showToast('❌ Lỗi: ' + e2.message); }
   };
@@ -421,8 +429,9 @@ const FreshFit = () => {
         category: editItem.category,
         group: (editItem.group || '').trim() || null,
         price: Number(editItem.price),
-        imageUrl: normalizeImageUrl(editItem.imageUrl) || null, // link ảnh — Dropbox tự đổi sang raw=1
-        description: (editItem.description || '').trim() || null, // mô tả — hiện khi bấm vào thẻ món
+        imageUrl: normalizeImageUrl(editItem.imageUrl) || null, // link ảnh, Dropbox tự đổi sang raw=1
+        description: (editItem.description || '').trim() || null, // mô tả, hiện khi bấm vào thẻ món
+        prepMinutes: Number(editItem.prepMinutes) > 0 ? Number(editItem.prepMinutes) : null, // thời gian có món (phút), tùy chọn
       });
       setEditItem(null);
       showToast('✅ Đã cập nhật món.');
@@ -483,10 +492,12 @@ const FreshFit = () => {
           <div className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full space-y-4 border border-slate-100">
             <p className="text-sm font-medium text-slate-700">
               {confirmTarget.action === 'confirm'
-                ? ((confirmTarget.r.wallet || 'bonus') === 'plus'
-                    ? <>Xác nhận đổi <b>{itemsText(confirmTarget.r.items)}</b> — sẽ trừ <b className="text-sky-700">{confirmTarget.r.totalCredits} Credits +</b> của <b>{confirmTarget.r.studentName}</b>?</>
-                    : <>Xác nhận đổi <b>{itemsText(confirmTarget.r.items)}</b> — sẽ trừ <b className="text-red-600">{confirmTarget.r.totalCredits * 2} điểm Bonus</b> ({confirmTarget.r.totalCredits} credits) của <b>{confirmTarget.r.studentName}</b>?</>)
-                : <>Từ chối yêu cầu của <b>{confirmTarget.r.studentName}</b>? Credits sẽ được hoàn lại cho học viên.</>}
+                ? ((confirmTarget.r.wallet || 'bonus') === 'cash'
+                    ? <>Xác nhận đơn <b>{itemsText(confirmTarget.r.items)}</b> của <b>{confirmTarget.r.studentName}</b>? Đơn TIỀN MẶT: KHÔNG trừ ví, thu <b className="text-amber-700">{((Number(confirmTarget.r.totalCredits) || 0) * 1000).toLocaleString('vi-VN')}đ</b> khi giao món.</>
+                    : (confirmTarget.r.wallet || 'bonus') === 'plus'
+                    ? <>Xác nhận đổi <b>{itemsText(confirmTarget.r.items)}</b>, sẽ trừ <b className="text-sky-700">{confirmTarget.r.totalCredits} Credits +</b> của <b>{confirmTarget.r.studentName}</b>?</>
+                    : <>Xác nhận đổi <b>{itemsText(confirmTarget.r.items)}</b>, sẽ trừ <b className="text-red-600">{confirmTarget.r.totalCredits * 2} điểm Bonus</b> ({confirmTarget.r.totalCredits} credits) của <b>{confirmTarget.r.studentName}</b>?</>)
+                : <>Từ chối yêu cầu của <b>{confirmTarget.r.studentName}</b>? {(confirmTarget.r.wallet || 'bonus') !== 'cash' && 'Credits sẽ được hoàn lại cho học viên.'}</>}
             </p>
             {/* Lý do từ chối — bắt buộc, hiển thị cho học viên */}
             {confirmTarget.action === 'reject' && (
@@ -532,6 +543,9 @@ const FreshFit = () => {
             </div>
             <input className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] transition" list="ff-groups"
               value={editItem.group || ''} onChange={e => setEditItem({ ...editItem, group: e.target.value })} placeholder="Nhóm món (VD: Trà sữa, Món chính...)" />
+            {/* Thời gian có món (phút), tùy chọn: học viên thấy "Có món sau ~X phút" */}
+            <input type="number" min="1" className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] transition"
+              value={editItem.prepMinutes || ''} onChange={e => setEditItem({ ...editItem, prepMinutes: e.target.value })} placeholder="⏱ Thời gian có món (phút, tùy chọn)" />
             {/* Link ảnh món — học viên thấy ảnh cạnh món trên menu */}
             <input className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] transition font-mono"
               value={editItem.imageUrl || ''} onChange={e => setEditItem({ ...editItem, imageUrl: e.target.value })} placeholder="Link ảnh món (https://...)" />
@@ -642,7 +656,11 @@ const FreshFit = () => {
                 const wallet = r.wallet || 'bonus';
                 let availText = '', enough = true;
                 if (r.status === 'pending') {
-                  if (wallet === 'plus') {
+                  if (wallet === 'cash') {
+                    // Đơn tiền mặt: không cần kiểm tra ví, chỉ nhắc số tiền phải thu
+                    enough = true;
+                    availText = `Thu tiền mặt ${((Number(r.totalCredits) || 0) * 1000).toLocaleString('vi-VN')}đ khi giao món`;
+                  } else if (wallet === 'plus') {
                     const bal = getPlusBalance(r.studentId);
                     enough = bal >= (Number(r.totalCredits) || 0);
                     availText = `Credits + hiện có: ${bal}`;
@@ -676,13 +694,16 @@ const FreshFit = () => {
                       </div>
                       <div className="flex flex-col items-end gap-1 shrink-0">
                         <div className="flex items-center gap-1.5">
-                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase ${wallet === 'plus' ? 'bg-sky-50 text-sky-700 border-sky-200' : 'bg-[#E8F4EC] text-[#2B6830] border-green-200'}`}>
-                            {wallet === 'plus' ? '💳 Credits +' : '⭐ Credits'}
+                          {/* Đơn tiền mặt: badge amber nổi bật để quầy nhớ THU TIỀN khi giao */}
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase ${wallet === 'cash' ? 'bg-amber-400 text-amber-900 border-amber-500' : wallet === 'plus' ? 'bg-sky-50 text-sky-700 border-sky-200' : 'bg-[#E8F4EC] text-[#2B6830] border-green-200'}`}>
+                            {wallet === 'cash' ? '💵 TIỀN MẶT' : wallet === 'plus' ? '💳 Credits +' : '⭐ Credits'}
                           </span>
                           <span className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase ${meta.cls}`}>{meta.label}</span>
                         </div>
-                        <span className="text-base font-extrabold text-[#2B6830]">
-                          {r.totalCredits} ⭐ {wallet !== 'plus' && <span className="text-[10px] text-slate-400 font-bold">= {r.totalCredits * 2} Bonus</span>}
+                        <span className={`text-base font-extrabold ${wallet === 'cash' ? 'text-amber-700' : 'text-[#2B6830]'}`}>
+                          {wallet === 'cash'
+                            ? <>{((Number(r.totalCredits) || 0) * 1000).toLocaleString('vi-VN')}đ <span className="text-[10px] text-amber-600 font-bold">thu tại quầy</span></>
+                            : <>{r.totalCredits} ⭐ {wallet !== 'plus' && <span className="text-[10px] text-slate-400 font-bold">= {r.totalCredits * 2} Bonus</span>}</>}
                         </span>
                       </div>
                     </div>
@@ -888,9 +909,12 @@ const FreshFit = () => {
                 placeholder="Nhóm món" value={menuForm.group} onChange={e => setMenuForm({ ...menuForm, group: e.target.value })} />
               <input type="number" min="1" className="w-full md:w-28 border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] transition"
                 placeholder="Giá (⭐)" value={menuForm.price} onChange={e => setMenuForm({ ...menuForm, price: e.target.value })} />
+              {/* Thời gian có món (phút), tùy chọn */}
+              <input type="number" min="1" className="w-full md:w-28 border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] transition"
+                placeholder="⏱ Phút" title="Thời gian có món (phút), tùy chọn" value={menuForm.prepMinutes} onChange={e => setMenuForm({ ...menuForm, prepMinutes: e.target.value })} />
               <button type="submit" className="btn-primary">+ Thêm</button>
             </form>
-            <p className="text-[11px] text-slate-400 mt-2">💡 Giá credit = giá tiền ÷ 1.000 (1 credit = 1.000đ). Ảnh và mô tả món thêm qua nút <b>Sửa</b> trên từng món.</p>
+            <p className="text-[11px] text-slate-400 mt-2">💡 Giá credit = giá tiền ÷ 1.000 (1 credit = 1.000đ). Ô <b>⏱ Phút</b> là thời gian chuẩn bị món (tùy chọn), học viên sẽ thấy "Có món sau ~X phút". Ảnh và mô tả món thêm qua nút <b>Sửa</b> trên từng món.</p>
           </div>
 
           {/* DANH SÁCH MÓN */}
@@ -951,6 +975,10 @@ const FreshFit = () => {
                           <p className="text-[10px] font-bold text-slate-400 uppercase mt-0.5">
                             {CATEGORY_META[item.category]?.label || 'Khác'}{item.group && ` · ${item.group}`}{item.available === false && ' · ĐANG ẨN'}
                           </p>
+                          {/* Món có khai báo thời gian chuẩn bị */}
+                          {Number(item.prepMinutes) > 0 && (
+                            <p className="text-[10px] font-bold text-amber-600 mt-0.5">⏱ Có món sau ~{item.prepMinutes} phút</p>
+                          )}
                         </div>
                         <span className="shrink-0 text-sm font-extrabold text-[#2B6830] bg-[#E8F4EC] px-2.5 py-1 rounded-lg border border-green-100">{item.price} ⭐</span>
                       </div>

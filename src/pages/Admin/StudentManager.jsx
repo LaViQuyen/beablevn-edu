@@ -46,6 +46,28 @@ const ChangePasswordModal = ({ student, onConfirm, onCancel }) => {
   );
 };
 
+// ===== Helper lọc theo ngày sinh + SĐT =====
+// Parse ngày sinh: nhận "dd/mm/yyyy" (GV/CCO gõ tay) và "yyyy-mm-dd" (dữ liệu cũ)
+// Cùng logic với StudentDetailModal, KHÔNG dùng new Date() để tránh lệch múi giờ
+const parseBirth = (s) => {
+  if (!s || typeof s !== 'string') return null;
+  const t = s.trim();
+  let d, m, y;
+  if (t.includes('/')) {
+    const p = t.split('/');
+    if (p.length !== 3) return null;
+    d = +p[0]; m = +p[1]; y = +p[2];
+  } else if (t.includes('-')) {
+    const p = t.split('-');
+    if (p.length !== 3) return null;
+    y = +p[0]; m = +p[1]; d = +p[2];
+  } else return null;
+  if (!d || !m || !y || m < 1 || m > 12 || d < 1 || d > 31 || y < 1900) return null;
+  return { y, m, d };
+};
+// Chuẩn hóa số điện thoại: chỉ giữ chữ số (bỏ khoảng trắng, dấu chấm, dấu gạch...)
+const digitsOnly = (s) => String(s || '').replace(/\D/g, '');
+
 const StudentManager = () => {
   const [activeTab, setActiveTab] = useState('create');
   const [classes, setClasses] = useState([]);
@@ -62,6 +84,9 @@ const StudentManager = () => {
   const [customLockDate, setCustomLockDate] = useState(new Date().toISOString().split('T')[0]); 
   const [filterClass, setFilterClass] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  // Lọc theo tháng/năm sinh (dựa trên birthDate lưu ở user record)
+  const [filterBirthMonth, setFilterBirthMonth] = useState('all'); // 'all' | '1'..'12'
+  const [filterBirthYear, setFilterBirthYear] = useState('');      // '' = không lọc
   // Bảo lưu
   const [reserveTarget, setReserveTarget] = useState(null);
   const [reserveStart, setReserveStart] = useState('');
@@ -269,11 +294,26 @@ const StudentManager = () => {
           const studentClasses = st.classIds || [];
           if (!studentClasses.includes(filterClass)) return false;
       }
+      // Lọc theo tháng/năm sinh: học viên chưa có ngày sinh sẽ bị loại khi đang lọc
+      if (filterBirthMonth !== 'all' || filterBirthYear.trim()) {
+          const ymd = parseBirth(st.birthDate);
+          if (!ymd) return false;
+          if (filterBirthMonth !== 'all' && ymd.m !== Number(filterBirthMonth)) return false;
+          if (filterBirthYear.trim() && String(ymd.y) !== filterBirthYear.trim()) return false;
+      }
       if (searchTerm) {
           const lowerTerm = searchTerm.toLowerCase();
-          const matchName = st.name.toLowerCase().includes(lowerTerm);
-          const matchCode = st.studentCode.toLowerCase().includes(lowerTerm);
-          if (!matchName && !matchCode) return false;
+          const matchName = (st.name || '').toLowerCase().includes(lowerTerm);
+          const matchCode = (st.studentCode || '').toLowerCase().includes(lowerTerm);
+          // Tìm theo SĐT: chuẩn hóa bỏ ký tự không phải số ở CẢ 2 phía rồi so includes
+          // Quét field phone của học viên (nếu có) + các liên hệ của phụ huynh (parent.contacts)
+          const termDigits = digitsOnly(searchTerm);
+          const phoneSources = [st.phone, ...(Array.isArray(st.parent?.contacts) ? st.parent.contacts : [])];
+          const matchPhone = termDigits.length >= 3 && phoneSources.some(p => {
+              const d = digitsOnly(p);
+              return d && d.includes(termDigits);
+          });
+          if (!matchName && !matchCode && !matchPhone) return false;
       }
       return true;
   }).sort((a, b) => (a.name || '').localeCompare(b.name || '', 'vi')); // sắp xếp học viên A-Z (có dấu tiếng Việt)
@@ -429,19 +469,37 @@ const StudentManager = () => {
 
       {activeTab === 'list' && (
         <div className="card-std p-5 md:p-6">
-           {/* --- BỘ LỌC (Responsive) --- */}
+           {/* --- BỘ LỌC (Responsive): lớp + tháng/năm sinh + tìm kiếm (tên / mã HV / SĐT) --- */}
            <div className="flex flex-col md:flex-row gap-3 mb-4">
-               <select 
-                   className="p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 md:min-w-[150px] bg-slate-50"
+               <select
+                   className="p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 md:min-w-[130px] bg-slate-50"
                    value={filterClass}
                    onChange={e => setFilterClass(e.target.value)}
                >
                    <option value="all">Tất cả lớp</option>
                    {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                </select>
-               <input 
-                   className="p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 md:min-w-[250px]"
-                   placeholder="Tìm theo Tên hoặc Mã HV..."
+               {/* Lọc theo tháng sinh */}
+               <select
+                   className="p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 md:w-36 bg-slate-50"
+                   value={filterBirthMonth}
+                   onChange={e => setFilterBirthMonth(e.target.value)}
+               >
+                   <option value="all">Tháng sinh: Tất cả</option>
+                   {[1,2,3,4,5,6,7,8,9,10,11,12].map(m => <option key={m} value={m}>Tháng {m}</option>)}
+               </select>
+               {/* Lọc theo năm sinh */}
+               <input
+                   type="number"
+                   min="1900"
+                   className="p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 md:w-32 bg-slate-50"
+                   placeholder="Năm sinh"
+                   value={filterBirthYear}
+                   onChange={e => setFilterBirthYear(e.target.value)}
+               />
+               <input
+                   className="flex-1 p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 md:min-w-[220px]"
+                   placeholder="Tìm theo Tên, Mã HV hoặc SĐT..."
                    value={searchTerm}
                    onChange={e => setSearchTerm(e.target.value)}
                />

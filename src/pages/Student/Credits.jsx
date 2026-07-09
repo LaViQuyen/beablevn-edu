@@ -92,8 +92,9 @@ const StudentCredits = () => {
   const totalCredits = Math.floor(totalBonus / 2); // 2 Bonus = 1 Credit
 
   // Credit đang bị tạm giữ bởi yêu cầu chờ duyệt — tách theo từng ví
+  // Đơn 'cash' (tiền mặt) KHÔNG giữ credit của ví nào
   const pendingBonusHold = myRedemptions
-    .filter(r => r.status === 'pending' && (r.wallet || 'bonus') !== 'plus')
+    .filter(r => r.status === 'pending' && (r.wallet || 'bonus') !== 'plus' && r.wallet !== 'cash')
     .reduce((a, r) => a + (Number(r.totalCredits) || 0), 0);
   const pendingPlusHold = myRedemptions
     .filter(r => r.status === 'pending' && r.wallet === 'plus')
@@ -120,6 +121,16 @@ const StudentCredits = () => {
   }, 0);
   const cartCount = Object.values(cart).reduce((a, b) => a + b, 0);
 
+  // Giỏ có quà tặng (kênh BOD duyệt)? Tiền mặt chỉ áp dụng cho MÓN Fresh Fit,
+  // vì đơn quà do BOD xử lý ở BAVN Center (không có luồng thu tiền mặt)
+  const cartHasGift = Object.keys(cart).some(id => catalog.find(m => m.id === id)?.src === 'gift');
+
+  // Thời gian chuẩn bị dự kiến của một đơn = số phút LỚN NHẤT trong các món (nếu món có khai báo)
+  const orderPrepMinutes = (r) => (r.items || []).reduce((mx, i) => {
+    const p = Number(menu.find(m => m.id === i.id)?.prepMinutes) || 0;
+    return p > mx ? p : mx;
+  }, 0);
+
   const addToCart = (id) => { setConfirmingSend(false); setCart(prev => ({ ...prev, [id]: (prev[id] || 0) + 1 })); };
   const removeFromCart = (id) => {
     setConfirmingSend(false);
@@ -130,10 +141,15 @@ const StudentCredits = () => {
     });
   };
 
-  // --- Gửi yêu cầu đổi với ví đã chọn ---
+  // --- Gửi yêu cầu đổi với phương thức đã chọn ('bonus' | 'plus' | 'cash') ---
   const submitRedeem = async (wallet) => {
-    const avail = wallet === 'plus' ? availablePlus : availableCredits;
-    if (cartTotal > avail) return showToast(`⚠️ Không đủ số dư ví ${wallet === 'plus' ? 'Credits +' : 'Credits'}!`);
+    if (wallet === 'cash') {
+      // Tiền mặt: KHÔNG kiểm tra / trừ ví nào, học viên trả tiền tại quầy khi nhận món
+      if (cartHasGift) return showToast('⚠️ Tiền mặt chỉ áp dụng cho món Fresh Fit. Vui lòng bỏ Quà tặng khỏi giỏ.');
+    } else {
+      const avail = wallet === 'plus' ? availablePlus : availableCredits;
+      if (cartTotal > avail) return showToast(`⚠️ Không đủ số dư ví ${wallet === 'plus' ? 'Credits +' : 'Credits'}!`);
+    }
 
     setSubmitting(true);
     try {
@@ -149,7 +165,7 @@ const StudentCredits = () => {
         studentId: currentUser.id,
         studentName: currentUser.name,
         userType: 'student',
-        wallet, // 'bonus' | 'plus' — trừ đúng ví này khi xác nhận
+        wallet, // 'bonus' | 'plus' | 'cash' (cash: không trừ ví, thu tiền mặt tại quầy)
         note: orderNote.trim() || null,
         status: 'pending',
         date: new Date().toISOString(),
@@ -169,9 +185,11 @@ const StudentCredits = () => {
       setOrderNote('');
       setConfirmingSend(false);
       setWalletModal(false);
-      showToast(count === 2
-        ? '✅ Đã gửi 2 yêu cầu: món (quầy Fresh Fit duyệt) và quà (BOD duyệt).'
-        : '✅ Đã gửi yêu cầu! Chờ duyệt nhé.');
+      showToast(wallet === 'cash'
+        ? `✅ Đã gửi yêu cầu! Nhớ mang ${(cartTotal * 1000).toLocaleString('vi-VN')}đ tiền mặt trả tại quầy khi nhận món nhé.`
+        : count === 2
+          ? '✅ Đã gửi 2 yêu cầu: món (quầy Fresh Fit duyệt) và quà (BOD duyệt).'
+          : '✅ Đã gửi yêu cầu! Chờ duyệt nhé.');
     } catch (e) {
       showToast('❌ Lỗi: ' + e.message);
     } finally {
@@ -179,13 +197,11 @@ const StudentCredits = () => {
     }
   };
 
-  // Nút "Gửi yêu cầu đổi": có Credits + thì popup hỏi ví; không có thì trừ Credits mặc định
+  // Nút "Gửi yêu cầu đổi": luôn mở popup chọn phương thức thanh toán
+  // (Credits / Credits + / Tiền mặt), popup chính là bước xác nhận
   const handleSubmit = () => {
     if (cartCount === 0) return;
-    if (availablePlus > 0) { setWalletModal(true); return; }
-    if (cartTotal > availableCredits) return showToast('⚠️ Không đủ credits khả dụng!');
-    if (!confirmingSend) { setConfirmingSend(true); return; } // bấm lần đầu: hiện xác nhận
-    submitRedeem('bonus');
+    setWalletModal(true);
   };
 
   const visibleMenu = catalog
@@ -209,8 +225,8 @@ const StudentCredits = () => {
       {walletModal && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setWalletModal(false)}>
           <div className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full space-y-4 border border-slate-100" onClick={e => e.stopPropagation()}>
-            <h3 className="font-bold text-[#2B6830] text-base">Chọn ví thanh toán</h3>
-            <p className="text-sm text-slate-600">Đơn đổi quà của bạn: <b>{cartTotal} credits</b>. Bạn muốn trừ vào ví nào?</p>
+            <h3 className="font-bold text-[#2B6830] text-base">Chọn phương thức thanh toán</h3>
+            <p className="text-sm text-slate-600">Đơn đổi quà của bạn: <b>{cartTotal} credits</b>. Bạn muốn thanh toán bằng cách nào?</p>
             <div className="space-y-2.5">
               <button
                 onClick={() => submitRedeem('bonus')}
@@ -228,6 +244,20 @@ const StudentCredits = () => {
                 <span className="text-sm font-bold text-sky-700">💳 Credits + <span className="font-medium text-slate-500">(đã nạp)</span></span>
                 <span className="text-sm font-extrabold text-sky-700">Còn {availablePlus}</span>
               </button>
+              {/* Tiền mặt: không trừ ví, trả tiền tại quầy khi nhận món (chỉ áp dụng món Fresh Fit) */}
+              <button
+                onClick={() => submitRedeem('cash')}
+                disabled={submitting || cartHasGift}
+                className="w-full flex items-center justify-between p-4 rounded-xl border-2 border-amber-200 bg-amber-50/50 hover:border-amber-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <span className="text-sm font-bold text-amber-700">💵 Tiền mặt <span className="font-medium text-slate-500">(trả tại quầy)</span></span>
+                <span className="text-sm font-extrabold text-amber-700">{(cartTotal * 1000).toLocaleString('vi-VN')}đ</span>
+              </button>
+              {cartHasGift && (
+                <p className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5">
+                  ⚠️ Tiền mặt chỉ áp dụng cho món Fresh Fit. Giỏ đang có Quà tặng (BOD duyệt) nên không chọn được tiền mặt.
+                </p>
+              )}
             </div>
             <button onClick={() => setWalletModal(false)} className="w-full py-2.5 rounded-xl text-sm font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 transition-colors">Hủy</button>
           </div>
@@ -248,6 +278,9 @@ const StudentCredits = () => {
                 <div>
                   <h3 className="font-bold text-slate-800 text-lg leading-snug">{CATEGORY_META[viewItem.category]?.icon || '🛍️'} {viewItem.name}</h3>
                   <p className="text-xs font-bold text-slate-400 uppercase mt-1">{CATEGORY_META[viewItem.category]?.label || 'Khác'}{viewItem.group && ` · ${viewItem.group}`}</p>
+                  {Number(viewItem.prepMinutes) > 0 && (
+                    <p className="text-xs font-bold text-amber-600 mt-1">⏱ Có món sau ~{viewItem.prepMinutes} phút</p>
+                  )}
                 </div>
                 <span className="shrink-0 text-lg font-extrabold text-[#2B6830] bg-[#E8F4EC] px-3 py-1.5 rounded-xl border border-green-100">{viewItem.price} ⭐</span>
               </div>
@@ -388,6 +421,10 @@ const StudentCredits = () => {
                       <div className="min-w-0 flex-1">
                         <p className="font-bold text-slate-800 text-sm leading-snug group-hover:text-[#2B6830] transition-colors">{CATEGORY_META[item.category]?.icon || '🛍️'} {item.name}</p>
                         <p className="text-[10px] font-bold text-slate-400 uppercase mt-0.5">{CATEGORY_META[item.category]?.label || 'Khác'}{item.group && ` · ${item.group}`}</p>
+                        {/* Thời gian có món: chỉ hiện khi món có khai báo prepMinutes (món cũ không có field vẫn OK) */}
+                        {Number(item.prepMinutes) > 0 && (
+                          <p className="text-[10px] font-bold text-amber-600 mt-0.5">⏱ Có món sau ~{item.prepMinutes} phút</p>
+                        )}
                       </div>
                       <span className="shrink-0 text-sm font-extrabold text-[#2B6830] bg-white px-2.5 py-1 rounded-lg border border-green-100">{item.price} ⭐</span>
                     </div>
@@ -415,8 +452,8 @@ const StudentCredits = () => {
               <p className="text-xs text-slate-600 truncate">
                 {Object.entries(cart).map(([id, q]) => `${catalog.find(m => m.id === id)?.name || '?'} ×${q}`).join(', ')}
               </p>
-              <p className={`text-sm font-extrabold mt-1 ${cartTotal > Math.max(availableCredits, availablePlus) ? 'text-red-600' : 'text-[#2B6830]'}`}>
-                Tổng: {cartTotal} credits {cartTotal > Math.max(availableCredits, availablePlus) && '— vượt số dư cả 2 ví!'}
+              <p className={`text-sm font-extrabold mt-1 ${cartTotal > Math.max(availableCredits, availablePlus) ? 'text-amber-700' : 'text-[#2B6830]'}`}>
+                Tổng: {cartTotal} credits {cartTotal > Math.max(availableCredits, availablePlus) && '(vượt số dư 2 ví, có thể chọn Tiền mặt)'}
               </p>
               {/* Ghi chú cho quầy — yêu cầu điều chỉnh món */}
               <input
@@ -430,12 +467,13 @@ const StudentCredits = () => {
             </div>
             <div className="flex gap-2 shrink-0">
               <button onClick={() => { setCart({}); setConfirmingSend(false); }} className="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-colors">Xóa giỏ</button>
+              {/* Không khóa nút khi vượt số dư ví: học viên vẫn có thể chọn Tiền mặt trong popup */}
               <button
                 onClick={handleSubmit}
-                disabled={submitting || cartTotal > Math.max(availableCredits, availablePlus)}
-                className={`px-5 py-2.5 rounded-xl text-xs font-bold text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${confirmingSend ? 'bg-amber-500 hover:bg-amber-600' : 'bg-[#2B6830] hover:bg-[#1E5225]'}`}
+                disabled={submitting}
+                className="px-5 py-2.5 rounded-xl text-xs font-bold text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-[#2B6830] hover:bg-[#1E5225]"
               >
-                {submitting ? 'Đang gửi...' : confirmingSend ? `Bấm lần nữa để xác nhận (${cartTotal} ⭐)` : 'Gửi yêu cầu đổi'}
+                {submitting ? 'Đang gửi...' : 'Gửi yêu cầu đổi'}
               </button>
             </div>
           </div>
@@ -456,6 +494,10 @@ const StudentCredits = () => {
                   <div className="min-w-0">
                     <p className="text-sm font-bold text-slate-700 leading-snug">{itemsText(r.items)}</p>
                     {r.note && <p className="text-[11px] text-amber-700 mt-0.5">📝 {r.note}</p>}
+                    {/* Đơn đang chờ: hiện thời gian dự kiến có món (theo prepMinutes của món) */}
+                    {r.status === 'pending' && orderPrepMinutes(r) > 0 && (
+                      <p className="text-[11px] font-bold text-amber-600 mt-0.5">⏱ Dự kiến có món sau ~{orderPrepMinutes(r)} phút</p>
+                    )}
                     <p className="text-[11px] text-slate-400 mt-0.5 font-mono">
                       {new Date(r.date).toLocaleString('vi-VN')}
                       {r.status === 'confirmed' && r.confirmedBy && ` · xác nhận bởi ${r.confirmedBy}`}
@@ -463,7 +505,7 @@ const StudentCredits = () => {
                     {/* Lý do bị từ chối — để học viên hiểu vì sao và credits đã được hoàn */}
                     {r.status === 'rejected' && r.rejectReason && (
                       <p className="text-xs font-semibold text-red-600 bg-red-50 border border-red-100 rounded-lg px-2.5 py-1.5 mt-1.5 inline-block">
-                        ❌ Lý do từ chối: {r.rejectReason} <span className="font-normal text-red-400">(credits đã được hoàn lại)</span>
+                        ❌ Lý do từ chối: {r.rejectReason} {r.wallet !== 'cash' && <span className="font-normal text-red-400">(credits đã được hoàn lại)</span>}
                       </p>
                     )}
                   </div>
@@ -472,12 +514,15 @@ const StudentCredits = () => {
                       {r.channel === 'gift' && (
                         <span className="text-[10px] font-bold px-2 py-0.5 rounded border uppercase bg-purple-50 text-purple-700 border-purple-200">🎁 Quà (BOD)</span>
                       )}
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase ${r.wallet === 'plus' ? 'bg-sky-50 text-sky-700 border-sky-200' : 'bg-[#E8F4EC] text-[#2B6830] border-green-200'}`}>
-                        {r.wallet === 'plus' ? '💳 Credits +' : '⭐ Credits'}
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase ${r.wallet === 'plus' ? 'bg-sky-50 text-sky-700 border-sky-200' : r.wallet === 'cash' ? 'bg-amber-50 text-amber-700 border-amber-300' : 'bg-[#E8F4EC] text-[#2B6830] border-green-200'}`}>
+                        {r.wallet === 'plus' ? '💳 Credits +' : r.wallet === 'cash' ? '💵 Tiền mặt' : '⭐ Credits'}
                       </span>
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase ${meta.cls}`}>{meta.label}</span>
                     </div>
-                    <span className="text-sm font-extrabold text-[#2B6830]">−{r.totalCredits} ⭐</span>
+                    {/* Đơn tiền mặt: hiện số tiền phải trả tại quầy thay vì trừ credits */}
+                    {r.wallet === 'cash'
+                      ? <span className="text-sm font-extrabold text-amber-700">{((Number(r.totalCredits) || 0) * 1000).toLocaleString('vi-VN')}đ</span>
+                      : <span className="text-sm font-extrabold text-[#2B6830]">−{r.totalCredits} ⭐</span>}
                   </div>
                 </div>
               );

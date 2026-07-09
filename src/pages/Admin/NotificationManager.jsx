@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { db } from '../../firebase';
+import { db, storage } from '../../firebase';
 import { ref, onValue, remove, push, set, update } from "firebase/database";
+import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useAuth } from '../../context/AuthContext';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
@@ -69,6 +70,28 @@ const stripHtml = (html) => {
 const PAGE_SIZE = 10; // số thông báo mỗi trang
 
 // ============================================================
+// FILE ĐÍNH KÈM PDF: giới hạn 10MB, tên file làm sạch trước khi upload
+// Dùng chung path Storage 'notifications_files/' với cổng Giáo vụ
+// ============================================================
+const MAX_ATTACH_BYTES = 10 * 1024 * 1024; // 10MB
+// Làm sạch tên file: chỉ giữ chữ/số/._- để tránh ký tự lạ trong path Storage
+const safeFileName = (name) => (name || 'file.pdf').replace(/[^a-zA-Z0-9._-]+/g, '_');
+// Kiểm tra file hợp lệ: PDF + dưới 10MB. Trả về chuỗi lỗi hoặc '' nếu OK
+const validatePdf = (file) => {
+  if (!file) return '';
+  const isPdf = /\.pdf$/i.test(file.name) || file.type === 'application/pdf';
+  if (!isPdf) return '❌ Chỉ nhận file PDF.';
+  if (file.size > MAX_ATTACH_BYTES) return `❌ File quá lớn (${(file.size / 1024 / 1024).toFixed(1)}MB). Giới hạn 10MB.`;
+  return '';
+};
+// Upload file lên Storage rồi trả về URL tải
+const uploadAttachment = async (file) => {
+  const fileRef = storageRef(storage, `notifications_files/${Date.now()}_${safeFileName(file.name)}`);
+  await uploadBytes(fileRef, file);
+  return getDownloadURL(fileRef);
+};
+
+// ============================================================
 // MAIN COMPONENT
 // ============================================================
 const NotificationManager = () => {
@@ -87,12 +110,17 @@ const NotificationManager = () => {
   });
   const [submitting, setSubmitting] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
+  // File PDF đính kèm cho form tạo mới (tùy chọn)
+  const [attachment, setAttachment] = useState(null);
+  const [attachmentTitle, setAttachmentTitle] = useState('');
 
   // --- State modal xóa + modal xem chi tiết + modal sửa ---
   const [deleteTarget, setDeleteTarget] = useState(null); // id cần xóa
   const [viewTarget, setViewTarget] = useState(null);     // thông báo đang xem chi tiết
   const [editTarget, setEditTarget] = useState(null);     // bản sao thông báo đang sửa
   const [savingEdit, setSavingEdit] = useState(false);
+  const [editAttachment, setEditAttachment] = useState(null); // file MỚI chọn khi sửa
+  const [editRemoveAtt, setEditRemoveAtt] = useState(false);  // cờ gỡ file đính kèm khi sửa
 
   // --- State bộ lọc / sắp xếp / phân trang ---
   const [filterScope, setFilterScope] = useState('all');   // 'all' | 'system' | classId
@@ -146,6 +174,18 @@ const NotificationManager = () => {
   const safePage = Math.min(page, totalPages);
   const pagedNotifs = filteredNotifs.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
+  // Chọn file PDF cho form tạo mới: báo lỗi ngay nếu không phải PDF hoặc quá 10MB
+  const handlePickAttachment = (file) => {
+    if (!file) return;
+    const err = validatePdf(file);
+    if (err) {
+      setSuccessMsg(err);
+      setTimeout(() => setSuccessMsg(''), 4000);
+      return;
+    }
+    setAttachment(file);
+  };
+
   // --- Xử lý tạo thông báo mới ---
   const handleCreate = async (e) => {
     e.preventDefault();
@@ -155,8 +195,7 @@ const NotificationManager = () => {
 
     setSubmitting(true);
     try {
-      const newRef = push(ref(db, 'notifications'));
-      await set(newRef, {
+      const payload = {
         title: form.title.trim(),
         type: form.type,
         content: form.type === 'content' ? form.content : '', // giữ nguyên HTML từ Quill
@@ -165,9 +204,20 @@ const NotificationManager = () => {
         scope: form.scope,
         author: userData?.name || 'Admin',
         date: new Date().toISOString(),
-      });
+      };
+      // Đính kèm PDF (chỉ áp dụng cho loại nội dung): upload Storage rồi lưu URL + tên file
+      // Modal xem chi tiết đã render sẵn attachmentUrl / attachmentTitle / attachmentName
+      if (form.type === 'content' && attachment) {
+        payload.attachmentUrl = await uploadAttachment(attachment);
+        payload.attachmentName = attachment.name;
+        payload.attachmentTitle = attachmentTitle.trim() || attachment.name;
+      }
+      const newRef = push(ref(db, 'notifications'));
+      await set(newRef, payload);
       // Reset form
       setForm({ title: '', type: 'content', content: '', linkUrl: '', scope: 'all', label: 'báo bài' });
+      setAttachment(null);
+      setAttachmentTitle('');
       setSuccessMsg('Đã đăng thông báo thành công!');
       setTimeout(() => setSuccessMsg(''), 3000);
     } catch (err) {
@@ -193,11 +243,28 @@ const NotificationManager = () => {
       if (editTarget.type === 'content') {
         changes.content = editTarget.content;
         changes.label = editTarget.label || 'báo bài';
+        // --- Xử lý file PDF đính kèm khi sửa ---
+        if (editAttachment) {
+          // Thay file mới: upload Storage rồi trỏ URL mới
+          changes.attachmentUrl = await uploadAttachment(editAttachment);
+          changes.attachmentName = editAttachment.name;
+          changes.attachmentTitle = editTarget.attachmentTitle || editAttachment.name;
+        } else if (editRemoveAtt) {
+          // Gỡ file: set null để xóa key trong Realtime DB
+          changes.attachmentUrl = null;
+          changes.attachmentName = null;
+          changes.attachmentTitle = null;
+        } else if (editTarget.attachmentName) {
+          // Giữ file cũ, chỉ cập nhật tên hiển thị nếu người dùng đổi
+          changes.attachmentTitle = editTarget.attachmentTitle || editTarget.attachmentName;
+        }
       } else {
         changes.linkUrl = editTarget.linkUrl.trim();
       }
       await update(ref(db, `notifications/${editTarget.id}`), changes);
       setEditTarget(null);
+      setEditAttachment(null);
+      setEditRemoveAtt(false);
       setSuccessMsg('Đã cập nhật thông báo!');
       setTimeout(() => setSuccessMsg(''), 3000);
     } catch (e) {
@@ -366,11 +433,53 @@ const NotificationManager = () => {
                     />
                   </div>
                 </div>
+                {/* FILE PDF ĐÍNH KÈM: giữ / thay / gỡ */}
+                <div className="space-y-2">
+                  <label className="stat-label block">File PDF đính kèm</label>
+                  {editAttachment ? (
+                    <div className="flex items-center justify-between gap-2 bg-[#E8F4EC] border border-green-200 rounded-xl px-3 py-2">
+                      <span className="text-xs font-bold text-green-700 truncate">🆕 {editAttachment.name}</span>
+                      <button type="button" onClick={() => setEditAttachment(null)} className="text-xs font-bold text-slate-500 hover:text-red-500 shrink-0">Bỏ chọn</button>
+                    </div>
+                  ) : (editTarget.attachmentName && !editRemoveAtt) ? (
+                    <div className="flex items-center justify-between gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">
+                      <span className="text-xs font-medium text-slate-600 truncate">📎 {editTarget.attachmentName}</span>
+                      <button type="button" onClick={() => setEditRemoveAtt(true)} className="text-xs font-bold text-red-500 hover:text-red-600 shrink-0">Gỡ file</button>
+                    </div>
+                  ) : editRemoveAtt ? (
+                    <div className="flex items-center justify-between gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
+                      <span className="text-xs font-medium text-red-600">File sẽ bị gỡ khi bấm Lưu</span>
+                      <button type="button" onClick={() => setEditRemoveAtt(false)} className="text-xs font-bold text-slate-500 hover:text-[#2B6830] shrink-0">Hoàn tác</button>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-slate-400 italic">Chưa có file đính kèm.</p>
+                  )}
+                  <label className="inline-flex items-center gap-2 text-xs font-bold text-[#2B6830] bg-white border border-[#2B6830] rounded-xl px-3 py-2 cursor-pointer hover:bg-[#E8F4EC] transition-all">
+                    {(editTarget.attachmentName || editAttachment) ? '🔄 Thay file PDF khác...' : '📎 Chọn file PDF...'}
+                    <input type="file" accept=".pdf,application/pdf" className="hidden"
+                      onChange={e => {
+                        const f = e.target.files?.[0];
+                        e.target.value = '';
+                        if (!f) return;
+                        const err = validatePdf(f);
+                        if (err) { setSuccessMsg(err); setTimeout(() => setSuccessMsg(''), 4000); return; }
+                        setEditAttachment(f); setEditRemoveAtt(false);
+                      }} />
+                  </label>
+                  {(editAttachment || (editTarget.attachmentName && !editRemoveAtt)) && (
+                    <input
+                      className="w-full border border-slate-200 p-2.5 rounded-xl text-xs outline-none focus:border-[#2B6830] transition"
+                      placeholder="Tên hiển thị của file (tùy chọn)"
+                      value={editTarget.attachmentTitle || ''}
+                      onChange={e => setEditTarget({ ...editTarget, attachmentTitle: e.target.value })}
+                    />
+                  )}
+                </div>
               </>
             )}
 
             <div className="flex gap-3 justify-end pt-1">
-              <button onClick={() => setEditTarget(null)} className="btn-secondary">Hủy</button>
+              <button onClick={() => { setEditTarget(null); setEditAttachment(null); setEditRemoveAtt(false); }} className="btn-secondary">Hủy</button>
               <button onClick={handleSaveEdit} disabled={savingEdit} className="btn-primary disabled:opacity-50">
                 {savingEdit ? 'Đang lưu...' : 'Lưu thay đổi'}
               </button>
@@ -481,6 +590,33 @@ const NotificationManager = () => {
                   placeholder="Nội dung sẽ được hiển thị cho học viên..."
                   className="h-40 pb-10"
                 />
+              </div>
+
+              {/* ===== FILE PDF ĐÍNH KÈM (tùy chọn, tối đa 10MB) ===== */}
+              <div className="mt-4 space-y-2">
+                <label className="stat-label block">File PDF đính kèm (tùy chọn, tối đa 10MB)</label>
+                {attachment ? (
+                  <div className="flex items-center justify-between gap-2 bg-[#E8F4EC] border border-green-200 rounded-xl px-3 py-2">
+                    <span className="text-xs font-bold text-green-700 truncate">📎 {attachment.name}</span>
+                    {/* Nút gỡ file đã chọn */}
+                    <button type="button" onClick={() => { setAttachment(null); setAttachmentTitle(''); }}
+                      className="text-xs font-bold text-slate-500 hover:text-red-500 shrink-0">Gỡ file</button>
+                  </div>
+                ) : (
+                  <label className="inline-flex items-center gap-2 text-xs font-bold text-[#2B6830] bg-white border border-[#2B6830] rounded-xl px-3 py-2 cursor-pointer hover:bg-[#E8F4EC] transition-all">
+                    📎 Chọn file PDF...
+                    <input type="file" accept=".pdf,application/pdf" className="hidden"
+                      onChange={e => { handlePickAttachment(e.target.files?.[0]); e.target.value = ''; }} />
+                  </label>
+                )}
+                {attachment && (
+                  <input
+                    className="w-full border border-slate-200 p-2.5 rounded-xl text-xs outline-none focus:border-[#2B6830] transition"
+                    placeholder="Tên hiển thị của file (tùy chọn)"
+                    value={attachmentTitle}
+                    onChange={e => setAttachmentTitle(e.target.value)}
+                  />
+                )}
               </div>
             </div>
           ) : (
@@ -608,7 +744,8 @@ const NotificationManager = () => {
                 >
                   <td className="text-slate-500 text-xs font-mono">{new Date(n.date).toLocaleDateString('vi-VN')}</td>
                   <td>
-                    <div className="font-bold text-slate-800">{n.title}</div>
+                    {/* Icon 📎 báo hiệu thông báo có file đính kèm */}
+                    <div className="font-bold text-slate-800">{n.title}{n.attachmentUrl && <span className="ml-1.5" title={`Đính kèm: ${n.attachmentTitle || n.attachmentName || 'file'}`}>📎</span>}</div>
                     <div className="text-xs text-slate-500 mt-1 flex items-center gap-2">
                       {n.type === 'link'
                         ? <span className="text-green-600 bg-[#E8F4EC] px-1.5 py-0.5 rounded border border-green-100 font-bold text-[10px]">LINK</span>
@@ -628,7 +765,7 @@ const NotificationManager = () => {
                       Xem
                     </button>
                     <button
-                      onClick={() => setEditTarget({ ...n })}
+                      onClick={() => { setEditTarget({ ...n }); setEditAttachment(null); setEditRemoveAtt(false); }}
                       className="text-amber-600 hover:bg-amber-50 px-3 py-1.5 rounded-xl transition-colors text-xs font-bold border border-amber-200 mr-2"
                     >
                       Sửa
@@ -663,7 +800,7 @@ const NotificationManager = () => {
                 {renderTargets(n)}
               </div>
               <div onClick={() => setViewTarget(n)}>
-                <h4 className="font-bold text-slate-800 text-sm mb-1">{n.title}</h4>
+                <h4 className="font-bold text-slate-800 text-sm mb-1">{n.title}{n.attachmentUrl && <span className="ml-1.5" title="Có file đính kèm">📎</span>}</h4>
                 <p className="text-xs text-slate-500 line-clamp-2">{n.type === 'link' ? n.linkUrl : stripHtml(n.content)}</p>
               </div>
               <div className="flex justify-between items-center pt-3 border-t border-slate-100">
@@ -676,7 +813,7 @@ const NotificationManager = () => {
                     Xem
                   </button>
                   <button
-                    onClick={() => setEditTarget({ ...n })}
+                    onClick={() => { setEditTarget({ ...n }); setEditAttachment(null); setEditRemoveAtt(false); }}
                     className="bg-amber-50 text-amber-700 px-4 py-2 rounded-xl text-xs font-bold border border-amber-200 active:bg-amber-100"
                   >
                     Sửa

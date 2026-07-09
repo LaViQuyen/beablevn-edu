@@ -99,7 +99,8 @@ const StudentSkins = () => {
   const totalCredits = Math.floor(totalBonus / 2);
 
   const pendingBonusHold = myRedemptions
-    .filter(r => r.status === 'pending' && (r.wallet || 'bonus') !== 'plus')
+    // Đơn 'plus' (Credits +) và 'cash' (tiền mặt) KHÔNG giữ credit từ Bonus
+    .filter(r => r.status === 'pending' && (r.wallet || 'bonus') !== 'plus' && r.wallet !== 'cash')
     .reduce((a, r) => a + (Number(r.totalCredits) || 0), 0);
   const availableCredits = totalCredits - pendingBonusHold;
 
