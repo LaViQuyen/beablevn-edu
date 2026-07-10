@@ -13,6 +13,24 @@
       }
     },
 
+    "coachConfig": {
+      ".read": "auth != null",
+      ".write": "auth != null && auth.token.role === 'admin'"
+    },
+
+    "coachUsage": {
+      ".read": "auth != null && (auth.token.role === 'staff' || auth.token.role === 'admin')",
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid"
+      }
+    },
+
+    "coachHistory": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || auth.token.role === 'staff' || auth.token.role === 'admin')"
+      }
+    },
+
     "scores": {
       ".read": "auth != null",
       "$cid": {

@@ -44,10 +44,27 @@ import StudentProfile from './pages/Student/Profile';
 import StudentFeedback from './pages/Student/Feedback';
 import StudentContact from './pages/Student/Contact';
 import StudentCredits from './pages/Student/Credits'; // ví BAVN Credits của học viên
-import StudentResources from './pages/Student/Resources'; // khu Tài nguyên & Luyện tập (link công cụ Coach)
 import StudentSkins from './pages/Student/Skins'; // Cửa hàng Skin: đổi Credits lấy avatar
 import StudentLeaderboard from './pages/Student/Leaderboard'; // Bảng vinh danh toàn hệ thống
 const HanhTrinhGame = lazy(() => import('./pages/Student/Game/HanhTrinhGame')); // Game Phaser — lazy load (Phaser nặng)
+
+// Module IELTS Coach tích hợp (khu Tài nguyên & Luyện tập), lazy load vì mỗi tool khá nặng.
+// .catch + reload: sau khi deploy, tab cũ có thể xin chunk hash cũ (404) -> tải lại để lấy bản mới.
+const lazyCoach = (importer) =>
+  lazy(() =>
+    importer().catch(() => {
+      window.location.reload();
+      return new Promise(() => {}); // đang reload, treo promise cho Suspense giữ fallback
+    })
+  );
+const CoachHome = lazyCoach(() => import('./pages/Student/Coach/CoachHome'));
+const SpeakingCoach = lazyCoach(() => import('./pages/Student/Coach/SpeakingCoach'));
+const WritingCoach = lazyCoach(() => import('./pages/Student/Coach/WritingCoach'));
+const IntroCoach = lazyCoach(() => import('./pages/Student/Coach/IntroCoach'));
+const CoachHistory = lazyCoach(() => import('./pages/Student/Coach/CoachHistory'));
+const CoachSusp = ({ children }) => (
+  <Suspense fallback={<div className="py-24 text-center text-slate-500">Đang tải công cụ…</div>}>{children}</Suspense>
+);
 
 // Component: Điều hướng dựa trên Role (Khi vào trang chủ /)
 const RedirectBasedOnRole = () => {
@@ -133,7 +150,12 @@ const App = () => {
             <Route path="skins" element={<StudentSkins />} />
             <Route path="games/hanh-trinh" element={<Suspense fallback={<div className="py-24 text-center text-slate-500">Đang tải game…</div>}><HanhTrinhGame /></Suspense>} />
             <Route path="leaderboard" element={<StudentLeaderboard />} />
-            <Route path="resources" element={<StudentResources />} />
+            {/* Khu Tài nguyên & Luyện tập: module IELTS Coach tích hợp */}
+            <Route path="resources" element={<CoachSusp><CoachHome /></CoachSusp>} />
+            <Route path="resources/speaking" element={<CoachSusp><SpeakingCoach /></CoachSusp>} />
+            <Route path="resources/writing" element={<CoachSusp><WritingCoach /></CoachSusp>} />
+            <Route path="resources/intro" element={<CoachSusp><IntroCoach /></CoachSusp>} />
+            <Route path="resources/history" element={<CoachSusp><CoachHistory /></CoachSusp>} />
             <Route path="profile" element={<StudentProfile />} />
             <Route path="feedback" element={<StudentFeedback />} />
             <Route path="contact" element={<StudentContact />} />
