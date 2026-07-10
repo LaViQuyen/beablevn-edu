@@ -54,3 +54,4 @@ repomix-output.xml
 
 # Backup credential files - KHONG day len repo
 *.bak
+functions/.secret.local

@@ -30,7 +30,9 @@ async function saveHistory(uid, tool, record) {
   const ref = db.ref(`coachHistory/${uid}/${tool}`);
   await ref.push({
     ...slimRecord(record),
-    at: admin.database.ServerValue.TIMESTAMP,
+    // Wire-format server timestamp: tương đương ServerValue.TIMESTAMP nhưng
+    // không phụ thuộc static prop (proxy của emulator không forward prop này)
+    at: { ".sv": "timestamp" },
   });
   // Prune: push key tăng dần theo thời gian nên sort key = sort thời gian
   const snap = await ref.orderByKey().get();

@@ -14,7 +14,7 @@
 "use strict";
 
 // ---------------------------------------------------------------------------
-// THANG 7 BẬC NÂNG BAND — phương pháp của Bak
+// THANG 7 BẬC NÂNG BAND, phương pháp của Bak
 //   goal  : mục tiêu bậc (đưa vào prompt giải thích)
 //   focus : chuẩn để Gemini chấm "đạt/chưa đạt"
 //   tech  : giải thích NGẮN dự phòng (khi cần dùng tĩnh)
@@ -71,7 +71,7 @@ function levelsPublic() {
 }
 
 // ---------------------------------------------------------------------------
-// RUBRIC chung — nhúng vào mọi prompt
+// RUBRIC chung, nhúng vào mọi prompt
 // (bat dau va ket thuc bang "\n" giong het triple-quoted string cua Python)
 // ---------------------------------------------------------------------------
 const RUBRIC = `

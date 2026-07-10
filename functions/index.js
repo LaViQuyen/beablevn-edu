@@ -235,3 +235,9 @@ exports.issueToken = onCall({ region: 'asia-southeast1' }, async (req) => {
   const { password: _omit, ...safeUser } = user;
   return { token, user: { id: uid, ...safeUser } };
 });
+
+const coach = require('./coach'); // IELTS COACH: dispatcher tại functions/coach/index.js
+exports.coachSpeaking = coach.coachSpeaking;
+exports.coachWriting = coach.coachWriting;
+exports.coachIntro = coach.coachIntro;
+exports.coachTts = coach.coachTts;
