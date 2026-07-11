@@ -318,9 +318,25 @@ const StaffManager = () => {
                 <span className="block text-amber-600/80 mt-0.5">Hiện nhãn DEMO cho nhân sự, KHÔNG vào file báo cáo đổi thưởng.</span>
               </span>
             </label>
+            {/* PHÂN QUYỀN: gom 4 toggle vào đây cho gọn hàng danh sách. Áp dụng NGAY (đọc trạng thái live). */}
+            {(() => {
+              const live = staffList.find((x) => x.id === editingStaff.id) || editingStaff;
+              const cell = 'py-2 rounded-xl text-xs font-bold border transition-colors';
+              return (
+                <div className="mb-4">
+                  <p className="text-xs font-bold text-slate-500 uppercase mb-2">Phân quyền (áp dụng ngay)</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button onClick={() => toggleFF(live)} className={`${cell} ${live.ffAccess ? 'bg-primary text-white border-primary' : 'bg-primary-light text-primary border-green-200'}`}>Fresh Fit: {live.ffAccess ? 'BẬT' : 'tắt'}</button>
+                    <button onClick={() => toggleFFPlus(live)} className={`${cell} ${live.ffPlusAccess ? 'bg-sky-600 text-white border-sky-600' : 'bg-sky-50 text-sky-600 border-sky-200'}`}>FF+ nạp Credits: {live.ffPlusAccess ? 'BẬT' : 'tắt'}</button>
+                    <button onClick={() => toggleBOD(live)} className={`${cell} ${live.bodAccess ? 'bg-purple-600 text-white border-purple-600' : 'bg-purple-50 text-purple-600 border-purple-200'}`}>BAVN Center: {live.bodAccess ? 'BẬT' : 'tắt'}</button>
+                    <button onClick={() => toggleMod(live)} className={`${cell} ${live.modAccess ? 'bg-rose-600 text-white border-rose-600' : 'bg-rose-50 text-rose-600 border-rose-200'}`}>Thưởng Bonus: {live.modAccess ? 'BẬT' : 'tắt'}</button>
+                  </div>
+                </div>
+              );
+            })()}
             <div className="flex gap-2 justify-end pt-2 border-t border-slate-100">
-              <button onClick={() => setEditingStaff(null)} className="btn-secondary">Hủy</button>
-              <button onClick={() => { update(ref(db, `users/${editingStaff.id}`), { assignedClasses: editingStaff.assignedClasses, isDemo: !!editingStaff.isDemo, subRole: editingStaff.subRole || 'teacher' }); setEditingStaff(null); showSuccess('Đã cập nhật nhân sự.'); }} className="btn-primary">Lưu</button>
+              <button onClick={() => setEditingStaff(null)} className="btn-secondary">Xong</button>
+              <button onClick={() => { update(ref(db, `users/${editingStaff.id}`), { assignedClasses: editingStaff.assignedClasses, isDemo: !!editingStaff.isDemo, subRole: editingStaff.subRole || 'teacher' }); setEditingStaff(null); showSuccess('Đã cập nhật nhân sự.'); }} className="btn-primary">Lưu lớp & vai trò</button>
             </div>
           </div>
         </div>
@@ -389,36 +405,9 @@ const StaffManager = () => {
                   </td>
                   <td className="text-right">
                     <div className="flex justify-end gap-2">
-                      <button
-                        onClick={() => toggleFF(s)}
-                        title={s.ffAccess ? 'Gỡ quyền Fresh Fit' : 'Gán quyền Fresh Fit (duyệt đổi credits)'}
-                        className={`px-2 py-1 rounded-xl text-[10px] font-bold border transition-colors ${s.ffAccess ? 'text-white bg-primary border-primary hover:bg-primary-hover' : 'text-primary border-green-300 hover:bg-primary-light'}`}
-                      >
-                        FF {s.ffAccess ? 'ON' : 'OFF'}
-                      </button>
-                      <button
-                        onClick={() => toggleFFPlus(s)}
-                        title={s.ffPlusAccess ? 'Gỡ quyền FF+ (nạp Credits +)' : 'Gán quyền FF+, nạp Credits + cho học viên & nhân sự'}
-                        className={`px-2 py-1 rounded-xl text-[10px] font-bold border transition-colors ${s.ffPlusAccess ? 'text-white bg-sky-600 border-sky-600 hover:bg-sky-700' : 'text-sky-600 border-sky-300 hover:bg-sky-50'}`}
-                      >
-                        FF+ {s.ffPlusAccess ? 'ON' : 'OFF'}
-                      </button>
-                      <button
-                        onClick={() => toggleBOD(s)}
-                        title={s.bodAccess ? 'Gỡ quyền BOD' : 'Gán quyền BOD, grant Credits, quản lý hệ quà, duyệt đơn quà'}
-                        className={`px-2 py-1 rounded-xl text-[10px] font-bold border transition-colors ${s.bodAccess ? 'text-white bg-purple-600 border-purple-600 hover:bg-purple-700' : 'text-purple-600 border-purple-300 hover:bg-purple-50'}`}
-                      >
-                        BOD {s.bodAccess ? 'ON' : 'OFF'}
-                      </button>
-                      <button
-                        onClick={() => toggleMod(s)}
-                        title={s.modAccess ? 'Gỡ quyền MOD' : 'Gán quyền MOD, thưởng Bonus cho nhân sự khác (không tự thưởng)'}
-                        className={`px-2 py-1 rounded-xl text-[10px] font-bold border transition-colors ${s.modAccess ? 'text-white bg-rose-600 border-rose-600 hover:bg-rose-700' : 'text-rose-600 border-rose-300 hover:bg-rose-50'}`}
-                      >
-                        MOD {s.modAccess ? 'ON' : 'OFF'}
-                      </button>
-                      <button onClick={() => setChangePassTarget(s)} className="text-amber-600 border border-amber-300 px-2 py-1 rounded-xl text-[10px] font-bold hover:bg-amber-50 transition-colors">Pass</button>
-                      <button onClick={() => setDeleteTarget(s.id)} className="text-red-500 border border-red-200 px-2 py-1 rounded-xl text-[10px] font-bold hover:bg-red-50 transition-colors">Xóa</button>
+                      {/* Quyền FF/FF+/BOD/MOD chỉnh trong modal Sửa; hàng chỉ giữ Pass + Xóa cho gọn */}
+                      <button onClick={() => setChangePassTarget(s)} className="text-slate-600 border border-slate-300 px-2 py-1 rounded-xl text-[10px] font-bold hover:bg-slate-100 hover:border-slate-400 transition-colors">Pass</button>
+                      <button onClick={() => setDeleteTarget(s.id)} className="text-red-500 border border-red-200 px-2 py-1 rounded-xl text-[10px] font-bold hover:bg-red-500 hover:text-white transition-colors">Xóa</button>
                     </div>
                   </td>
                 </tr>
@@ -462,20 +451,9 @@ const StaffManager = () => {
                   <button onClick={() => setEditingStaff(s)} className="text-primary border border-primary text-[10px] font-bold px-2 py-0.5 rounded-xl hover:bg-primary hover:text-white transition-all whitespace-nowrap">Sửa</button>
                 </div>
               </div>
+              {/* Quyền FF/FF+/BOD/MOD chỉnh trong modal Sửa; hàng chỉ giữ Pass + Xóa cho gọn */}
               <div className="flex gap-2 border-t border-slate-100 pt-3 flex-wrap">
-                <button onClick={() => toggleFF(s)} className={`flex-1 text-center py-2 rounded-xl text-xs font-bold border transition-colors ${s.ffAccess ? 'text-white bg-primary border-primary' : 'text-primary bg-primary-light border-green-200 active:bg-green-100'}`}>
-                  FF {s.ffAccess ? 'ON' : 'OFF'}
-                </button>
-                <button onClick={() => toggleFFPlus(s)} className={`flex-1 text-center py-2 rounded-xl text-xs font-bold border transition-colors ${s.ffPlusAccess ? 'text-white bg-sky-600 border-sky-600' : 'text-sky-600 bg-sky-50 border-sky-200 active:bg-sky-100'}`}>
-                  FF+ {s.ffPlusAccess ? 'ON' : 'OFF'}
-                </button>
-                <button onClick={() => toggleBOD(s)} className={`flex-1 text-center py-2 rounded-xl text-xs font-bold border transition-colors ${s.bodAccess ? 'text-white bg-purple-600 border-purple-600' : 'text-purple-600 bg-purple-50 border-purple-200 active:bg-purple-100'}`}>
-                  BOD {s.bodAccess ? 'ON' : 'OFF'}
-                </button>
-                <button onClick={() => toggleMod(s)} className={`flex-1 text-center py-2 rounded-xl text-xs font-bold border transition-colors ${s.modAccess ? 'text-white bg-rose-600 border-rose-600' : 'text-rose-600 bg-rose-50 border-rose-200 active:bg-rose-100'}`}>
-                  MOD {s.modAccess ? 'ON' : 'OFF'}
-                </button>
-                <button onClick={() => setChangePassTarget(s)} className="flex-1 text-center py-2 text-amber-700 bg-amber-50 rounded-xl text-xs font-bold border border-amber-200 active:bg-amber-100">Pass</button>
+                <button onClick={() => setChangePassTarget(s)} className="flex-1 text-center py-2 text-slate-600 bg-slate-50 rounded-xl text-xs font-bold border border-slate-200 active:bg-slate-100">Pass</button>
                 <button onClick={() => setDeleteTarget(s.id)} className="flex-1 text-center py-2 text-red-600 bg-red-50 rounded-xl text-xs font-bold border border-red-200 active:bg-red-100">Xóa</button>
               </div>
             </div>
