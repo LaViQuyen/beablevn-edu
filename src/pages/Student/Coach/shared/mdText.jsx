@@ -14,7 +14,7 @@ export function MdBold({ text }) {
 }
 
 // mdRich(): tô màu cụm nhấn **...** hoặc *...*, dọn dấu * lẻ còn sót
-export function MdRich({ text, className = 'text-[#2B6830] font-semibold' }) {
+export function MdRich({ text, className = 'text-primary font-semibold' }) {
   const s = String(text == null ? '' : text);
   const re = /\*\*(.+?)\*\*|\*(.+?)\*/g; // nhánh ** đứng trước để ưu tiên như bản gốc
   const nodes = [];

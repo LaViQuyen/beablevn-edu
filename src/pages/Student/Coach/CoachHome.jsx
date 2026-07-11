@@ -77,24 +77,24 @@ const ToolCard = ({ tool, left, limit }) => {
     <Link
       to={tool.path}
       className={`group flex flex-col bg-white rounded-2xl border p-6 transition-all hover:-translate-y-0.5 hover:shadow-lg ${
-        tool.featured ? 'border-[#2B6830]/40 shadow-md ring-1 ring-[#2B6830]/10' : 'border-slate-200 shadow-sm'
+        tool.featured ? 'border-primary/40 shadow-md ring-1 ring-primary/10' : 'border-slate-200 shadow-sm'
       }`}
     >
       <div className="flex items-center justify-between">
-        <div className="w-12 h-12 rounded-xl bg-[#E8F4EC] text-[#2B6830] flex items-center justify-center group-hover:bg-[#2B6830] group-hover:text-white transition-colors">
+        <div className="w-12 h-12 rounded-xl bg-primary-light text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
           <Icon className="w-6 h-6" />
         </div>
         {tool.badge && (
-          <span className="text-[10px] font-bold bg-[#E8F4EC] text-[#2B6830] px-2 py-0.5 rounded-full border border-green-100 uppercase tracking-wide">
+          <span className="text-[10px] font-bold bg-primary-light text-primary px-2 py-0.5 rounded-full border border-green-100 uppercase tracking-wide">
             {tool.badge}
           </span>
         )}
       </div>
-      <p className="mt-4 text-[11px] font-bold text-[#3D8B47] uppercase tracking-wide">{tool.tag}</p>
+      <p className="mt-4 text-[11px] font-bold text-primary-medium uppercase tracking-wide">{tool.tag}</p>
       <h3 className="mt-1 section-title">{tool.title}</h3>
       <p className="mt-2 text-sm text-slate-500 leading-relaxed flex-1">{tool.desc}</p>
       <div className="mt-4 flex items-center justify-between">
-        <span className="inline-flex items-center gap-2 bg-[#2B6830] text-white rounded-xl px-4 py-2.5 text-sm font-bold shadow-sm group-hover:bg-[#1E5225] transition-colors">
+        <span className="inline-flex items-center gap-2 bg-primary text-white rounded-xl px-4 py-2.5 text-sm font-bold shadow-sm group-hover:bg-primary-hover transition-colors">
           Vào luyện
           <IconArrow className="w-4 h-4 transition-transform group-hover:translate-x-1" />
         </span>
@@ -149,15 +149,15 @@ const CoachHome = () => {
         </div>
         <Link
           to="/student/resources/history"
-          className="inline-flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-[#2B6830] shadow-sm hover:bg-[#F2F8F4] transition-colors"
+          className="inline-flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-primary shadow-sm hover:bg-primary-subtle transition-colors"
         >
           <IconClock className="w-4 h-4" />
           Lịch sử luyện tập
         </Link>
       </div>
 
-      <div className="bg-[#F2F8F4] border-l-4 border-[#2B6830] rounded-xl px-4 py-3 text-sm text-slate-600 leading-relaxed">
-        <b className="text-[#2B6830]">Lưu ý:</b> Mỗi công cụ có <b>giới hạn lượt mỗi ngày</b> (một lần
+      <div className="bg-primary-subtle border-l-4 border-primary rounded-xl px-4 py-3 text-sm text-slate-600 leading-relaxed">
+        <b className="text-primary">Lưu ý:</b> Mỗi công cụ có <b>giới hạn lượt mỗi ngày</b> (một lần
         chấm hoặc sinh đề tính một lượt). Kết quả các phiên luyện được lưu tự động vào{' '}
         <b>Lịch sử luyện tập</b>.
       </div>

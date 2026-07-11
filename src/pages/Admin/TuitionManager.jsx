@@ -19,7 +19,7 @@ const parseExcelDate = (val) => {
 };
 
 const fmtDate = (d) => {
-  if (!d) return '—';
+  if (!d) return '–';
   try { return new Date(d + 'T00:00:00').toLocaleDateString('vi-VN'); } catch { return d; }
 };
 
@@ -70,7 +70,7 @@ const exportToPDF = (snapshotRecords, snapshotTitle) => {
 <html lang="vi">
 <head>
   <meta charset="UTF-8"/>
-  <title>${snapshotTitle || 'Thống kê Buổi học'} — ${dateStr}</title>
+  <title>${snapshotTitle || 'Thống kê Buổi học'}, ${dateStr}</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
     body{font-family:Arial,'Helvetica Neue',sans-serif;font-size:12px;color:#1a1a1a;padding:28px 32px}
@@ -87,7 +87,7 @@ const exportToPDF = (snapshotRecords, snapshotTitle) => {
 </head>
 <body>
   <div class="header">
-    <h2>BE ABLE VN — Thống kê Buổi học trả trước còn lại</h2>
+    <h2>BE ABLE VN, Thống kê Buổi học trả trước còn lại</h2>
     <p class="meta">Thời điểm chốt: <strong>${dateStr}</strong> &nbsp;·&nbsp; Tổng: <strong>${snapshotRecords?.length || 0} học viên</strong></p>
   </div>
   <table>
@@ -105,7 +105,7 @@ const exportToPDF = (snapshotRecords, snapshotTitle) => {
     </thead>
     <tbody>${rows}</tbody>
   </table>
-  <p class="footer">Xuất từ Hệ thống 2SOL / Be Able VN &nbsp;—&nbsp; ${now.toLocaleDateString('vi-VN')}</p>
+  <p class="footer">Xuất từ Hệ thống 2SOL / Be Able VN &nbsp;·&nbsp; ${now.toLocaleDateString('vi-VN')}</p>
   <script>window.onload = () => { window.print(); };<\/script>
 </body>
 </html>`;
@@ -144,7 +144,7 @@ const EditModal = ({ record, onSave, onClose }) => {
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[70] p-4">
       <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-lg border border-slate-100 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-bold text-[#2B6830] text-base">Chỉnh sửa học viên</h3>
+          <h3 className="font-bold text-primary text-base">Chỉnh sửa học viên</h3>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
           </button>
@@ -153,40 +153,40 @@ const EditModal = ({ record, onSave, onClose }) => {
         <div className="space-y-3">
           <div className="space-y-1">
             <label className="stat-label">Họ và tên</label>
-            <input className="w-full border border-slate-200 p-2.5 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10" value={form.name} onChange={f('name')} />
+            <input className="w-full border border-slate-200 p-2.5 rounded-xl text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10" value={form.name} onChange={f('name')} />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
               <label className="stat-label">Mã HV</label>
-              <input className="w-full border border-slate-200 p-2.5 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 font-mono" value={form.studentCode} onChange={f('studentCode')} />
+              <input className="w-full border border-slate-200 p-2.5 rounded-xl text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 font-mono" value={form.studentCode} onChange={f('studentCode')} />
             </div>
             <div className="space-y-1">
               <label className="stat-label">Lớp</label>
-              <input className="w-full border border-slate-200 p-2.5 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10" value={form.className} onChange={f('className')} />
+              <input className="w-full border border-slate-200 p-2.5 rounded-xl text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10" value={form.className} onChange={f('className')} />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
               <label className="stat-label">Buổi còn lại</label>
-              <input type="number" min="0" className="w-full border border-slate-200 p-2.5 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10" value={form.remainingSessions} onChange={f('remainingSessions')} />
+              <input type="number" min="0" className="w-full border border-slate-200 p-2.5 rounded-xl text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10" value={form.remainingSessions} onChange={f('remainingSessions')} />
             </div>
             <div className="space-y-1">
               <label className="stat-label">Buổi cộng thêm</label>
-              <input type="number" min="0" className="w-full border border-slate-200 p-2.5 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10" value={form.addedSessions} onChange={f('addedSessions')} />
+              <input type="number" min="0" className="w-full border border-slate-200 p-2.5 rounded-xl text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10" value={form.addedSessions} onChange={f('addedSessions')} />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
               <label className="stat-label">Hạn thanh toán</label>
-              <input type="date" className="w-full border border-slate-200 p-2.5 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10" value={form.paymentDeadline} onChange={handleDeadlineChange} />
+              <input type="date" className="w-full border border-slate-200 p-2.5 rounded-xl text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10" value={form.paymentDeadline} onChange={handleDeadlineChange} />
               <p className="text-[10px] text-slate-400">Để trống → tự động "Đã thanh toán"</p>
             </div>
             <div className="space-y-1">
               <label className="stat-label">Tình trạng</label>
-              <select className="w-full border border-slate-200 p-2.5 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 bg-white" value={form.status} onChange={f('status')}>
+              <select className="w-full border border-slate-200 p-2.5 rounded-xl text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 bg-white" value={form.status} onChange={f('status')}>
                 {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
@@ -204,14 +204,14 @@ const EditModal = ({ record, onSave, onClose }) => {
 
 // ─── ConfirmModal ─────────────────────────────────────────────────────────────
 
-const ConfirmModal = ({ title, message, onConfirm, onCancel }) => (
+const ConfirmModal = ({ title, message, onConfirm, onCancel, confirmLabel = 'Xóa' }) => (
   <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[80] p-4">
     <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full space-y-4 border border-slate-100">
       <p className="text-base font-bold text-slate-800">{title}</p>
       {message && <p className="text-sm text-slate-500">{message}</p>}
       <div className="flex gap-3 justify-end">
         <button onClick={onCancel} className="btn-secondary">Hủy</button>
-        <button onClick={onConfirm} className="btn-danger">Xóa</button>
+        <button onClick={onConfirm} className="btn-danger">{confirmLabel}</button>
       </div>
     </div>
   </div>
@@ -229,7 +229,8 @@ const TuitionManager = () => {
   const [filterSessions, setFilterSessions] = useState('');
   const [editTarget, setEditTarget]       = useState(null);
   const [deleteTarget, setDeleteTarget]   = useState(null);
-  const [successMsg, setSuccessMsg]       = useState('');
+  const [toast, setToast]                 = useState({ msg: '', type: 'success' });
+  const [pendingImport, setPendingImport] = useState(null); // {updates, count} chờ admin xác nhận thay thế toàn bộ
   const [sortKey, setSortKey]             = useState('');
   const [sortDir, setSortDir]             = useState('asc');
   const fileInputRef = useRef(null);
@@ -256,24 +257,24 @@ const TuitionManager = () => {
     return () => { unsubRec(); unsubSnap(); };
   }, []);
 
-  const showSuccess = (msg) => { setSuccessMsg(msg); setTimeout(() => setSuccessMsg(''), 3500); };
+  // Toast phân loại: success (xanh) / error (đỏ) / warning (vàng). Màu lấy TỪ type, không suy từ emoji.
+  const showToast = (msg, type = 'success') => {
+    setToast({ msg, type });
+    setTimeout(() => setToast((t) => ({ ...t, msg: '' })), 3500);
+  };
 
-  // ── Import Excel: XÓA TOÀN BỘ rồi ghi mới ───────────────────────────────
+  // ── Import Excel: PARSE trước, chờ admin XÁC NHẬN rồi mới thay thế toàn bộ ──
   const handleImport = (e) => {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = async (evt) => {
+    reader.onload = (evt) => {
       try {
         const wb   = XLSX.read(evt.target.result, { type: 'binary' });
         const ws   = wb.Sheets[wb.SheetNames[0]];
         const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
-        if (rows.length < 2) return showSuccess('❌ File không có dữ liệu (cần ít nhất 1 hàng dữ liệu sau header).');
+        if (rows.length < 2) return showToast('File không có dữ liệu (cần ít nhất 1 hàng dữ liệu sau header).', 'error');
 
-        // 1. Xóa toàn bộ dữ liệu cũ
-        await set(ref(db, 'tuitionRecords'), null);
-
-        // 2. Ghi dữ liệu mới
         // Cột: [0] Mã HV  [1] Họ và tên  [2] Lớp  [3] Buổi còn lại  [4] Buổi cộng thêm  [5] Hạn TT  [6] Tình trạng
         const updates = {};
         let count = 0;
@@ -297,19 +298,35 @@ const TuitionManager = () => {
           };
           count++;
         }
-        if (count > 0) await update(ref(db), updates);
-        showSuccess(`✅ Import thành công ${count} học viên (đã thay thế toàn bộ danh sách cũ).`);
+        if (count === 0) return showToast('Không đọc được dòng dữ liệu hợp lệ nào từ file.', 'error');
+        // KHÔNG ghi ngay: chờ xác nhận (chống một cú bấm nhầm xoá sạch dữ liệu tiền bạc).
+        setPendingImport({ updates, count });
       } catch (err) {
-        showSuccess('❌ Lỗi đọc file: ' + err.message);
+        showToast('Lỗi đọc file: ' + err.message, 'error');
       }
     };
     reader.readAsBinaryString(file);
     e.target.value = '';
   };
 
+  // Thực thi thay thế toàn bộ danh sách SAU khi admin xác nhận trong ConfirmModal
+  const confirmImport = async () => {
+    if (!pendingImport) return;
+    const { updates, count } = pendingImport;
+    try {
+      await set(ref(db, 'tuitionRecords'), null);       // 1. xoá toàn bộ dữ liệu cũ
+      if (count > 0) await update(ref(db), updates);    // 2. ghi dữ liệu mới
+      showToast(`Import thành công ${count} học viên (đã thay thế toàn bộ danh sách cũ).`, 'success');
+    } catch (err) {
+      showToast('Lỗi import: ' + err.message, 'error');
+    } finally {
+      setPendingImport(null);
+    }
+  };
+
   // ── Chốt: lưu snapshot + xuất PDF ngay ──────────────────────────────────
   const handleChot = async () => {
-    if (records.length === 0) return showSuccess('⚠️ Không có dữ liệu để chốt.');
+    if (records.length === 0) return showToast('Không có dữ liệu để chốt.', 'warning');
     try {
       const snapshotRef = push(ref(db, 'tuitionSnapshots'));
       await set(snapshotRef, {
@@ -318,9 +335,9 @@ const TuitionManager = () => {
         records:   records.map((r) => ({ ...r })),
       });
       exportToPDF(records, 'Thống kê Buổi học trả trước còn lại');
-      showSuccess('✅ Đã chốt và xuất PDF!');
+      showToast('Đã chốt và xuất PDF.', 'success');
     } catch (err) {
-      showSuccess('❌ Lỗi chốt: ' + err.message);
+      showToast('Lỗi chốt: ' + err.message, 'error');
     }
   };
 
@@ -346,20 +363,20 @@ const TuitionManager = () => {
     try {
       await update(ref(db, `tuitionRecords/${editTarget.id}`), updates);
       setEditTarget(null);
-      showSuccess('✅ Đã cập nhật thông tin học viên.');
+      showToast('Đã cập nhật thông tin học viên.', 'success');
     } catch (err) {
-      showSuccess('❌ Lỗi: ' + err.message);
+      showToast('Lỗi: ' + err.message, 'error');
     }
   };
 
   // ── Xóa record ───────────────────────────────────────────────────────────
   const confirmDelete = async () => {
     try {
-      await remove(ref(db, `tuitionRecords/${deleteTarget}`));
+      await remove(ref(db, `tuitionRecords/${deleteTarget}`));  // xoá 1 học viên
       setDeleteTarget(null);
-      showSuccess('✅ Đã xóa học viên khỏi danh sách.');
+      showToast('Đã xóa học viên khỏi danh sách.', 'success');
     } catch (err) {
-      showSuccess('❌ Lỗi: ' + err.message);
+      showToast('Lỗi: ' + err.message, 'error');
     }
   };
 
@@ -429,16 +446,27 @@ const TuitionManager = () => {
   return (
     <div className="space-y-6 pb-20">
 
-      {/* Flash success */}
-      {successMsg && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[90] bg-emerald-600 text-white px-5 py-3 rounded-xl shadow-lg text-sm font-medium flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 shrink-0"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
-          {successMsg}
+      {/* Flash toast: màu theo type (đỏ = lỗi, vàng = cảnh báo, xanh = thành công) */}
+      {toast.msg && (
+        <div className={`fixed top-4 left-1/2 -translate-x-1/2 z-[90] text-white px-5 py-3 rounded-xl shadow-lg text-sm font-medium flex items-center gap-2 animate-fade-in-up ${toast.type === 'error' ? 'bg-red-500' : toast.type === 'warning' ? 'bg-amber-500' : 'bg-emerald-600'}`}>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 shrink-0">
+            <path strokeLinecap="round" strokeLinejoin="round" d={toast.type === 'success' ? 'M4.5 12.75l6 6 9-13.5' : 'M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z'} />
+          </svg>
+          {toast.msg}
         </div>
       )}
 
       {editTarget && <EditModal record={editTarget} onSave={handleSaveEdit} onClose={() => setEditTarget(null)} />}
       {deleteTarget && <ConfirmModal title="Xóa học viên này khỏi danh sách?" message="Hành động không thể hoàn tác." onConfirm={confirmDelete} onCancel={() => setDeleteTarget(null)} />}
+      {pendingImport && (
+        <ConfirmModal
+          title="Thay thế toàn bộ danh sách học phí?"
+          message={`Thao tác này sẽ XOÁ ${records.length} học viên hiện tại và ghi ${pendingImport.count} dòng từ file mới. Không thể hoàn tác.`}
+          confirmLabel="Thay thế"
+          onConfirm={confirmImport}
+          onCancel={() => setPendingImport(null)}
+        />
+      )}
 
       {/* Page header */}
       <div>
@@ -457,7 +485,7 @@ const TuitionManager = () => {
             onClick={() => setActiveSubTab(tab.key)}
             className={`pb-3 px-4 text-sm font-bold transition-all whitespace-nowrap ${
               activeSubTab === tab.key
-                ? 'text-[#2B6830] border-b-2 border-[#2B6830]'
+                ? 'text-primary border-b-2 border-primary'
                 : 'text-slate-400 hover:text-slate-600'
             }`}
           >
@@ -516,7 +544,7 @@ const TuitionManager = () => {
             </button>
             <button
               onClick={handleChot}
-              className="btn-danger"
+              className="btn-primary"
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -539,7 +567,7 @@ const TuitionManager = () => {
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-xs text-blue-700 leading-relaxed">
             <span className="font-bold">Định dạng Excel (hàng đầu = tiêu đề, bỏ qua):</span>
             <span className="mx-1">A=Mã HV · B=Họ và tên · C=Lớp · D=Buổi còn lại · E=Buổi cộng thêm · F=Hạn thanh toán (DD/MM/YYYY) · G=Tình trạng</span>
-            <span className="font-bold text-red-600">— Import sẽ THAY THẾ toàn bộ danh sách hiện tại.</span>
+            <span className="font-bold text-red-600">Import sẽ THAY THẾ toàn bộ danh sách hiện tại.</span>
           </div>
 
           {/* Bảng */}
@@ -586,11 +614,11 @@ const TuitionManager = () => {
                       key={r.id}
                       className={`hover:bg-slate-50 transition-colors ${r.status === 'Chờ duyệt gia hạn' ? 'bg-purple-50/50' : ''}`}
                     >
-                      <td className="font-bold text-[#2B6830] font-mono text-xs">{r.studentCode || '—'}</td>
-                      <td className="font-medium text-slate-800">{r.name || '—'}</td>
-                      <td className="text-slate-600 text-xs">{r.className || '—'}</td>
+                      <td className="font-bold text-primary font-mono text-xs">{r.studentCode || '–'}</td>
+                      <td className="font-medium text-slate-800">{r.name || '–'}</td>
+                      <td className="text-slate-600 text-xs">{r.className || '–'}</td>
                       <td className="text-center">
-                        <span className="font-bold text-slate-700">{r.remainingSessions ?? '—'}</span>
+                        <span className="font-bold text-slate-700">{r.remainingSessions ?? '–'}</span>
                       </td>
                       <td className="text-center">
                         <span className="font-bold text-blue-600">{r.addedSessions ?? 0}</span>
@@ -605,7 +633,7 @@ const TuitionManager = () => {
                         <div className="flex gap-2 justify-end">
                           <button
                             onClick={() => setEditTarget(r)}
-                            className="text-[#2B6830] border border-[#2B6830] px-2 py-1 rounded text-xs font-bold hover:bg-[#2B6830] hover:text-white transition-all"
+                            className="text-primary border border-primary px-2 py-1 rounded text-xs font-bold hover:bg-primary hover:text-white transition-all"
                           >
                             Sửa
                           </button>
@@ -632,7 +660,7 @@ const TuitionManager = () => {
           {/* Filter tháng/năm */}
           <div className="flex items-center gap-3 flex-wrap">
             <select
-              className="p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 bg-white min-w-[180px]"
+              className="p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 bg-white min-w-[180px]"
               value={filterMonth}
               onChange={(e) => setFilterMonth(e.target.value)}
             >
@@ -672,7 +700,7 @@ const TuitionManager = () => {
                         })}
                       </p>
                       <p className="text-xs text-slate-500 mt-1">
-                        <span className="font-bold text-[#2B6830]">{snap.count || snap.records?.length || 0}</span> học viên
+                        <span className="font-bold text-primary">{snap.count || snap.records?.length || 0}</span> học viên
                       </p>
                     </div>
                     <button

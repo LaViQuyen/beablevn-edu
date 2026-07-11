@@ -52,14 +52,14 @@ function buildQueue(test, mode) {
 
 // Đoạn nhấn xanh/đỏ trong khối hướng dẫn (port .hl / .hlr)
 const Hl = ({ children }) => (
-  <span className="bg-[#E8F4EC] text-[#1E5225] font-bold px-1 rounded">{children}</span>
+  <span className="bg-primary-light text-primary-hover font-bold px-1 rounded">{children}</span>
 );
 const Hlr = ({ children }) => (
   <span className="bg-red-50 text-red-700 font-bold px-1 rounded">{children}</span>
 );
 
 const GuideLine = ({ children }) => (
-  <p className="relative pl-4 my-2 leading-relaxed before:content-['–'] before:absolute before:left-0 before:text-[#3D8B47] before:font-bold">
+  <p className="relative pl-4 my-2 leading-relaxed before:content-['–'] before:absolute before:left-0 before:text-primary-medium before:font-bold">
     {children}
   </p>
 );
@@ -191,7 +191,7 @@ const SpeakingCoach = () => {
         {screen !== 'exam' && (
           <Link
             to="/student/resources"
-            className="inline-flex items-center gap-1.5 bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-[#2B6830] shadow-sm hover:bg-[#F2F8F4] transition-colors"
+            className="inline-flex items-center gap-1.5 bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-primary shadow-sm hover:bg-primary-subtle transition-colors"
           >
             ← Tài nguyên &amp; Luyện tập
           </Link>
@@ -209,8 +209,8 @@ const SpeakingCoach = () => {
                 onClick={() => setMode(t.id)}
                 className={`rounded-xl px-2 py-3 text-center font-bold text-sm border-[1.5px] transition-all ${
                   mode === t.id
-                    ? 'bg-[#2B6830] text-white border-[#2B6830]'
-                    : 'bg-white text-[#1E5225] border-[#C9E2CF] hover:bg-[#F2F8F4]'
+                    ? 'bg-primary text-white border-primary'
+                    : 'bg-white text-primary-hover border-[#C9E2CF] hover:bg-primary-subtle'
                 }`}
               >
                 {t.label}
@@ -271,37 +271,37 @@ const SpeakingCoach = () => {
 
           {/* Khối hướng dẫn, port #modeHelp */}
           <div className="card card-body text-[13px] text-slate-500">
-            <div className="font-bold text-[#1E5225] text-xs uppercase tracking-wide mb-2.5">Cách hoạt động</div>
+            <div className="font-bold text-primary-hover text-xs uppercase tracking-wide mb-2.5">Cách hoạt động</div>
             <GuideLine>
-              Giám khảo sẽ <b className="text-[#1E5225]">đọc câu hỏi thành tiếng</b>, nhớ bật loa hoặc tai nghe.{' '}
-              <b className="text-[#1E5225]">Nên dùng Microsoft Edge</b> để giọng đọc tự nhiên nhất.
+              Giám khảo sẽ <b className="text-primary-hover">đọc câu hỏi thành tiếng</b>, nhớ bật loa hoặc tai nghe.{' '}
+              <b className="text-primary-hover">Nên dùng Microsoft Edge</b> để giọng đọc tự nhiên nhất.
             </GuideLine>
             <GuideLine>
-              Mỗi câu có thời gian chuẩn bị rồi <b className="text-[#1E5225]">tự động thu âm</b>: Part 1 – 15 giây
+              Mỗi câu có thời gian chuẩn bị rồi <b className="text-primary-hover">tự động thu âm</b>: Part 1 – 15 giây
               / 40 giây · Part 2 – 1 phút / 2 phút · Part 3 – 15 giây / 60 giây.
             </GuideLine>
             {mode === 'practice' && (
               <GuideLine>
-                Chế độ <b className="text-[#1E5225]">Luyện tập</b>: sau mỗi câu hiện lỗi ngữ pháp, từ vựng, phát âm
-                kèm <b className="text-[#1E5225]">gợi ý theo phương pháp Be Able</b>, em được{' '}
-                <b className="text-[#1E5225]">nói lại 1 lần</b> để sửa.
+                Chế độ <b className="text-primary-hover">Luyện tập</b>: sau mỗi câu hiện lỗi ngữ pháp, từ vựng, phát âm
+                kèm <b className="text-primary-hover">gợi ý theo phương pháp Be Able</b>, em được{' '}
+                <b className="text-primary-hover">nói lại 1 lần</b> để sửa.
               </GuideLine>
             )}
             {mode === 'drill' && (
               <GuideLine>
-                Chế độ <b className="text-[#1E5225]">Luyện Part 1</b>: hệ thống ra một bộ{' '}
-                <b className="text-[#1E5225]">6–8 câu Part 1</b>. Mỗi câu em có{' '}
-                <b className="text-[#1E5225]">3 giây chuẩn bị</b> rồi <b className="text-[#1E5225]">15 giây trả lời</b>;
-                đang nói mà <b className="text-[#1E5225]">ngừng quá 3 giây</b> sẽ tự kết thúc. Sau đó giám khảo{' '}
-                <b className="text-[#1E5225]">chỉ lỗi ngữ pháp và phát âm</b>, đọc mẫu câu đúng để em nghe theo; em{' '}
-                <b className="text-[#1E5225]">nói lại đến khi không còn lỗi</b> mới sang câu tiếp (tối đa 4 lần/câu).
+                Chế độ <b className="text-primary-hover">Luyện Part 1</b>: hệ thống ra một bộ{' '}
+                <b className="text-primary-hover">6–8 câu Part 1</b>. Mỗi câu em có{' '}
+                <b className="text-primary-hover">3 giây chuẩn bị</b> rồi <b className="text-primary-hover">15 giây trả lời</b>;
+                đang nói mà <b className="text-primary-hover">ngừng quá 3 giây</b> sẽ tự kết thúc. Sau đó giám khảo{' '}
+                <b className="text-primary-hover">chỉ lỗi ngữ pháp và phát âm</b>, đọc mẫu câu đúng để em nghe theo; em{' '}
+                <b className="text-primary-hover">nói lại đến khi không còn lỗi</b> mới sang câu tiếp (tối đa 4 lần/câu).
               </GuideLine>
             )}
             {mode === 'exam' && (
               <GuideLine>
-                Chế độ <b className="text-[#1E5225]">Thi thật</b>: trả lời liên tục cả 3 phần,{' '}
+                Chế độ <b className="text-primary-hover">Thi thật</b>: trả lời liên tục cả 3 phần,{' '}
                 <Hl>không hiện điểm giữa chừng</Hl>, band tổng và phân tích từng câu chỉ hiện ở cuối.{' '}
-                <Hlr>Quy định:</Hlr> bài chạy <b className="text-[#1E5225]">toàn màn hình</b>; rời màn hình lần 1 bị
+                <Hlr>Quy định:</Hlr> bài chạy <b className="text-primary-hover">toàn màn hình</b>; rời màn hình lần 1 bị
                 cảnh báo, <Hlr>lần 2 bị đình chỉ</Hlr> và biên bản tự tải về.
               </GuideLine>
             )}
@@ -330,7 +330,7 @@ const SpeakingCoach = () => {
           <div className="card card-body text-center">
             <PartBadge>HOÀN THÀNH PART 1</PartBadge>
             <div className="text-5xl my-3">🎉</div>
-            <p className="text-base font-bold text-[#2B6830] my-1.5">Em đã luyện xong bộ câu Part 1!</p>
+            <p className="text-base font-bold text-primary my-1.5">Em đã luyện xong bộ câu Part 1!</p>
             <p className="text-sm text-slate-500 leading-relaxed my-2">
               Em đã luyện <b>{drillStats.total}</b> câu Part 1, trong đó <b>{drillStats.cleanFirst}</b> câu nói
               đúng ngay lần đầu. Mỗi lần luyện lại là một bước tiến 💪

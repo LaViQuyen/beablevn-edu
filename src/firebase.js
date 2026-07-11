@@ -25,7 +25,7 @@ export const db = getDatabase(app, firebaseConfig.databaseURL);
 export const storage = getStorage(app);
 // 3. Khởi tạo Auth
 export const auth = getAuth(app);
-// 4. Khởi tạo Functions — PHẢI cùng region với function (asia-southeast1)
+// 4. Khởi tạo Functions, PHẢI cùng region với function (asia-southeast1)
 //    để httpsCallable gọi đúng endpoint. Dùng cho issueToken (cầu nối đăng nhập).
 export const functions = getFunctions(app, "asia-southeast1");
 

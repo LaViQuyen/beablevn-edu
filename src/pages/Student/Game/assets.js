@@ -1,6 +1,6 @@
 // src/assets.js
 // NÂNG CẤP ĐỒ HỌA SVG - HÀNH TRÌNH TRƯỞNG THÀNH (GLOSSY 3D v3.0)
-// Phong cách: 2D Vector có KHỐI NỔI — gradient nhiều chặng, highlight bóng (specular),
+// Phong cách: 2D Vector có KHỐI NỔI, gradient nhiều chặng, highlight bóng (specular),
 // viền tối tạo chiều sâu, mắt long lanh có đốm sáng. Giữ nguyên viewBox + key + SIZES.
 
 const commonDefs = `<defs>

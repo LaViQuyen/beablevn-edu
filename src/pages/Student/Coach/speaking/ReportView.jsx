@@ -12,7 +12,7 @@ import { CRIT_NAMES, BAND_KEYS } from './constants';
  */
 
 const HL_BLUE = 'font-bold text-blue-700 bg-blue-50 px-0.5 rounded';
-const HL_GREEN = 'font-bold text-[#1E5225] bg-[#E8F4EC] px-0.5 rounded';
+const HL_GREEN = 'font-bold text-primary-hover bg-primary-light px-0.5 rounded';
 const HL_RED = 'font-bold text-red-700 bg-red-50 px-0.5 rounded';
 
 const ReportView = ({ report, studentName, modeLabel, targetBand, onRestart }) => {
@@ -25,7 +25,7 @@ const ReportView = ({ report, studentName, modeLabel, targetBand, onRestart }) =
       <div className="text-center">
         <PartBadge>KẾT QUẢ</PartBadge>
       </div>
-      <div className="text-center text-5xl font-extrabold text-[#2B6830] my-3">
+      <div className="text-center text-5xl font-extrabold text-primary my-3">
         {Number.isFinite(ov) ? `Band ${ov.toFixed(1)}` : 'Band –'}
       </div>
       <p className="text-center text-[13px] text-slate-500">
@@ -37,13 +37,13 @@ const ReportView = ({ report, studentName, modeLabel, targetBand, onRestart }) =
         <table className="w-full border-collapse text-sm min-w-[480px]">
           <thead>
             <tr>
-              <th className="border border-[#C9E2CF] bg-[#E8F4EC] text-[#1E5225] px-2.5 py-2 text-left w-[32%]">
+              <th className="border border-[#C9E2CF] bg-primary-light text-primary-hover px-2.5 py-2 text-left w-[32%]">
                 Tiêu chí
               </th>
-              <th className="border border-[#C9E2CF] bg-[#E8F4EC] text-[#1E5225] px-2.5 py-2 text-left w-[14%]">
+              <th className="border border-[#C9E2CF] bg-primary-light text-primary-hover px-2.5 py-2 text-left w-[14%]">
                 Band
               </th>
-              <th className="border border-[#C9E2CF] bg-[#E8F4EC] text-[#1E5225] px-2.5 py-2 text-left">
+              <th className="border border-[#C9E2CF] bg-primary-light text-primary-hover px-2.5 py-2 text-left">
                 Nhận xét &amp; cách lên band
               </th>
             </tr>
@@ -56,7 +56,7 @@ const ReportView = ({ report, studentName, modeLabel, targetBand, onRestart }) =
                   <td className="border border-[#C9E2CF] px-2.5 py-2">
                     {CRIT_NAMES[k]} ({k})
                   </td>
-                  <td className="border border-[#C9E2CF] px-2.5 py-2 text-center text-lg font-extrabold text-[#1E5225]">
+                  <td className="border border-[#C9E2CF] px-2.5 py-2 text-center text-lg font-extrabold text-primary-hover">
                     {Number.isFinite(b) ? Math.floor(b) : '–'}
                   </td>
                   <td className="border border-[#C9E2CF] px-2.5 py-2 leading-relaxed">
@@ -70,7 +70,7 @@ const ReportView = ({ report, studentName, modeLabel, targetBand, onRestart }) =
       </div>
 
       <b className="block mt-4">Nhận xét của giám khảo</b>
-      <div className="bg-[#F4F7F4] border-l-[3px] border-[#2B6830] rounded-r-xl px-4 py-3 my-2.5 text-sm leading-relaxed">
+      <div className="bg-[#F4F7F4] border-l-[3px] border-primary rounded-r-xl px-4 py-3 my-2.5 text-sm leading-relaxed">
         <MdRich text={d.examiner_comment_vi || ''} className={HL_BLUE} />
       </div>
 
@@ -99,7 +99,7 @@ const ReportView = ({ report, studentName, modeLabel, targetBand, onRestart }) =
             {pq.map((q, i) => (
               <div key={i} className="border border-[#C9E2CF] rounded-xl px-3.5 py-3 my-2 bg-white">
                 <div className="font-semibold text-[13.5px] mb-1.5 leading-snug">
-                  <span className="inline-block bg-[#2B6830] text-white text-[10.5px] font-bold px-2 py-0.5 rounded-full mr-2 tracking-wide align-[1px]">
+                  <span className="inline-block bg-primary text-white text-[10.5px] font-bold px-2 py-0.5 rounded-full mr-2 tracking-wide align-[1px]">
                     PART {q.part}
                   </span>
                   {q.question || ''}
@@ -113,7 +113,7 @@ const ReportView = ({ report, studentName, modeLabel, targetBand, onRestart }) =
                   </div>
                 ) : null}
                 {q.good_vi ? (
-                  <div className="text-[13.5px] text-[#1E5225] my-1 leading-relaxed">
+                  <div className="text-[13.5px] text-primary-hover my-1 leading-relaxed">
                     ✓ <MdRich text={q.good_vi} className={HL_GREEN} />
                   </div>
                 ) : null}
@@ -123,8 +123,8 @@ const ReportView = ({ report, studentName, modeLabel, targetBand, onRestart }) =
                   </div>
                 ) : null}
                 {q.revised ? (
-                  <div className="bg-[#E8F4EC] border-l-[3px] border-[#3D8B47] rounded-r-lg px-3 py-2 my-2 text-[13.5px] text-[#1E5225] font-semibold leading-relaxed">
-                    <span className="block text-[10.5px] font-bold uppercase tracking-wide text-[#2B6830] mb-0.5">
+                  <div className="bg-primary-light border-l-[3px] border-primary-medium rounded-r-lg px-3 py-2 my-2 text-[13.5px] text-primary-hover font-semibold leading-relaxed">
+                    <span className="block text-[10.5px] font-bold uppercase tracking-wide text-primary mb-0.5">
                       ✍ Chỉnh theo phương pháp Be Able VN
                     </span>
                     {q.revised}

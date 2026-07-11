@@ -26,11 +26,11 @@ const Notifications = () => {
     const [attachmentTitle, setAttachmentTitle] = useState('');
     const [linkUrl, setLinkUrl] = useState('');
     const [linkTitle, setLinkTitle] = useState('Link bài tập');
-    const [codeHtml, setCodeHtml] = useState(''); // chế độ Code: dán HTML soạn sẵn (từ GEM Gemini) — có preview trước khi đăng
+    const [codeHtml, setCodeHtml] = useState(''); // chế độ Code: dán HTML soạn sẵn (từ GEM Gemini), có preview trước khi đăng
     const [selectedLabel, setSelectedLabel] = useState('báo bài');
 
     // Lưới an toàn: chuyển markdown sót trong HTML (**đậm**, *nghiêng*) thành thẻ HTML
-    // — phòng khi GEM/giáo viên dán lẫn cú pháp markdown vào code
+    //, phòng khi GEM/giáo viên dán lẫn cú pháp markdown vào code
     const mdToHtml = (html) => (html || '')
         .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')
         .replace(/(^|[\s>([])\*([^*\n<]+)\*(?=[\s<.,;:!?)\]]|$)/g, '$1<i>$2</i>');
@@ -55,7 +55,7 @@ const Notifications = () => {
 
     const LINK_TITLES = ["Link điểm danh", "Link sự kiện", "Link bài tập", "Link kiểm tra"];
     const LABELS = [
-        { id: 'báo bài', color: 'bg-[#E8F4EC] text-green-700 border-green-200' },
+        { id: 'báo bài', color: 'bg-primary-light text-green-700 border-green-200' },
         { id: 'quan trọng', color: 'bg-red-50 text-red-700 border-red-200' },
         { id: 'sự kiện', color: 'bg-yellow-50 text-yellow-700 border-yellow-200' }
     ];
@@ -257,7 +257,7 @@ const Notifications = () => {
                     <div className="flex justify-between items-start">
                         <div className="flex items-center gap-2 mb-1">
                             {noti.type === 'link' ? (
-                                <span className="bg-[#E8F4EC] text-green-700 text-[10px] font-bold px-2.5 py-1 rounded-md border border-green-100 flex items-center gap-1 uppercase tracking-wide">
+                                <span className="bg-primary-light text-green-700 text-[10px] font-bold px-2.5 py-1 rounded-md border border-green-100 flex items-center gap-1 uppercase tracking-wide">
                                     <IconLink /> Link
                                 </span>
                             ) : (
@@ -267,12 +267,12 @@ const Notifications = () => {
                             )}
                             <span className="text-[11px] text-slate-400 font-medium font-mono">{new Date(noti.date).toLocaleDateString('vi-VN')}</span>
                             {noti.editedAt && <span className="text-[10px] text-slate-400 italic">(đã sửa)</span>}
-                            <span className="text-[11px] font-bold text-[#2B6830] bg-slate-50 px-2 py-0.5 rounded border border-slate-100">{getScopeName(noti.scope)}</span>
+                            <span className="text-[11px] font-bold text-primary bg-slate-50 px-2 py-0.5 rounded border border-slate-100">{getScopeName(noti.scope)}</span>
                         </div>
                         <div className="flex items-center gap-1 shrink-0">
                         <button
                             onClick={() => { setEditTarget({ ...noti }); setEditAttachment(null); setEditRemoveAtt(false); }}
-                            className="text-slate-300 hover:text-[#2B6830] hover:bg-[#E8F4EC] p-1.5 rounded-xl transition-all"
+                            className="text-slate-300 hover:text-primary hover:bg-primary-light p-1.5 rounded-xl transition-all"
                             title="Sửa thông báo"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
@@ -291,7 +291,7 @@ const Notifications = () => {
                         className={noti.type === 'content' ? "cursor-pointer group/content" : ""}
                         onClick={() => { if (noti.type === 'content') toggleExpand(noti.id); }}
                     >
-                        <h4 className={`font-bold text-sm mb-2 transition-colors ${noti.type === 'content' ? 'text-slate-800 group-hover/content:text-[#2B6830]' : 'text-slate-800'}`}>
+                        <h4 className={`font-bold text-sm mb-2 transition-colors ${noti.type === 'content' ? 'text-slate-800 group-hover/content:text-primary' : 'text-slate-800'}`}>
                             {noti.title}
                         </h4>
 
@@ -300,7 +300,7 @@ const Notifications = () => {
                                 href={noti.linkUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#2B6830] bg-[#E8F4EC] hover:bg-green-100 px-3.5 py-2 rounded-xl border border-green-100 transition-colors"
+                                className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary bg-primary-light hover:bg-green-100 px-3.5 py-2 rounded-xl border border-green-100 transition-colors"
                             >
                                 <IconLink /> Mở liên kết
                             </a>
@@ -323,7 +323,7 @@ const Notifications = () => {
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         onClick={(e) => e.stopPropagation()}
-                                        className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-[#2B6830] bg-[#E8F4EC] hover:bg-green-100 px-3.5 py-2.5 rounded-xl border border-green-100 transition-colors w-fit"
+                                        className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-primary bg-primary-light hover:bg-green-100 px-3.5 py-2.5 rounded-xl border border-green-100 transition-colors w-fit"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13" /></svg>
                                         {noti.attachmentTitle || noti.attachmentName}
@@ -367,7 +367,7 @@ const Notifications = () => {
             {editTarget && (
                 <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-2xl shadow-xl p-6 max-w-lg w-full space-y-4 border border-slate-100 max-h-[90vh] overflow-y-auto">
-                        <h3 className="font-bold text-[#2B6830]">✏️ Sửa thông báo — {getScopeName(editTarget.scope)}</h3>
+                        <h3 className="font-bold text-primary">✏️ Sửa thông báo, {getScopeName(editTarget.scope)}</h3>
 
                         <div>
                             <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Tiêu đề</label>
@@ -395,7 +395,7 @@ const Notifications = () => {
                                         {LABELS.map(l => (
                                             <button key={l.id} type="button"
                                                 onClick={() => setEditTarget({ ...editTarget, label: l.id })}
-                                                className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all uppercase ${editTarget.label === l.id ? l.color + ' ring-2 ring-[#2B6830]/20' : 'bg-white text-slate-400 border-slate-200 hover:border-slate-300'}`}>
+                                                className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all uppercase ${editTarget.label === l.id ? l.color + ' ring-2 ring-primary/20' : 'bg-white text-slate-400 border-slate-200 hover:border-slate-300'}`}>
                                                 {l.id}
                                             </button>
                                         ))}
@@ -412,7 +412,7 @@ const Notifications = () => {
                                 <div className="space-y-2">
                                     <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block">File đính kèm</label>
                                     {editAttachment ? (
-                                        <div className="flex items-center justify-between gap-2 bg-[#E8F4EC] border border-green-200 rounded-xl px-3 py-2">
+                                        <div className="flex items-center justify-between gap-2 bg-primary-light border border-green-200 rounded-xl px-3 py-2">
                                             <span className="text-xs font-bold text-green-700 truncate">🆕 {editAttachment.name}</span>
                                             <button type="button" onClick={() => setEditAttachment(null)} className="text-xs font-bold text-slate-500 hover:text-red-500 shrink-0">Bỏ chọn</button>
                                         </div>
@@ -424,18 +424,18 @@ const Notifications = () => {
                                     ) : editRemoveAtt ? (
                                         <div className="flex items-center justify-between gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
                                             <span className="text-xs font-medium text-red-600">File sẽ bị gỡ khi bấm Lưu</span>
-                                            <button type="button" onClick={() => setEditRemoveAtt(false)} className="text-xs font-bold text-slate-500 hover:text-[#2B6830] shrink-0">Hoàn tác</button>
+                                            <button type="button" onClick={() => setEditRemoveAtt(false)} className="text-xs font-bold text-slate-500 hover:text-primary shrink-0">Hoàn tác</button>
                                         </div>
                                     ) : (
                                         <p className="text-xs text-slate-400 italic">Chưa có file đính kèm.</p>
                                     )}
-                                    <label className="inline-flex items-center gap-2 text-xs font-bold text-[#2B6830] bg-white border border-[#2B6830] rounded-xl px-3 py-2 cursor-pointer hover:bg-[#E8F4EC] transition-all">
+                                    <label className="inline-flex items-center gap-2 text-xs font-bold text-primary bg-white border border-primary rounded-xl px-3 py-2 cursor-pointer hover:bg-primary-light transition-all">
                                         {(editTarget.attachmentName || editAttachment) ? '🔄 Thay file khác...' : '📎 Chọn file...'}
                                         <input type="file" className="hidden" onChange={e => { if (e.target.files?.[0]) { setEditAttachment(e.target.files[0]); setEditRemoveAtt(false); } }} />
                                     </label>
                                     {(editAttachment || (editTarget.attachmentName && !editRemoveAtt)) && (
                                         <input
-                                            className="w-full border border-slate-200 p-2.5 rounded-xl text-xs outline-none focus:border-[#2B6830] transition"
+                                            className="w-full border border-slate-200 p-2.5 rounded-xl text-xs outline-none focus:border-primary transition"
                                             placeholder="Tên hiển thị của file (tùy chọn)"
                                             value={editTarget.attachmentTitle || ''}
                                             onChange={e => setEditTarget({ ...editTarget, attachmentTitle: e.target.value })}
@@ -447,7 +447,7 @@ const Notifications = () => {
 
                         <div className="flex gap-3 justify-end pt-1">
                             <button onClick={() => setEditTarget(null)} className="px-4 py-2 rounded-xl text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">Hủy</button>
-                            <button onClick={handleSaveEdit} disabled={savingEdit} className="px-4 py-2 rounded-xl text-sm font-bold text-white bg-[#2B6830] hover:bg-[#1E5225] transition-colors disabled:opacity-50">
+                            <button onClick={handleSaveEdit} disabled={savingEdit} className="px-4 py-2 rounded-xl text-sm font-bold text-white bg-primary hover:bg-primary-hover transition-colors disabled:opacity-50">
                                 {savingEdit ? 'Đang lưu...' : 'Lưu thay đổi'}
                             </button>
                         </div>
@@ -461,7 +461,7 @@ const Notifications = () => {
                 .ql-editor li { padding-left: 0.25rem !important; margin-bottom: 0.25rem !important; }
             `}</style>
             <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
-                <div className="p-2 bg-[#E8F4EC] rounded-xl text-[#2B6830]">
+                <div className="p-2 bg-primary-light rounded-xl text-primary">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 01-1.44-4.282m3.102.069a18.03 18.03 0 01-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 018.835 2.535M10.34 6.66a23.847 23.847 0 008.835-2.535m0 0A23.74 23.74 0 0018.795 3m.38 1.125a23.91 23.91 0 011.014 5.795c0 1.94-.254 3.82-.734 5.622m-4.731.213a23.87 23.87 0 005.932 2.535m0 0A23.753 23.753 0 0122.5 6" /></svg>
                 </div>
                 <h2 className="page-title">Đăng Thông Báo Mới</h2>
@@ -471,19 +471,19 @@ const Notifications = () => {
                 <div className="flex gap-3 mb-6">
                     <button
                         onClick={() => setPostMode('content')}
-                        className={`flex-1 py-3 rounded-xl text-sm font-semibold transition-all border flex items-center justify-center gap-2 ${postMode === 'content' ? 'bg-[#2B6830] text-white border-[#2B6830]' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
+                        className={`flex-1 py-3 rounded-xl text-sm font-semibold transition-all border flex items-center justify-center gap-2 ${postMode === 'content' ? 'bg-primary text-white border-primary' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
                     >
                         <IconContent /> Nội dung
                     </button>
                     <button
                         onClick={() => setPostMode('link')}
-                        className={`flex-1 py-3 rounded-xl text-sm font-semibold transition-all border flex items-center justify-center gap-2 ${postMode === 'link' ? 'bg-[#2B6830] text-white border-[#2B6830]' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
+                        className={`flex-1 py-3 rounded-xl text-sm font-semibold transition-all border flex items-center justify-center gap-2 ${postMode === 'link' ? 'bg-primary text-white border-primary' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
                     >
                         <IconLink /> Hyperlink
                     </button>
                     <button
                         onClick={() => setPostMode('code')}
-                        className={`flex-1 py-3 rounded-xl text-sm font-semibold transition-all border flex items-center justify-center gap-2 ${postMode === 'code' ? 'bg-[#2B6830] text-white border-[#2B6830]' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
+                        className={`flex-1 py-3 rounded-xl text-sm font-semibold transition-all border flex items-center justify-center gap-2 ${postMode === 'code' ? 'bg-primary text-white border-primary' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
                     >
                         <IconCode /> Code
                     </button>
@@ -532,7 +532,7 @@ const Notifications = () => {
                                 type="file"
                                 accept=".html,.htm,.pdf,.doc,.docx"
                                 onChange={(e) => setAttachment(e.target.files[0])}
-                                className="w-full p-2 border border-slate-200 rounded-xl outline-none text-sm bg-slate-50 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#E8F4EC] file:text-green-700 hover:file:bg-green-100 transition-colors cursor-pointer"
+                                className="w-full p-2 border border-slate-200 rounded-xl outline-none text-sm bg-slate-50 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary-light file:text-green-700 hover:file:bg-green-100 transition-colors cursor-pointer"
                             />
                         </div>
                         {/* THÊM KHUNG NHẬP TIÊU ĐỀ FILE VÀO ĐÂY */}
@@ -563,7 +563,7 @@ const Notifications = () => {
                     </div>
                 ) : postMode === 'code' ? (
                     <div className="animate-fade-in">
-                        {/* CHẾ ĐỘ CODE: dán HTML soạn sẵn (VD từ GEM Gemini) — giữ định dạng chuẩn, có preview trước khi đăng */}
+                        {/* CHẾ ĐỘ CODE: dán HTML soạn sẵn (VD từ GEM Gemini), giữ định dạng chuẩn, có preview trước khi đăng */}
                         <div className="mb-4">
                             <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Nhãn dán (Label)</label>
                             <div className="flex gap-2">
@@ -593,7 +593,7 @@ const Notifications = () => {
                                 type="file"
                                 accept=".html,.htm,.pdf,.doc,.docx"
                                 onChange={(e) => setAttachment(e.target.files[0])}
-                                className="w-full p-2 border border-slate-200 rounded-xl outline-none text-sm bg-slate-50 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#E8F4EC] file:text-green-700 hover:file:bg-green-100 transition-colors cursor-pointer"
+                                className="w-full p-2 border border-slate-200 rounded-xl outline-none text-sm bg-slate-50 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary-light file:text-green-700 hover:file:bg-green-100 transition-colors cursor-pointer"
                             />
                         </div>
                         {attachment && (
@@ -619,12 +619,12 @@ const Notifications = () => {
                         </div>
                         <div className="mb-6">
                             <label className="block text-xs font-bold text-slate-500 uppercase mb-1">
-                                Xem trước (Preview) <span className="normal-case font-semibold text-green-600">— học viên sẽ thấy đúng như bên dưới</span>
+                                Xem trước (Preview) <span className="normal-case font-semibold text-green-600">học viên sẽ thấy đúng như bên dưới</span>
                             </label>
                             <div className="border-2 border-dashed border-green-200 rounded-xl p-4 bg-white min-h-[80px]">
                                 {codeHtml.trim() ? (
                                     <>
-                                        {title && <div className="text-sm font-bold text-[#2B6830] mb-2">{title}</div>}
+                                        {title && <div className="text-sm font-bold text-primary mb-2">{title}</div>}
                                         <div
                                             className="quill-content text-xs text-slate-600 leading-relaxed"
                                             dangerouslySetInnerHTML={{ __html: mdToHtml(codeHtml) }}
@@ -641,7 +641,7 @@ const Notifications = () => {
                         <div className="mb-4">
                             <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Tiêu đề liên kết</label>
                             <select
-                                className="input-base font-semibold text-[#2B6830]"
+                                className="input-base font-semibold text-primary"
                                 value={linkTitle}
                                 onChange={(e) => setLinkTitle(e.target.value)}
                             >

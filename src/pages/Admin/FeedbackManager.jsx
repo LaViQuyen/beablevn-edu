@@ -4,15 +4,15 @@ import { ref, onValue, update } from 'firebase/database';
 import { useAuth } from '../../context/AuthContext';
 
 const CATEGORIES = {
-  'hoc-tap':   { label: '📚 Học tập',        color: 'bg-[#E8F4EC] text-green-700 border-green-200' },
-  'giao-vien': { label: '👨‍🏫 Giáo viên',      color: 'bg-[#1E5225]/10 text-[#1E5225] border-[#1E5225]/25' },
+  'hoc-tap':   { label: '📚 Học tập',        color: 'bg-primary-light text-green-700 border-green-200' },
+  'giao-vien': { label: '👨‍🏫 Giáo viên',      color: 'bg-primary-hover/10 text-primary-hover border-primary-hover/25' },
   'co-so':     { label: '🏫 Cơ sở vật chất', color: 'bg-amber-50 text-amber-700 border-amber-200' },
   'khac':      { label: '💬 Khác',            color: 'bg-slate-50 text-slate-600 border-slate-200' },
 };
 
 const STATUS_STYLES = {
   pending:  { label: 'Chờ xử lý', color: 'bg-amber-50 text-amber-700 border-amber-200' },
-  read:     { label: 'Đã xem',    color: 'bg-[#E8F4EC] text-green-700 border-green-200' },
+  read:     { label: 'Đã xem',    color: 'bg-primary-light text-green-700 border-green-200' },
   resolved: { label: 'Đã xử lý', color: 'bg-green-50 text-green-700 border-green-200' },
 };
 
@@ -88,7 +88,7 @@ const FeedbackManager = () => {
 
   // Lấy tên lớp học viên
   const getClassNames = (classIds) => {
-    if (!classIds || !classIds.length) return '—';
+    if (!classIds || !classIds.length) return '–';
     const ids = Array.isArray(classIds) ? classIds : Object.values(classIds);
     return ids.map(id => classes[id]?.name || id).join(', ');
   };
@@ -98,7 +98,7 @@ const FeedbackManager = () => {
 
       {/* Header */}
       <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
-        <div className="p-2 bg-orange-50 rounded-xl text-orange-500">
+        <div className="p-2 bg-primary-light rounded-xl text-primary-medium">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
           </svg>
@@ -138,7 +138,7 @@ const FeedbackManager = () => {
                 <button
                   key={f.id}
                   onClick={() => setFilterStatus(f.id)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${filterStatus === f.id ? 'bg-white text-[#2B6830] shadow-sm' : 'text-slate-500'}`}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${filterStatus === f.id ? 'bg-white text-primary shadow-sm' : 'text-slate-500'}`}
                 >
                   {f.label}
                 </button>
@@ -147,7 +147,7 @@ const FeedbackManager = () => {
 
             {/* Category filter */}
             <select
-              className="border border-slate-200 px-3 py-1.5 rounded-xl text-xs font-bold outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 bg-white"
+              className="border border-slate-200 px-3 py-1.5 rounded-xl text-xs font-bold outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 bg-white"
               value={filterCat}
               onChange={e => setFilterCat(e.target.value)}
             >
@@ -160,7 +160,7 @@ const FeedbackManager = () => {
             {/* Search */}
             <div className="flex-1 min-w-[200px] relative">
               <input
-                className="w-full border border-slate-200 pl-8 pr-4 py-1.5 rounded-xl text-xs outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition"
+                className="w-full border border-slate-200 pl-8 pr-4 py-1.5 rounded-xl text-xs outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition"
                 placeholder="Tìm theo tiêu đề hoặc tên học viên..."
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
@@ -207,7 +207,7 @@ const FeedbackManager = () => {
       ) : (
         /* Chi tiết */
         <div className="max-w-2xl">
-          <button onClick={() => setSelectedFb(null)} className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-[#2B6830] mb-4 transition-colors font-medium">
+          <button onClick={() => setSelectedFb(null)} className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-primary mb-4 transition-colors font-medium">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
             Quay lại
           </button>
@@ -243,7 +243,7 @@ const FeedbackManager = () => {
                 {/* Cho phép sửa phản hồi */}
                 <button
                   onClick={() => setSelectedFb(prev => ({ ...prev, staffReply: null }))}
-                  className="mt-2 text-xs text-slate-400 hover:text-[#2B6830] underline"
+                  className="mt-2 text-xs text-slate-400 hover:text-primary underline"
                 >
                   Chỉnh sửa phản hồi
                 </button>

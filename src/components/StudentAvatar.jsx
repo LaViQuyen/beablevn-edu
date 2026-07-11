@@ -2,7 +2,7 @@ import React from 'react';
 import { getSkin, normalizeSkin } from '../data/skins';
 
 // ============================================================
-// StudentAvatar — render avatar học viên theo skin.
+// StudentAvatar, render avatar học viên theo skin.
 // Dùng lại ở: Cửa hàng Skin, Admin quản lý Skin, Hồ sơ, lịch sử, Bảng Vinh Danh.
 //
 // ĐẶC QUYỀN SKIN MỐC: skin mở khóa bằng THÀNH TÍCH (unlock='milestone') được
@@ -10,9 +10,9 @@ import { getSkin, normalizeSkin } from '../data/skins';
 // Đây là đặc quyền hiển thị, KHÔNG gắn cho skin mua bằng Credit (tránh pay-to-win).
 //
 // Props (truyền 1 trong 2):
-//   skin   : object skin ĐẦY ĐỦ (ưu tiên — dùng cho skin DB do Admin tạo)
+//   skin   : object skin ĐẦY ĐỦ (ưu tiên, dùng cho skin DB do Admin tạo)
 //   skinId : id skin mặc định (fallback tra trong bộ default)
-//   name   : tên học viên — hiện ký tự đầu khi skin không có emoji
+//   name   : tên học viên, hiện ký tự đầu khi skin không có emoji
 //   size   : đường kính px (mặc định 56)
 //   ring   : có vẽ viền (frame) theo màu skin không (mặc định true)
 // ============================================================

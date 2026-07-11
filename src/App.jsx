@@ -46,7 +46,7 @@ import StudentContact from './pages/Student/Contact';
 import StudentCredits from './pages/Student/Credits'; // ví BAVN Credits của học viên
 import StudentSkins from './pages/Student/Skins'; // Cửa hàng Skin: đổi Credits lấy avatar
 import StudentLeaderboard from './pages/Student/Leaderboard'; // Bảng vinh danh toàn hệ thống
-const HanhTrinhGame = lazy(() => import('./pages/Student/Game/HanhTrinhGame')); // Game Phaser — lazy load (Phaser nặng)
+const HanhTrinhGame = lazy(() => import('./pages/Student/Game/HanhTrinhGame')); // Game Phaser, lazy load (Phaser nặng)
 
 // Module IELTS Coach tích hợp (khu Tài nguyên & Luyện tập), lazy load vì mỗi tool khá nặng.
 // .catch + reload: sau khi deploy, tab cũ có thể xin chunk hash cũ (404) -> tải lại để lấy bản mới.
@@ -70,7 +70,7 @@ const CoachSusp = ({ children }) => (
 const RedirectBasedOnRole = () => {
   const { currentUser, userData, loading } = useAuth();
 
-  if (loading) return <div className="h-screen flex items-center justify-center text-[#2B6830] font-bold">Đang tải dữ liệu...</div>;
+  if (loading) return <div className="h-screen flex items-center justify-center text-primary font-bold">Đang tải dữ liệu...</div>;
   if (!currentUser) return <Navigate to="/login" />;
 
   if (userData?.role === 'admin') return <Navigate to="/admin/dashboard" />;
@@ -84,7 +84,7 @@ const RedirectBasedOnRole = () => {
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { currentUser, userData, loading } = useAuth();
 
-  if (loading) return <div className="h-screen flex items-center justify-center text-[#2B6830] font-bold">Đang xác thực...</div>;
+  if (loading) return <div className="h-screen flex items-center justify-center text-primary font-bold">Đang xác thực...</div>;
   if (!currentUser) return <Navigate to="/login" />;
 
   // Nếu đã đăng nhập nhưng không đúng quyền -> Về trang chủ để Redirect lại đúng chỗ
@@ -126,13 +126,13 @@ const App = () => {
             <Route path="scores" element={<ScoreInput />} />
             <Route path="notifications" element={<StaffNotifications />} />
             <Route path="inbox" element={<StaffInbox />} />
-            {/* Trang Fresh Fit — bên trong component tự chặn nếu nhân sự chưa có cờ ffAccess */}
+            {/* Trang Fresh Fit, bên trong component tự chặn nếu nhân sự chưa có cờ ffAccess */}
             <Route path="freshfit" element={<FreshFit />} />
-            {/* Ví Credits của nhân sự — mọi nhân sự đều có */}
+            {/* Ví Credits của nhân sự, mọi nhân sự đều có */}
             <Route path="credits" element={<StaffCredits />} />
-            {/* BAVN Center — component tự chặn nếu chưa có cờ bodAccess */}
+            {/* BAVN Center, component tự chặn nếu chưa có cờ bodAccess */}
             <Route path="bavn" element={<BavnCenter />} />
-            {/* Khu MOD — component tự chặn nếu chưa có cờ modAccess */}
+            {/* Khu MOD, component tự chặn nếu chưa có cờ modAccess */}
             <Route path="mod-bonus" element={<ModBonus />} />
             {/* Cửa hàng Skin + Game cho nhân sự (dùng chung component học viên, mở khóa toàn bộ + chơi không giới hạn) */}
             <Route path="skins" element={<StudentSkins />} />

@@ -25,7 +25,7 @@ const parseExcelDate = (val) => {
 };
 
 const fmtDate = (d) => {
-  if (!d) return '—';
+  if (!d) return '–';
   try { return new Date(d + 'T00:00:00').toLocaleDateString('vi-VN'); } catch { return d; }
 };
 
@@ -322,15 +322,15 @@ const TuitionStats = () => {
                 filteredRecords.map((r, idx) => (
                   <tr key={r.id}>
                     <td className="text-center text-slate-400 font-bold text-xs">{idx + 1}</td>
-                    <td className="font-bold text-[#2B6830] font-mono text-xs">{r.studentCode || '—'}</td>
+                    <td className="font-bold text-primary font-mono text-xs">{r.studentCode || '–'}</td>
                     <td className="font-medium text-slate-800">
-                      {r.name || '—'}
+                      {r.name || '–'}
                       {r.extensionRequested && !r.extensionApproved && (
                         <span className="ml-1.5 text-[10px] font-bold bg-purple-50 text-purple-600 border border-purple-200 px-1.5 py-0.5 rounded">Xin gia hạn</span>
                       )}
                     </td>
                     <td className="text-center">
-                      <span className="font-bold text-slate-700">{r.remainingSessions ?? '—'}</span>
+                      <span className="font-bold text-slate-700">{r.remainingSessions ?? '–'}</span>
                     </td>
                     <td className="text-center">
                       <span className="font-bold text-blue-600">{r.addedSessions ?? 0}</span>
@@ -340,14 +340,14 @@ const TuitionStats = () => {
                         <div className="flex items-center gap-2 flex-wrap">
                           <input
                             type="date"
-                            className="p-2 border border-[#2B6830] rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2B6830]/10"
+                            className="p-2 border border-primary rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary/10"
                             value={editingDeadline.value}
                             onChange={(e) => setEditingDeadline({ id: r.id, value: e.target.value })}
                             autoFocus
                           />
                           <button
                             onClick={() => handleSaveDeadline(r.id)}
-                            className="text-[#2B6830] font-bold text-xs px-2.5 py-1 bg-[#E8F4EC] rounded-lg border border-green-200 hover:bg-green-200 transition"
+                            className="text-primary font-bold text-xs px-2.5 py-1 bg-primary-light rounded-lg border border-green-200 hover:bg-green-200 transition"
                           >
                             Lưu
                           </button>
@@ -371,7 +371,7 @@ const TuitionStats = () => {
                       <div className="flex gap-2 justify-end">
                         <button
                           onClick={() => setEditingDeadline({ id: r.id, value: r.paymentDeadline || '' })}
-                          className="text-[#2B6830] border border-[#2B6830] px-2 py-1 rounded text-xs font-bold hover:bg-[#2B6830] hover:text-white transition-all"
+                          className="text-primary border border-primary px-2 py-1 rounded text-xs font-bold hover:bg-primary hover:text-white transition-all"
                         >
                           Sửa
                         </button>

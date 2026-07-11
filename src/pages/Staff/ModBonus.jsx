@@ -80,7 +80,7 @@ export default function ModBonus() {
   const award = async () => {
     const amt = Math.round(Number(amount) || 0);
     if (!targetId) return showToast('⚠️ Chọn nhân sự nhận thưởng.');
-    if (targetId === uid) return showToast('⛔ Không thể tự thưởng cho chính mình — nhờ MOD khác.');
+    if (targetId === uid) return showToast('⛔ Không thể tự thưởng cho chính mình, nhờ MOD khác.');
     if (amt <= 0) return showToast('⚠️ Nhập số Bonus > 0.');
     if (!reason.trim()) return showToast('⚠️ Nhập lý do thưởng.');
     setBusy(true);
@@ -126,7 +126,7 @@ export default function ModBonus() {
           <div className="text-3xl">🛡️</div>
           <div>
             <h1 className="text-xl font-bold tracking-wide">Thưởng Bonus Nhân sự</h1>
-            <p className="text-green-100/90 text-sm mt-0.5">Ghi nhận đóng góp của đồng nghiệp — minh bạch, có lý do. Không tự thưởng cho mình.</p>
+            <p className="text-green-100/90 text-sm mt-0.5">Ghi nhận đóng góp của đồng nghiệp, minh bạch, có lý do. Không tự thưởng cho mình.</p>
           </div>
         </div>
       </div>
@@ -139,7 +139,7 @@ export default function ModBonus() {
             <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Nhân sự nhận thưởng</label>
             <select value={targetId} onChange={(e) => setTargetId(e.target.value)}
               className="input-base">
-              <option value="">— Chọn nhân sự —</option>
+              <option value="">-- Chọn nhân sự --</option>
               {awardable.map((s) => (
                 <option key={s.id} value={s.id}>{s.name} · {s.subRole}{s.modAccess ? ' · MOD' : ''}</option>
               ))}
@@ -186,7 +186,7 @@ export default function ModBonus() {
               </thead>
               <tbody>
                 {staffStats.map((s) => (
-                  <tr key={s.id} className={s.id === uid ? 'bg-[#E8F4EC]/40' : ''}>
+                  <tr key={s.id} className={s.id === uid ? 'bg-primary-light/40' : ''}>
                     <td>
                       <span className="font-bold text-slate-700">{s.name}</span>
                       <span className="text-[10px] text-slate-400 ml-1 uppercase">{s.subRole}{s.id === uid ? ' · Bạn' : ''}</span>

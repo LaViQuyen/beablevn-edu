@@ -118,7 +118,7 @@ const ClassStats = () => {
 
   // Class-level stats
   const cls = classes.find(c => c.id === selectedClass);
-  const avgGPA = rows.length ? (rows.reduce((s, r) => s + r.gpa, 0) / rows.length).toFixed(2) : '—';
+  const avgGPA = rows.length ? (rows.reduce((s, r) => s + r.gpa, 0) / rows.length).toFixed(2) : '–';
   const avgAtt = rows.filter(r => r.att !== null).length
     ? Math.round(rows.filter(r => r.att !== null).reduce((s, r) => s + r.att, 0) / rows.filter(r => r.att !== null).length)
     : null;
@@ -130,7 +130,7 @@ const ClassStats = () => {
     const header = ['Xếp hạng', 'Họ tên', 'Mã HV', 'Điểm Tổng Kết', 'Chuyên cần (%)', 'Bonus'];
     const rowsCSV = sorted.map((st, i) => [
       i + 1, st.name, st.studentCode || '',
-      st.gpa.toFixed(2), st.att !== null ? `${st.att}%` : '—', st.bonus,
+      st.gpa.toFixed(2), st.att !== null ? `${st.att}%` : '–', st.bonus,
     ]);
     const csv = [header, ...rowsCSV].map(r => r.map(v => `"${v}"`).join(',')).join('\n');
     const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
@@ -168,7 +168,7 @@ const ClassStats = () => {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-100">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-[#E8F4EC] rounded-xl text-[#3D8B47]">
+          <div className="p-2 bg-primary-light rounded-xl text-primary-medium">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
             </svg>
@@ -215,11 +215,11 @@ const ClassStats = () => {
         <>
           {/* Stat summary */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <StatCard label="Học viên" value={rows.length} sub={cls?.name} color="bg-[#E8F4EC]" />
-            <StatCard label="GPA Trung bình" value={avgGPA} sub="Assignment·Formative·MMT·EOMT" color="bg-[#E8F4EC]" />
+            <StatCard label="Học viên" value={rows.length} sub={cls?.name} color="bg-primary-light" />
+            <StatCard label="GPA Trung bình" value={avgGPA} sub="Assignment·Formative·MMT·EOMT" color="bg-primary-light" />
             <StatCard
               label="Chuyên cần TB"
-              value={avgAtt !== null ? `${avgAtt}%` : '—'}
+              value={avgAtt !== null ? `${avgAtt}%` : '–'}
               sub={lowAttCount > 0 ? `⚠️ ${lowAttCount} người dưới 70%` : 'Tất cả đạt'}
               color={lowAttCount > 0 ? 'bg-red-50' : 'bg-emerald-50'}
             />
@@ -234,7 +234,7 @@ const ClassStats = () => {
           ) : (
             <div className="card-std overflow-hidden">
               <div className="p-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-2">
-                <h3 className="font-bold text-[#2B6830] text-sm">Bảng xếp hạng ({sorted.length} học viên)</h3>
+                <h3 className="font-bold text-primary text-sm">Bảng xếp hạng ({sorted.length} học viên)</h3>
                 <p className="text-xs text-slate-400">Bấm vào tiêu đề cột để sắp xếp</p>
               </div>
 
@@ -244,13 +244,13 @@ const ClassStats = () => {
                   <thead>
                     <tr>
                       <th className="w-12 text-center">Hạng</th>
-                      <th className="cursor-pointer hover:text-[#2B6830] transition-colors" onClick={() => toggleSort('name')}>
+                      <th className="cursor-pointer hover:text-primary transition-colors" onClick={() => toggleSort('name')}>
                         Học viên <SortIcon col="name" />
                       </th>
-                      <th className="text-center cursor-pointer hover:text-[#2B6830] transition-colors" onClick={() => toggleSort('gpa')}>
+                      <th className="text-center cursor-pointer hover:text-primary transition-colors" onClick={() => toggleSort('gpa')}>
                         Điểm TK <SortIcon col="gpa" />
                       </th>
-                      <th className="text-center cursor-pointer hover:text-[#2B6830] transition-colors" onClick={() => toggleSort('att')}>
+                      <th className="text-center cursor-pointer hover:text-primary transition-colors" onClick={() => toggleSort('att')}>
                         Chuyên cần <SortIcon col="att" />
                       </th>
                       <th className="text-center">Bonus</th>
@@ -262,7 +262,7 @@ const ClassStats = () => {
                       const sData = scores[st.id] || {};
                       const getAvg = (cat) => {
                         const vals = Object.values(sData[cat] || {}).map(r => Number(r.score) || 0);
-                        return vals.length ? (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1) : '—';
+                        return vals.length ? (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1) : '–';
                       };
                       const rank = idx + 1;
                       const medalClass = rank === 1 ? 'text-amber-500' : rank === 2 ? 'text-slate-400' : rank === 3 ? 'text-amber-700' : 'text-slate-300';
@@ -280,7 +280,7 @@ const ClassStats = () => {
                           </td>
                           <td className="text-center">
                             <span className={`text-lg font-extrabold ${gpaColor(st.gpa)}`}>
-                              {st.gpa > 0 ? st.gpa.toFixed(2) : '—'}
+                              {st.gpa > 0 ? st.gpa.toFixed(2) : '–'}
                             </span>
                           </td>
                           <td className="text-center">
@@ -291,7 +291,7 @@ const ClassStats = () => {
                                   <div className={`h-full rounded-full ${st.att >= 80 ? 'bg-emerald-500' : st.att >= 60 ? 'bg-amber-400' : 'bg-red-500'}`} style={{ width: `${st.att}%` }} />
                                 </div>
                               </div>
-                            ) : <span className="text-slate-300 text-xs">—</span>}
+                            ) : <span className="text-slate-300 text-xs">–</span>}
                           </td>
                           <td className="text-center">
                             <span className="font-bold text-amber-600">{st.bonus || 0}</span>
@@ -300,8 +300,8 @@ const ClassStats = () => {
                             <div className="flex justify-center gap-2 text-[10px] font-bold">
                               {[
                                 { label: 'A', val: getAvg('assignment'), color: 'bg-green-50 text-green-700' },
-                                { label: 'F', val: getAvg('formative'),  color: 'bg-[#E8F4EC] text-green-700' },
-                                { label: 'S', val: getAvg('summative'),  color: 'bg-[#E8F4EC] text-green-700' },
+                                { label: 'F', val: getAvg('formative'),  color: 'bg-primary-light text-green-700' },
+                                { label: 'S', val: getAvg('summative'),  color: 'bg-primary-light text-green-700' },
                               ].map(d => (
                                 <span key={d.label} className={`px-1.5 py-0.5 rounded ${d.color}`} title={d.label === 'A' ? 'Assignment' : d.label === 'F' ? 'Formative' : 'Summative'}>
                                   {d.label}: {d.val}
@@ -330,7 +330,7 @@ const ClassStats = () => {
                         <p className="text-xs text-slate-400 font-mono mb-2">{st.studentCode}</p>
                         <div className="flex gap-3 text-xs">
                           <span className={`font-extrabold ${gpaColor(st.gpa)}`}>
-                            GPA: {st.gpa > 0 ? st.gpa.toFixed(2) : '—'}
+                            GPA: {st.gpa > 0 ? st.gpa.toFixed(2) : '–'}
                           </span>
                           {st.att !== null && (
                             <span className={`font-bold ${attColor(st.att)}`}>Chuyên cần: {st.att}%</span>

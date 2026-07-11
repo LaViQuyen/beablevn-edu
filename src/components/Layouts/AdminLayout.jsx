@@ -1,7 +1,8 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useSwipeTabs } from '../useSwipeTabs';
+import StudentAvatar from '../StudentAvatar'; // avatar cho khối danh tính người đăng nhập
 
 const Icons = {
   Dashboard: ({ active }) => (
@@ -63,17 +64,24 @@ const Icons = {
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
       <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
     </svg>
-  )
+  ),
+  // Icon "Thêm" (dấu 3 chấm) mở Drawer chức năng phụ trên mobile
+  More: ({ active }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill={active ? "#2B6830" : "#64748b"} className="w-5 h-5">
+      <path d="M6 12a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM13.5 12a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM21 12a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
+    </svg>
+  ),
 };
 
 const AdminLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { logout } = useAuth(); // Lấy hàm logout từ context
+  const { logout, currentUser } = useAuth(); // logout + user hiện tại (khối danh tính)
+  const [moreOpen, setMoreOpen] = useState(false); // Drawer "Thêm" trên mobile
 
   const isActive = (path) => location.pathname.includes(path);
   // Moi the co be rong toi thieu co dinh + khong co lai (shrink-0) de thanh nav cuon ngang duoc
-  const mobileLinkClass = (path) => `flex flex-col items-center justify-center shrink-0 min-w-[64px] h-full space-y-1 px-0.5 ${isActive(path) ? 'text-[#2B6830]' : 'text-slate-400 hover:text-slate-600'}`;
+  const mobileLinkClass = (path) => `relative flex flex-col items-center justify-center shrink-0 min-w-[64px] h-full space-y-1 px-0.5 ${isActive(path) ? "text-primary before:absolute before:top-0 before:inset-x-3.5 before:h-[3px] before:bg-primary before:rounded-b-full" : 'text-slate-500 hover:text-slate-700'}`;
 
   // Thu tu the tren bottom nav - dung cho VUOT NGANG chuyen the (mobile)
   const TABS = [
@@ -90,6 +98,18 @@ const AdminLayout = () => {
     { key: 'tuition',       to: '/admin/tuition' },
   ];
   const { onTouchStart, onTouchEnd, slideKey, slideClass } = useSwipeTabs(TABS);
+
+  // Bottom nav mobile: 4 thẻ chính hiện trực tiếp, phần còn lại gom vào Drawer "Thêm"
+  const MORE_ITEMS = [
+    { to: '/admin/data',          key: 'data',          label: 'Dữ liệu Lớp',   Icon: Icons.Data },
+    { to: '/admin/stats',         key: 'stats',         label: 'Thống kê lớp',   Icon: Icons.Stats },
+    { to: '/admin/skins',         key: 'skins',         label: 'Quản lý Skin',   Icon: Icons.Skins },
+    { to: '/admin/autobonus',     key: 'autobonus',     label: 'Tự động Bonus',  Icon: Icons.Bonus },
+    { to: '/admin/notifications', key: 'notifications', label: 'Thông báo',      Icon: Icons.Noti },
+    { to: '/admin/feedback',      key: 'feedback',      label: 'Phản ánh',       Icon: Icons.Feedback },
+    { to: '/admin/import',        key: 'import',        label: 'Import học viên', Icon: Icons.Import },
+  ];
+  const moreActive = MORE_ITEMS.some((it) => isActive(it.key));
 
   // Tu cuon the dang chon vao giua thanh nav
   const bottomNavRef = useRef(null);
@@ -110,52 +130,60 @@ const AdminLayout = () => {
         <div className="p-6 border-b border-slate-100 flex items-center gap-3">
           <img src="/BA LOGO.png" alt="Logo" className="w-10 h-10 object-contain" />
           <div>
-            <h1 className="font-extrabold text-[#2B6830] text-lg leading-tight">BE ABLE VN</h1>
+            <h1 className="font-extrabold text-primary text-lg leading-tight">BE ABLE VN</h1>
             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Cổng Quản trị</p>
           </div>
         </div>
 
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           <p className="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 mt-2">Tổng quan</p>
-          <Link to="/admin/dashboard" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('dashboard') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
+          <Link to="/admin/dashboard" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('dashboard') ? 'bg-primary/10 text-primary' : 'text-slate-600 hover:bg-slate-50'}`}>
             <Icons.Dashboard active={isActive('dashboard')} /> Dashboard
           </Link>
 
           <p className="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 mt-4">Quản lý</p>
 
-          <Link to="/admin/staff" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('staff') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
+          <Link to="/admin/staff" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('staff') ? 'bg-primary/10 text-primary' : 'text-slate-600 hover:bg-slate-50'}`}>
             <Icons.Staff active={isActive('staff')} /> Nhân sự
           </Link>
-          <Link to="/admin/students" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('students') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
+          <Link to="/admin/students" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('students') ? 'bg-primary/10 text-primary' : 'text-slate-600 hover:bg-slate-50'}`}>
             <Icons.Student active={isActive('students')} /> Học viên
           </Link>
-          <Link to="/admin/data" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('data') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
+          <Link to="/admin/data" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('data') ? 'bg-primary/10 text-primary' : 'text-slate-600 hover:bg-slate-50'}`}>
             <Icons.Data active={isActive('data')} /> Dữ liệu Lớp
           </Link>
-          <Link to="/admin/stats" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('stats') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
+          <Link to="/admin/stats" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('stats') ? 'bg-primary/10 text-primary' : 'text-slate-600 hover:bg-slate-50'}`}>
             <Icons.Stats active={isActive('stats')} /> Thống kê lớp
           </Link>
-          <Link to="/admin/skins" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('skins') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
+          <Link to="/admin/skins" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('skins') ? 'bg-primary/10 text-primary' : 'text-slate-600 hover:bg-slate-50'}`}>
             <Icons.Skins active={isActive('skins')} /> Quản lý Skin
           </Link>
-          <Link to="/admin/autobonus" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('autobonus') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
+          <Link to="/admin/autobonus" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('autobonus') ? 'bg-primary/10 text-primary' : 'text-slate-600 hover:bg-slate-50'}`}>
             <Icons.Bonus active={isActive('autobonus')} /> Tự động Bonus
           </Link>
-          <Link to="/admin/notifications" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('notifications') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
+          <Link to="/admin/notifications" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('notifications') ? 'bg-primary/10 text-primary' : 'text-slate-600 hover:bg-slate-50'}`}>
             <Icons.Noti active={isActive('notifications')} /> Thông báo
           </Link>
-          <Link to="/admin/feedback" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('feedback') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
+          <Link to="/admin/feedback" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('feedback') ? 'bg-primary/10 text-primary' : 'text-slate-600 hover:bg-slate-50'}`}>
             <Icons.Feedback active={isActive('feedback')} /> Phản ánh
           </Link>
-          <Link to="/admin/import" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('import') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
+          <Link to="/admin/import" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('import') ? 'bg-primary/10 text-primary' : 'text-slate-600 hover:bg-slate-50'}`}>
             <Icons.Import active={isActive('import')} /> Import học viên
           </Link>
-          <Link to="/admin/tuition" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('tuition') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
+          <Link to="/admin/tuition" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('tuition') ? 'bg-primary/10 text-primary' : 'text-slate-600 hover:bg-slate-50'}`}>
             <Icons.Tuition active={isActive('tuition')} /> Học phí
           </Link>
         </nav>
 
-        <div className="p-4 border-t border-slate-100">
+        <div className="p-4 border-t border-slate-100 space-y-1">
+           {/* Khối danh tính người đang đăng nhập */}
+           <div className="flex items-center gap-3 px-3 py-2.5 mb-1 rounded-xl bg-slate-50">
+             <StudentAvatar name={currentUser?.name} size={38} />
+             <div className="min-w-0">
+               <p className="text-sm font-bold text-slate-800 truncate">{currentUser?.name || 'Quản trị'}</p>
+               <p className="text-[11px] text-slate-500 truncate">Quản trị viên</p>
+             </div>
+           </div>
            <button onClick={handleLogout} className="flex items-center gap-3 px-4 py-3 rounded-xl w-full text-slate-500 hover:bg-red-50 hover:text-red-600 transition-all font-medium text-sm">
              <Icons.Logout /> Đăng xuất
            </button>
@@ -166,9 +194,9 @@ const AdminLayout = () => {
       <header className="md:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-slate-200 z-50 px-4 flex justify-between items-center shadow-sm">
         <div className="flex items-center gap-2">
           <img src="/BA LOGO.png" alt="Logo" className="w-7 h-7 object-contain" />
-          <span className="text-[#2B6830] font-bold text-sm">CỔNG QUẢN TRỊ</span>
+          <span className="text-primary font-bold text-sm">CỔNG QUẢN TRỊ</span>
         </div>
-        <button onClick={handleLogout} className="p-2 text-slate-400 hover:text-red-500"><Icons.Logout /></button>
+        <button onClick={handleLogout} aria-label="Đăng xuất" title="Đăng xuất" className="p-2 text-slate-500 hover:text-red-500"><Icons.Logout /></button>
       </header>
 
       {/* MAIN CONTENT - vuot ngang tren mobile de chuyen the truoc/sau */}
@@ -176,24 +204,44 @@ const AdminLayout = () => {
         <div key={slideKey} className={`max-w-6xl mx-auto ${slideClass}`}><Outlet /></div>
       </main>
 
-      {/* MOBILE BOTTOM NAV - cuon ngang duoc vi nhieu the; an thanh cuon cho gon */}
-      <nav
-        ref={bottomNavRef}
-        className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 h-16 flex items-center overflow-x-auto overflow-y-hidden z-50 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] [&::-webkit-scrollbar]:hidden"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
-      >
-        <Link to="/admin/dashboard" data-active={isActive('dashboard')} className={mobileLinkClass('dashboard')}><Icons.Dashboard active={isActive('dashboard')} /><span className="text-[10px] font-medium">Dashboard</span></Link>
-        <Link to="/admin/staff" data-active={isActive('staff')} className={mobileLinkClass('staff')}><Icons.Staff active={isActive('staff')} /><span className="text-[10px] font-medium">Nhân sự</span></Link>
-        <Link to="/admin/students" data-active={isActive('students')} className={mobileLinkClass('students')}><Icons.Student active={isActive('students')} /><span className="text-[10px] font-medium">Học viên</span></Link>
-        <Link to="/admin/data" data-active={isActive('data')} className={mobileLinkClass('data')}><Icons.Data active={isActive('data')} /><span className="text-[10px] font-medium">Dữ liệu</span></Link>
-        <Link to="/admin/stats" data-active={isActive('stats')} className={mobileLinkClass('stats')}><Icons.Stats active={isActive('stats')} /><span className="text-[10px] font-medium">Thống kê</span></Link>
-        <Link to="/admin/skins" data-active={isActive('skins')} className={mobileLinkClass('skins')}><Icons.Skins active={isActive('skins')} /><span className="text-[10px] font-medium">Skin</span></Link>
-        <Link to="/admin/autobonus" data-active={isActive('autobonus')} className={mobileLinkClass('autobonus')}><Icons.Bonus active={isActive('autobonus')} /><span className="text-[10px] font-medium">AutoBonus</span></Link>
-        <Link to="/admin/notifications" data-active={isActive('notifications')} className={mobileLinkClass('notifications')}><Icons.Noti active={isActive('notifications')} /><span className="text-[10px] font-medium">TBáo</span></Link>
-        <Link to="/admin/feedback" data-active={isActive('feedback')} className={mobileLinkClass('feedback')}><Icons.Feedback active={isActive('feedback')} /><span className="text-[10px] font-medium">Phản ánh</span></Link>
-        <Link to="/admin/import" data-active={isActive('import')} className={mobileLinkClass('import')}><Icons.Import active={isActive('import')} /><span className="text-[10px] font-medium">Import</span></Link>
-        <Link to="/admin/tuition" data-active={isActive('tuition')} className={mobileLinkClass('tuition')}><Icons.Tuition active={isActive('tuition')} /><span className="text-[10px] font-medium">Học phí</span></Link>
+      {/* MOBILE BOTTOM NAV - 4 the chinh + nut Them (mo Drawer chua phan con lai) */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 h-16 flex items-center justify-around z-50 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+        <Link to="/admin/dashboard" className={mobileLinkClass('dashboard')}><Icons.Dashboard active={isActive('dashboard')} /><span className="text-[10px] font-medium">Tổng quan</span></Link>
+        <Link to="/admin/students" className={mobileLinkClass('students')}><Icons.Student active={isActive('students')} /><span className="text-[10px] font-medium">Học viên</span></Link>
+        <Link to="/admin/staff" className={mobileLinkClass('staff')}><Icons.Staff active={isActive('staff')} /><span className="text-[10px] font-medium">Nhân sự</span></Link>
+        <Link to="/admin/tuition" className={mobileLinkClass('tuition')}><Icons.Tuition active={isActive('tuition')} /><span className="text-[10px] font-medium">Học phí</span></Link>
+        <button
+          onClick={() => setMoreOpen(true)}
+          aria-label="Thêm chức năng"
+          className={`relative flex flex-col items-center justify-center shrink-0 min-w-[64px] h-full space-y-1 px-0.5 ${moreActive ? 'text-primary' : 'text-slate-500 hover:text-slate-700'}`}
+        >
+          <Icons.More active={moreActive} /><span className="text-[10px] font-medium">Thêm</span>
+        </button>
       </nav>
+
+      {/* DRAWER "Thêm" - bottom sheet chua cac chuc nang phu (mobile) */}
+      {moreOpen && (
+        <div className="md:hidden fixed inset-0 z-[60]" role="dialog" aria-modal="true" aria-label="Thêm chức năng">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in" onClick={() => setMoreOpen(false)} />
+          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-2xl p-4 pb-8 pb-safe animate-fade-in-up">
+            <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-3" />
+            <p className="stat-label px-1 mb-3">Thêm chức năng</p>
+            <div className="grid grid-cols-4 gap-2">
+              {MORE_ITEMS.map((it) => (
+                <Link
+                  key={it.key}
+                  to={it.to}
+                  onClick={() => setMoreOpen(false)}
+                  className={`flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl text-center transition-colors ${isActive(it.key) ? 'bg-primary/10 text-primary' : 'text-slate-600 hover:bg-slate-50'}`}
+                >
+                  <it.Icon active={isActive(it.key)} />
+                  <span className="text-[11px] font-medium leading-tight">{it.label}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

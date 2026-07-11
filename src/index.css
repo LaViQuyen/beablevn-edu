@@ -3,15 +3,17 @@
 @tailwind utilities;
 
 /* ============================================================
-   DESIGN TOKENS — Be Able VN / 2Sol EDU
+   DESIGN TOKENS, Be Able VN / 2Sol EDU
    Thay đổi màu thương hiệu: chỉ cần sửa --color-primary
    ============================================================ */
 :root {
-  /* === Màu thương hiệu === */
-  --color-primary:        #2B6830;
-  --color-primary-hover:  #1E5225;
-  --color-primary-light:  #E8F4EC;   /* bg-[#E8F4EC] tương đương */
-  --color-primary-ring:   #2B6830/10;
+  /* === Màu thương hiệu (RGB triplet, 1 nguồn sự thật, map vào Tailwind qua <alpha-value>) ===
+     Đổi màu brand: chỉ cần sửa 5 biến dưới đây là lan ra toàn app (bg-primary, text-primary, bg-primary/10...). */
+  --color-primary:        43 104 48;    /* #2B6830 Forest Green */
+  --color-primary-hover:  30 82 37;     /* #1E5225 Dark Forest */
+  --color-primary-light:  232 244 236;  /* #E8F4EC tint nền callout */
+  --color-primary-medium: 61 139 71;    /* #3D8B47 medium */
+  --color-primary-subtle: 242 248 244;  /* #F2F8F4 nền rất nhạt */
 
   /* === Màu trạng thái === */
   --color-success:   #059669;
@@ -21,8 +23,8 @@
 
   /* === Border radius === */
   --radius-sm:  6px;   /* badge, tag nhỏ */
-  --radius-md:  12px;  /* input, button, card — rounded-xl */
-  --radius-lg:  16px;  /* modal, drawer     — rounded-2xl */
+  --radius-md:  12px;  /* input, button, card, rounded-xl */
+  --radius-lg:  16px;  /* modal, drawer    , rounded-2xl */
   --radius-full: 9999px; /* pill, avatar */
 
   /* === Shadow === */
@@ -50,7 +52,7 @@ button, input, optgroup, select, textarea {
 }
 
 /* ============================================================
-   UTILITY CLASSES — Design System
+   UTILITY CLASSES, Design System
    Dùng trong JSX: className="btn-primary", "card", "input-base"
    ============================================================ */
 @layer components {
@@ -59,20 +61,20 @@ button, input, optgroup, select, textarea {
   .btn {
     @apply inline-flex items-center justify-center gap-2 font-bold rounded-xl transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
   }
-  .btn-sm  { @apply btn px-3 py-2 text-xs; }
+  .btn-sm  { @apply btn px-3 py-1.5 text-xs; }
   .btn-md  { @apply btn px-5 py-2.5 text-sm; }
   .btn-lg  { @apply btn px-8 py-3 text-sm; }
 
-  .btn-primary  { @apply btn-md bg-[#2B6830] text-white hover:bg-[#1E5225] shadow-sm; }
+  .btn-primary  { @apply btn-md bg-primary text-white hover:bg-primary-hover shadow-sm; }
   .btn-secondary{ @apply btn-md bg-slate-100 text-slate-700 hover:bg-slate-200; }
   .btn-danger   { @apply btn-md bg-red-500 text-white hover:bg-red-600; }
   .btn-ghost    { @apply btn-md text-slate-600 hover:bg-slate-100; }
-  .btn-outline  { @apply btn-md border border-[#2B6830] text-[#2B6830] hover:bg-[#2B6830] hover:text-white; }
+  .btn-outline  { @apply btn-md border border-primary text-primary hover:bg-primary hover:text-white; }
 
   /* --- Inputs --- */
   .input-base {
     @apply w-full border border-slate-200 p-3 rounded-xl text-sm outline-none
-           focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10
+           focus:border-primary focus:ring-2 focus:ring-primary/10
            bg-white transition-all placeholder:text-slate-400;
   }
   .input-error {
@@ -81,7 +83,7 @@ button, input, optgroup, select, textarea {
 
   /* --- Cards --- */
   .card {
-    @apply bg-white rounded-xl border border-slate-100 shadow-sm;
+    @apply bg-white rounded-2xl border border-slate-100 shadow-sm;
   }
   .card-hover {
     @apply card hover:shadow-md hover:border-green-100 transition-all;
@@ -94,11 +96,11 @@ button, input, optgroup, select, textarea {
   .badge {
     @apply inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded border uppercase tracking-wide;
   }
-  .badge-blue   { @apply badge bg-[#E8F4EC] text-green-700 border-green-200; }
+  .badge-blue   { @apply badge bg-primary-light text-green-700 border-green-200; }
   .badge-green  { @apply badge bg-green-50 text-green-700 border-green-200; }
   .badge-amber  { @apply badge bg-amber-50 text-amber-700 border-amber-200; }
   .badge-red    { @apply badge bg-red-50 text-red-700 border-red-200; }
-  .badge-purple { @apply badge bg-[#E8F4EC] text-green-700 border-green-200; }
+  .badge-purple { @apply badge bg-primary-light text-green-700 border-green-200; }
   .badge-slate  { @apply badge bg-slate-50 text-slate-600 border-slate-200; }
 
   /* --- Section headers --- */
@@ -111,7 +113,7 @@ button, input, optgroup, select, textarea {
 
   /* --- Form labels --- */
   .label {
-    @apply text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1.5;
+    @apply text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1.5;
   }
 
   /* --- Skeleton pulse --- */
@@ -131,11 +133,11 @@ button, input, optgroup, select, textarea {
   /* --- CHUAN DONG BO 3 CONG (Admin / Staff / Student) ---
      Title trang, title muc, box trang, bang, chi so: moi trang dung chung
      cac class nay de size + mau thong nhat. Doi 1 cho la lan toa ca app. */
-  .page-title    { @apply text-xl font-bold text-[#2B6830] tracking-tight; }
-  .page-sub      { @apply text-xs text-slate-400 mt-0.5; }
+  .page-title    { @apply text-xl font-bold text-primary tracking-tight; }
+  .page-sub      { @apply text-xs text-slate-500 mt-0.5; }
   .section-title { @apply text-base font-bold text-slate-800; }
   .card-std      { @apply bg-white rounded-2xl border border-slate-100 shadow-sm; }
-  .stat-label    { @apply text-xs font-bold text-slate-400 uppercase tracking-wider; }
+  .stat-label    { @apply text-xs font-bold text-slate-500 uppercase tracking-wider; }
   .stat-value    { @apply text-3xl font-extrabold text-slate-800 leading-tight; }
 
   /* --- Bang chuan: dat 1 class len <table>, th/td tu an style --- */
@@ -188,7 +190,7 @@ button, input, optgroup, select, textarea {
 .custom-scrollbar { scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
 
 /* ============================================================
-   QUILL RICH TEXT — áp dụng cho cả editor lẫn display
+   QUILL RICH TEXT, áp dụng cho cả editor lẫn display
    ============================================================ */
 .quill-content ul,
 .ql-editor ul { list-style-type: disc !important; padding-left: 1.5rem !important; margin-bottom: 0.5rem !important; }
@@ -199,7 +201,7 @@ button, input, optgroup, select, textarea {
 
 /* ============================================================
    CHỐNG TRÀN NGANG TRÊN MOBILE cho nội dung thông báo (HTML từ Quill / tab Code)
-   — chữ dài, link dài, bảng, ảnh đều gói gọn trong khung
+  , chữ dài, link dài, bảng, ảnh đều gói gọn trong khung
    ============================================================ */
 .quill-content {
   max-width: 100%;

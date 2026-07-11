@@ -20,7 +20,7 @@ const DrillPanel = ({ fb, onRetry, onNext, onHearModel }) => {
   return (
     <div className="card card-body mt-4">
       {d.praise_vi ? (
-        <p className="text-[#1E5225] font-semibold text-sm my-2">
+        <p className="text-primary-hover font-semibold text-sm my-2">
           <MdBold text={d.praise_vi} />
         </p>
       ) : null}
@@ -39,8 +39,8 @@ const DrillPanel = ({ fb, onRetry, onNext, onHearModel }) => {
       </div>
 
       {d.model_answer ? (
-        <div className="bg-[#E8F4EC] rounded-xl p-3 text-sm my-2">
-          <span className="block text-[#2B6830] font-bold text-[11px] uppercase tracking-wide mb-1">
+        <div className="bg-primary-light rounded-xl p-3 text-sm my-2">
+          <span className="block text-primary font-bold text-[11px] uppercase tracking-wide mb-1">
             ✍ Câu đúng để nói theo
           </span>
           <span>{d.model_answer}</span>
@@ -48,7 +48,7 @@ const DrillPanel = ({ fb, onRetry, onNext, onHearModel }) => {
             <button
               type="button"
               onClick={onHearModel}
-              className="mt-2 bg-white text-[#2B6830] border-[1.5px] border-[#2B6830] rounded-xl px-3.5 py-1.5 text-[12.5px] font-semibold hover:bg-[#E8F4EC] transition-colors"
+              className="mt-2 bg-white text-primary border-[1.5px] border-primary rounded-xl px-3.5 py-1.5 text-[12.5px] font-semibold hover:bg-primary-light transition-colors"
             >
               🔊 Nghe đọc mẫu
             </button>

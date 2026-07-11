@@ -1,5 +1,5 @@
 // ============================================================
-// AUTO-BONUS — luật tự động cộng điểm Bonus khi GIÁO VIÊN nhập điểm.
+// AUTO-BONUS, luật tự động cộng điểm Bonus khi GIÁO VIÊN nhập điểm.
 // Chạy client-side ngay lúc lưu (không cần Cloud Function/Blaze).
 // Cấu hình lưu ở node DB `bonusRules` (Admin chỉnh); thiếu → dùng DEFAULT.
 //

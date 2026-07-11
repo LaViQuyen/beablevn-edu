@@ -88,11 +88,11 @@ function exitFullscreen() {
 const PromptBox = ({ p }) => {
   if (!p) return null;
   return (
-    <div className="bg-[#F2F8F4] border border-[#C9E2CF] rounded-xl p-4 md:p-5">
-      <p className="text-[11px] font-bold text-[#2B6830] uppercase tracking-wide">
+    <div className="bg-primary-subtle border border-[#C9E2CF] rounded-xl p-4 md:p-5">
+      <p className="text-[11px] font-bold text-primary uppercase tracking-wide">
         Đề bài · IELTS Writing Task 2
       </p>
-      <p className="mt-1.5 text-[15px] md:text-base font-bold text-[#1E5225] leading-relaxed">
+      <p className="mt-1.5 text-[15px] md:text-base font-bold text-primary-hover leading-relaxed">
         {p.prompt_en}
       </p>
       {p.prompt_vi && (
@@ -101,11 +101,11 @@ const PromptBox = ({ p }) => {
       {(p.view1_en || p.view2_en) && (
         <div className="mt-3 flex flex-col sm:flex-row gap-2.5">
           <div className="flex-1 bg-white border border-[#C9E2CF] rounded-lg px-3 py-2.5">
-            <p className="text-[10px] font-bold uppercase tracking-wide text-[#2B6830]">Quan điểm 1</p>
+            <p className="text-[10px] font-bold uppercase tracking-wide text-primary">Quan điểm 1</p>
             <p className="text-[13px] mt-0.5 leading-relaxed">{p.view1_en}</p>
           </div>
           <div className="flex-1 bg-white border border-[#C9E2CF] rounded-lg px-3 py-2.5">
-            <p className="text-[10px] font-bold uppercase tracking-wide text-[#2B6830]">Quan điểm 2</p>
+            <p className="text-[10px] font-bold uppercase tracking-wide text-primary">Quan điểm 2</p>
             <p className="text-[13px] mt-0.5 leading-relaxed">{p.view2_en}</p>
           </div>
         </div>
@@ -119,7 +119,7 @@ const ComponentGuide = ({ c }) => {
   if (!c) return null;
   return (
     <div>
-      <div className="bg-[#E8F4EC] border-l-4 border-[#2B6830] rounded-lg px-4 py-3 text-sm leading-relaxed">
+      <div className="bg-primary-light border-l-4 border-primary rounded-lg px-4 py-3 text-sm leading-relaxed">
         <p>
           <b>Khái niệm:</b> {c.guide_vi}
         </p>
@@ -127,20 +127,20 @@ const ComponentGuide = ({ c }) => {
           <b>Cách làm:</b> {c.how_to_vi}
         </p>
         {c.frame && (
-          <div className="mt-2.5 bg-white border border-dashed border-[#C9E2CF] rounded-lg px-3 py-2 font-mono text-[13px] text-[#1E5225] overflow-x-auto whitespace-nowrap">
+          <div className="mt-2.5 bg-white border border-dashed border-[#C9E2CF] rounded-lg px-3 py-2 font-mono text-[13px] text-primary-hover overflow-x-auto whitespace-nowrap">
             Khung gợi ý: {c.frame}
           </div>
         )}
       </div>
       {c.synonyms && c.synonyms.length > 0 && (
         <div className="mt-3">
-          <p className="text-xs font-bold text-[#1E5225]">Từ đồng nghĩa nên dùng</p>
+          <p className="text-xs font-bold text-primary-hover">Từ đồng nghĩa nên dùng</p>
           <div className="overflow-x-auto mt-1.5">
             <table className="w-full text-[13px] border-collapse">
               <tbody>
                 {c.synonyms.map((s, i) => (
                   <tr key={i}>
-                    <td className="border border-[#C9E2CF] bg-[#F2F8F4] font-bold text-[#1E5225] px-2.5 py-1.5 w-1/3">
+                    <td className="border border-[#C9E2CF] bg-primary-subtle font-bold text-primary-hover px-2.5 py-1.5 w-1/3">
                       {s.from}
                     </td>
                     <td className="border border-[#C9E2CF] px-2.5 py-1.5">{s.to}</td>
@@ -170,7 +170,7 @@ const ComponentGuide = ({ c }) => {
 // Bộ câu mẫu Band 7/8/9
 const ExemplarList = ({ data }) => (
   <div className="mt-3">
-    <h4 className="text-[13px] font-bold text-[#1E5225] uppercase tracking-wide">
+    <h4 className="text-[13px] font-bold text-primary-hover uppercase tracking-wide">
       Câu mẫu nâng band cho cấu phần này
     </h4>
     {[
@@ -180,9 +180,9 @@ const ExemplarList = ({ data }) => (
     ].map(([k, lbl]) => {
       const e = (data && data[k]) || {};
       return (
-        <div key={k} className="bg-[#F2F8F4] border border-[#C9E2CF] rounded-xl px-3.5 py-3 mt-2">
-          <p className="text-[11px] font-extrabold text-[#2B6830] uppercase">{lbl}</p>
-          <p className="text-sm italic text-[#1E5225] mt-1 leading-relaxed">{e.sentence || ''}</p>
+        <div key={k} className="bg-primary-subtle border border-[#C9E2CF] rounded-xl px-3.5 py-3 mt-2">
+          <p className="text-[11px] font-extrabold text-primary uppercase">{lbl}</p>
+          <p className="text-sm italic text-primary-hover mt-1 leading-relaxed">{e.sentence || ''}</p>
           {e.note && <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">→ {e.note}</p>}
         </div>
       );
@@ -192,7 +192,7 @@ const ExemplarList = ({ data }) => (
 
 const Spinner = ({ className = '' }) => (
   <span
-    className={`inline-block w-4 h-4 border-[3px] border-[#3D8B47] border-t-transparent rounded-full animate-spin align-middle ${className}`}
+    className={`inline-block w-4 h-4 border-[3px] border-primary-medium border-t-transparent rounded-full animate-spin align-middle ${className}`}
   />
 );
 
@@ -527,7 +527,7 @@ const IntroCoach = () => {
 
       {/* overlay bận khi chờ chấm */}
       {grading && (
-        <div className="fixed inset-0 z-50 bg-[#1E5225]/95 flex items-center justify-center p-6 text-center">
+        <div className="fixed inset-0 z-50 bg-primary-hover/95 flex items-center justify-center p-6 text-center">
           <div>
             <div className="w-11 h-11 border-4 border-white/30 border-t-white rounded-full animate-spin mx-auto" />
             <p className="mt-4 text-white font-bold text-base">Đang đối chiếu thang điểm chuẩn...</p>
@@ -538,7 +538,7 @@ const IntroCoach = () => {
 
       {/* overlay giám sát toàn màn hình */}
       {guardOverlay && (
-        <div className="fixed inset-0 z-[60] bg-[#1E5225]/[.97] text-white flex items-center justify-center p-6 text-center">
+        <div className="fixed inset-0 z-[60] bg-primary-hover/[.97] text-white flex items-center justify-center p-6 text-center">
           <div className="max-w-md">
             {guardOverlay.kind === 'warn' ? (
               <>
@@ -551,7 +551,7 @@ const IntroCoach = () => {
                 </p>
                 <Button
                   size="lg"
-                  className="!bg-white !text-[#2B6830] hover:!bg-[#E8F4EC]"
+                  className="!bg-white !text-primary hover:!bg-primary-light"
                   onClick={async () => {
                     await enterFullscreen();
                     setGuardOverlay(null);
@@ -570,7 +570,7 @@ const IntroCoach = () => {
                 </p>
                 <Button
                   size="lg"
-                  className="!bg-white !text-[#2B6830] hover:!bg-[#E8F4EC]"
+                  className="!bg-white !text-primary hover:!bg-primary-light"
                   onClick={handleLockReset}
                 >
                   Về màn hình bắt đầu
@@ -585,13 +585,13 @@ const IntroCoach = () => {
       <div className="flex items-center justify-between">
         <Link
           to="/student/resources"
-          className="inline-flex items-center gap-1 text-sm font-bold text-[#2B6830] hover:underline py-2"
+          className="inline-flex items-center gap-1 text-sm font-bold text-primary hover:underline py-2"
         >
           ← Công cụ
         </Link>
       </div>
       <div className="text-center mt-1 mb-4 px-2">
-        <h1 className="text-xl md:text-2xl font-extrabold text-[#2B6830] uppercase tracking-wide">
+        <h1 className="text-xl md:text-2xl font-extrabold text-primary uppercase tracking-wide">
           Writing Intro Coach
         </h1>
         <p className="text-[13px] md:text-sm text-slate-500 mt-1.5 leading-relaxed">
@@ -609,12 +609,12 @@ const IntroCoach = () => {
             <div key={lab} className="flex-1 text-center">
               <div
                 className={`h-1.5 rounded-full transition-colors ${
-                  done ? 'bg-[#2B6830]' : active ? 'bg-[#B8860B]' : 'bg-[#C9E2CF]'
+                  done ? 'bg-primary' : active ? 'bg-[#B8860B]' : 'bg-[#C9E2CF]'
                 }`}
               />
               <div
                 className={`mt-1.5 text-[11px] font-semibold whitespace-nowrap ${
-                  done ? 'text-[#2B6830]' : active ? 'text-[#B8860B]' : 'text-slate-400'
+                  done ? 'text-primary' : active ? 'text-[#B8860B]' : 'text-slate-400'
                 }`}
               >
                 {lab}
@@ -628,7 +628,7 @@ const IntroCoach = () => {
       {screen === 'start' && (
         <section className="card card-body">
           <h2 className="section-title">Bắt đầu</h2>
-          <label className="block text-[13px] font-semibold text-[#1E5225] mt-4 mb-1.5" htmlFor="introStudentName">
+          <label className="block text-[13px] font-semibold text-primary-hover mt-4 mb-1.5" htmlFor="introStudentName">
             Tên học viên (để ghi vào lịch sử luyện tập)
           </label>
           <input
@@ -639,7 +639,7 @@ const IntroCoach = () => {
             value={studentName}
             onChange={(e) => setStudentName(e.target.value)}
           />
-          <p className="block text-[13px] font-semibold text-[#1E5225] mt-4 mb-1.5">
+          <p className="block text-[13px] font-semibold text-primary-hover mt-4 mb-1.5">
             Trình độ hiện tại của bạn (để góp ý đúng mức)
           </p>
           <div className="flex flex-wrap gap-2">
@@ -650,20 +650,20 @@ const IntroCoach = () => {
                 onClick={() => setStudentLevel(l)}
                 className={`px-4 py-2.5 rounded-full text-[13px] font-semibold border-[1.5px] transition-colors ${
                   l === studentLevel
-                    ? 'bg-[#2B6830] text-white border-[#2B6830]'
-                    : 'bg-[#F2F8F4] text-[#1E5225] border-[#C9E2CF] hover:bg-[#E8F4EC] hover:border-[#2B6830]'
+                    ? 'bg-primary text-white border-primary'
+                    : 'bg-primary-subtle text-primary-hover border-[#C9E2CF] hover:bg-primary-light hover:border-primary'
                 }`}
               >
                 Band {l}
               </button>
             ))}
           </div>
-          <div className="mt-4 bg-[#F2F8F4] border-l-4 border-[#B8860B] rounded-lg px-4 py-3 text-sm leading-relaxed">
+          <div className="mt-4 bg-primary-subtle border-l-4 border-[#B8860B] rounded-lg px-4 py-3 text-sm leading-relaxed">
             <b>Cách học:</b> Mỗi lần bắt đầu, hệ thống cho một <b>đề ngẫu nhiên</b>. Bạn viết lần
             lượt <b>Hook → Paraphrase → Thesis</b>. Mỗi câu được chấm 4 tiêu chí; <b>đạt Band 7</b>{' '}
             mới mở phần tiếp theo. Cứ viết lại đến khi ổn nhé.
           </div>
-          <div className="mt-3 bg-[#E8F4EC] border-l-4 border-[#2B6830] rounded-lg px-4 py-3 text-sm leading-relaxed">
+          <div className="mt-3 bg-primary-light border-l-4 border-primary rounded-lg px-4 py-3 text-sm leading-relaxed">
             <b>Lưu ý:</b> Khi bấm "Bắt đầu", tool sẽ mở <b>toàn màn hình</b> để bạn tập trung.
             Thoát ra ngoài quá 2 lần sẽ kết thúc phiên.
           </div>
@@ -682,7 +682,7 @@ const IntroCoach = () => {
 
           <div className="mt-5 flex items-center justify-between gap-3 flex-wrap">
             <h2 className="section-title">{curComp.title}</h2>
-            <span className="bg-[#2B6830] text-white text-[13px] font-bold px-3 py-1 rounded-full whitespace-nowrap">
+            <span className="bg-primary text-white text-[13px] font-bold px-3 py-1 rounded-full whitespace-nowrap">
               Mục tiêu {curComp.target || 'Band 7'}
             </span>
           </div>
@@ -690,7 +690,7 @@ const IntroCoach = () => {
             <ComponentGuide c={components[compIdx]} />
           </div>
 
-          <label className="block text-[13px] font-semibold text-[#1E5225] mt-5 mb-1.5" htmlFor="introWriteBox">
+          <label className="block text-[13px] font-semibold text-primary-hover mt-5 mb-1.5" htmlFor="introWriteBox">
             Viết câu của bạn cho cấu phần này (tiếng Anh)
           </label>
           <textarea
@@ -725,19 +725,19 @@ const IntroCoach = () => {
                 </div>
               ) : (
                 <>
-                  <p className="text-xl font-extrabold text-[#1E5225]">
+                  <p className="text-xl font-extrabold text-primary-hover">
                     Overall Band: {fbData.overall_band || '–'}
                   </p>
 
                   <div className="mt-3">
-                    <h4 className="text-[13px] font-bold text-[#1E5225] uppercase tracking-wide mb-1.5">
+                    <h4 className="text-[13px] font-bold text-primary-hover uppercase tracking-wide mb-1.5">
                       4 tiêu chí
                     </h4>
                     {CRIT_ORDER.map((k) => {
                       const o = crit[k] || {};
                       return (
                         <div key={k} className="flex items-start gap-2.5 my-2">
-                          <div className="w-11 shrink-0 font-extrabold text-[#1E5225] text-[13px] pt-0.5">
+                          <div className="w-11 shrink-0 font-extrabold text-primary-hover text-[13px] pt-0.5">
                             {k}
                           </div>
                           <span
@@ -756,11 +756,11 @@ const IntroCoach = () => {
 
                   {fbData.strengths && fbData.strengths.length > 0 && (
                     <div className="mt-3">
-                      <h4 className="text-[13px] font-bold text-[#1E5225] uppercase tracking-wide mb-1.5">
+                      <h4 className="text-[13px] font-bold text-primary-hover uppercase tracking-wide mb-1.5">
                         ✓ Điểm tốt
                       </h4>
                       {fbData.strengths.map((s, i) => (
-                        <div key={i} className="bg-[#E8F4EC] rounded-lg px-3 py-2.5 my-1.5 text-sm leading-relaxed">
+                        <div key={i} className="bg-primary-light rounded-lg px-3 py-2.5 my-1.5 text-sm leading-relaxed">
                           <MdBold text={s} />
                         </div>
                       ))}
@@ -769,7 +769,7 @@ const IntroCoach = () => {
 
                   {fbData.issues && fbData.issues.length > 0 && (
                     <div className="mt-3">
-                      <h4 className="text-[13px] font-bold text-[#1E5225] uppercase tracking-wide mb-1.5">
+                      <h4 className="text-[13px] font-bold text-primary-hover uppercase tracking-wide mb-1.5">
                         Cần chỉnh
                       </h4>
                       {fbData.issues.map((iss, i) => {
@@ -793,24 +793,24 @@ const IntroCoach = () => {
 
                   {fbData.model_sentence && (
                     <div className="mt-3">
-                      <h4 className="text-[13px] font-bold text-[#1E5225] uppercase tracking-wide mb-1.5">
+                      <h4 className="text-[13px] font-bold text-primary-hover uppercase tracking-wide mb-1.5">
                         Câu mẫu tham khảo (~B7.5)
                       </h4>
-                      <div className="bg-white border-[1.5px] border-[#2B6830] rounded-lg px-3.5 py-3 text-[15px] italic leading-relaxed">
+                      <div className="bg-white border-[1.5px] border-primary rounded-lg px-3.5 py-3 text-[15px] italic leading-relaxed">
                         {fbData.model_sentence}
                       </div>
                     </div>
                   )}
 
                   {fbData.next_hint && (
-                    <div className="mt-3 bg-[#E8F4EC] border-l-4 border-[#2B6830] rounded-lg px-4 py-3 text-sm leading-relaxed">
+                    <div className="mt-3 bg-primary-light border-l-4 border-primary rounded-lg px-4 py-3 text-sm leading-relaxed">
                       <b>Đi xa hơn:</b> <MdBold text={fbData.next_hint} />
                     </div>
                   )}
 
                   <div
                     className={`mt-4 rounded-xl px-4 py-3 text-white font-bold text-center ${
-                      passed ? 'bg-[#2B6830]' : 'bg-[#9A6A2B]'
+                      passed ? 'bg-primary' : 'bg-[#9A6A2B]'
                     }`}
                   >
                     {passed
@@ -877,18 +877,18 @@ const IntroCoach = () => {
           <p className="text-[13px] text-slate-500 mt-1">
             Mở bài hoàn chỉnh của bạn (ghép 3 cấu phần đã đạt):
           </p>
-          <div className="my-3 bg-white border-[1.5px] border-[#2B6830] rounded-lg px-3.5 py-3 text-[15px] italic leading-relaxed">
+          <div className="my-3 bg-white border-[1.5px] border-primary rounded-lg px-3.5 py-3 text-[15px] italic leading-relaxed">
             {finalIntro}
           </div>
           <div className="space-y-2.5">
             {results.filter(Boolean).map((r) => (
               <div
                 key={r.key}
-                className="bg-[#E8F4EC] border-l-4 border-[#2B6830] rounded-lg px-4 py-3 text-sm leading-relaxed"
+                className="bg-primary-light border-l-4 border-primary rounded-lg px-4 py-3 text-sm leading-relaxed"
               >
                 <span
                   className={`inline-block text-white text-[13px] font-bold px-3 py-0.5 rounded-full mr-2 ${
-                    parseFloat(r.overall_band) >= 8 ? 'bg-[#B8860B]' : 'bg-[#2B6830]'
+                    parseFloat(r.overall_band) >= 8 ? 'bg-[#B8860B]' : 'bg-primary'
                   }`}
                 >
                   Band {r.overall_band}
@@ -900,7 +900,7 @@ const IntroCoach = () => {
           </div>
 
           {/* lưu lịch sử (thay cho xuất file .docx của bản gốc) */}
-          <div className="mt-4 bg-[#F2F8F4] border-l-4 border-[#B8860B] rounded-lg px-4 py-3 text-sm leading-relaxed">
+          <div className="mt-4 bg-primary-subtle border-l-4 border-[#B8860B] rounded-lg px-4 py-3 text-sm leading-relaxed">
             <b>Lưu lại buổi học:</b> Kết quả phiên luyện (đề bài, từng cấu phần kèm band 4 tiêu chí)
             được lưu tự động vào <b>Lịch sử luyện tập</b> của em.
           </div>
@@ -911,7 +911,7 @@ const IntroCoach = () => {
               </span>
             )}
             {saveStatus === 'done' && (
-              <span className="text-[#2B6830] font-semibold">
+              <span className="text-primary font-semibold">
                 ✓ Đã lưu vào Lịch sử luyện tập.{' '}
                 <Link to="/student/resources/history" className="underline font-bold">
                   Xem lịch sử

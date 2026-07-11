@@ -7,17 +7,21 @@ export default {
   theme: {
     extend: {
       colors: {
-        // === Brand colors — wire vào CSS variables ===
+        // === Brand colors, 1 NGUỒN SỰ THẬT ===
+        // Màu định nghĩa dạng RGB triplet trong :root (src/index.css); đổi màu brand
+        // chỉ cần sửa biến ở đó là lan ra cả app. <alpha-value> giữ được opacity (bg-primary/10).
         primary: {
-          DEFAULT: '#2B6830',
-          hover:   '#1E5225',
-          light:   '#E8F4EC',
+          DEFAULT: 'rgb(var(--color-primary) / <alpha-value>)',
+          hover:   'rgb(var(--color-primary-hover) / <alpha-value>)',
+          light:   'rgb(var(--color-primary-light) / <alpha-value>)',
+          medium:  'rgb(var(--color-primary-medium) / <alpha-value>)',
+          subtle:  'rgb(var(--color-primary-subtle) / <alpha-value>)',
         },
         // === Semantic colors ===
         success: '#059669',
         warning: '#D97706',
         danger:  '#DC2626',
-        info:    '#2B6830',
+        info:    'rgb(var(--color-primary) / <alpha-value>)',
       },
       borderRadius: {
         // Đồng nhất border radius theo design system

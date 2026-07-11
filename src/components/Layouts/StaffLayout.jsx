@@ -6,6 +6,7 @@ import { db } from '../../firebase';
 import { ref, update, get, onValue, push, set } from 'firebase/database';
 import bcrypt from 'bcryptjs'; // Import mã hóa
 import { StaffNotifyEngine } from '../NotificationEngine'; // thông báo + chuông cho FF/FF+/BOD
+import StudentAvatar from '../StudentAvatar'; // avatar cho khối danh tính người đăng nhập
 
 const Icons = {
   Class: ({ active }) => (
@@ -68,6 +69,12 @@ const Icons = {
       <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
     </svg>
   ),
+  // Icon "Thêm" (dấu 3 chấm) mở Drawer chức năng phụ trên mobile
+  More: ({ active }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill={active ? "#2B6830" : "#64748b"} className="w-5 h-5">
+      <path d="M6 12a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM13.5 12a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM21 12a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
+    </svg>
+  ),
 };
 
 const StaffLayout = () => {
@@ -86,6 +93,7 @@ const StaffLayout = () => {
   const [bodAccess, setBodAccess] = useState(false); // cờ quyền BOD (realtime)
   const [giftPending, setGiftPending] = useState(0); // badge số đơn QUÀ chờ duyệt (BOD)
   const [modAccess, setModAccess] = useState(false); // cờ quyền MOD (thưởng Bonus nhân sự)
+  const [moreOpen, setMoreOpen] = useState(false);   // Drawer "Thêm" trên mobile
 
   // Badge Hộp thư = số phản ánh CHƯA xử lý (theo lớp phụ trách) + tin nhắn chưa đọc
   useEffect(() => {
@@ -153,7 +161,7 @@ const StaffLayout = () => {
     })();
   }, [currentUser?.id]);
 
-  // Theo dõi cờ FF realtime — admin gán/gỡ là menu hiện/ẩn ngay
+  // Theo dõi cờ FF realtime, admin gán/gỡ là menu hiện/ẩn ngay
   useEffect(() => {
     if (!currentUser?.id) return;
     if (currentUser.role === 'admin') { setFfAccess(true); return; }
@@ -169,7 +177,7 @@ const StaffLayout = () => {
     return () => unsubB();
   }, [currentUser?.id, currentUser?.role]);
 
-  // Theo dõi cờ MOD realtime — admin gán/gỡ là menu Thưởng Bonus hiện/ẩn ngay
+  // Theo dõi cờ MOD realtime, admin gán/gỡ là menu Thưởng Bonus hiện/ẩn ngay
   useEffect(() => {
     if (!currentUser?.id) return;
     if (currentUser.role === 'admin') { setModAccess(true); return; }
@@ -191,7 +199,7 @@ const StaffLayout = () => {
 
   const isActive = (path) => location.pathname.includes(path);
   // Moi the co be rong toi thieu co dinh + khong co lai (shrink-0) de thanh nav cuon ngang duoc
-  const mobileLinkClass = (path) => `flex flex-col items-center justify-center shrink-0 min-w-[64px] h-full space-y-1 px-0.5 ${isActive(path) ? 'text-[#2B6830]' : 'text-slate-400 hover:text-slate-600'}`;
+  const mobileLinkClass = (path) => `relative flex flex-col items-center justify-center shrink-0 min-w-[64px] h-full space-y-1 px-0.5 ${isActive(path) ? "text-primary before:absolute before:top-0 before:inset-x-3.5 before:h-[3px] before:bg-primary before:rounded-b-full" : 'text-slate-500 hover:text-slate-700'}`;
 
   // Thu tu the tren bottom nav - dung cho VUOT NGANG chuyen the (mobile);
   // cac the theo co quyen (FF/BOD/MOD) chi vao day khi duoc cap quyen
@@ -208,6 +216,18 @@ const StaffLayout = () => {
     ...(modAccess ? [{ key: 'mod-bonus', to: '/staff/mod-bonus' }] : []),
   ];
   const { onTouchStart, onTouchEnd, slideKey, slideClass } = useSwipeTabs(TABS);
+
+  // Bottom nav mobile: 4 thẻ chính hiện trực tiếp, phần còn lại (kể cả tab gated) gom vào Drawer "Thêm"
+  const MORE_ITEMS = [
+    { to: '/staff/notifications', key: 'notifications', label: 'Thông báo',    Icon: Icons.Noti },
+    { to: '/staff/credits',       key: 'credits',       label: 'BAVN Credits', Icon: Icons.Credits },
+    { to: '/staff/skins',         key: 'skins',         label: 'Skin & Game',  Icon: Icons.Game, activeExtra: 'games' },
+    ...(ffAccess  ? [{ to: '/staff/freshfit',  key: 'freshfit',  label: 'Fresh Fit',     Icon: Icons.FreshFit, badge: ffPending }] : []),
+    ...(bodAccess ? [{ to: '/staff/bavn',      key: 'bavn',      label: 'BAVN Center',   Icon: Icons.Bavn, badge: giftPending }] : []),
+    ...(modAccess ? [{ to: '/staff/mod-bonus', key: 'mod-bonus', label: 'Thưởng Bonus',  Icon: Icons.Mod }] : []),
+  ];
+  const moreActive = MORE_ITEMS.some((it) => isActive(it.key) || (it.activeExtra && isActive(it.activeExtra)));
+  const morePending = (ffAccess ? ffPending : 0) + (bodAccess ? giftPending : 0);
 
   // Tu cuon the dang chon vao giua thanh nav
   const bottomNavRef = useRef(null);
@@ -253,14 +273,14 @@ const StaffLayout = () => {
 
   return (
     <div className="flex h-screen bg-slate-50 font-sans">
-      {/* Engine thông báo trình duyệt + âm thanh — đơn mới cho FF/BOD, trạng thái đơn của mình */}
+      {/* Engine thông báo trình duyệt + âm thanh, đơn mới cho FF/BOD, trạng thái đơn của mình */}
       <StaffNotifyEngine currentUser={currentUser} ffAccess={ffAccess} bodAccess={bodAccess} />
       {/* SIDEBAR (Desktop) */}
       <aside className="hidden md:flex flex-col w-64 bg-white border-r border-slate-200 h-full fixed left-0 top-0 z-50">
         <div className="p-6 border-b border-slate-100 flex items-center gap-3">
           <img src="/BA LOGO.png" alt="Logo" className="w-10 h-10 object-contain" />
           <div>
-            <h1 className="font-extrabold text-[#2B6830] text-lg leading-tight">BE ABLE VN</h1>
+            <h1 className="font-extrabold text-primary text-lg leading-tight">BE ABLE VN</h1>
             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Cổng Giáo vụ</p>
           </div>
         </div>
@@ -268,19 +288,19 @@ const StaffLayout = () => {
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           <p className="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 mt-2">Giảng dạy</p>
 
-          <Link to="/staff/classes" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('classes') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
+          <Link to="/staff/classes" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('classes') ? 'bg-primary/10 text-primary' : 'text-slate-600 hover:bg-slate-50'}`}>
             <Icons.Class active={isActive('classes')} /> Thông tin học viên
           </Link>
-          <Link to="/staff/attendance" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('attendance') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
+          <Link to="/staff/attendance" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('attendance') ? 'bg-primary/10 text-primary' : 'text-slate-600 hover:bg-slate-50'}`}>
             <Icons.Attendance active={isActive('attendance')} /> Điểm danh
           </Link>
-          <Link to="/staff/scores" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('scores') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
+          <Link to="/staff/scores" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('scores') ? 'bg-primary/10 text-primary' : 'text-slate-600 hover:bg-slate-50'}`}>
             <Icons.Scores active={isActive('scores')} /> Nhập điểm
           </Link>
-          <Link to="/staff/notifications" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('notifications') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
+          <Link to="/staff/notifications" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('notifications') ? 'bg-primary/10 text-primary' : 'text-slate-600 hover:bg-slate-50'}`}>
             <Icons.Noti active={isActive('notifications')} /> Thông báo
           </Link>
-          <Link to="/staff/inbox" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('inbox') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
+          <Link to="/staff/inbox" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('inbox') ? 'bg-primary/10 text-primary' : 'text-slate-600 hover:bg-slate-50'}`}>
             <Icons.Inbox active={isActive('inbox')} />
             <span className="flex-1">Hộp thư</span>
             {inboxUnread > 0 && (
@@ -290,22 +310,22 @@ const StaffLayout = () => {
             )}
           </Link>
 
-          {/* Ví BAVN Credits — mọi nhân sự đều có */}
+          {/* Ví BAVN Credits, mọi nhân sự đều có */}
           <p className="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 mt-4">Ưu đãi</p>
-          <Link to="/staff/credits" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('credits') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
+          <Link to="/staff/credits" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('credits') ? 'bg-primary/10 text-primary' : 'text-slate-600 hover:bg-slate-50'}`}>
             <Icons.Credits active={isActive('credits')} />
             <span className="flex-1">BAVN Credits</span>
-            <span className="text-[9px] font-bold bg-[#E8F4EC] text-[#2B6830] px-1.5 py-0.5 rounded border border-green-100 uppercase">Mới</span>
+            <span className="text-[9px] font-bold bg-primary-light text-primary px-1.5 py-0.5 rounded border border-green-100 uppercase">Mới</span>
           </Link>
 
-          {/* Skin & Game — nhân sự đổi skin + chơi Hành Trình Trưởng Thành không giới hạn */}
-          <Link to="/staff/skins" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('skins') || isActive('games') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
+          {/* Skin & Game, nhân sự đổi skin + chơi Hành Trình Trưởng Thành không giới hạn */}
+          <Link to="/staff/skins" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('skins') || isActive('games') ? 'bg-primary/10 text-primary' : 'text-slate-600 hover:bg-slate-50'}`}>
             <Icons.Game active={isActive('skins') || isActive('games')} />
             <span className="flex-1">Skin & Game</span>
-            <span className="text-[9px] font-bold bg-[#E8F4EC] text-[#2B6830] px-1.5 py-0.5 rounded border border-green-100 uppercase">Mới</span>
+            <span className="text-[9px] font-bold bg-primary-light text-primary px-1.5 py-0.5 rounded border border-green-100 uppercase">Mới</span>
           </Link>
 
-          {/* BAVN Center — chỉ hiện với cờ BOD (hoặc admin) */}
+          {/* BAVN Center, chỉ hiện với cờ BOD (hoặc admin) */}
           {bodAccess && (
             <Link to="/staff/bavn" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('bavn') ? 'bg-purple-50 text-purple-700' : 'text-slate-600 hover:bg-slate-50'}`}>
               <Icons.Bavn active={isActive('bavn')} />
@@ -318,7 +338,7 @@ const StaffLayout = () => {
             </Link>
           )}
 
-          {/* Khu MOD — thưởng Bonus nhân sự (hiện khi có cờ modAccess hoặc admin) */}
+          {/* Khu MOD, thưởng Bonus nhân sự (hiện khi có cờ modAccess hoặc admin) */}
           {modAccess && (
             <Link to="/staff/mod-bonus" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('mod-bonus') ? 'bg-rose-50 text-rose-700' : 'text-slate-600 hover:bg-slate-50'}`}>
               <Icons.Mod active={isActive('mod-bonus')} />
@@ -327,11 +347,11 @@ const StaffLayout = () => {
             </Link>
           )}
 
-          {/* Khu Fresh Fit — chỉ hiện với nhân sự được gán cờ FF (hoặc admin) */}
+          {/* Khu Fresh Fit, chỉ hiện với nhân sự được gán cờ FF (hoặc admin) */}
           {ffAccess && (
             <>
               <p className="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 mt-4">Fresh Fit</p>
-              <Link to="/staff/freshfit" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('freshfit') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
+              <Link to="/staff/freshfit" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('freshfit') ? 'bg-primary/10 text-primary' : 'text-slate-600 hover:bg-slate-50'}`}>
                 <Icons.FreshFit active={isActive('freshfit')} />
                 <span className="flex-1">Menu & Đổi credits</span>
                 {ffPending > 0 && (
@@ -345,8 +365,16 @@ const StaffLayout = () => {
         </nav>
 
         <div className="p-4 border-t border-slate-100 space-y-1">
+           {/* Khối danh tính người đang đăng nhập */}
+           <div className="flex items-center gap-3 px-3 py-2.5 mb-1 rounded-xl bg-slate-50">
+             <StudentAvatar name={currentUser?.name} size={38} />
+             <div className="min-w-0">
+               <p className="text-sm font-bold text-slate-800 truncate">{currentUser?.name || 'Nhân sự'}</p>
+               <p className="text-[11px] text-slate-500 truncate">{currentUser?.role === 'admin' ? 'Quản trị viên' : 'Giáo vụ'}</p>
+             </div>
+           </div>
            {/* Nút Đổi Mật Khẩu Desktop */}
-           <button onClick={() => setShowPassModal(true)} className="flex items-center gap-3 px-4 py-3 rounded-xl w-full text-slate-500 hover:bg-[#E8F4EC] hover:text-[#2B6830] transition-all font-medium text-sm">
+           <button onClick={() => setShowPassModal(true)} className="flex items-center gap-3 px-4 py-3 rounded-xl w-full text-slate-500 hover:bg-primary-light hover:text-primary transition-all font-medium text-sm">
              <Icons.Key /> Đổi mật khẩu
            </button>
            <button onClick={handleLogout} className="flex items-center gap-3 px-4 py-3 rounded-xl w-full text-slate-500 hover:bg-red-50 hover:text-red-600 transition-all font-medium text-sm">
@@ -359,14 +387,14 @@ const StaffLayout = () => {
       <header className="md:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-slate-200 z-50 px-4 flex justify-between items-center shadow-sm">
         <div className="flex items-center gap-2">
           <img src="/BA LOGO.png" alt="Logo" className="w-7 h-7 object-contain" />
-          <span className="text-[#2B6830] font-bold text-sm">CỔNG GIÁO VỤ</span>
+          <span className="text-primary font-bold text-sm">CỔNG GIÁO VỤ</span>
         </div>
         <div className="flex items-center gap-1">
             {/* Nút Đổi Mật Khẩu Mobile */}
-            <button onClick={() => setShowPassModal(true)} className="p-2 text-slate-400 hover:text-[#2B6830]">
+            <button onClick={() => setShowPassModal(true)} aria-label="Đổi mật khẩu" title="Đổi mật khẩu" className="p-2 text-slate-500 hover:text-primary">
                 <Icons.Key />
             </button>
-            <button onClick={handleLogout} className="p-2 text-slate-400 hover:text-red-500">
+            <button onClick={handleLogout} aria-label="Đăng xuất" title="Đăng xuất" className="p-2 text-slate-500 hover:text-red-500">
                 <Icons.Logout />
             </button>
         </div>
@@ -377,35 +405,58 @@ const StaffLayout = () => {
         <div key={slideKey} className={`max-w-6xl mx-auto ${slideClass}`}><Outlet /></div>
       </main>
 
-      {/* MOBILE BOTTOM NAV - cuon ngang duoc vi nhieu the; an thanh cuon cho gon */}
-      <nav
-        ref={bottomNavRef}
-        className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 h-16 flex items-center overflow-x-auto overflow-y-hidden z-50 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] [&::-webkit-scrollbar]:hidden"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
-      >
-        <Link to="/staff/classes" data-active={isActive('classes')} className={mobileLinkClass('classes')}><Icons.Class active={isActive('classes')} /><span className="text-[10px] font-medium">Học viên</span></Link>
-        <Link to="/staff/attendance" data-active={isActive('attendance')} className={mobileLinkClass('attendance')}><Icons.Attendance active={isActive('attendance')} /><span className="text-[10px] font-medium">Đ.Danh</span></Link>
-        <Link to="/staff/scores" data-active={isActive('scores')} className={mobileLinkClass('scores')}><Icons.Scores active={isActive('scores')} /><span className="text-[10px] font-medium">Điểm</span></Link>
-        <Link to="/staff/notifications" data-active={isActive('notifications')} className={mobileLinkClass('notifications')}><Icons.Noti active={isActive('notifications')} /><span className="text-[10px] font-medium">TBáo</span></Link>
-        <Link to="/staff/inbox" data-active={isActive('inbox')} className={mobileLinkClass('inbox')}><Icons.Inbox active={isActive('inbox')} /><span className="text-[10px] font-medium">Hộp thư</span></Link>
-        <Link to="/staff/credits" data-active={isActive('credits')} className={mobileLinkClass('credits')}><Icons.Credits active={isActive('credits')} /><span className="text-[10px] font-medium">Credits</span></Link>
-        <Link to="/staff/skins" data-active={isActive('skins')} className={mobileLinkClass('skins')}><Icons.Game active={isActive('skins') || isActive('games')} /><span className="text-[10px] font-medium">Skin/Game</span></Link>
-        {ffAccess && (
-          <Link to="/staff/freshfit" data-active={isActive('freshfit')} className={mobileLinkClass('freshfit')}><Icons.FreshFit active={isActive('freshfit')} /><span className="text-[10px] font-medium">FreshFit</span></Link>
-        )}
-        {bodAccess && (
-          <Link to="/staff/bavn" data-active={isActive('bavn')} className={mobileLinkClass('bavn')}><Icons.Bavn active={isActive('bavn')} /><span className="text-[10px] font-medium">BAVN</span></Link>
-        )}
-        {modAccess && (
-          <Link to="/staff/mod-bonus" data-active={isActive('mod-bonus')} className={mobileLinkClass('mod-bonus')}><Icons.Mod active={isActive('mod-bonus')} /><span className="text-[10px] font-medium">Bonus</span></Link>
-        )}
+      {/* MOBILE BOTTOM NAV - 4 the chinh + nut Them (mo Drawer chua phan con lai, ke ca tab gated) */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 h-16 flex items-center justify-around z-50 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+        <Link to="/staff/classes" className={mobileLinkClass('classes')}><Icons.Class active={isActive('classes')} /><span className="text-[10px] font-medium">Học viên</span></Link>
+        <Link to="/staff/attendance" className={mobileLinkClass('attendance')}><Icons.Attendance active={isActive('attendance')} /><span className="text-[10px] font-medium">Đ.Danh</span></Link>
+        <Link to="/staff/scores" className={mobileLinkClass('scores')}><Icons.Scores active={isActive('scores')} /><span className="text-[10px] font-medium">Điểm</span></Link>
+        <Link to="/staff/inbox" className={mobileLinkClass('inbox')}>
+          <span className="relative"><Icons.Inbox active={isActive('inbox')} />{inboxUnread > 0 && <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-1 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">{inboxUnread > 9 ? '9+' : inboxUnread}</span>}</span>
+          <span className="text-[10px] font-medium">Hộp thư</span>
+        </Link>
+        <button
+          onClick={() => setMoreOpen(true)}
+          aria-label="Thêm chức năng"
+          className={`relative flex flex-col items-center justify-center shrink-0 min-w-[64px] h-full space-y-1 px-0.5 ${moreActive ? 'text-primary' : 'text-slate-500 hover:text-slate-700'}`}
+        >
+          <span className="relative"><Icons.More active={moreActive} />{morePending > 0 && <span className="absolute -top-1 -right-1.5 w-2.5 h-2.5 bg-amber-400 border border-white rounded-full" />}</span>
+          <span className="text-[10px] font-medium">Thêm</span>
+        </button>
       </nav>
+
+      {/* DRAWER "Thêm" - bottom sheet chua cac chuc nang phu + tab gated (mobile) */}
+      {moreOpen && (
+        <div className="md:hidden fixed inset-0 z-[60]" role="dialog" aria-modal="true" aria-label="Thêm chức năng">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in" onClick={() => setMoreOpen(false)} />
+          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-2xl p-4 pb-8 pb-safe animate-fade-in-up">
+            <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-3" />
+            <p className="stat-label px-1 mb-3">Thêm chức năng</p>
+            <div className="grid grid-cols-4 gap-2">
+              {MORE_ITEMS.map((it) => {
+                const act = isActive(it.key) || (it.activeExtra && isActive(it.activeExtra));
+                return (
+                  <Link
+                    key={it.key}
+                    to={it.to}
+                    onClick={() => setMoreOpen(false)}
+                    className={`relative flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl text-center transition-colors ${act ? 'bg-primary/10 text-primary' : 'text-slate-600 hover:bg-slate-50'}`}
+                  >
+                    {it.badge > 0 && <span className="absolute top-1.5 right-1.5 min-w-[16px] h-4 px-1 bg-amber-400 text-amber-900 text-[9px] font-bold rounded-full flex items-center justify-center">{it.badge > 9 ? '9+' : it.badge}</span>}
+                    <it.Icon active={act} />
+                    <span className="text-[11px] font-medium leading-tight">{it.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* MODAL ĐỔI MẬT KHẨU */}
       {showPassModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
-                <h3 className="text-lg font-bold text-[#2B6830] mb-4 flex items-center gap-2">
+                <h3 className="text-lg font-bold text-primary mb-4 flex items-center gap-2">
                     <Icons.Key /> Đổi Mật Khẩu
                 </h3>
                 <form onSubmit={handleChangePassword} className="space-y-4">
@@ -424,19 +475,19 @@ const StaffLayout = () => {
                     )}
                     <div>
                         <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Mật khẩu cũ</label>
-                        <input type="password" className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition"
+                        <input type="password" className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition"
                             value={passForm.oldPass} onChange={e => { setPassForm({...passForm, oldPass: e.target.value}); setPassError(''); }}
                         />
                     </div>
                     <div>
                         <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Mật khẩu mới</label>
-                        <input type="password" className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition"
+                        <input type="password" className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition"
                             value={passForm.newPass} onChange={e => { setPassForm({...passForm, newPass: e.target.value}); setPassError(''); }}
                         />
                     </div>
                     <div>
                         <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Xác nhận mật khẩu mới</label>
-                        <input type="password" className={`w-full p-3 border rounded-xl outline-none focus:ring-2 transition ${passForm.confirmPass && passForm.newPass !== passForm.confirmPass ? 'border-red-300 focus:border-red-400 focus:ring-red-100' : 'border-slate-200 focus:border-[#2B6830] focus:ring-[#2B6830]/10'}`}
+                        <input type="password" className={`w-full p-3 border rounded-xl outline-none focus:ring-2 transition ${passForm.confirmPass && passForm.newPass !== passForm.confirmPass ? 'border-red-300 focus:border-red-400 focus:ring-red-100' : 'border-slate-200 focus:border-primary focus:ring-primary/10'}`}
                             value={passForm.confirmPass} onChange={e => { setPassForm({...passForm, confirmPass: e.target.value}); setPassError(''); }}
                         />
                         {passForm.confirmPass && passForm.newPass !== passForm.confirmPass && (
@@ -445,7 +496,7 @@ const StaffLayout = () => {
                     </div>
                     <div className="flex gap-3 pt-2">
                         <button type="button" onClick={() => { setShowPassModal(false); setPassError(''); setPassSuccess(''); setPassForm({ oldPass: '', newPass: '', confirmPass: '' }); }} className="flex-1 py-3 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition-colors">Hủy</button>
-                        <button type="submit" disabled={loadingPass} className="flex-1 py-3 bg-[#2B6830] text-white rounded-xl font-bold hover:bg-[#1E5225] transition-colors disabled:opacity-50">
+                        <button type="submit" disabled={loadingPass} className="flex-1 py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary-hover transition-colors disabled:opacity-50">
                             {loadingPass ? "Đang xử lý..." : "Lưu thay đổi"}
                         </button>
                     </div>

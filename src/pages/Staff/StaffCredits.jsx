@@ -4,10 +4,10 @@ import { db } from '../../firebase';
 import { ref, onValue, push, set } from 'firebase/database';
 
 // ============================================================
-// BAVN CREDITS — Cổng nhân sự
+// BAVN CREDITS, Cổng nhân sự
 // 2 ví: Credits (BOD grant, có lý do) + Credits + (nạp tiền qua FF+)
 // Menu: món Fresh Fit (FF duyệt) + Quà nhân sự (BOD duyệt)
-// Giỏ trộn được — khi gửi tự tách thành 2 đơn theo kênh duyệt.
+// Giỏ trộn được, khi gửi tự tách thành 2 đơn theo kênh duyệt.
 // ============================================================
 
 const CATEGORY_META = {
@@ -195,7 +195,7 @@ const StaffCredits = () => {
       {walletModal && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setWalletModal(false)}>
           <div className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full space-y-4 border border-slate-100" onClick={e => e.stopPropagation()}>
-            <h3 className="font-bold text-[#2B6830] text-base">Chọn ví thanh toán</h3>
+            <h3 className="font-bold text-primary text-base">Chọn ví thanh toán</h3>
             <p className="text-sm text-slate-600">Đơn của bạn: <b>{cartTotal} credits</b>. Trừ vào ví nào?</p>
             <div className="space-y-2.5">
               <button onClick={() => submitRedeem('staff')} disabled={submitting || cartTotal > availableCredits}
@@ -229,7 +229,7 @@ const StaffCredits = () => {
                   <h3 className="font-bold text-slate-800 text-lg leading-snug">{CATEGORY_META[viewItem.category]?.icon || '🛍️'} {viewItem.name}</h3>
                   <p className="text-xs font-bold text-slate-400 uppercase mt-1">{CATEGORY_META[viewItem.category]?.label || 'Khác'}{viewItem.group && ` · ${viewItem.group}`}</p>
                 </div>
-                <span className="shrink-0 text-lg font-extrabold text-[#2B6830] bg-[#E8F4EC] px-3 py-1.5 rounded-xl border border-green-100">{viewItem.price} ⭐</span>
+                <span className="shrink-0 text-lg font-extrabold text-primary bg-primary-light px-3 py-1.5 rounded-xl border border-green-100">{viewItem.price} ⭐</span>
               </div>
               <p className="text-sm text-slate-600 leading-relaxed">
                 {viewItem.description || <span className="italic text-slate-400">Chưa có mô tả.</span>}
@@ -239,10 +239,10 @@ const StaffCredits = () => {
                   {(cart[viewItem.id] || 0) > 0 && (
                     <>
                       <button onClick={() => removeFromCart(viewItem.id)} className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-200 text-slate-600 font-bold text-lg hover:border-red-300 hover:text-red-500 transition-colors">−</button>
-                      <span className="w-8 text-center font-extrabold text-[#2B6830] text-lg">{cart[viewItem.id]}</span>
+                      <span className="w-8 text-center font-extrabold text-primary text-lg">{cart[viewItem.id]}</span>
                     </>
                   )}
-                  <button onClick={() => addToCart(viewItem.id)} className="w-10 h-10 rounded-xl bg-[#2B6830] text-white font-bold text-lg hover:bg-[#1E5225] transition-colors">+</button>
+                  <button onClick={() => addToCart(viewItem.id)} className="w-10 h-10 rounded-xl bg-primary text-white font-bold text-lg hover:bg-primary-hover transition-colors">+</button>
                 </div>
                 <button onClick={() => setViewItem(null)} className="px-5 py-2.5 rounded-xl text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">Đóng</button>
               </div>
@@ -254,19 +254,19 @@ const StaffCredits = () => {
       {/* ===== HERO: 2 VÍ ===== */}
       <div className="bg-gradient-to-r from-purple-700 to-purple-500 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
         <div className="relative z-10">
-          <p className="text-purple-200 text-xs font-bold uppercase tracking-wider">Ví BAVN Credits — Nhân sự</p>
+          <p className="text-purple-200 text-xs font-bold uppercase tracking-wider">Ví BAVN Credits, Nhân sự</p>
           <div className="flex items-end gap-2 mt-1 mb-4">
-            <span className="text-5xl font-extrabold leading-none">{loading ? '—' : availableCredits}</span>
+            <span className="text-5xl font-extrabold leading-none">{loading ? '–' : availableCredits}</span>
             <span className="text-purple-200 font-bold mb-1">credits khả dụng</span>
           </div>
           <div className="flex flex-wrap gap-3">
             <div className="bg-white/15 rounded-xl px-4 py-2.5">
               <p className="text-[10px] font-bold text-purple-200 uppercase tracking-wider">⭐ Credits (BOD cấp)</p>
-              <p className="text-xl font-extrabold">{loading ? '—' : staffWallet.balance}</p>
+              <p className="text-xl font-extrabold">{loading ? '–' : staffWallet.balance}</p>
             </div>
             <div className="bg-sky-400/25 rounded-xl px-4 py-2.5 border border-sky-200/40">
               <p className="text-[10px] font-bold text-sky-100 uppercase tracking-wider">💳 Credits +</p>
-              <p className="text-xl font-extrabold text-sky-50">{loading ? '—' : availablePlus}</p>
+              <p className="text-xl font-extrabold text-sky-50">{loading ? '–' : availablePlus}</p>
             </div>
             {(pendingStaffHold + pendingPlusHold) > 0 && (
               <div className="bg-amber-400/20 rounded-xl px-4 py-2.5 border border-amber-200/30">
@@ -287,7 +287,7 @@ const StaffCredits = () => {
           <div className="space-y-1.5 max-h-56 overflow-y-auto">
             {myGrantHistory.map(h => (
               <div key={h.id} className="flex items-center justify-between p-2.5 bg-slate-50 rounded-lg border border-slate-100 text-xs">
-                <span className="text-slate-600 truncate mr-2">{h.reason || h.note || '—'} <span className="text-slate-400">· {h.by}</span></span>
+                <span className="text-slate-600 truncate mr-2">{h.reason || h.note || '–'} <span className="text-slate-400">· {h.by}</span></span>
                 <span className="flex items-center gap-2 shrink-0">
                   <span className="text-slate-400 font-mono">{new Date(h.date).toLocaleDateString('vi-VN')}</span>
                   <b className={h.amount >= 0 ? 'text-purple-700' : 'text-red-500'}>{h.amount >= 0 ? '+' : ''}{h.amount}</b>
@@ -301,11 +301,11 @@ const StaffCredits = () => {
       {/* ===== MENU ĐỔI: MÓN FRESH FIT + QUÀ NHÂN SỰ ===== */}
       <div className="card-std p-5">
         <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-          <h3 className="text-sm font-bold text-[#2B6830] uppercase tracking-wide">🌿 Đổi món Fresh Fit & 🎁 quà nhân sự</h3>
+          <h3 className="text-sm font-bold text-primary uppercase tracking-wide">🌿 Đổi món Fresh Fit & 🎁 quà nhân sự</h3>
           <div className="flex gap-1.5 flex-wrap">
             {['all', 'sothich', 'thucduong', 'gift'].map(cat => (
               <button key={cat} onClick={() => setActiveCategory(cat)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors ${activeCategory === cat ? 'bg-[#2B6830] text-white border-[#2B6830]' : 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100'}`}>
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors ${activeCategory === cat ? 'bg-primary text-white border-primary' : 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100'}`}>
                 {cat === 'all' ? 'Tất cả' : `${CATEGORY_META[cat].icon} ${CATEGORY_META[cat].label}`}
               </button>
             ))}
@@ -333,7 +333,7 @@ const StaffCredits = () => {
               const qty = cart[item.id] || 0;
               return (
                 <div key={item.id} onClick={() => setViewItem(item)}
-                  className={`group rounded-xl border overflow-hidden flex flex-col cursor-pointer transition-all duration-200 hover:-translate-y-1.5 hover:shadow-xl ${qty > 0 ? 'border-[#2B6830] bg-[#E8F4EC]/40 ring-2 ring-[#2B6830]/20' : 'border-slate-200 bg-white hover:border-green-300'}`}>
+                  className={`group rounded-xl border overflow-hidden flex flex-col cursor-pointer transition-all duration-200 hover:-translate-y-1.5 hover:shadow-xl ${qty > 0 ? 'border-primary bg-primary-light/40 ring-2 ring-primary/20' : 'border-slate-200 bg-white hover:border-green-300'}`}>
                   {item.imageUrl && (
                     <div className="h-40 overflow-hidden bg-slate-50 flex items-center justify-center">
                       <img src={item.imageUrl} alt={item.name} className="max-w-full max-h-full object-contain transition-transform duration-300 ease-out group-hover:scale-110" onError={(e) => { e.target.parentElement.style.display = 'none'; }} />
@@ -342,19 +342,19 @@ const StaffCredits = () => {
                   <div className="p-4 flex flex-col gap-2 flex-1">
                     <div className="flex items-start gap-3">
                       <div className="min-w-0 flex-1">
-                        <p className="font-bold text-slate-800 text-sm leading-snug group-hover:text-[#2B6830] transition-colors">{CATEGORY_META[item.category]?.icon || '🛍️'} {item.name}</p>
+                        <p className="font-bold text-slate-800 text-sm leading-snug group-hover:text-primary transition-colors">{CATEGORY_META[item.category]?.icon || '🛍️'} {item.name}</p>
                         <p className="text-[10px] font-bold text-slate-400 uppercase mt-0.5">{CATEGORY_META[item.category]?.label || 'Khác'}{item.group && ` · ${item.group}`}</p>
                       </div>
-                      <span className="shrink-0 text-sm font-extrabold text-[#2B6830] bg-white px-2.5 py-1 rounded-lg border border-green-100">{item.price} ⭐</span>
+                      <span className="shrink-0 text-sm font-extrabold text-primary bg-white px-2.5 py-1 rounded-lg border border-green-100">{item.price} ⭐</span>
                     </div>
                     <div className="flex items-center justify-end gap-2 mt-auto pt-2" onClick={e => e.stopPropagation()}>
                       {qty > 0 && (
                         <>
                           <button onClick={() => removeFromCart(item.id)} className="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-600 font-bold hover:border-red-300 hover:text-red-500 transition-colors">−</button>
-                          <span className="w-6 text-center font-extrabold text-[#2B6830]">{qty}</span>
+                          <span className="w-6 text-center font-extrabold text-primary">{qty}</span>
                         </>
                       )}
-                      <button onClick={() => addToCart(item.id)} className="w-8 h-8 rounded-lg bg-[#2B6830] text-white font-bold hover:bg-[#1E5225] transition-colors">+</button>
+                      <button onClick={() => addToCart(item.id)} className="w-8 h-8 rounded-lg bg-primary text-white font-bold hover:bg-primary-hover transition-colors">+</button>
                     </div>
                   </div>
                 </div>
@@ -365,17 +365,17 @@ const StaffCredits = () => {
 
         {/* THANH GIỎ */}
         {cartCount > 0 && (
-          <div className="mt-4 p-4 bg-[#E8F4EC] border border-green-200 rounded-xl flex flex-col md:flex-row md:items-center gap-3">
+          <div className="mt-4 p-4 bg-primary-light border border-green-200 rounded-xl flex flex-col md:flex-row md:items-center gap-3">
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-[#2B6830] uppercase tracking-wide mb-0.5">Giỏ đổi ({cartCount})</p>
+              <p className="text-xs font-bold text-primary uppercase tracking-wide mb-0.5">Giỏ đổi ({cartCount})</p>
               <p className="text-xs text-slate-600 truncate">
                 {Object.entries(cart).map(([id, q]) => `${catalog.find(m => m.id === id)?.name || '?'} ×${q}`).join(', ')}
               </p>
-              <p className={`text-sm font-extrabold mt-1 ${cartTotal > Math.max(availableCredits, availablePlus) ? 'text-red-600' : 'text-[#2B6830]'}`}>
-                Tổng: {cartTotal} credits {cartTotal > Math.max(availableCredits, availablePlus) && '— vượt số dư cả 2 ví!'}
+              <p className={`text-sm font-extrabold mt-1 ${cartTotal > Math.max(availableCredits, availablePlus) ? 'text-red-600' : 'text-primary'}`}>
+                Tổng: {cartTotal} credits {cartTotal > Math.max(availableCredits, availablePlus) && '(vượt số dư cả 2 ví!)'}
               </p>
               <input type="text" maxLength={200}
-                className="w-full mt-2 p-2.5 border border-green-200 rounded-xl text-xs outline-none focus:border-[#2B6830] bg-white transition-colors"
+                className="w-full mt-2 p-2.5 border border-green-200 rounded-xl text-xs outline-none focus:border-primary bg-white transition-colors"
                 placeholder="📝 Ghi chú cho quầy (VD: ít ngọt, ít đá...)"
                 value={orderNote} onChange={e => { setOrderNote(e.target.value); setConfirmingSend(false); }}
               />
@@ -384,7 +384,7 @@ const StaffCredits = () => {
               <button onClick={() => { setCart({}); setConfirmingSend(false); }} className="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-colors">Xóa giỏ</button>
               <button onClick={handleSubmit}
                 disabled={submitting || cartTotal > Math.max(availableCredits, availablePlus)}
-                className={`px-5 py-2.5 rounded-xl text-xs font-bold text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${confirmingSend ? 'bg-amber-500 hover:bg-amber-600' : 'bg-[#2B6830] hover:bg-[#1E5225]'}`}>
+                className={`px-5 py-2.5 rounded-xl text-xs font-bold text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${confirmingSend ? 'bg-amber-500 hover:bg-amber-600' : 'bg-primary hover:bg-primary-hover'}`}>
                 {submitting ? 'Đang gửi...' : confirmingSend ? `Bấm lần nữa (${cartTotal} ⭐)` : 'Gửi yêu cầu đổi'}
               </button>
             </div>
@@ -394,7 +394,7 @@ const StaffCredits = () => {
 
       {/* ===== LỊCH SỬ ĐỔI ===== */}
       <div className="card-std p-5">
-        <h3 className="text-sm font-bold text-[#2B6830] mb-3 uppercase tracking-wide">Lịch sử đổi của bạn</h3>
+        <h3 className="text-sm font-bold text-primary mb-3 uppercase tracking-wide">Lịch sử đổi của bạn</h3>
         {myRedemptions.length === 0 ? (
           <p className="text-xs text-slate-400 italic">Chưa có yêu cầu nào.</p>
         ) : (
@@ -418,12 +418,12 @@ const StaffCredits = () => {
                   </div>
                   <div className="flex flex-col items-end gap-1 shrink-0">
                     <div className="flex items-center gap-1.5">
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase ${r.channel === 'gift' ? 'bg-purple-50 text-purple-700 border-purple-200' : 'bg-[#E8F4EC] text-[#2B6830] border-green-200'}`}>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase ${r.channel === 'gift' ? 'bg-purple-50 text-purple-700 border-purple-200' : 'bg-primary-light text-primary border-green-200'}`}>
                         {r.channel === 'gift' ? '🎁 Quà (BOD)' : '🌿 Món (FF)'}
                       </span>
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase ${meta.cls}`}>{meta.label}</span>
                     </div>
-                    <span className="text-sm font-extrabold text-[#2B6830]">−{r.totalCredits} ⭐ <span className="text-[10px] text-slate-400">({r.wallet === 'plus' ? 'Credits +' : 'Credits'})</span></span>
+                    <span className="text-sm font-extrabold text-primary">−{r.totalCredits} ⭐ <span className="text-[10px] text-slate-400">({r.wallet === 'plus' ? 'Credits +' : 'Credits'})</span></span>
                   </div>
                 </div>
               );

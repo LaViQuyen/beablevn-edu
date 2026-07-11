@@ -31,7 +31,7 @@ export const RESERVE_LABEL = {
   ending: 'Sắp hết bảo lưu',
 };
 
-// dùng cho badge nền nhạt — màu VÀNG (khác màu đỏ "Vắng nhiều")
+// dùng cho badge nền nhạt, màu VÀNG (khác màu đỏ "Vắng nhiều")
 export const RESERVE_BADGE = {
   active: 'text-yellow-700 bg-yellow-100 border-yellow-300',
   ending: 'text-amber-700 bg-amber-100 border-amber-400',

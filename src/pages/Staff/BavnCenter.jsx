@@ -4,11 +4,11 @@ import { db } from '../../firebase';
 import { ref, onValue, push, update, remove } from 'firebase/database';
 
 // ============================================================
-// BAVN CENTER — chỉ nhân sự có cờ BOD (hoặc admin)
+// BAVN CENTER, chỉ nhân sự có cờ BOD (hoặc admin)
 // Tab 1: Grant Credits cho nhân sự (bắt buộc lý do, kể cả chính mình)
-// Tab 2: Quà học viên   — BOD thiết lập & quản lý
-// Tab 3: Quà nhân sự    — BOD thiết lập & quản lý
-// Tab 4: Duyệt đổi quà  — đơn channel 'gift' của cả học viên & nhân sự
+// Tab 2: Quà học viên  , BOD thiết lập & quản lý
+// Tab 3: Quà nhân sự   , BOD thiết lập & quản lý
+// Tab 4: Duyệt đổi quà , đơn channel 'gift' của cả học viên & nhân sự
 // ============================================================
 
 const STATUS_META = {
@@ -128,7 +128,7 @@ const BavnCenter = () => {
       const key = push(ref(db, `staffCredits/${grantTarget.id}/history`)).key;
       updates[`staffCredits/${grantTarget.id}/history/${key}`] = {
         amount: amt,
-        reason: grantReason.trim(), // lý do bắt buộc — minh bạch
+        reason: grantReason.trim(), // lý do bắt buộc, minh bạch
         by: currentUser.name,
         date: new Date().toISOString(),
       };
@@ -162,7 +162,7 @@ const BavnCenter = () => {
     try {
       await push(ref(db, 'gifts'), {
         name: giftForm.name.trim(),
-        audience, // 'student' | 'staff' — 2 hệ quà riêng
+        audience, // 'student' | 'staff', 2 hệ quà riêng
         price: Number(giftForm.price),
         available: true,
         createdAt: new Date().toISOString(),
@@ -218,7 +218,7 @@ const BavnCenter = () => {
       const timestamp = new Date().toISOString();
       const updates = {};
       const { enough } = checkBalance(r);
-      if (!enough) { showToast('⚠️ Người đổi không đủ số dư — hãy Từ chối.'); setProcessing(null); return; }
+      if (!enough) { showToast('⚠️ Người đổi không đủ số dư, hãy Từ chối.'); setProcessing(null); return; }
 
       if (wallet === 'plus') {
         const bal = getPlusBalance(r.studentId);
@@ -231,7 +231,7 @@ const BavnCenter = () => {
         const k = push(ref(db, `staffCredits/${r.studentId}/history`)).key;
         updates[`staffCredits/${r.studentId}/history/${k}`] = { amount: -need, reason: `Đổi quà: ${itemsText(r.items)}`, by: currentUser.name, date: timestamp };
       } else {
-        // Học viên ví Credits — ghi record bonus ÂM (lớp bonus cao nhất trước)
+        // Học viên ví Credits, ghi record bonus ÂM (lớp bonus cao nhất trước)
         const balances = getBonusBalances(r.studentId);
         let remaining = need * 2;
         const today = timestamp.slice(0, 10);
@@ -251,7 +251,7 @@ const BavnCenter = () => {
       updates[`redemptions/${r.id}/confirmedBy`] = currentUser.name;
       updates[`redemptions/${r.id}/confirmedAt`] = timestamp;
       await update(ref(db), updates);
-      showToast(`✅ Đã xác nhận — trừ ${need} credits của ${r.studentName}.`);
+      showToast(`✅ Đã xác nhận, trừ ${need} credits của ${r.studentName}.`);
     } catch (e) {
       showToast('❌ Lỗi: ' + e.message);
     } finally {
@@ -268,7 +268,7 @@ const BavnCenter = () => {
         status: 'rejected', rejectedBy: currentUser.name,
         rejectedAt: new Date().toISOString(), rejectReason: rejectReason.trim(),
       });
-      showToast(`Đã từ chối — credits hoàn lại cho ${r.studentName}.`);
+      showToast(`Đã từ chối, credits hoàn lại cho ${r.studentName}.`);
       setRejectReason('');
     } catch (e) {
       showToast('❌ Lỗi: ' + e.message);
@@ -306,13 +306,13 @@ const BavnCenter = () => {
           <div className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full space-y-4 border border-slate-100">
             <p className="text-sm font-medium text-slate-700">
               {confirmTarget.action === 'confirm'
-                ? <>Xác nhận đổi <b>{itemsText(confirmTarget.r.items)}</b> — trừ <b className="text-purple-700">{confirmTarget.r.totalCredits} credits</b> của <b>{confirmTarget.r.studentName}</b>?</>
+                ? <>Xác nhận đổi <b>{itemsText(confirmTarget.r.items)}</b>, trừ <b className="text-purple-700">{confirmTarget.r.totalCredits} credits</b> của <b>{confirmTarget.r.studentName}</b>?</>
                 : <>Từ chối yêu cầu của <b>{confirmTarget.r.studentName}</b>? Credits sẽ được hoàn lại.</>}
             </p>
             {confirmTarget.action === 'reject' && (
               <textarea rows={2} autoFocus maxLength={200}
                 className="w-full border border-red-300 p-3 rounded-xl text-sm outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100 transition resize-none"
-                placeholder="Lý do từ chối (bắt buộc — VD: quà tạm hết hàng...)"
+                placeholder="Lý do từ chối (bắt buộc, VD: quà tạm hết hàng...)"
                 value={rejectReason} onChange={e => setRejectReason(e.target.value)}
               />
             )}
@@ -393,7 +393,7 @@ const BavnCenter = () => {
         <div className="card-std p-5 space-y-4">
           <div>
             <h3 className="text-sm font-bold text-purple-700 uppercase tracking-wide">⭐ Grant BAVN Credits cho nhân sự</h3>
-            <p className="text-xs text-slate-400 mt-1">Cấp credits thưởng (1 credit = 1.000đ), bắt buộc nhập lý do — grant được cho cả chính mình.</p>
+            <p className="text-xs text-slate-400 mt-1">Cấp credits thưởng (1 credit = 1.000đ), bắt buộc nhập lý do, grant được cho cả chính mình.</p>
           </div>
 
           {!grantTarget ? (
@@ -435,7 +435,7 @@ const BavnCenter = () => {
                 />
                 <input
                   className="flex-1 p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-purple-500 transition"
-                  placeholder="Lý do cụ thể (bắt buộc — VD: thưởng hoàn thành dự án ABC tháng 6)"
+                  placeholder="Lý do cụ thể (bắt buộc, VD: thưởng hoàn thành dự án ABC tháng 6)"
                   value={grantReason} maxLength={200}
                   onChange={e => { setGrantReason(e.target.value); setGrantConfirming(false); }}
                 />
@@ -458,7 +458,7 @@ const BavnCenter = () => {
                   <div key={h.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100 text-xs">
                     <div className="min-w-0 mr-2">
                       <p className="font-bold text-slate-700 truncate">{h.staffName}</p>
-                      <p className="text-slate-500 truncate">{h.reason || h.note || '—'} <span className="text-slate-400">· bởi {h.by}</span></p>
+                      <p className="text-slate-500 truncate">{h.reason || h.note || '–'} <span className="text-slate-400">· bởi {h.by}</span></p>
                     </div>
                     <div className="flex flex-col items-end shrink-0">
                       <b className={`text-sm ${h.amount >= 0 ? 'text-purple-700' : 'text-red-500'}`}>{h.amount >= 0 ? '+' : ''}{h.amount} ⭐</b>
@@ -494,7 +494,7 @@ const BavnCenter = () => {
                       <div className="min-w-0">
                         <p className="font-bold text-slate-800 text-sm">
                           {r.studentName}
-                          <span className={`ml-2 text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase ${r.userType === 'staff' ? 'bg-purple-50 text-purple-700 border-purple-200' : 'bg-[#E8F4EC] text-[#2B6830] border-green-200'}`}>
+                          <span className={`ml-2 text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase ${r.userType === 'staff' ? 'bg-purple-50 text-purple-700 border-purple-200' : 'bg-primary-light text-primary border-green-200'}`}>
                             {r.userType === 'staff' ? 'Nhân sự' : 'Học viên'}
                           </span>
                         </p>
@@ -510,7 +510,7 @@ const BavnCenter = () => {
 
                     {r.status === 'pending' && (
                       <div className="flex items-center justify-between gap-3 pt-2.5 border-t border-slate-100 flex-wrap">
-                        <p className={`text-[11px] font-bold ${bal.enough ? 'text-slate-500' : 'text-red-600'}`}>{bal.text}{!bal.enough && ' — KHÔNG ĐỦ'}</p>
+                        <p className={`text-[11px] font-bold ${bal.enough ? 'text-slate-500' : 'text-red-600'}`}>{bal.text}{!bal.enough && ', KHÔNG ĐỦ'}</p>
                         <div className="flex gap-2">
                           <button onClick={() => { setRejectReason(''); setConfirmTarget({ r, action: 'reject' }); }}
                             className="px-4 py-2 rounded-xl text-xs font-bold text-red-600 bg-red-50 border border-red-100 hover:bg-red-100 transition-colors">Từ chối</button>
@@ -553,7 +553,7 @@ const BavnCenter = () => {
           <div className="card-std p-5">
             <h3 className="text-sm font-bold text-purple-700 uppercase tracking-wide mb-3">Danh sách quà {audience === 'staff' ? 'nhân sự' : 'học viên'} ({giftList.length})</h3>
             {giftList.length === 0 ? (
-              <p className="text-xs text-slate-400 italic text-center py-6 bg-slate-50 rounded-xl border border-dashed border-slate-200">Chưa có quà nào — thêm quà đầu tiên ở trên.</p>
+              <p className="text-xs text-slate-400 italic text-center py-6 bg-slate-50 rounded-xl border border-dashed border-slate-200">Chưa có quà nào, thêm quà đầu tiên ở trên.</p>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {giftList.map(g => (

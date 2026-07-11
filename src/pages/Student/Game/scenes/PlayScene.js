@@ -144,19 +144,19 @@ export class PlayScene extends Phaser.Scene {
     const WORLD=this.WORLD; this.layGround(0, WORLD);
     this.makePlatform(900, H-120, 200); this.makePlatform(1700, H-150, 220); this.makePlatform(2500, H-120, 200);
   }
-  // THCS: bản đồ nhiều tầng — bệ đá xếp chồng, leo nhảy bậc + quái bay canh tầng trên
+  // THCS: bản đồ nhiều tầng, bệ đá xếp chồng, leo nhảy bậc + quái bay canh tầng trên
   buildVertical(){
     const WORLD=this.WORLD;
     const segs=[[0,700],[700,920],[920,1500],[1500,1760],[1760,2500],[2500,2760],[2760,WORLD]];
     segs.forEach((s,i)=>{ if(i%2===0) this.layGround(s[0],s[1]); else this.addHazardRun(s[0],s[1]); });
-    // bệ bắc qua các đoạn hụt (tầng 1) — buộc leo nhảy
+    // bệ bắc qua các đoạn hụt (tầng 1), buộc leo nhảy
     [[700,920],[1500,1760],[2500,2760]].forEach(([a,b])=>{
       const mid=(a+b)/2; this.makePlatform(mid, H-118, (b-a)+140); this.elevatedSpawns.push({x:mid, y:H-160});
     });
-    // tầng 2 trên cao để khám phá — quái bay canh giữ
+    // tầng 2 trên cao để khám phá, quái bay canh giữ
     for(let i=0;i<4;i++){ const x=620+i*680; this.makePlatform(x, H-205, 200); this.elevatedSpawns.push({x:x, y:H-245}); }
   }
-  // THPT: ngã rẽ định hướng — Đường Kỷ Luật (trên, phẳng, nhiều quái) vs Đường Lười Biếng (dưới, đầy hố)
+  // THPT: ngã rẽ định hướng, Đường Kỷ Luật (trên, phẳng, nhiều quái) vs Đường Lười Biếng (dưới, đầy hố)
   buildBranching(){
     const WORLD=this.WORLD;
     const A=950, B=2550;
@@ -173,8 +173,8 @@ export class PlayScene extends Phaser.Scene {
     this.makePlatform((A+B)/2, H-118, (B-A)+40);
     this.makePlatform(A-10, H-118, 130); this.makePlatform(B+10, H-118, 130); // bậc lên/xuống 2 đầu
     this.disciplineRoad = { a:A, b:B, y:H-129 };
-    this.add.text(A+30, H-160, '↑ ĐƯỜNG KỶ LUẬT — nhiều quái, an toàn', {fontFamily:'Be Vietnam Pro', fontSize:'12px', color:'#ffffff', fontStyle:'bold', backgroundColor:'#2B6830', padding:{x:6,y:3}}).setDepth(30);
-    this.add.text(A+30, H-66, '↓ ĐƯỜNG LƯỜI BIẾNG — ít quái, đầy hố', {fontFamily:'Be Vietnam Pro', fontSize:'12px', color:'#ffffff', fontStyle:'bold', backgroundColor:'#8B1E3B', padding:{x:6,y:3}}).setDepth(30);
+    this.add.text(A+30, H-160, '↑ ĐƯỜNG KỶ LUẬT, nhiều quái, an toàn', {fontFamily:'Be Vietnam Pro', fontSize:'12px', color:'#ffffff', fontStyle:'bold', backgroundColor:'#2B6830', padding:{x:6,y:3}}).setDepth(30);
+    this.add.text(A+30, H-66, '↓ ĐƯỜNG LƯỜI BIẾNG, ít quái, đầy hố', {fontFamily:'Be Vietnam Pro', fontSize:'12px', color:'#ffffff', fontStyle:'bold', backgroundColor:'#8B1E3B', padding:{x:6,y:3}}).setDepth(30);
   }
 
   // ===================== SINH QUÁI =====================
@@ -215,7 +215,7 @@ export class PlayScene extends Phaser.Scene {
       m.roadBound = { a:this.disciplineRoad.a+20, b:this.disciplineRoad.b-20 };
     }
   }
-  // Quái BAY canh tầng trên (vertical) — lấy mẫu quái bay của cấp
+  // Quái BAY canh tầng trên (vertical), lấy mẫu quái bay của cấp
   spawnGuards(){
     if(!this.elevatedSpawns.length) return;
     const defs = MONSTER_DEFS[this.levelData.rank] || MONSTER_DEFS[1];
@@ -239,7 +239,7 @@ export class PlayScene extends Phaser.Scene {
     this.boss.baseName = bossName;
     this.boss.nameLabel = this.add.text(this.boss.x, this.boss.y - 80, `${bossName} (${this.boss.hp}/${this.boss.maxHp})`, { fontSize:'14px', color:'#ffffff', fontStyle:'bold', backgroundColor:'#d63d54', padding:{x:4,y:2} }).setOrigin(0.5);
     this.flag.setVisible(false); this.flag.body.enable = false;
-    // Vòng bảo vệ (Aura) — Trạng thái 1
+    // Vòng bảo vệ (Aura), Trạng thái 1
     this.bossAura = this.add.circle(this.boss.x, this.boss.y, 78, 0x66ccff, 0.22).setStrokeStyle(3, 0x66ccff, 0.9).setDepth(55).setVisible(false);
     this.bossShielded = true;
     this.add.text(this.boss.x, this.boss.y - 105, '🛡 Hạ hết đệ tử để phá khiên Boss', {fontSize:'12px', color:'#cdefff', fontStyle:'bold', backgroundColor:'rgba(0,0,40,0.5)', padding:{x:5,y:2}}).setOrigin(0.5).setDepth(56).setScrollFactor(1);
@@ -334,7 +334,7 @@ export class PlayScene extends Phaser.Scene {
   // ===================== THỂ LỰC =====================
   spendStamina(c){ this.stamina = Math.max(0, this.stamina - c); }
   addStamina(c){ this.stamina = Math.min(this.staminaMax, this.stamina + c); }
-  staminaWarn(){ if(this.time.now > this._staminaMsgT){ this._staminaMsgT = this.time.now + 700; this.showFloatingText("Hết thể lực — chờ hồi sức!", 0xFF5A6E); } }
+  staminaWarn(){ if(this.time.now > this._staminaMsgT){ this._staminaMsgT = this.time.now + 700; this.showFloatingText("Hết thể lực, chờ hồi sức!", 0xFF5A6E); } }
 
   handleSkillInput(key) {
     if(!this.player.active || this._done) return;
@@ -469,13 +469,13 @@ export class PlayScene extends Phaser.Scene {
   setupGimmicks(){
     const gm = this.gm; if(!gm) return;
     if(gm==='stealth'){ this.activeMonsters.forEach(m=>{ m.dormant=true; m.setVelocity(0,0); }); this.showFloatingText("Đi nhẹ kẻo đánh thức quái!", 0xFFD23F); }
-    if(gm==='armor'){ this.activeMonsters.forEach(m=>{ m.armor=true; m.hp+=4; m.maxHp+=4; m.setScale((m.scaleX||1)*1.15); }); this.showFloatingText("Quái có giáp — đánh nhiều phát!", 0xFF8C00); }
-    if(gm==='invisible'){ this.activeMonsters.forEach(m=>{ m.ghost=true; m.setAlpha(0.12); if(m.nameLabel) m.nameLabel.setAlpha(0.2); }); this.showFloatingText("Quái tàng hình — tới gần mới hiện!", 0x9370DB); }
+    if(gm==='armor'){ this.activeMonsters.forEach(m=>{ m.armor=true; m.hp+=4; m.maxHp+=4; m.setScale((m.scaleX||1)*1.15); }); this.showFloatingText("Quái có giáp, đánh nhiều phát!", 0xFF8C00); }
+    if(gm==='invisible'){ this.activeMonsters.forEach(m=>{ m.ghost=true; m.setAlpha(0.12); if(m.nameLabel) m.nameLabel.setAlpha(0.2); }); this.showFloatingText("Quái tàng hình, tới gần mới hiện!", 0x9370DB); }
     if(gm==='clones'){ for(let i=0;i<4;i++){ const sx=600+Math.random()*2200; const m=this.monsters.create(sx, H-220-Math.random()*80, 'giành'); m.setTint(0xFFD700); m.setAlpha(0.9); m.kind='giành'; m.behavior='fly'; m.startX=sx; m.startY=m.y; m.body.setAllowGravity(false); m.speedMulti=1; m.hp=2; m.maxHp=2; m.originTint=0xFFD700; m.hpBg=this.add.rectangle(m.x,m.y-60,40,6,0x000000,0.6).setDepth(48); m.hpBar=this.add.rectangle(m.x-20,m.y-60,40,6,0x7ED957).setOrigin(0,0.5).setDepth(49); m.nameLabel=this.add.text(m.x,m.y-45,"Phân Thân",{fontSize:'11px',color:'#fff',backgroundColor:'rgba(0,0,0,0.6)',fontStyle:'bold',padding:{x:3,y:1}}).setOrigin(0.5); this.activeMonsters.push(m);} }
     if(gm==='summon'){ const all=[].concat(MONSTER_DEFS[1],MONSTER_DEFS[2],MONSTER_DEFS[3],MONSTER_DEFS[4],MONSTER_DEFS[5]); for(let i=0;i<6;i++){ const t=all[Math.floor(Math.random()*all.length)]; const sx=600+Math.random()*2200; const m=this.monsters.create(sx,H-120,t.sprite); m.originTint=t.tint||0xffffff; if(t.tint)m.setTint(t.tint); m.kind=t.sprite; m.behavior='chase'; m.startX=sx; m.speedMulti=1; m.hp=4; m.maxHp=4; m.hpBg=this.add.rectangle(m.x,m.y-60,40,6,0x000000,0.6).setDepth(48); m.hpBar=this.add.rectangle(m.x-20,m.y-60,40,6,0x7ED957).setOrigin(0,0.5).setDepth(49); m.nameLabel=this.add.text(m.x,m.y-45,t.name,{fontSize:'11px',color:'#fff',backgroundColor:'rgba(0,0,0,0.6)',fontStyle:'bold',padding:{x:3,y:1}}).setOrigin(0.5); this.activeMonsters.push(m);} this.showFloatingText("Nợ Môn: quái mọi cấp ùa tới!", 0xFF0000); }
-    if(gm==='thief'){ this.healItems=this.physics.add.group({allowGravity:false}); for(let i=0;i<5;i++){ const it=this.healItems.create(500+i*560, H-72, 'heart'); it.setDepth(15); } this.physics.add.overlap(this.player,this.healItems,(p,it)=>{ if(this.hp<heartsFor(this.prog.rank)){ this.hp++; this.updateHearts(); playSfx('heal'); this.showFloatingText("+1 Máu", 0x7ED957); } it.destroy(); }, null, this); this.physics.add.overlap(this.monsters,this.healItems,(mm,it)=>{ this.poof(it.x,it.y); it.destroy(); }, null, this); this.showFloatingText("Quái Dành Đồ cướp tim — nhặt nhanh!", 0xFF8C00); }
-    if(gm==='stamina'){ this.staminaItems=this.physics.add.group({allowGravity:false}); for(let i=0;i<6;i++){ const it=this.staminaItems.create(450+i*480, H-72, 'w_thaido'); it.setDepth(15); } this.physics.add.overlap(this.player,this.staminaItems,(p,it)=>{ this.addStamina(40); playSfx('heal'); this.showFloatingText("+Tỉnh táo (Sữa/Cafe)", 0xFFD23F); it.destroy(); }, null, this); this.showFloatingText("Giữ Thể lực — cạn thì không nhảy được!", 0xFFD23F); }
-    if(gm==='dark'){ this.darkOverlay=this.add.rectangle(this.scale.width/2,H/2,this.scale.width,H,0x05060a,0.86).setScrollFactor(0).setDepth(45); this.lightGlow=this.add.circle(this.player.x,this.player.y,150,0xfff2b0,0.16).setDepth(46).setBlendMode(Phaser.BlendModes.ADD); this.showFloatingText("Tối quá — bám theo vùng sáng!", 0xFFD23F); }
+    if(gm==='thief'){ this.healItems=this.physics.add.group({allowGravity:false}); for(let i=0;i<5;i++){ const it=this.healItems.create(500+i*560, H-72, 'heart'); it.setDepth(15); } this.physics.add.overlap(this.player,this.healItems,(p,it)=>{ if(this.hp<heartsFor(this.prog.rank)){ this.hp++; this.updateHearts(); playSfx('heal'); this.showFloatingText("+1 Máu", 0x7ED957); } it.destroy(); }, null, this); this.physics.add.overlap(this.monsters,this.healItems,(mm,it)=>{ this.poof(it.x,it.y); it.destroy(); }, null, this); this.showFloatingText("Quái Dành Đồ cướp tim, nhặt nhanh!", 0xFF8C00); }
+    if(gm==='stamina'){ this.staminaItems=this.physics.add.group({allowGravity:false}); for(let i=0;i<6;i++){ const it=this.staminaItems.create(450+i*480, H-72, 'w_thaido'); it.setDepth(15); } this.physics.add.overlap(this.player,this.staminaItems,(p,it)=>{ this.addStamina(40); playSfx('heal'); this.showFloatingText("+Tỉnh táo (Sữa/Cafe)", 0xFFD23F); it.destroy(); }, null, this); this.showFloatingText("Giữ Thể lực, cạn thì không nhảy được!", 0xFFD23F); }
+    if(gm==='dark'){ this.darkOverlay=this.add.rectangle(this.scale.width/2,H/2,this.scale.width,H,0x05060a,0.86).setScrollFactor(0).setDepth(45); this.lightGlow=this.add.circle(this.player.x,this.player.y,150,0xfff2b0,0.16).setDepth(46).setBlendMode(Phaser.BlendModes.ADD); this.showFloatingText("Tối quá, bám theo vùng sáng!", 0xFFD23F); }
     if(gm==='fireWall'){ this.fireWall=this.add.rectangle(-140,H/2,140,H,0xff5a1e,0.82).setDepth(70); this.showFloatingText("CHẠY! Tường lửa Deadline đuổi theo!", 0xff5a1e); }
     if(gm==='ink'){ this.time.addEvent({delay:2600,loop:true,callback:()=>{ if(this._done)return;
       const cx=Phaser.Math.Between(150,this.scale.width-150), cy=Phaser.Math.Between(120,H-130), base=Phaser.Math.Between(38,62);
@@ -526,7 +526,7 @@ export class PlayScene extends Phaser.Scene {
       if(remain <= 0){ this.reverseCtrl = false; if(this.reverseText) this.reverseText.setVisible(false); }
       else {
         if(!this.reverseText){ const _SW=this.scale.width; this.reverseText=this.add.text(_SW/2, 150, '', {fontFamily:'Be Vietnam Pro', fontSize:'19px', color:'#ffffff', fontStyle:'900', backgroundColor:'#6D28D9', padding:{x:12,y:6}}).setOrigin(0.5).setScrollFactor(0).setDepth(120); }
-        this.reverseText.setVisible(true).setText('🔀 ĐẢO HƯỚNG — về bình thường sau ' + (remain/1000).toFixed(1) + 's');
+        this.reverseText.setVisible(true).setText('🔀 ĐẢO HƯỚNG, về bình thường sau ' + (remain/1000).toFixed(1) + 's');
       }
     } else if(this.reverseText && this.reverseText.visible){ this.reverseText.setVisible(false); }
 
@@ -631,7 +631,7 @@ export class PlayScene extends Phaser.Scene {
     let wantsToJump = Phaser.Input.Keyboard.JustDown(this.keys.W);
     if(this.joyData.active && this.joyData.y < -0.5) { if(!this.joyJumpFired) { wantsToJump = true; this.joyJumpFired = true; } } else { this.joyJumpFired = false; }
     if(!inputLocked && wantsToJump && this.player.body.blocked.down) {
-      if(this.jumpStaminaLevel && this.stamina < 15){ this.showFloatingText("Hết thể lực — nghỉ lấy sức!", 0xFF5A6E); }
+      if(this.jumpStaminaLevel && this.stamina < 15){ this.showFloatingText("Hết thể lực, nghỉ lấy sức!", 0xFF5A6E); }
       else {
         if(this.jumpStaminaLevel) this.stamina -= 15;
         playSfx('jump'); this.player.setVelocityY(-480); this.dustEmitter.explode(8, this.player.x, this.player.y + 25);

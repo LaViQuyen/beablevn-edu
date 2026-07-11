@@ -1,5 +1,5 @@
 // ============================================================
-// THEME CONSTANTS — Be Able VN / 2Sol EDU
+// THEME CONSTANTS, Be Able VN / 2Sol EDU
 // Dùng file này thay vì hardcode màu/class trực tiếp trong JSX.
 // Import: import { colors, btn, input, card } from '../../theme';
 // ============================================================
@@ -30,19 +30,19 @@ export const colors = {
 
 // --- BUTTON VARIANTS ---
 export const btn = {
-  // Nút chính — xanh đậm
+  // Nút chính, xanh đậm
   primary: `bg-[#003366] text-white font-bold hover:bg-[#002244] active:scale-[0.98] transition-all rounded-xl shadow-sm disabled:opacity-50 disabled:cursor-not-allowed`,
 
-  // Nút phụ — outline
+  // Nút phụ, outline
   secondary: `bg-white text-slate-700 font-bold border border-slate-200 hover:bg-slate-50 active:scale-[0.98] transition-all rounded-xl`,
 
-  // Nút nguy hiểm — đỏ
+  // Nút nguy hiểm, đỏ
   danger: `bg-red-500 text-white font-bold hover:bg-red-600 active:scale-[0.98] transition-all rounded-xl`,
 
-  // Nút thành công — xanh lá
+  // Nút thành công, xanh lá
   success: `bg-emerald-600 text-white font-bold hover:bg-emerald-700 active:scale-[0.98] transition-all rounded-xl`,
 
-  // Nút ghost — không border
+  // Nút ghost, không border
   ghost: `text-slate-600 font-medium hover:bg-slate-100 active:scale-[0.98] transition-all rounded-xl`,
 
   // Size padding

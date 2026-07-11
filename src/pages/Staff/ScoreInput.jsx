@@ -113,7 +113,7 @@ const ScoreInput = () => {
     };
 
     // ============================================================
-    // BULK PASTE — copy cột điểm từ Excel/Sheets, paste vào ô đầu tiên
+    // BULK PASTE, copy cột điểm từ Excel/Sheets, paste vào ô đầu tiên
     // Mỗi dòng (ngăn cách bởi \n hoặc \t) → một học viên theo thứ tự
     // ============================================================
     const handleScorePaste = (e, startIndex) => {
@@ -355,11 +355,11 @@ const ScoreInput = () => {
                         <div key={r.id} className="p-3 border border-slate-200 rounded-xl bg-slate-50 hover:bg-white transition-all shadow-sm">
                             {editingRecordId === r.id ? (
                                 <div className="space-y-2">
-                                    <input type="date" value={editFormData.date} onChange={e => setEditFormData({ ...editFormData, date: e.target.value })} className="w-full text-xs p-1.5 border rounded outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10" />
-                                    <input type="number" value={editFormData.score} onChange={e => setEditFormData({ ...editFormData, score: e.target.value })} className="w-full text-xs p-1.5 border rounded outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10" placeholder="Điểm số" />
-                                    <textarea value={editFormData.content} onChange={e => setEditFormData({ ...editFormData, content: e.target.value })} className="w-full text-xs p-1.5 border rounded outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10" placeholder="Nội dung ghi nhận"></textarea>
+                                    <input type="date" value={editFormData.date} onChange={e => setEditFormData({ ...editFormData, date: e.target.value })} className="w-full text-xs p-1.5 border rounded outline-none focus:border-primary focus:ring-2 focus:ring-primary/10" />
+                                    <input type="number" value={editFormData.score} onChange={e => setEditFormData({ ...editFormData, score: e.target.value })} className="w-full text-xs p-1.5 border rounded outline-none focus:border-primary focus:ring-2 focus:ring-primary/10" placeholder="Điểm số" />
+                                    <textarea value={editFormData.content} onChange={e => setEditFormData({ ...editFormData, content: e.target.value })} className="w-full text-xs p-1.5 border rounded outline-none focus:border-primary focus:ring-2 focus:ring-primary/10" placeholder="Nội dung ghi nhận"></textarea>
                                     {catKey === 'summative' && (
-                                        <select value={editFormData.examType || 'MMT'} onChange={e => setEditFormData({ ...editFormData, examType: e.target.value })} className="w-full text-xs p-1.5 border rounded outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10">
+                                        <select value={editFormData.examType || 'MMT'} onChange={e => setEditFormData({ ...editFormData, examType: e.target.value })} className="w-full text-xs p-1.5 border rounded outline-none focus:border-primary focus:ring-2 focus:ring-primary/10">
                                             <option value="MMT">MMT</option>
                                             <option value="EOMT">EOMT</option>
                                         </select>
@@ -371,14 +371,14 @@ const ScoreInput = () => {
                                 </div>
                             ) : (
                                 <>
-                                    <div className="flex justify-between font-bold text-[#2B6830] text-sm mb-1.5">
+                                    <div className="flex justify-between font-bold text-primary text-sm mb-1.5">
                                         <span>{r.score} điểm</span>
                                         <span className="text-xs text-slate-500 font-mono">{new Date(r.date).toLocaleDateString('vi-VN')}</span>
                                     </div>
                                     <p className="text-xs text-slate-600 mb-2 leading-relaxed">{r.content}</p>
                                     {r.examType && <span className="text-[10px] font-bold bg-slate-200 px-1.5 py-0.5 rounded uppercase mb-2 inline-block">{r.examType}</span>}
                                     <div className="flex gap-2 border-t border-slate-200 pt-2 mt-2">
-                                        <button onClick={() => { setEditingRecordId(r.id); setEditFormData(r); }} className="text-green-600 hover:text-green-800 text-xs font-bold px-2 py-1 rounded bg-[#E8F4EC]">Sửa</button>
+                                        <button onClick={() => { setEditingRecordId(r.id); setEditFormData(r); }} className="text-green-600 hover:text-green-800 text-xs font-bold px-2 py-1 rounded bg-primary-light">Sửa</button>
                                         <button onClick={() => deleteRecord(r.id, catKey)} className="text-red-600 hover:text-red-800 text-xs font-bold px-2 py-1 rounded bg-red-50 ml-auto">Xóa</button>
                                     </div>
                                 </>
@@ -419,7 +419,7 @@ const ScoreInput = () => {
             )}
 
             <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
-                <div className="p-2 bg-[#E8F4EC] rounded-xl text-[#2B6830]">
+                <div className="p-2 bg-primary-light rounded-xl text-primary">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
                 </div>
                 <h2 className="page-title">Nhập Điểm Chi Tiết</h2>
@@ -445,7 +445,7 @@ const ScoreInput = () => {
                                 <button
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id)}
-                                    className={`px-6 py-4 text-sm font-bold whitespace-nowrap transition-all ${activeTab === tab.id ? 'bg-white text-[#2B6830] border-t-2 border-t-[#2B6830]' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100'
+                                    className={`px-6 py-4 text-sm font-bold whitespace-nowrap transition-all ${activeTab === tab.id ? 'bg-white text-primary border-t-2 border-t-primary' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100'
                                         }`}
                                 >
                                     {tab.label}
@@ -453,7 +453,7 @@ const ScoreInput = () => {
                             ))}
                         </div>
 
-                        <div className="p-5 bg-[#E8F4EC]/50 border-b border-slate-100 grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                        <div className="p-5 bg-primary-light/50 border-b border-slate-100 grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                             <div className="md:col-span-3">
                                 <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Ngày ghi nhận</label>
                                 <input type="date" className="input-base" value={commonInput.date} onChange={e => setCommonInput({ ...commonInput, date: e.target.value })} />
@@ -461,7 +461,7 @@ const ScoreInput = () => {
                             {activeTab === 'summative' && (
                                 <div className="md:col-span-2">
                                     <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Kỳ thi</label>
-                                    <select className="input-base font-bold text-[#2B6830]" value={commonInput.examType} onChange={e => setCommonInput({ ...commonInput, examType: e.target.value })}>
+                                    <select className="input-base font-bold text-primary" value={commonInput.examType} onChange={e => setCommonInput({ ...commonInput, examType: e.target.value })}>
                                         <option value="MMT">MMT</option>
                                         <option value="EOMT">EOMT</option>
                                     </select>
@@ -478,7 +478,7 @@ const ScoreInput = () => {
                             <div className="px-5 py-3 border-b border-slate-100 flex items-center gap-2">
                                 <div className="relative flex-1 max-w-xs">
                                     <input
-                                        className="w-full border border-slate-200 pl-8 pr-3 py-2 rounded-xl text-xs outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition"
+                                        className="w-full border border-slate-200 pl-8 pr-3 py-2 rounded-xl text-xs outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition"
                                         placeholder="Tìm tên học viên..."
                                         value={studentSearch}
                                         onChange={e => setStudentSearch(e.target.value)}
@@ -512,8 +512,8 @@ const ScoreInput = () => {
                                         <th>Học Viên (Bấm để xem lịch sử)</th>
                                         <th className="!text-center !text-yellow-700 !bg-yellow-50/50 hidden md:table-cell">Bonus</th>
                                         <th className="!text-center !text-green-700 !bg-green-50/50 hidden md:table-cell">Assign</th>
-                                        <th className="!text-center !text-green-700 !bg-[#E8F4EC]/50 hidden md:table-cell">Format</th>
-                                        <th className="!text-center !text-green-700 !bg-[#E8F4EC]/50 hidden md:table-cell">Summa</th>
+                                        <th className="!text-center !text-green-700 !bg-primary-light/50 hidden md:table-cell">Format</th>
+                                        <th className="!text-center !text-green-700 !bg-primary-light/50 hidden md:table-cell">Summa</th>
                                         <th className="w-40 !text-center border-l border-slate-200">Nhập Điểm</th>
                                     </tr>
                                 </thead>
@@ -526,7 +526,7 @@ const ScoreInput = () => {
                                                 <td>
                                                     <button
                                                         onClick={() => setHistoryStudentModal(st)}
-                                                        className="font-bold text-[#2B6830] hover:text-green-600 hover:underline text-left outline-none transition-all flex items-center gap-2"
+                                                        className="font-bold text-primary hover:text-green-600 hover:underline text-left outline-none transition-all flex items-center gap-2"
                                                         title="Bấm để xem & sửa lịch sử điểm"
                                                     >
                                                         {fmtStudentName(st.name, st.englishName)}
@@ -538,21 +538,21 @@ const ScoreInput = () => {
                                                     <div className="grid grid-cols-4 gap-1.5 mt-2.5 md:hidden">
                                                         <div className="bg-yellow-50 text-yellow-700 text-[10px] font-bold text-center py-1 rounded border border-yellow-100" title="Bonus">B: {summary.bonus}</div>
                                                         <div className="bg-green-50 text-green-700 text-[10px] font-bold text-center py-1 rounded border border-green-100" title="Assignment">A: {summary.assignment}</div>
-                                                        <div className="bg-[#E8F4EC] text-green-700 text-[10px] font-bold text-center py-1 rounded border border-green-100" title="Formative">F: {summary.formative}</div>
-                                                        <div className="bg-[#E8F4EC] text-green-700 text-[10px] font-bold text-center py-1 rounded border border-green-100" title="Summative">S: {summary.summative}</div>
+                                                        <div className="bg-primary-light text-green-700 text-[10px] font-bold text-center py-1 rounded border border-green-100" title="Formative">F: {summary.formative}</div>
+                                                        <div className="bg-primary-light text-green-700 text-[10px] font-bold text-center py-1 rounded border border-green-100" title="Summative">S: {summary.summative}</div>
                                                     </div>
                                                     {/* ------------------------------------------------ */}
                                                 </td>
                                                 <td className="text-center font-bold !text-yellow-700 bg-yellow-50/30 hidden md:table-cell">{summary.bonus}</td>
                                                 <td className="text-center font-bold !text-green-700 bg-green-50/30 hidden md:table-cell">{summary.assignment}</td>
-                                                <td className="text-center font-bold !text-green-700 bg-[#E8F4EC]/30 hidden md:table-cell">{summary.formative}</td>
-                                                <td className="text-center font-bold !text-green-700 bg-[#E8F4EC]/30 hidden md:table-cell">{summary.summative}</td>
+                                                <td className="text-center font-bold !text-green-700 bg-primary-light/30 hidden md:table-cell">{summary.formative}</td>
+                                                <td className="text-center font-bold !text-green-700 bg-primary-light/30 hidden md:table-cell">{summary.summative}</td>
                                                 <td className="border-l border-slate-100 bg-slate-50/50">
                                                     <div className="flex justify-center">
                                                         <input
                                                             id={`score-input-${index}`} // Cấp ID duy nhất dựa trên index của mảng
                                                             type="number"
-                                                            className="w-full max-w-[100px] text-center p-2.5 border border-slate-200 rounded-xl focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/20 outline-none font-bold text-lg transition-all shadow-sm hover:border-[#2B6830]/50"
+                                                            className="w-full max-w-[100px] text-center p-2.5 border border-slate-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none font-bold text-lg transition-all shadow-sm hover:border-primary/50"
                                                             placeholder="0-10"
                                                             value={studentScores[st.id] || ''}
                                                             onChange={(e) => handleScoreChange(st.id, e.target.value)}
@@ -580,18 +580,18 @@ const ScoreInput = () => {
                                 </svg>
                                 Xuất CSV
                             </button>
-                            {/* Inline confirm — hiện sau lần bấm đầu thay window.confirm */}
+                            {/* Inline confirm, hiện sau lần bấm đầu thay window.confirm */}
                             {pendingSaveCount > 0 && (
                                 <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2 text-sm">
                                     <span className="text-amber-700 font-medium">Lưu điểm cho <strong>{pendingSaveCount}</strong> học viên?</span>
-                                    <button onClick={handleSaveAll} className="bg-[#2B6830] text-white px-4 py-1.5 rounded-xl text-xs font-bold hover:bg-[#1E5225] transition-colors">Xác nhận</button>
+                                    <button onClick={handleSaveAll} className="bg-primary text-white px-4 py-1.5 rounded-xl text-xs font-bold hover:bg-primary-hover transition-colors">Xác nhận</button>
                                     <button onClick={() => setPendingSaveCount(0)} className="text-slate-500 px-3 py-1.5 rounded-xl text-xs font-bold bg-white border border-slate-200 hover:bg-slate-50 transition-colors">Hủy</button>
                                 </div>
                             )}
                             <button
                                 onClick={handleSaveAll}
                                 disabled={loading || Object.keys(studentScores).length === 0}
-                                className={`px-8 py-3 rounded-xl text-sm font-bold transition-all shadow-sm flex items-center gap-2 ${Object.keys(studentScores).length > 0 && commonInput.content ? 'bg-[#2B6830] text-white hover:bg-[#1E5225]' : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                                className={`px-8 py-3 rounded-xl text-sm font-bold transition-all shadow-sm flex items-center gap-2 ${Object.keys(studentScores).length > 0 && commonInput.content ? 'bg-primary text-white hover:bg-primary-hover' : 'bg-slate-200 text-slate-400 cursor-not-allowed'
                                     }`}
                             >
                                 {loading ? (
@@ -616,7 +616,7 @@ const ScoreInput = () => {
                                 <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                                     <div>
                                         <h3 className="section-title">Lịch sử Điểm & Chỉnh sửa</h3>
-                                        <p className="text-sm font-medium text-slate-500 mt-1">Học viên: <span className="text-[#2B6830]">{fmtStudentName(historyStudentModal.name, historyStudentModal.englishName)}</span> ({historyStudentModal.studentCode})</p>
+                                        <p className="text-sm font-medium text-slate-500 mt-1">Học viên: <span className="text-primary">{fmtStudentName(historyStudentModal.name, historyStudentModal.englishName)}</span> ({historyStudentModal.studentCode})</p>
                                     </div>
                                     <button onClick={() => { setHistoryStudentModal(null); setEditingRecordId(null); }} className="p-2 bg-slate-200 text-slate-500 rounded-full hover:bg-red-100 hover:text-red-600 transition-colors">
                                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>

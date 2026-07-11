@@ -29,7 +29,7 @@ const ChangePasswordModal = ({ student, onConfirm, onCancel }) => {
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
       <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full space-y-4 border border-slate-100">
-        <h3 className="font-bold text-[#2B6830] text-base">Đổi mật khẩu: {student.name}</h3>
+        <h3 className="font-bold text-primary text-base">Đổi mật khẩu: {student.name}</h3>
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>
             <label className="stat-label block mb-1">Mật khẩu mới</label>
@@ -87,6 +87,7 @@ const StudentManager = () => {
   // Lọc theo tháng/năm sinh (dựa trên birthDate lưu ở user record)
   const [filterBirthMonth, setFilterBirthMonth] = useState('all'); // 'all' | '1'..'12'
   const [filterBirthYear, setFilterBirthYear] = useState('');      // '' = không lọc
+  const [page, setPage] = useState(1);                             // trang hiện tại (phân trang danh sách)
   // Bảo lưu
   const [reserveTarget, setReserveTarget] = useState(null);
   const [reserveStart, setReserveStart] = useState('');
@@ -103,6 +104,9 @@ const StudentManager = () => {
       setLoading(false);
     });
   }, []);
+
+  // Đổi bộ lọc thì về trang 1 (tránh kẹt ở trang trống)
+  useEffect(() => { setPage(1); }, [filterClass, searchTerm, filterBirthMonth, filterBirthYear]);
 
   const showSuccess = (msg) => { setSuccessMsg(msg); setTimeout(() => setSuccessMsg(''), 3500); };
 
@@ -318,6 +322,13 @@ const StudentManager = () => {
       return true;
   }).sort((a, b) => (a.name || '').localeCompare(b.name || '', 'vi')); // sắp xếp học viên A-Z (có dấu tiếng Việt)
 
+  // Phân trang: 25 học viên/trang, tránh render toàn bộ danh sách 1 lần
+  const PAGE_SIZE = 25;
+  const totalPages = Math.max(1, Math.ceil(filteredStudents.length / PAGE_SIZE));
+  const pageSafe = Math.min(page, totalPages);
+  const pagedStudents = filteredStudents.slice((pageSafe - 1) * PAGE_SIZE, pageSafe * PAGE_SIZE);
+  const pageOffset = (pageSafe - 1) * PAGE_SIZE; // để đánh STT liên tục qua các trang
+
   return (
     <div className="space-y-6 pb-20">
 
@@ -344,11 +355,11 @@ const StudentManager = () => {
             <div className="grid grid-cols-2 gap-3 mb-6">
               <div>
                 <label className="block text-xs font-bold text-slate-400 uppercase mb-1.5">Ngày bắt đầu</label>
-                <input type="date" className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 text-sm font-semibold bg-slate-50 focus:bg-white transition-colors" value={reserveStart} onChange={e => setReserveStart(e.target.value)} />
+                <input type="date" className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 text-sm font-semibold bg-slate-50 focus:bg-white transition-colors" value={reserveStart} onChange={e => setReserveStart(e.target.value)} />
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-400 uppercase mb-1.5">Ngày kết thúc</label>
-                <input type="date" className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 text-sm font-semibold bg-slate-50 focus:bg-white transition-colors" value={reserveEnd} onChange={e => setReserveEnd(e.target.value)} />
+                <input type="date" className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 text-sm font-semibold bg-slate-50 focus:bg-white transition-colors" value={reserveEnd} onChange={e => setReserveEnd(e.target.value)} />
               </div>
             </div>
 
@@ -428,9 +439,14 @@ const StudentManager = () => {
         </div>
       )}
 
+      <div>
+        <h1 className="page-title">Quản lý Học viên</h1>
+        <p className="page-sub">Thêm học viên, tra cứu và quản lý danh sách toàn trung tâm</p>
+      </div>
+
       <div className="flex gap-4 border-b border-slate-200 overflow-x-auto w-full flex-nowrap scrollbar-hide">
-        <button onClick={() => setActiveTab('create')} className={`pb-3 px-4 text-sm font-bold transition-all whitespace-nowrap ${activeTab === 'create' ? 'text-[#2B6830] border-b-2 border-[#2B6830]' : 'text-slate-400 hover:text-slate-600'}`}>Thêm Học Viên</button>
-        <button onClick={() => setActiveTab('list')} className={`pb-3 px-4 text-sm font-bold transition-all whitespace-nowrap ${activeTab === 'list' ? 'text-[#2B6830] border-b-2 border-[#2B6830]' : 'text-slate-400 hover:text-slate-600'}`}>Danh sách</button>
+        <button onClick={() => setActiveTab('create')} className={`pb-3 px-4 text-sm font-bold transition-all whitespace-nowrap ${activeTab === 'create' ? 'text-primary border-b-2 border-primary' : 'text-slate-500 hover:text-slate-700'}`}>Thêm Học Viên</button>
+        <button onClick={() => setActiveTab('list')} className={`pb-3 px-4 text-sm font-bold transition-all whitespace-nowrap ${activeTab === 'list' ? 'text-primary border-b-2 border-primary' : 'text-slate-500 hover:text-slate-700'}`}>Danh sách</button>
       </div>
 
       {activeTab === 'create' && (
@@ -472,7 +488,7 @@ const StudentManager = () => {
            {/* --- BỘ LỌC (Responsive): lớp + tháng/năm sinh + tìm kiếm (tên / mã HV / SĐT) --- */}
            <div className="flex flex-col md:flex-row gap-3 mb-4">
                <select
-                   className="p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 md:min-w-[130px] bg-slate-50"
+                   className="p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 md:min-w-[130px] bg-slate-50"
                    value={filterClass}
                    onChange={e => setFilterClass(e.target.value)}
                >
@@ -481,7 +497,7 @@ const StudentManager = () => {
                </select>
                {/* Lọc theo tháng sinh */}
                <select
-                   className="p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 md:w-36 bg-slate-50"
+                   className="p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 md:w-36 bg-slate-50"
                    value={filterBirthMonth}
                    onChange={e => setFilterBirthMonth(e.target.value)}
                >
@@ -492,13 +508,13 @@ const StudentManager = () => {
                <input
                    type="number"
                    min="1900"
-                   className="p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 md:w-32 bg-slate-50"
+                   className="p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 md:w-32 bg-slate-50"
                    placeholder="Năm sinh"
                    value={filterBirthYear}
                    onChange={e => setFilterBirthYear(e.target.value)}
                />
                <input
-                   className="flex-1 p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 md:min-w-[220px]"
+                   className="flex-1 p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 md:min-w-[220px]"
                    placeholder="Tìm theo Tên, Mã HV hoặc SĐT..."
                    value={searchTerm}
                    onChange={e => setSearchTerm(e.target.value)}
@@ -518,10 +534,10 @@ const StudentManager = () => {
                  </tr>
                </thead>
                <tbody>
-                 {filteredStudents.map((st, index) => (
+                 {pagedStudents.map((st, index) => (
                    <tr key={st.id}>
-                     <td className="text-center text-slate-400 font-bold">{index + 1}</td>
-                     <td className="font-bold text-[#2B6830]">{st.studentCode}</td>
+                     <td className="text-center text-slate-400 font-bold">{pageOffset + index + 1}</td>
+                     <td className="font-bold text-primary">{st.studentCode}</td>
                      <td className="font-medium">
                        <div className="flex items-center gap-2 flex-wrap">
                          <span>{st.name}</span>
@@ -530,27 +546,27 @@ const StudentManager = () => {
                      </td>
                      <td className="text-slate-600 max-w-xs truncate">{getClassNames(st.classIds)}</td>
                      <td className="text-right flex justify-end gap-2">
-                        <button onClick={() => setEditingStudent({...st, classId1: st.classIds?.[0]||'', classId2: st.classIds?.[1]||'', classId3: st.classIds?.[2]||'', classId4: st.classIds?.[3]||''})} className="text-[#2B6830] border border-[#2B6830] px-2 py-1 rounded text-xs font-bold hover:bg-[#2B6830] hover:text-white transition-all">Sửa</button>
-                        <button onClick={() => handleResetPassword(st)} className="text-yellow-600 border border-yellow-600 px-2 py-1 rounded text-xs font-bold hover:bg-yellow-600 hover:text-white transition-colors">Pass</button>
-                        <button 
-                            onClick={() => handleToggleLock(st)} 
-                            className={`px-2 py-1 rounded text-xs font-bold border transition-colors ${(st.lockedAt || st.isLocked) ? 'text-emerald-600 border-emerald-600 hover:bg-emerald-600 hover:text-white' : 'text-orange-500 border-orange-500 hover:bg-orange-500 hover:text-white'}`}
+                        <button onClick={() => setEditingStudent({...st, classId1: st.classIds?.[0]||'', classId2: st.classIds?.[1]||'', classId3: st.classIds?.[2]||'', classId4: st.classIds?.[3]||''})} className="text-primary border border-primary px-2 py-1 rounded text-xs font-bold hover:bg-primary hover:text-white transition-all">Sửa</button>
+                        <button onClick={() => handleResetPassword(st)} className="text-slate-600 border border-slate-300 px-2 py-1 rounded text-xs font-bold hover:bg-slate-100 hover:border-slate-400 transition-colors">Pass</button>
+                        <button
+                            onClick={() => handleToggleLock(st)}
+                            className={`px-2 py-1 rounded text-xs font-bold border transition-colors ${(st.lockedAt || st.isLocked) ? 'text-amber-600 border-amber-500 hover:bg-amber-500 hover:text-white' : 'text-slate-600 border-slate-300 hover:bg-slate-100 hover:border-slate-400'}`}
                         >
                             {(st.lockedAt || st.isLocked) ? 'Mở' : 'Khóa'}
                         </button>
                         <button
                             onClick={() => handleOpenReserve(st)}
-                            className={`px-2 py-1 rounded text-xs font-bold border transition-colors ${st.reserve ? 'text-blue-600 border-blue-600 hover:bg-blue-600 hover:text-white' : 'text-slate-500 border-slate-300 hover:bg-slate-500 hover:text-white'}`}
+                            className={`px-2 py-1 rounded text-xs font-bold border transition-colors ${st.reserve ? 'text-primary border-primary/40 bg-primary/5' : 'text-slate-600 border-slate-300 hover:bg-slate-100 hover:border-slate-400'}`}
                         >
                             Bảo lưu
                         </button>
                         <button
                             onClick={() => { setTransferTarget(st); setTransferFrom(''); setTransferTo(''); }}
-                            className="text-violet-600 border border-violet-400 px-2 py-1 rounded text-xs font-bold hover:bg-violet-600 hover:text-white transition-colors"
+                            className="text-slate-600 border border-slate-300 px-2 py-1 rounded text-xs font-bold hover:bg-slate-100 hover:border-slate-400 transition-colors"
                         >
                             Chuyển
                         </button>
-                        <button onClick={() => handleDelete(st.id)} className="text-red-500 hover:text-red-700 font-bold text-xs px-2">Xóa</button>
+                        <button onClick={() => handleDelete(st.id)} className="text-red-500 border border-red-200 px-2 py-1 rounded text-xs font-bold hover:bg-red-500 hover:text-white transition-colors">Xóa</button>
                      </td>
                    </tr>
                  ))}
@@ -566,15 +582,15 @@ const StudentManager = () => {
 
            {/* MOBILE CARDS */}
            <div className="md:hidden space-y-3">
-                {filteredStudents.map((st, index) => (
+                {pagedStudents.map((st, index) => (
                     <div key={st.id} className="p-4 border border-slate-200 rounded-xl bg-white shadow-sm flex flex-col gap-3">
                         <div className="flex justify-between items-start">
                             <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-[#E8F4EC] text-[#2B6830] flex items-center justify-center font-bold text-xs">
-                                    {index + 1}
+                                <div className="w-8 h-8 rounded-full bg-primary-light text-primary flex items-center justify-center font-bold text-xs">
+                                    {pageOffset + index + 1}
                                 </div>
                                 <div>
-                                    <h4 className="font-bold text-[#2B6830] text-sm flex items-center gap-2 flex-wrap">
+                                    <h4 className="font-bold text-primary text-sm flex items-center gap-2 flex-wrap">
                                       {st.name}
                                       {(() => { const rs = getReserveStatus(st); return rs ? <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${RESERVE_BADGE[rs]}`}>{RESERVE_LABEL[rs]}</span> : null; })()}
                                     </h4>
@@ -589,22 +605,39 @@ const StudentManager = () => {
                         </div>
 
                         <div className="flex flex-wrap gap-2 border-t border-slate-100 pt-3 mt-1">
-                            <button onClick={() => setEditingStudent({...st, classId1: st.classIds?.[0]||'', classId2: st.classIds?.[1]||'', classId3: st.classIds?.[2]||'', classId4: st.classIds?.[3]||''})} className="flex-1 min-w-[60px] py-2 text-[#2B6830] bg-[#E8F4EC] rounded-xl text-xs font-bold border border-green-200 active:bg-green-100">Sửa</button>
-                            <button onClick={() => handleResetPassword(st)} className="flex-1 min-w-[60px] py-2 text-yellow-700 bg-yellow-50 rounded-xl text-xs font-bold border border-yellow-200 active:bg-yellow-100">Pass</button>
+                            <button onClick={() => setEditingStudent({...st, classId1: st.classIds?.[0]||'', classId2: st.classIds?.[1]||'', classId3: st.classIds?.[2]||'', classId4: st.classIds?.[3]||''})} className="flex-1 min-w-[60px] py-2 text-primary bg-primary-light rounded-xl text-xs font-bold border border-green-200 active:bg-green-100">Sửa</button>
+                            <button onClick={() => handleResetPassword(st)} className="flex-1 min-w-[60px] py-2 text-slate-600 bg-slate-50 rounded-xl text-xs font-bold border border-slate-200 active:bg-slate-100">Pass</button>
                             <button
                                   onClick={() => handleToggleLock(st)}
-                                  className={`flex-1 min-w-[60px] py-2 rounded-xl text-xs font-bold border transition-colors ${(st.lockedAt || st.isLocked) ? 'text-emerald-700 bg-emerald-50 border-emerald-200 active:bg-emerald-100' : 'text-orange-600 bg-orange-50 border-orange-200 active:bg-orange-100'}`}
+                                  className={`flex-1 min-w-[60px] py-2 rounded-xl text-xs font-bold border transition-colors ${(st.lockedAt || st.isLocked) ? 'text-amber-700 bg-amber-50 border-amber-200 active:bg-amber-100' : 'text-slate-600 bg-slate-50 border-slate-200 active:bg-slate-100'}`}
                               >
                                   {(st.lockedAt || st.isLocked) ? 'Mở Khóa' : 'Khóa'}
                               </button>
-                            <button onClick={() => handleOpenReserve(st)} className={`flex-1 min-w-[60px] py-2 rounded-xl text-xs font-bold border transition-colors ${st.reserve ? 'text-blue-600 bg-blue-50 border-blue-200 active:bg-blue-100' : 'text-slate-600 bg-slate-50 border-slate-200 active:bg-slate-100'}`}>Bảo lưu</button>
-                            <button onClick={() => { setTransferTarget(st); setTransferFrom(''); setTransferTo(''); }} className="flex-1 min-w-[60px] py-2 text-violet-600 bg-violet-50 rounded-xl text-xs font-bold border border-violet-200 active:bg-violet-100">Chuyển</button>
+                            <button onClick={() => handleOpenReserve(st)} className={`flex-1 min-w-[60px] py-2 rounded-xl text-xs font-bold border transition-colors ${st.reserve ? 'text-primary bg-primary/5 border-primary/30 active:bg-primary/10' : 'text-slate-600 bg-slate-50 border-slate-200 active:bg-slate-100'}`}>Bảo lưu</button>
+                            <button onClick={() => { setTransferTarget(st); setTransferFrom(''); setTransferTo(''); }} className="flex-1 min-w-[60px] py-2 text-slate-600 bg-slate-50 rounded-xl text-xs font-bold border border-slate-200 active:bg-slate-100">Chuyển</button>
                             <button onClick={() => handleDelete(st.id)} className="flex-1 min-w-[60px] py-2 text-red-600 bg-red-50 rounded-xl text-xs font-bold border border-red-200 active:bg-red-100">Xóa</button>
                         </div>
                     </div>
                 ))}
-                {filteredStudents.length === 0 && <div className="p-8 text-center text-slate-400 italic bg-slate-50 rounded-xl border border-dashed border-slate-200">Không tìm thấy dữ liệu.</div>}
+                {loading && [1,2,3].map(i => <div key={i} className="h-24 bg-slate-100 rounded-xl animate-pulse" />)}
+                {!loading && filteredStudents.length === 0 && <div className="p-8 text-center text-slate-400 italic bg-slate-50 rounded-xl border border-dashed border-slate-200">Không tìm thấy dữ liệu.</div>}
            </div>
+
+           {/* PHÂN TRANG danh sách */}
+           {!loading && filteredStudents.length > 0 && (
+             <div className="flex items-center justify-between gap-3 mt-4 flex-wrap">
+               <p className="text-xs text-slate-500">
+                 Hiển thị {pageOffset + 1} đến {Math.min(pageOffset + PAGE_SIZE, filteredStudents.length)} trong {filteredStudents.length} học viên
+               </p>
+               {totalPages > 1 && (
+                 <div className="flex items-center gap-1.5">
+                   <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={pageSafe <= 1} className="px-3 py-1.5 rounded-lg text-xs font-bold border border-slate-200 text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">Trước</button>
+                   <span className="text-xs font-bold text-slate-700 px-2">Trang {pageSafe} / {totalPages}</span>
+                   <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={pageSafe >= totalPages} className="px-3 py-1.5 rounded-lg text-xs font-bold border border-slate-200 text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">Sau</button>
+                 </div>
+               )}
+             </div>
+           )}
         </div>
       )}
 
@@ -619,7 +652,7 @@ const StudentManager = () => {
               <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 space-y-2">
                  <p className="text-xs font-bold text-slate-400 uppercase">Cập nhật lớp</p>
                  {[1,2,3,4].map(i => (
-                   <select key={i} className="border p-2 rounded text-sm w-full bg-white outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10" value={editingStudent[`classId${i}`]} onChange={e => setEditingStudent({...editingStudent, [`classId${i}`]: e.target.value})}>
+                   <select key={i} className="border p-2 rounded text-sm w-full bg-white outline-none focus:border-primary focus:ring-2 focus:ring-primary/10" value={editingStudent[`classId${i}`]} onChange={e => setEditingStudent({...editingStudent, [`classId${i}`]: e.target.value})}>
                      <option value="">-- Lớp {i} --</option>
                      {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                    </select>
@@ -658,7 +691,7 @@ const StudentManager = () => {
               <label className="block text-xs font-bold text-slate-400 uppercase mb-1.5">Chọn ngày áp dụng khóa</label>
               <input
                 type="date"
-                className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 text-sm font-semibold bg-slate-50 focus:bg-white transition-colors cursor-pointer"
+                className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 text-sm font-semibold bg-slate-50 focus:bg-white transition-colors cursor-pointer"
                 value={customLockDate}
                 onChange={(e) => setCustomLockDate(e.target.value)}
               />

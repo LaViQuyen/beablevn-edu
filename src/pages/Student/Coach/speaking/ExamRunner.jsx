@@ -39,7 +39,7 @@ const ExamRunner = (props) => {
     <div className="max-w-3xl mx-auto">
       {/* Thanh tiến độ */}
       <div className="h-1.5 bg-[#E3EDE5] rounded overflow-hidden mb-3.5">
-        <div className="h-1.5 bg-[#3D8B47] rounded transition-all duration-300" style={{ width: `${progress}%` }} />
+        <div className="h-1.5 bg-primary-medium rounded transition-all duration-300" style={{ width: `${progress}%` }} />
       </div>
 
       <div className="card card-body">
@@ -54,13 +54,13 @@ const ExamRunner = (props) => {
         </div>
 
         {partIntro && (
-          <div className="bg-[#E8F4EC] rounded-xl px-3.5 py-2.5 mt-2.5 text-[13px] text-[#1E5225]">{partIntro}</div>
+          <div className="bg-primary-light rounded-xl px-3.5 py-2.5 mt-2.5 text-[13px] text-primary-hover">{partIntro}</div>
         )}
 
         {item.part === 2 ? (
           <>
             <div className="text-lg md:text-xl font-bold mt-4 mb-1.5 leading-snug">Part 2 · Cue card</div>
-            <div className="bg-[#E8F4EC] border border-[#C9E2CF] rounded-xl px-4 py-3.5 my-3 text-[15px] md:text-base leading-relaxed">
+            <div className="bg-primary-light border border-[#C9E2CF] rounded-xl px-4 py-3.5 my-3 text-[15px] md:text-base leading-relaxed">
               <b>
                 <MdBold text={item.cue.topic} />
               </b>
@@ -86,7 +86,7 @@ const ExamRunner = (props) => {
 
         <div
           className={`text-center text-5xl font-extrabold my-2.5 ${
-            timer.left != null && timer.left <= 10 ? 'text-red-600' : 'text-[#2B6830]'
+            timer.left != null && timer.left <= 10 ? 'text-red-600' : 'text-primary'
           }`}
           style={{ fontVariantNumeric: 'tabular-nums' }}
         >
@@ -135,7 +135,7 @@ const ExamRunner = (props) => {
           <div className="card card-body mt-4">
             <BandChips bands={feedback.bands} />
             {feedback.praise ? (
-              <p className="text-[#1E5225] font-semibold text-sm my-2">
+              <p className="text-primary-hover font-semibold text-sm my-2">
                 <MdBold text={feedback.praise} />
               </p>
             ) : null}
@@ -152,13 +152,13 @@ const ExamRunner = (props) => {
               ))}
             </div>
             {feedback.upgrade ? (
-              <div className="bg-[#E8F4EC] rounded-xl p-3 text-sm my-2">
+              <div className="bg-primary-light rounded-xl p-3 text-sm my-2">
                 💡 <b>Câu mẫu hay hơn:</b> <MdBold text={feedback.upgrade} />
               </div>
             ) : null}
             {methodTips.length > 0 && (
-              <div className="bg-[#F2F8F4] border border-[#C9E2CF] border-l-[3px] border-l-[#3D8B47] rounded-r-xl px-3.5 py-3 my-2.5 text-sm">
-                <div className="font-bold text-[#1E5225] text-xs uppercase tracking-wide mb-1.5">
+              <div className="bg-primary-subtle border border-[#C9E2CF] border-l-[3px] border-l-primary-medium rounded-r-xl px-3.5 py-3 my-2.5 text-sm">
+                <div className="font-bold text-primary-hover text-xs uppercase tracking-wide mb-1.5">
                   📐 Theo phương pháp Be Able · Part {item.part}
                 </div>
                 {methodTips.map((t, i) => (

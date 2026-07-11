@@ -6,6 +6,7 @@ import { db } from '../../firebase';
 import { ref, update, get, onValue } from 'firebase/database';
 import bcrypt from 'bcryptjs';
 import { StudentNotifyEngine } from '../NotificationEngine'; // thông báo + chuông: báo bài, nhắc lịch học, trạng thái đổi quà
+import StudentAvatar from '../StudentAvatar'; // avatar cho khối danh tính người đăng nhập
 
 const Icons = {
   Dashboard: ({ active }) => (
@@ -58,13 +59,13 @@ const Icons = {
       <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
     </svg>
   ),
-  // Icon Skin (gương mặt cười) — khu Cửa hàng Skin
+  // Icon Skin (gương mặt cười), khu Cửa hàng Skin
   Skins: ({ active }) => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke={active ? "#2B6830" : "#64748b"} className="w-5 h-5">
       <path strokeLinecap="round" strokeLinejoin="round" d="M15.182 15.182a4.5 4.5 0 01-6.364 0M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75zm-.375 0h.008v.015h-.008V9.75zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75zm-.375 0h.008v.015h-.008V9.75z" />
     </svg>
   ),
-  // Icon cúp — Bảng Vinh Danh
+  // Icon cúp, Bảng Vinh Danh
   Trophy: ({ active }) => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke={active ? "#2B6830" : "#64748b"} className="w-5 h-5">
       <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 01-.982-3.172M9.497 14.25a7.454 7.454 0 00.981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 007.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 002.748 1.35m8.272-6.842V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.492a46.32 46.32 0 012.916.52 6.003 6.003 0 01-5.395 4.972m0 0a6.726 6.726 0 01-2.749 1.35m0 0a6.772 6.772 0 01-3.044 0" />
@@ -73,6 +74,12 @@ const Icons = {
   Lock: () => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="#94a3b8" className="w-3.5 h-3.5 shrink-0">
       <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 00-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+    </svg>
+  ),
+  // Icon "Thêm" (dấu 3 chấm) mở Drawer chức năng phụ trên mobile
+  More: ({ active }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill={active ? "#2B6830" : "#64748b"} className="w-5 h-5">
+      <path d="M6 12a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM13.5 12a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM21 12a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
     </svg>
   ),
 };
@@ -105,6 +112,7 @@ const StudentLayout = () => {
   const [passError, setPassError] = useState('');
   const [passSuccess, setPassSuccess] = useState('');
   const [feedbackUnread, setFeedbackUnread] = useState(0); // số phản hồi mới của GV
+  const [moreOpen, setMoreOpen] = useState(false); // Drawer "Thêm" trên mobile
 
   // ─── Trạng thái học phí để khoá menu khi Quá hạn ─────────────────────────
   const [tuitionStatus, setTuitionStatus] = useState(null); // null | 'Chờ' | 'Quá hạn' | 'Đã đóng'
@@ -146,7 +154,7 @@ const StudentLayout = () => {
 
   const isActive = (path) => location.pathname.includes(path);
   // Mỗi thẻ có bề rộng tối thiểu cố định + không co lại (shrink-0) để thanh nav cuộn ngang được
-  const mobileLinkClass = (path) => `flex flex-col items-center justify-center shrink-0 min-w-[64px] h-full space-y-1 px-0.5 ${isActive(path) ? 'text-[#2B6830]' : 'text-slate-400 hover:text-slate-600'}`;
+  const mobileLinkClass = (path) => `relative flex flex-col items-center justify-center shrink-0 min-w-[64px] h-full space-y-1 px-0.5 ${isActive(path) ? "text-primary before:absolute before:top-0 before:inset-x-3.5 before:h-[3px] before:bg-primary before:rounded-b-full" : 'text-slate-500 hover:text-slate-700'}`;
 
   // Thu tu the bottom nav - dung cho VUOT NGANG chuyen the;
   // khi Qua han hoc phi thi BO cac the bi khoa khoi day vuot (khong lach duoc popup)
@@ -164,6 +172,19 @@ const StudentLayout = () => {
     { key: 'contact',       to: '/student/contact' },
   ].filter((tb) => !isOverdue || !LOCKED_WHEN_OVERDUE.includes(tb.key));
   const { onTouchStart, onTouchEnd, slideKey, slideClass } = useSwipeTabs(TABS);
+
+  // Bottom nav mobile: 4 thẻ chính hiện trực tiếp, phần còn lại gom vào Drawer "Thêm".
+  // Giữ nguyên cơ chế khoá khi Quá hạn: các mục trong LOCKED_WHEN_OVERDUE bị chặn + hiện popup.
+  const isLocked = (key) => isOverdue && LOCKED_WHEN_OVERDUE.includes(key);
+  const MORE_ITEMS = [
+    { to: '/student/credits',       key: 'credits',       label: 'BAVN Credits',  Icon: Icons.Credits },
+    { to: '/student/skins',         key: 'skins',         label: 'Cửa hàng Skin', Icon: Icons.Skins },
+    { to: '/student/leaderboard',   key: 'leaderboard',   label: 'Bảng Vinh Danh', Icon: Icons.Trophy },
+    { to: '/student/resources',     key: 'resources',     label: 'Luyện tập IELTS', Icon: Icons.Practice },
+    { to: '/student/feedback',      key: 'feedback',      label: 'Phản ánh',      Icon: Icons.Feedback, badge: feedbackUnread },
+    { to: '/student/contact',       key: 'contact',       label: 'Liên hệ GV',    Icon: Icons.Contact },
+  ];
+  const moreActive = MORE_ITEMS.some((it) => isActive(it.key));
 
   // Tự cuộn thẻ đang chọn vào giữa thanh nav
   const bottomNavRef = useRef(null);
@@ -217,7 +238,7 @@ const StudentLayout = () => {
         <div className="p-6 border-b border-slate-100 flex items-center gap-3">
           <img src="/BA LOGO.png" alt="Logo" className="w-10 h-10 object-contain" />
           <div>
-            <h1 className="font-extrabold text-[#2B6830] text-lg leading-tight">BE ABLE VN</h1>
+            <h1 className="font-extrabold text-primary text-lg leading-tight">BE ABLE VN</h1>
             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Cổng Học viên</p>
           </div>
         </div>
@@ -225,20 +246,20 @@ const StudentLayout = () => {
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           <p className="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 mt-2">Học tập</p>
 
-          <Link to="/student/dashboard" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('dashboard') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
+          <Link to="/student/dashboard" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('dashboard') ? 'bg-primary/10 text-primary' : 'text-slate-600 hover:bg-slate-50'}`}>
             <Icons.Dashboard active={isActive('dashboard')} /> Tổng quan
           </Link>
-          <Link to="/student/attendance" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('attendance') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
+          <Link to="/student/attendance" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('attendance') ? 'bg-primary/10 text-primary' : 'text-slate-600 hover:bg-slate-50'}`}>
             <Icons.Attendance active={isActive('attendance')} /> Điểm danh của tôi
           </Link>
-          <Link to="/student/scores" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('scores') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
+          <Link to="/student/scores" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('scores') ? 'bg-primary/10 text-primary' : 'text-slate-600 hover:bg-slate-50'}`}>
             <Icons.Scores active={isActive('scores')} /> Bảng điểm
           </Link>
-          {/* Thông báo — khoá khi Quá hạn */}
+          {/* Thông báo, khoá khi Quá hạn */}
           <Link
             to="/student/notifications"
             onClick={handleBlockedMenuClick}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('notifications') ? 'bg-[#2B6830]/5 text-[#2B6830]' : isOverdue ? 'text-slate-300 cursor-not-allowed' : 'text-slate-600 hover:bg-slate-50'}`}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('notifications') ? 'bg-primary/10 text-primary' : isOverdue ? 'text-slate-300 cursor-not-allowed' : 'text-slate-600 hover:bg-slate-50'}`}
           >
             <Icons.Noti active={isActive('notifications') && !isOverdue} />
             <span className="flex-1">Thông báo</span>
@@ -246,55 +267,55 @@ const StudentLayout = () => {
           </Link>
 
           <p className="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 mt-4">Ưu đãi</p>
-          {/* BAVN Credits — khoá khi Quá hạn */}
+          {/* BAVN Credits, khoá khi Quá hạn */}
           <Link
             to="/student/credits"
             onClick={handleBlockedMenuClick}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('credits') ? 'bg-[#2B6830]/5 text-[#2B6830]' : isOverdue ? 'text-slate-300 cursor-not-allowed' : 'text-slate-600 hover:bg-slate-50'}`}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('credits') ? 'bg-primary/10 text-primary' : isOverdue ? 'text-slate-300 cursor-not-allowed' : 'text-slate-600 hover:bg-slate-50'}`}
           >
             <Icons.Credits active={isActive('credits') && !isOverdue} />
             <span className="flex-1">BAVN Credits</span>
             {isOverdue
               ? <Icons.Lock />
-              : <span className="text-[9px] font-bold bg-[#E8F4EC] text-[#2B6830] px-1.5 py-0.5 rounded border border-green-100 uppercase">Mới</span>
+              : <span className="text-[9px] font-bold bg-primary-light text-primary px-1.5 py-0.5 rounded border border-green-100 uppercase">Mới</span>
             }
           </Link>
-          {/* Cửa hàng Skin — khoá khi Quá hạn */}
+          {/* Cửa hàng Skin, khoá khi Quá hạn */}
           <Link
             to="/student/skins"
             onClick={handleBlockedMenuClick}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('skins') ? 'bg-[#2B6830]/5 text-[#2B6830]' : isOverdue ? 'text-slate-300 cursor-not-allowed' : 'text-slate-600 hover:bg-slate-50'}`}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('skins') ? 'bg-primary/10 text-primary' : isOverdue ? 'text-slate-300 cursor-not-allowed' : 'text-slate-600 hover:bg-slate-50'}`}
           >
             <Icons.Skins active={isActive('skins') && !isOverdue} />
             <span className="flex-1">Cửa hàng Skin</span>
             {isOverdue
               ? <Icons.Lock />
-              : <span className="text-[9px] font-bold bg-[#E8F4EC] text-[#2B6830] px-1.5 py-0.5 rounded border border-green-100 uppercase">Mới</span>
+              : <span className="text-[9px] font-bold bg-primary-light text-primary px-1.5 py-0.5 rounded border border-green-100 uppercase">Mới</span>
             }
           </Link>
-          <Link to="/student/leaderboard" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('leaderboard') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
+          <Link to="/student/leaderboard" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('leaderboard') ? 'bg-primary/10 text-primary' : 'text-slate-600 hover:bg-slate-50'}`}>
             <Icons.Trophy active={isActive('leaderboard')} />
             <span className="flex-1">Bảng Vinh Danh</span>
             <span className="text-[9px] font-bold bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded border border-amber-200 uppercase">Hot</span>
           </Link>
 
           <p className="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 mt-4">Tài nguyên</p>
-          {/* Luyện tập IELTS — khoá khi Quá hạn */}
+          {/* Luyện tập IELTS, khoá khi Quá hạn */}
           <Link
             to="/student/resources"
             onClick={handleBlockedMenuClick}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('resources') ? 'bg-[#2B6830]/5 text-[#2B6830]' : isOverdue ? 'text-slate-300 cursor-not-allowed' : 'text-slate-600 hover:bg-slate-50'}`}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('resources') ? 'bg-primary/10 text-primary' : isOverdue ? 'text-slate-300 cursor-not-allowed' : 'text-slate-600 hover:bg-slate-50'}`}
           >
             <Icons.Practice active={isActive('resources') && !isOverdue} />
             <span className="flex-1">Luyện tập IELTS</span>
             {isOverdue
               ? <Icons.Lock />
-              : <span className="text-[9px] font-bold bg-[#E8F4EC] text-[#2B6830] px-1.5 py-0.5 rounded border border-green-100 uppercase">Mới</span>
+              : <span className="text-[9px] font-bold bg-primary-light text-primary px-1.5 py-0.5 rounded border border-green-100 uppercase">Mới</span>
             }
           </Link>
 
           <p className="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 mt-4">Tương tác</p>
-          <Link to="/student/feedback" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('feedback') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
+          <Link to="/student/feedback" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('feedback') ? 'bg-primary/10 text-primary' : 'text-slate-600 hover:bg-slate-50'}`}>
             <Icons.Feedback active={isActive('feedback')} />
             <span className="flex-1">Phản ánh</span>
             {feedbackUnread > 0 && (
@@ -303,13 +324,21 @@ const StudentLayout = () => {
               </span>
             )}
           </Link>
-          <Link to="/student/contact" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('contact') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-600 hover:bg-slate-50'}`}>
+          <Link to="/student/contact" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('contact') ? 'bg-primary/10 text-primary' : 'text-slate-600 hover:bg-slate-50'}`}>
             <Icons.Contact active={isActive('contact')} /> Liên hệ GV
           </Link>
         </nav>
 
         <div className="p-4 border-t border-slate-100 space-y-1">
-          <Link to="/student/profile" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('profile') ? 'bg-[#2B6830]/5 text-[#2B6830]' : 'text-slate-500 hover:bg-[#E8F4EC] hover:text-[#2B6830]'}`}>
+          {/* Khối danh tính người đang đăng nhập */}
+          <div className="flex items-center gap-3 px-3 py-2.5 mb-1 rounded-xl bg-slate-50">
+            <StudentAvatar name={currentUser?.name} size={38} />
+            <div className="min-w-0">
+              <p className="text-sm font-bold text-slate-800 truncate">{currentUser?.name || 'Học viên'}</p>
+              <p className="text-[11px] text-slate-500 truncate">{currentUser?.studentCode ? `Mã HV: ${currentUser.studentCode}` : 'Cổng Học viên'}</p>
+            </div>
+          </div>
+          <Link to="/student/profile" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('profile') ? 'bg-primary/10 text-primary' : 'text-slate-500 hover:bg-primary-light hover:text-primary'}`}>
             <Icons.Key /> Tài khoản & Bảo mật
           </Link>
           <button onClick={handleLogout} className="flex items-center gap-3 px-4 py-3 rounded-xl w-full text-slate-500 hover:bg-red-50 hover:text-red-600 transition-all font-medium text-sm">
@@ -322,13 +351,13 @@ const StudentLayout = () => {
       <header className="md:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-slate-200 z-50 px-4 flex justify-between items-center shadow-sm">
         <div className="flex items-center gap-2">
           <img src="/BA LOGO.png" alt="Logo" className="w-7 h-7 object-contain" />
-          <span className="text-[#2B6830] font-bold text-sm">CỔNG HỌC VIÊN</span>
+          <span className="text-primary font-bold text-sm">CỔNG HỌC VIÊN</span>
         </div>
         <div className="flex items-center gap-1">
-          <button onClick={() => setShowPassModal(true)} className="p-2 text-slate-400 hover:text-[#2B6830]">
+          <button onClick={() => setShowPassModal(true)} aria-label="Đổi mật khẩu" title="Đổi mật khẩu" className="p-2 text-slate-500 hover:text-primary">
             <Icons.Key />
           </button>
-          <button onClick={handleLogout} className="p-2 text-slate-400 hover:text-red-500">
+          <button onClick={handleLogout} aria-label="Đăng xuất" title="Đăng xuất" className="p-2 text-slate-500 hover:text-red-500">
             <Icons.Logout />
           </button>
         </div>
@@ -339,47 +368,61 @@ const StudentLayout = () => {
         <div key={slideKey} className={`max-w-6xl mx-auto ${slideClass}`}><Outlet /></div>
       </main>
 
-      {/* MOBILE BOTTOM NAV — cuộn ngang (swipe) vì có nhiều thẻ; ẩn thanh cuộn cho gọn */}
-      <nav
-        ref={bottomNavRef}
-        className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 h-16 flex items-center overflow-x-auto overflow-y-hidden z-50 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] [&::-webkit-scrollbar]:hidden"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
-      >
-        <Link to="/student/dashboard" data-active={isActive('dashboard')} className={mobileLinkClass('dashboard')}><Icons.Dashboard active={isActive('dashboard')} /><span className="text-[10px] font-medium">Tổng quan</span></Link>
-        <Link to="/student/attendance" data-active={isActive('attendance')} className={mobileLinkClass('attendance')}><Icons.Attendance active={isActive('attendance')} /><span className="text-[10px] font-medium">Đ.Danh</span></Link>
-        <Link to="/student/scores" data-active={isActive('scores')} className={mobileLinkClass('scores')}><Icons.Scores active={isActive('scores')} /><span className="text-[10px] font-medium">Kết quả</span></Link>
-        {/* Credits — khoá khi Quá hạn */}
-        <Link to="/student/credits" data-active={isActive('credits')} onClick={handleBlockedMenuClick} className={mobileLinkClass('credits') + (isOverdue ? ' opacity-40' : '')}>
-          <Icons.Credits active={isActive('credits') && !isOverdue} /><span className="text-[10px] font-medium">Credits</span>
-        </Link>
-        {/* Skins — khoá khi Quá hạn */}
-        <Link to="/student/skins" data-active={isActive('skins')} onClick={handleBlockedMenuClick} className={mobileLinkClass('skins') + (isOverdue ? ' opacity-40' : '')}>
-          <Icons.Skins active={isActive('skins') && !isOverdue} /><span className="text-[10px] font-medium">Skin</span>
-        </Link>
-        <Link to="/student/leaderboard" data-active={isActive('leaderboard')} className={mobileLinkClass('leaderboard')}><Icons.Trophy active={isActive('leaderboard')} /><span className="text-[10px] font-medium">Vinh danh</span></Link>
-        {/* Luyện tập IELTS — khoá khi Quá hạn */}
-        <Link to="/student/resources" data-active={isActive('resources')} onClick={handleBlockedMenuClick} className={mobileLinkClass('resources') + (isOverdue ? ' opacity-40' : '')}>
-          <Icons.Practice active={isActive('resources') && !isOverdue} /><span className="text-[10px] font-medium">Luyện tập</span>
-        </Link>
-        {/* Thông báo — khoá khi Quá hạn */}
-        <Link to="/student/notifications" data-active={isActive('notifications')} onClick={handleBlockedMenuClick} className={mobileLinkClass('notifications') + (isOverdue ? ' opacity-40' : '')}>
+      {/* MOBILE BOTTOM NAV, 4 the chinh + nut Them (mo Drawer chua phan con lai) */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 h-16 flex items-center justify-around z-50 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+        <Link to="/student/dashboard" className={mobileLinkClass('dashboard')}><Icons.Dashboard active={isActive('dashboard')} /><span className="text-[10px] font-medium">Tổng quan</span></Link>
+        <Link to="/student/scores" className={mobileLinkClass('scores')}><Icons.Scores active={isActive('scores')} /><span className="text-[10px] font-medium">Điểm</span></Link>
+        <Link to="/student/attendance" className={mobileLinkClass('attendance')}><Icons.Attendance active={isActive('attendance')} /><span className="text-[10px] font-medium">Đ.Danh</span></Link>
+        {/* Thông báo, khoá khi Quá hạn */}
+        <Link to="/student/notifications" onClick={handleBlockedMenuClick} className={mobileLinkClass('notifications') + (isOverdue ? ' opacity-40' : '')}>
           <Icons.Noti active={isActive('notifications') && !isOverdue} /><span className="text-[10px] font-medium">TBáo</span>
         </Link>
-        <Link to="/student/feedback" data-active={isActive('feedback')} className={mobileLinkClass('feedback')}>
-          <div className="relative">
-            <Icons.Feedback active={isActive('feedback')} />
-            {feedbackUnread > 0 && <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-1 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">{feedbackUnread > 9 ? '9+' : feedbackUnread}</span>}
-          </div>
-          <span className="text-[10px] font-medium">Phản ánh</span>
-        </Link>
-        <Link to="/student/contact" data-active={isActive('contact')} className={mobileLinkClass('contact')}><Icons.Contact active={isActive('contact')} /><span className="text-[10px] font-medium">Liên hệ</span></Link>
+        <button
+          onClick={() => setMoreOpen(true)}
+          aria-label="Thêm chức năng"
+          className={`relative flex flex-col items-center justify-center shrink-0 min-w-[64px] h-full space-y-1 px-0.5 ${moreActive ? 'text-primary' : 'text-slate-500 hover:text-slate-700'}`}
+        >
+          <span className="relative"><Icons.More active={moreActive} />{feedbackUnread > 0 && <span className="absolute -top-1 -right-1.5 w-2.5 h-2.5 bg-red-500 border border-white rounded-full" />}</span>
+          <span className="text-[10px] font-medium">Thêm</span>
+        </button>
       </nav>
+
+      {/* DRAWER "Thêm" - bottom sheet chua cac chuc nang phu (mobile); giu khoa khi Qua han */}
+      {moreOpen && (
+        <div className="md:hidden fixed inset-0 z-[60]" role="dialog" aria-modal="true" aria-label="Thêm chức năng">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in" onClick={() => setMoreOpen(false)} />
+          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-2xl p-4 pb-8 pb-safe animate-fade-in-up">
+            <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-3" />
+            <p className="stat-label px-1 mb-3">Thêm chức năng</p>
+            <div className="grid grid-cols-4 gap-2">
+              {MORE_ITEMS.map((it) => {
+                const locked = isLocked(it.key);
+                const act = isActive(it.key) && !locked;
+                return (
+                  <Link
+                    key={it.key}
+                    to={it.to}
+                    onClick={(e) => { if (locked) { handleBlockedMenuClick(e); } else { setMoreOpen(false); } }}
+                    className={`relative flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl text-center transition-colors ${act ? 'bg-primary/10 text-primary' : 'text-slate-600 hover:bg-slate-50'} ${locked ? 'opacity-50' : ''}`}
+                  >
+                    {locked
+                      ? <span className="absolute top-1.5 right-1.5"><Icons.Lock /></span>
+                      : (it.badge > 0 && <span className="absolute top-1 right-1 min-w-[16px] h-4 px-1 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">{it.badge > 9 ? '9+' : it.badge}</span>)}
+                    <it.Icon active={act} />
+                    <span className="text-[11px] font-medium leading-tight">{it.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* MODAL ĐỔI MẬT KHẨU */}
       {showPassModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
-            <h3 className="text-lg font-bold text-[#2B6830] mb-4 flex items-center gap-2">
+            <h3 className="text-lg font-bold text-primary mb-4 flex items-center gap-2">
               <Icons.Key /> Đổi Mật Khẩu
             </h3>
             <form onSubmit={handleChangePassword} className="space-y-4">
@@ -397,17 +440,17 @@ const StudentLayout = () => {
               )}
               <div>
                 <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Mật khẩu cũ</label>
-                <input type="password" className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition"
+                <input type="password" className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition"
                   value={passForm.oldPass} onChange={e => { setPassForm({...passForm, oldPass: e.target.value}); setPassError(''); }} />
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Mật khẩu mới</label>
-                <input type="password" className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition"
+                <input type="password" className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition"
                   value={passForm.newPass} onChange={e => { setPassForm({...passForm, newPass: e.target.value}); setPassError(''); }} />
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Xác nhận mật khẩu mới</label>
-                <input type="password" className={`w-full p-3 border rounded-xl outline-none focus:ring-2 transition ${passForm.confirmPass && passForm.newPass !== passForm.confirmPass ? 'border-red-300 focus:ring-red-100' : 'border-slate-200 focus:border-[#2B6830] focus:ring-[#2B6830]/10'}`}
+                <input type="password" className={`w-full p-3 border rounded-xl outline-none focus:ring-2 transition ${passForm.confirmPass && passForm.newPass !== passForm.confirmPass ? 'border-red-300 focus:ring-red-100' : 'border-slate-200 focus:border-primary focus:ring-primary/10'}`}
                   value={passForm.confirmPass} onChange={e => { setPassForm({...passForm, confirmPass: e.target.value}); setPassError(''); }} />
                 {passForm.confirmPass && passForm.newPass !== passForm.confirmPass && (
                   <p className="text-red-500 text-xs mt-1">Mật khẩu không khớp</p>
@@ -415,7 +458,7 @@ const StudentLayout = () => {
               </div>
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => { setShowPassModal(false); setPassError(''); setPassSuccess(''); setPassForm({ oldPass:'', newPass:'', confirmPass:'' }); }} className="flex-1 py-3 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition-colors">Hủy</button>
-                <button type="submit" disabled={loadingPass} className="flex-1 py-3 bg-[#2B6830] text-white rounded-xl font-bold hover:bg-[#1E5225] transition-colors disabled:opacity-50">
+                <button type="submit" disabled={loadingPass} className="flex-1 py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary-hover transition-colors disabled:opacity-50">
                   {loadingPass ? "Đang xử lý..." : "Lưu thay đổi"}
                 </button>
               </div>

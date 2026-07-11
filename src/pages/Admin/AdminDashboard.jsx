@@ -3,7 +3,7 @@ import { db } from '../../firebase';
 import { ref, onValue } from 'firebase/database';
 
 // ============================================================
-// STAT CARD — hiển thị 1 chỉ số tổng quan
+// STAT CARD, hiển thị 1 chỉ số tổng quan
 // ============================================================
 const StatCard = ({ title, value, sub, icon, color }) => (
   <div className="card-std p-5 flex items-center gap-4">
@@ -19,7 +19,7 @@ const StatCard = ({ title, value, sub, icon, color }) => (
 );
 
 // ============================================================
-// SKELETON — hiển thị khi đang tải
+// SKELETON, hiển thị khi đang tải
 // ============================================================
 const Skeleton = () => (
   <div className="card-std p-5 flex items-center gap-4 animate-pulse">
@@ -73,7 +73,7 @@ const AdminDashboard = () => {
       checkDone();
     });
 
-    // 3. Điểm danh hôm nay — duyệt qua tất cả lớp, tổng hợp
+    // 3. Điểm danh hôm nay, duyệt qua tất cả lớp, tổng hợp
     const unsubAttendance = onValue(ref(db, 'attendance'), (snap) => {
       const data = snap.val() || {};
       let present = 0, absent = 0, late = 0, total = 0;
@@ -124,15 +124,19 @@ const AdminDashboard = () => {
   // Ngày hiển thị tiếng Việt
   const todayLabel = new Date().toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
 
+  // Tra tên lớp theo id (thông báo lưu scope = classId, cần hiện TÊN lớp cho dễ đọc)
+  const classNameById = {};
+  classesWithCounts.forEach((c) => { classNameById[c.id] = c.name; });
+
   return (
     <div className="space-y-6 pb-20 animate-fade-in-up">
 
       {/* ===== HEADER ===== */}
-      <div className="bg-gradient-to-r from-[#2B6830] to-[#3D8B47] rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
+      <div className="bg-gradient-to-r from-primary to-primary-medium rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
         <div className="relative z-10">
           <p className="text-green-200 text-sm font-medium capitalize">{todayLabel}</p>
           <h1 className="text-xl font-bold mt-1">Tổng quan hệ thống</h1>
-          <p className="text-green-200 text-sm mt-1">Be Able VN — 2Sol EDU</p>
+          <p className="text-green-200 text-sm mt-1">Be Able VN, 2Sol EDU</p>
         </div>
         <div className="absolute right-0 top-0 w-40 h-40 bg-white/10 rounded-full -mr-16 -mt-16 blur-3xl" />
       </div>
@@ -147,7 +151,7 @@ const AdminDashboard = () => {
               title="Lớp học"
               value={totalClasses}
               sub="đang hoạt động"
-              color="bg-[#E8F4EC]"
+              color="bg-primary-light"
               icon={
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="#2B6830" className="w-6 h-6">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443m-7.007 11.55A5.981 5.981 0 006.75 15.75v-1.5" />
@@ -158,9 +162,9 @@ const AdminDashboard = () => {
               title="Học viên"
               value={totalStudents}
               sub="đã đăng ký"
-              color="bg-green-50"
+              color="bg-primary-light"
               icon={
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="#16a34a" className="w-6 h-6">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="#2B6830" className="w-6 h-6">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
                 </svg>
               }
@@ -169,7 +173,7 @@ const AdminDashboard = () => {
               title="Nhân sự"
               value={totalStaff}
               sub="giáo viên / staff"
-              color="bg-[#E8F4EC]"
+              color="bg-primary-light"
               icon={
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="#2B6830" className="w-6 h-6">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
@@ -178,7 +182,7 @@ const AdminDashboard = () => {
             />
             <StatCard
               title="Điểm danh hôm nay"
-              value={todayStats.total === 0 ? '—' : `${attendanceRate}%`}
+              value={todayStats.total === 0 ? '–' : `${attendanceRate}%`}
               sub={todayStats.total === 0 ? 'Chưa có dữ liệu' : `${todayStats.present} có mặt · ${todayStats.absent} vắng · ${todayStats.late} trễ`}
               color="bg-amber-50"
               icon={
@@ -196,7 +200,7 @@ const AdminDashboard = () => {
 
         {/* Danh sách lớp */}
         <div className="card-std p-5">
-          <h2 className="text-sm font-bold text-[#2B6830] uppercase tracking-wider mb-4">
+          <h2 className="text-sm font-bold text-primary uppercase tracking-wider mb-4">
             Các lớp đang hoạt động
           </h2>
           {loading ? (
@@ -211,9 +215,9 @@ const AdminDashboard = () => {
                 <div key={cls.id} className="flex justify-between items-center px-3 py-2 rounded-xl hover:bg-slate-50 transition-colors">
                   <div>
                     <p className="text-sm font-bold text-slate-700">{cls.name}</p>
-                    <p className="text-xs text-slate-400">{cls.schedule || '—'} · {cls.room || '—'}</p>
+                    <p className="text-xs text-slate-400">{cls.schedule || '–'} · {cls.room || '–'}</p>
                   </div>
-                  <span className="text-[10px] font-bold text-[#2B6830] bg-[#E8F4EC] px-2 py-1 rounded-full border border-green-100">
+                  <span className="text-[10px] font-bold text-primary bg-primary-light px-2 py-1 rounded-full border border-green-100">
                     {cls.subject || 'N/A'}
                   </span>
                 </div>
@@ -224,7 +228,7 @@ const AdminDashboard = () => {
 
         {/* Thông báo gần nhất */}
         <div className="card-std p-5">
-          <h2 className="text-sm font-bold text-[#2B6830] uppercase tracking-wider mb-4">
+          <h2 className="text-sm font-bold text-primary uppercase tracking-wider mb-4">
             Thông báo gần nhất
           </h2>
           {loading ? (
@@ -237,11 +241,11 @@ const AdminDashboard = () => {
             <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
               {recentNotifs.map(n => (
                 <div key={n.id} className="flex items-start gap-3 px-3 py-2 rounded-xl hover:bg-slate-50 transition-colors">
-                  <div className={`mt-0.5 w-2 h-2 rounded-full shrink-0 ${n.scope === 'all' ? 'bg-green-400' : 'bg-green-400'}`} />
+                  <div className={`mt-0.5 w-2 h-2 rounded-full shrink-0 ${n.scope === 'all' ? 'bg-primary' : 'bg-amber-400'}`} />
                   <div className="min-w-0">
                     <p className="text-sm font-bold text-slate-700 truncate">{n.title}</p>
                     <p className="text-xs text-slate-400">
-                      {new Date(n.date).toLocaleDateString('vi-VN')} · {n.scope === 'all' ? 'Toàn hệ thống' : `Lớp ${n.scope}`}
+                      {new Date(n.date).toLocaleDateString('vi-VN')} · {n.scope === 'all' ? 'Toàn hệ thống' : `Lớp ${classNameById[n.scope] || n.scope}`}
                     </p>
                   </div>
                 </div>

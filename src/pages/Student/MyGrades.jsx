@@ -4,13 +4,13 @@ import { db } from '../../firebase';
 import { ref, onValue } from 'firebase/database';
 
 // ============================================================
-// Ý NGHĨA TỪNG LOẠI ĐIỂM — hiển thị trên biểu đồ & cột lịch sử
+// Ý NGHĨA TỪNG LOẠI ĐIỂM, hiển thị trên biểu đồ & cột lịch sử
 // ============================================================
 const SCORE_META = {
-  bonus:      { label: '⭐ Điểm Bonus',  meaning: 'Chỉ số tích cực — tham gia phát biểu & xây dựng bài', color: '#f59e0b', bg: 'bg-yellow-50 border-yellow-200' },
+  bonus:      { label: '⭐ Điểm Bonus',  meaning: 'Chỉ số tích cực, tham gia phát biểu & xây dựng bài', color: '#f59e0b', bg: 'bg-yellow-50 border-yellow-200' },
   assignment: { label: '📝 Assignment',  meaning: 'Tinh thần học tập', color: '#10b981', bg: 'bg-green-50 border-green-200' },
-  formative:  { label: '📊 Formative',   meaning: 'Sự tiến bộ & Mức độ tiếp thu', color: '#3D8B47', bg: 'bg-[#E8F4EC] border-green-200' },
-  summative:  { label: '🎯 Summative',   meaning: 'Mức độ làm chủ kiến thức', color: '#1E5225', bg: 'bg-[#E8F4EC] border-green-200' },
+  formative:  { label: '📊 Formative',   meaning: 'Sự tiến bộ & Mức độ tiếp thu', color: '#3D8B47', bg: 'bg-primary-light border-green-200' },
+  summative:  { label: '🎯 Summative',   meaning: 'Mức độ làm chủ kiến thức', color: '#1E5225', bg: 'bg-primary-light border-green-200' },
 };
 
 const MyGrades = () => {
@@ -146,7 +146,7 @@ const MyGrades = () => {
       .slice(-12); // tối đa 12 cột điểm gần nhất
   };
 
-  // SVG line chart cho MỘT loại điểm — mỗi loại 1 biểu đồ riêng
+  // SVG line chart cho MỘT loại điểm, mỗi loại 1 biểu đồ riêng
   const TypeChart = ({ type }) => {
     const meta = SCORE_META[type];
     const data = getTypePoints(type);
@@ -162,7 +162,7 @@ const MyGrades = () => {
       body = (
         <div className="flex flex-col items-center justify-center h-[160px] gap-1.5">
           <span className="text-4xl font-extrabold" style={{ color: meta.color }}>{data[0].score}</span>
-          <span className="text-sm text-slate-400">1 cột điểm ({new Date(data[0].date).toLocaleDateString('vi-VN')}) — cần ≥2 cột để vẽ xu hướng</span>
+          <span className="text-sm text-slate-400">1 cột điểm ({new Date(data[0].date).toLocaleDateString('vi-VN')}), cần ≥2 cột để vẽ xu hướng</span>
         </div>
       );
     } else {
@@ -265,7 +265,7 @@ const MyGrades = () => {
             <div className="flex-1 overflow-y-auto space-y-2 max-h-[350px] pr-1 custom-scrollbar">
                 {records.length > 0 ? records.map(r => (
                     <div key={r.id} className="bg-white/80 p-3 rounded-xl shadow-sm text-xs transition-all hover:bg-white">
-                        <div className="flex justify-between font-bold text-[#2B6830] mb-1.5">
+                        <div className="flex justify-between font-bold text-primary mb-1.5">
                             <span className="text-sm">{r.score} điểm</span>
                             <span className="text-slate-500 font-mono font-medium">{new Date(r.date).toLocaleDateString('vi-VN')}</span>
                         </div>
@@ -287,7 +287,7 @@ const MyGrades = () => {
   return (
     <div className="space-y-6 pb-20 animate-fade-in-up">
        <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
-            <div className="p-2 bg-[#E8F4EC] rounded-xl text-[#2B6830]">
+            <div className="p-2 bg-primary-light rounded-xl text-primary">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg>
             </div>
             <div>
@@ -297,7 +297,7 @@ const MyGrades = () => {
       </div>
 
       {loading ? (
-        <div className="flex justify-center p-8"><span className="animate-spin h-6 w-6 border-2 border-[#2B6830] border-t-transparent rounded-full"></span></div>
+        <div className="flex justify-center p-8"><span className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full"></span></div>
       ) : myClasses.length > 0 ? (
         <div className="card-std p-4 md:p-6">
 
@@ -318,7 +318,7 @@ const MyGrades = () => {
                     <div className="flex gap-4 md:gap-8 bg-white px-5 py-3 rounded-xl border border-slate-200 shadow-sm w-full md:w-auto">
                         <div className="text-center pr-4 md:pr-8 border-r border-slate-100">
                             <p className="stat-label mb-1" title="Assignment(10%) + Formative(20%) + MMT(30%) + EOMT(40%)">Điểm Tổng Kết</p>
-                            <p className="text-3xl font-extrabold leading-tight text-[#2B6830]">{rankInfo.totalScore}</p>
+                            <p className="text-3xl font-extrabold leading-tight text-primary">{rankInfo.totalScore}</p>
                         </div>
                         <div className="text-center pr-2">
                             <p className="stat-label mb-1">Xếp hạng của bạn</p>
@@ -328,8 +328,8 @@ const MyGrades = () => {
                 )}
             </div>
 
-            {/* ===== CƠ CHẾ TÍNH ĐIỂM & XẾP HẠNG — minh bạch cho Phụ huynh & Học viên ===== */}
-            <div className="bg-[#E8F4EC]/60 rounded-xl border border-green-200 p-4 md:p-5 mb-6">
+            {/* ===== CƠ CHẾ TÍNH ĐIỂM & XẾP HẠNG, minh bạch cho Phụ huynh & Học viên ===== */}
+            <div className="bg-primary-light/60 rounded-xl border border-green-200 p-4 md:p-5 mb-6">
                 <h3 className="section-title mb-3">📐 Cơ chế tính điểm & xếp hạng</h3>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     {/* Công thức điểm tổng kết */}
@@ -343,7 +343,7 @@ const MyGrades = () => {
                                 { label: '🎯 Thi cuối khóa (EOMT)', pct: 40, color: '#1E5225' },
                             ].map(row => (
                                 <div key={row.label}>
-                                    {/* Nhãn nằm TRÊN thanh — full width, không bị bóp nhỏ trên mobile */}
+                                    {/* Nhãn nằm TRÊN thanh, full width, không bị bóp nhỏ trên mobile */}
                                     <div className="flex items-center justify-between gap-2 mb-1.5">
                                         <span className="text-[15px] font-semibold text-slate-700 leading-tight">{row.label}</span>
                                         <span className="text-lg font-extrabold shrink-0" style={{ color: row.color }}>{row.pct}%</span>
@@ -366,16 +366,16 @@ const MyGrades = () => {
                             </p>
                         </div>
                         <div className="bg-white rounded-xl border border-yellow-200 p-4 flex-1">
-                            <p className="text-base font-bold text-slate-700 mb-1.5">⭐ ĐIỂM BONUS — KHÔNG tính vào Điểm Tổng Kết</p>
+                            <p className="text-base font-bold text-slate-700 mb-1.5">⭐ ĐIỂM BONUS, KHÔNG tính vào Điểm Tổng Kết</p>
                             <p className="text-[15px] text-slate-600 leading-relaxed">
-                                Bonus là điểm thưởng tích lũy cho sự tích cực (phát biểu, xây dựng bài). Bonus quy đổi được thành <b>BAVN Credits</b> (2 Bonus = 1 Credit = 1.000đ) để đổi đồ uống, đồ ăn Fresh Fit và quà tặng — xem thẻ <b>BAVN Credits</b> ở menu.
+                                Bonus là điểm thưởng tích lũy cho sự tích cực (phát biểu, xây dựng bài). Bonus quy đổi được thành <b>BAVN Credits</b> (2 Bonus = 1 Credit = 1.000đ) để đổi đồ uống, đồ ăn Fresh Fit và quà tặng, xem thẻ <b>BAVN Credits</b> ở menu.
                             </p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* ===== 4 BIỂU ĐỒ XU HƯỚNG — MỖI LOẠI ĐIỂM 1 BIỂU ĐỒ ===== */}
+            {/* ===== 4 BIỂU ĐỒ XU HƯỚNG, MỖI LOẠI ĐIỂM 1 BIỂU ĐỒ ===== */}
             {selectedClass && (
               <div className="mb-6">
                 <p className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">Xu hướng điểm số theo từng loại</p>
@@ -393,8 +393,8 @@ const MyGrades = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
                     {renderHistoryColumn('bonus', '1. Điểm Bonus', 'bg-yellow-50 border-yellow-200 text-yellow-900')}
                     {renderHistoryColumn('assignment', '2. Assignment', 'bg-green-50 border-green-200 text-green-900')}
-                    {renderHistoryColumn('formative', '3. Formative', 'bg-[#E8F4EC] border-green-200 text-green-900')}
-                    {renderHistoryColumn('summative', '4. Summative', 'bg-[#E8F4EC] border-green-200 text-green-900')}
+                    {renderHistoryColumn('formative', '3. Formative', 'bg-primary-light border-green-200 text-green-900')}
+                    {renderHistoryColumn('summative', '4. Summative', 'bg-primary-light border-green-200 text-green-900')}
                 </div>
             ) : null}
 

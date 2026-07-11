@@ -83,7 +83,7 @@ const Profile = () => {
     <div className="space-y-6 pb-20">
       {/* PAGE HEADER */}
       <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
-        <div className="p-2 bg-[#E8F4EC] rounded-xl text-[#3D8B47]">
+        <div className="p-2 bg-primary-light rounded-xl text-primary-medium">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
           </svg>
@@ -107,7 +107,7 @@ const Profile = () => {
                 <span className="inline-block text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5 mt-0.5">🏅 {title}</span>
               )}
               <p className="text-xs text-slate-400 font-mono mt-0.5">{currentUser?.studentCode || currentUser?.loginId}</p>
-              <Link to="/student/skins" className="inline-block mt-1 text-[11px] font-bold text-[#2B6830] hover:underline">🎨 Đổi skin avatar →</Link>
+              <Link to="/student/skins" className="inline-block mt-1 text-[11px] font-bold text-primary hover:underline">🎨 Đổi skin avatar →</Link>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3 mt-4">
@@ -117,7 +117,7 @@ const Profile = () => {
             </div>
             <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
               <p className="stat-label">Mã học viên</p>
-              <p className="font-bold text-[#2B6830] text-sm font-mono mt-0.5">{currentUser?.studentCode || '—'}</p>
+              <p className="font-bold text-primary text-sm font-mono mt-0.5">{currentUser?.studentCode || '–'}</p>
             </div>
           </div>
         </div>
@@ -173,7 +173,7 @@ const Profile = () => {
               className={`w-full border p-3 rounded-xl text-sm outline-none focus:ring-2 transition ${
                 form.confirmPass && form.newPass !== form.confirmPass
                   ? 'border-red-300 focus:border-red-400 focus:ring-red-100'
-                  : 'border-slate-200 focus:border-[#2B6830] focus:ring-[#2B6830]/10'
+                  : 'border-slate-200 focus:border-primary focus:ring-primary/10'
               }`}
               value={form.confirmPass}
               onChange={e => { setForm({...form, confirmPass: e.target.value}); setError(''); }}

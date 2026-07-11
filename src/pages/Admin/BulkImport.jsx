@@ -132,7 +132,7 @@ const BulkImport = () => {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-100">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-emerald-50 rounded-xl text-emerald-600">
+          <div className="p-2 bg-primary-light rounded-xl text-primary-medium">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
             </svg>
@@ -174,26 +174,26 @@ const BulkImport = () => {
         {/* Nhập CSV */}
         <div className="space-y-4">
           <div className="card-std p-5">
-            <h3 className="font-bold text-[#2B6830] mb-3">1. Nhập dữ liệu</h3>
+            <h3 className="font-bold text-primary mb-3">1. Nhập dữ liệu</h3>
 
             {/* Upload file */}
             <div
-              className="border-2 border-dashed border-slate-200 rounded-xl p-5 text-center cursor-pointer hover:border-[#2B6830] hover:bg-[#E8F4EC]/30 transition-all mb-3"
+              className="border-2 border-dashed border-slate-200 rounded-xl p-5 text-center cursor-pointer hover:border-primary hover:bg-primary-light/30 transition-all mb-3"
               onClick={() => fileRef.current?.click()}
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="#94a3b8" className="w-10 h-10 mx-auto mb-2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m6.75 12l-3-3m0 0l-3 3m3-3v6m-1.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
               </svg>
               <p className="text-sm text-slate-500 font-medium">Kéo thả hoặc bấm để chọn file CSV</p>
-              <p className="text-xs text-slate-400 mt-1">Hỗ trợ .csv, .txt — Encoding UTF-8</p>
+              <p className="text-xs text-slate-400 mt-1">Hỗ trợ .csv, .txt, Encoding UTF-8</p>
               <input ref={fileRef} type="file" accept=".csv,.txt" className="hidden" onChange={handleFileUpload} />
             </div>
 
-            <p className="text-xs text-slate-400 text-center mb-3">— hoặc dán trực tiếp —</p>
+            <p className="text-xs text-slate-400 text-center mb-3">hoặc dán trực tiếp</p>
 
             {/* Textarea paste */}
             <textarea
-              className="w-full border border-slate-200 p-3 rounded-xl text-xs font-mono outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 resize-none transition"
+              className="w-full border border-slate-200 p-3 rounded-xl text-xs font-mono outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 resize-none transition"
               rows={8}
               placeholder={`Họ tên,Mã học viên,Mật khẩu,Lớp 1,Lớp 2,Lớp 3\nNguyễn Văn An,HV001,BAVNbavn,Kids 1,,\n...`}
               value={rawText}
@@ -210,7 +210,7 @@ const BulkImport = () => {
           </div>
 
           {/* Hướng dẫn */}
-          <div className="bg-[#E8F4EC] border border-green-100 rounded-2xl p-4 text-xs text-green-700 space-y-1.5">
+          <div className="bg-primary-light border border-green-100 rounded-2xl p-4 text-xs text-green-700 space-y-1.5">
             <p className="font-bold text-green-800 mb-2">📋 Quy tắc format CSV:</p>
             <p>• <strong>Cột bắt buộc:</strong> Họ tên, Mã học viên</p>
             <p>• <strong>Mật khẩu</strong> mặc định <code className="bg-green-100 px-1 rounded">BAVNbavn</code> nếu để trống</p>
@@ -223,7 +223,7 @@ const BulkImport = () => {
         {/* Preview */}
         <div className="card-std p-5">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="font-bold text-[#2B6830]">2. Xem trước ({preview.length} học viên)</h3>
+            <h3 className="font-bold text-primary">2. Xem trước ({preview.length} học viên)</h3>
             {preview.length > 0 && (
               <button
                 onClick={handleImport}
@@ -262,7 +262,7 @@ const BulkImport = () => {
                     <tr key={i}>
                       <td className="text-slate-400">{i + 1}</td>
                       <td className="font-bold">{row.name}</td>
-                      <td className="font-mono text-[#2B6830]">{row.studentCode}</td>
+                      <td className="font-mono text-primary">{row.studentCode}</td>
                       <td className="font-mono text-slate-500">{row.password}</td>
                       <td>
                         {row.classNames.length > 0 ? (
@@ -277,7 +277,7 @@ const BulkImport = () => {
                               </span>
                             ))}
                           </div>
-                        ) : <span className="text-slate-300 italic">—</span>}
+                        ) : <span className="text-slate-300 italic">–</span>}
                       </td>
                     </tr>
                   ))}
@@ -292,7 +292,7 @@ const BulkImport = () => {
                   <div className="flex justify-between items-start gap-2">
                     <div>
                       <h4 className="font-bold text-slate-700 text-sm">{i + 1}. {row.name}</h4>
-                      <p className="text-xs font-mono text-[#2B6830] mt-0.5">{row.studentCode}</p>
+                      <p className="text-xs font-mono text-primary mt-0.5">{row.studentCode}</p>
                     </div>
                     <span className="text-[10px] font-mono text-slate-400 shrink-0">{row.password}</span>
                   </div>
@@ -305,7 +305,7 @@ const BulkImport = () => {
                           </span>
                         ))}
                       </div>
-                    ) : <span className="text-slate-300 italic text-xs">— Chưa có lớp</span>}
+                    ) : <span className="text-slate-300 italic text-xs">Chưa có lớp</span>}
                   </div>
                 </div>
               ))}

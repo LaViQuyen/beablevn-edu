@@ -35,7 +35,7 @@ const MonthPicker = ({ value, onChange }) => {
       <button
         type="button"
         onClick={() => { setYear(selYear); setOpen(o => !o); }}
-        className="flex items-center gap-2 w-full border border-slate-200 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 bg-slate-50 hover:border-[#2B6830] focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 outline-none transition-colors"
+        className="flex items-center gap-2 w-full border border-slate-200 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 bg-slate-50 hover:border-primary focus:border-primary focus:ring-2 focus:ring-primary/10 outline-none transition-colors"
       >
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="#2B6830" className="w-4 h-4 shrink-0"><path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
         <span className="flex-1 text-left">{selMonth ? `Tháng ${selMonth}, ${selYear}` : 'Chọn tháng'}</span>
@@ -48,11 +48,11 @@ const MonthPicker = ({ value, onChange }) => {
           <div className="absolute left-0 top-full mt-2 w-72 bg-white rounded-2xl shadow-xl border border-slate-100 p-3 z-30 animate-fade-in-up">
             {/* Điều hướng năm */}
             <div className="flex items-center justify-between mb-3">
-              <button type="button" onClick={() => setYear(y => y - 1)} className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:bg-[#E8F4EC] hover:text-[#2B6830] transition-colors">
+              <button type="button" onClick={() => setYear(y => y - 1)} className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:bg-primary-light hover:text-primary transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
               </button>
-              <span className="font-bold text-[#2B6830]">{year}</span>
-              <button type="button" onClick={() => setYear(y => y + 1)} className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:bg-[#E8F4EC] hover:text-[#2B6830] transition-colors">
+              <span className="font-bold text-primary">{year}</span>
+              <button type="button" onClick={() => setYear(y => y + 1)} className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:bg-primary-light hover:text-primary transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
               </button>
             </div>
@@ -66,7 +66,7 @@ const MonthPicker = ({ value, onChange }) => {
                     key={mn}
                     type="button"
                     onClick={() => pick(mn)}
-                    className={`py-2.5 rounded-xl text-sm font-semibold transition-colors ${active ? 'bg-[#2B6830] text-white shadow-sm' : 'text-slate-600 hover:bg-[#E8F4EC] hover:text-[#2B6830]'}`}
+                    className={`py-2.5 rounded-xl text-sm font-semibold transition-colors ${active ? 'bg-primary text-white shadow-sm' : 'text-slate-600 hover:bg-primary-light hover:text-primary'}`}
                   >
                     {m}
                   </button>
@@ -75,7 +75,7 @@ const MonthPicker = ({ value, onChange }) => {
             </div>
             {/* Phím tắt */}
             <div className="flex justify-end mt-3 pt-3 border-t border-slate-100">
-              <button type="button" onClick={goThisMonth} className="text-xs font-bold text-[#2B6830] hover:underline">Tháng này</button>
+              <button type="button" onClick={goThisMonth} className="text-xs font-bold text-primary hover:underline">Tháng này</button>
             </div>
           </div>
         </>
@@ -94,7 +94,7 @@ const Attendance = () => {
     const [status, setStatus] = useState({});
     const [notes, setNotes] = useState({});
     const [allAttendance, setAllAttendance] = useState({});
-    // Báo cáo theo tháng (YYYY-MM), mặc định tháng hiện tại — cột ngày tự đổi khi qua tháng mới
+    // Báo cáo theo tháng (YYYY-MM), mặc định tháng hiện tại, cột ngày tự đổi khi qua tháng mới
     const [reportMonth, setReportMonth] = useState(() => new Date().toISOString().slice(0, 7));
     const [savedAt, setSavedAt] = useState(null); // indicator trạng thái đã lưu
     const [saveError, setSaveError] = useState('');
@@ -274,7 +274,7 @@ const Attendance = () => {
     return (
         <div className="space-y-6 pb-20 animate-fade-in-up">
             <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
-                <div className="p-2 bg-[#E8F4EC] rounded-xl text-[#2B6830]">
+                <div className="p-2 bg-primary-light rounded-xl text-primary">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M11.35 3.836c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" /></svg>
                 </div>
                 <h2 className="page-title">Điểm danh & Chuyên cần</h2>
@@ -285,14 +285,14 @@ const Attendance = () => {
                     <option value="">-- Chọn lớp phụ trách --</option>
                     {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
-                {tab === 'take' && <input type="date" className="p-2.5 border border-slate-200 rounded-xl outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 text-sm text-slate-700 bg-slate-50 transition-colors hover:border-slate-200" value={date} onChange={e => setDate(e.target.value)} />}
+                {tab === 'take' && <input type="date" className="p-2.5 border border-slate-200 rounded-xl outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 text-sm text-slate-700 bg-slate-50 transition-colors hover:border-slate-200" value={date} onChange={e => setDate(e.target.value)} />}
             </div>
 
             {selectedClass && (
                 <div className="card-std overflow-hidden">
                     <div className="flex border-b border-slate-100 bg-slate-50/50">
-                        <button onClick={() => setTab('take')} className={`px-6 py-4 text-sm font-medium transition-all ${tab === 'take' ? 'bg-white text-[#2B6830] border-t-2 border-t-[#2B6830] shadow-[0_1px_0_white]' : 'text-slate-500 hover:text-[#2B6830]'}`}>Điểm danh</button>
-                        <button onClick={() => setTab('report')} className={`px-6 py-4 text-sm font-medium transition-all ${tab === 'report' ? 'bg-white text-[#2B6830] border-t-2 border-t-[#2B6830] shadow-[0_1px_0_white]' : 'text-slate-500 hover:text-[#2B6830]'}`}>Báo cáo</button>
+                        <button onClick={() => setTab('take')} className={`px-6 py-4 text-sm font-medium transition-all ${tab === 'take' ? 'bg-white text-primary border-t-2 border-t-primary shadow-[0_1px_0_white]' : 'text-slate-500 hover:text-primary'}`}>Điểm danh</button>
+                        <button onClick={() => setTab('report')} className={`px-6 py-4 text-sm font-medium transition-all ${tab === 'report' ? 'bg-white text-primary border-t-2 border-t-primary shadow-[0_1px_0_white]' : 'text-slate-500 hover:text-primary'}`}>Báo cáo</button>
                     </div>
 
                     {tab === 'take' ? (
@@ -310,7 +310,7 @@ const Attendance = () => {
                                                 {(() => { const bd = getBirthdayNotice(st); return bd.cake ? <div className="text-[11px] text-amber-600 font-medium mb-1 flex items-center gap-1">🎂 {bd.message}</div> : null; })()}
                                                 <button
                                                     onClick={() => setHistoryStudent(st)}
-                                                    className="font-bold text-slate-800 text-sm hover:text-[#2B6830] transition-colors"
+                                                    className="font-bold text-slate-800 text-sm hover:text-primary transition-colors"
                                                 >
                                                     {index + 1}. {fmtStudentName(st.name, st.englishName)}
                                                 </button>
@@ -331,7 +331,7 @@ const Attendance = () => {
                                             </span>
                                         </div>
 
-                                        {/* Nút điểm danh — to hơn để dễ bấm trên mobile */}
+                                        {/* Nút điểm danh, to hơn để dễ bấm trên mobile */}
                                         <div className="grid grid-cols-4 gap-2">
                                             {[
                                                 { val: 'present', label: '✓ Có mặt', active: 'bg-slate-500 text-white border-slate-500', hover: 'border-slate-300 text-slate-600' },
@@ -353,11 +353,11 @@ const Attendance = () => {
                                             ))}
                                         </div>
 
-                                        {/* Ghi chú — chỉ hiện khi không phải Có mặt */}
+                                        {/* Ghi chú, chỉ hiện khi không phải Có mặt */}
                                         {status[st.id] !== 'present' && (
                                             <input
                                                 type="text"
-                                                className="w-full p-2.5 border border-slate-200 rounded-xl text-xs outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 bg-slate-50 focus:bg-white transition-colors"
+                                                className="w-full p-2.5 border border-slate-200 rounded-xl text-xs outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 bg-slate-50 focus:bg-white transition-colors"
                                                 placeholder="Ghi chú (tùy chọn)..."
                                                 value={notes[st.id] || ''}
                                                 onChange={e => setNotes({ ...notes, [st.id]: e.target.value })}
@@ -387,7 +387,7 @@ const Attendance = () => {
                                                     {(() => { const bd = getBirthdayNotice(st); return bd.cake ? <div className="text-[11px] text-amber-600 font-medium mb-1 flex items-center gap-1">🎂 {bd.message}</div> : null; })()}
                                                     <button
                                                         onClick={() => setHistoryStudent(st)}
-                                                        className="font-medium text-slate-800 hover:text-[#2B6830] outline-none transition-all flex items-center gap-2 group-hover:underline decoration-slate-300 underline-offset-4"
+                                                        className="font-medium text-slate-800 hover:text-primary outline-none transition-all flex items-center gap-2 group-hover:underline decoration-slate-300 underline-offset-4"
                                                         title="Xem lịch sử"
                                                     >
                                                         {fmtStudentName(st.name, st.englishName)}
@@ -414,7 +414,7 @@ const Attendance = () => {
                                                     </div>
                                                 </td>
                                                 <td>
-                                                    <input type="text" className="w-full p-2 border border-slate-200 rounded-md outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 text-xs bg-slate-50 focus:bg-white transition-colors" placeholder="Thêm ghi chú..." value={notes[st.id] || ''} onChange={e => setNotes({ ...notes, [st.id]: e.target.value })} disabled={status[st.id] === 'present'} />
+                                                    <input type="text" className="w-full p-2 border border-slate-200 rounded-md outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 text-xs bg-slate-50 focus:bg-white transition-colors" placeholder="Thêm ghi chú..." value={notes[st.id] || ''} onChange={e => setNotes({ ...notes, [st.id]: e.target.value })} disabled={status[st.id] === 'present'} />
                                                 </td>
                                             </tr>
                                         ))}

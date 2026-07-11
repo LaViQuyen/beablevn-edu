@@ -5,7 +5,7 @@ import { ref, push, set, onValue, get, update } from 'firebase/database';
 import emailjs from '@emailjs/browser';
 
 // ============================================================
-// CẤU HÌNH EMAILJS — điền credentials của bạn vào đây
+// CẤU HÌNH EMAILJS, điền credentials của bạn vào đây
 // ============================================================
 const EMAILJS_SERVICE_ID  = 'service_gvlyalu';
 const EMAILJS_TEMPLATE_ID = 'template_yi89u66';
@@ -14,15 +14,15 @@ const ADMIN_EMAIL         = 'support@beablevn.com';
 
 // Danh mục phản ánh
 const CATEGORIES = [
-  { id: 'hoc-tap',    label: '📚 Học tập',          color: 'bg-[#E8F4EC] text-green-700 border-green-200' },
-  { id: 'giao-vien',  label: '👨‍🏫 Giáo viên',        color: 'bg-[#1E5225]/10 text-[#1E5225] border-[#1E5225]/25' },
+  { id: 'hoc-tap',    label: '📚 Học tập',          color: 'bg-primary-light text-green-700 border-green-200' },
+  { id: 'giao-vien',  label: '👨‍🏫 Giáo viên',        color: 'bg-primary-hover/10 text-primary-hover border-primary-hover/25' },
   { id: 'co-so',      label: '🏫 Cơ sở vật chất',   color: 'bg-amber-50 text-amber-700 border-amber-200' },
   { id: 'khac',       label: '💬 Khác',              color: 'bg-slate-50 text-slate-600 border-slate-200' },
 ];
 
 const STATUS_MAP = {
   pending:  { label: 'Chờ xử lý',  color: 'bg-amber-50 text-amber-700 border-amber-200' },
-  read:     { label: 'Đã xem',     color: 'bg-[#E8F4EC] text-green-700 border-green-200' },
+  read:     { label: 'Đã xem',     color: 'bg-primary-light text-green-700 border-green-200' },
   resolved: { label: 'Đã xử lý',  color: 'bg-green-50 text-green-700 border-green-200' },
 };
 
@@ -136,7 +136,7 @@ const Feedback = () => {
         classNameStr = classIds.map(id => classData[id]?.name || id).join(', ');
       } catch (_) {}
 
-      // Gửi email — chỉ gửi nếu đã cấu hình credentials
+      // Gửi email, chỉ gửi nếu đã cấu hình credentials
       if (EMAILJS_SERVICE_ID !== 'YOUR_SERVICE_ID') {
         await emailjs.send(
           EMAILJS_SERVICE_ID,
@@ -146,7 +146,7 @@ const Feedback = () => {
             subject:      `[Phản ánh mới] ${form.title.trim()}`,
             student_name: form.isAnonymous ? 'Ẩn danh' : currentUser.name,
             student_code: form.isAnonymous ? '' : (currentUser.studentCode || ''),
-            class_name:   classNameStr || '—',
+            class_name:   classNameStr || '–',
             category:     catLabel,
             title:        form.title.trim(),
             content:      form.content.trim(),
@@ -232,7 +232,7 @@ const Feedback = () => {
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
-            className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${tab === t.id ? 'bg-white text-[#2B6830] shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${tab === t.id ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
           >
             {t.label}
           </button>
@@ -261,7 +261,7 @@ const Feedback = () => {
                     type="button"
                     onClick={() => setForm({ ...form, category: cat.id })}
                     className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all ${
-                      form.category === cat.id ? cat.color + ' ring-2 ring-offset-1 ring-[#2B6830]/30' : 'bg-white text-slate-400 border-slate-200'
+                      form.category === cat.id ? cat.color + ' ring-2 ring-offset-1 ring-primary/30' : 'bg-white text-slate-400 border-slate-200'
                     }`}
                   >
                     {cat.label}
@@ -299,7 +299,7 @@ const Feedback = () => {
             <label className="flex items-center gap-2.5 cursor-pointer group">
               <input
                 type="checkbox"
-                className="w-4 h-4 accent-[#2B6830] rounded"
+                className="w-4 h-4 accent-primary rounded"
                 checked={form.isAnonymous}
                 onChange={e => setForm({ ...form, isAnonymous: e.target.checked })}
               />
@@ -330,7 +330,7 @@ const Feedback = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
               </svg>
               <p className="text-slate-400 text-sm font-medium">Bạn chưa gửi phản ánh nào.</p>
-              <button onClick={() => setTab('new')} className="mt-3 text-[#2B6830] text-sm font-bold hover:underline">Gửi phản ánh đầu tiên →</button>
+              <button onClick={() => setTab('new')} className="mt-3 text-primary text-sm font-bold hover:underline">Gửi phản ánh đầu tiên →</button>
             </div>
           ) : myFeedbacks.map(fb => {
             const cat = catInfo(fb.category);
@@ -366,7 +366,7 @@ const Feedback = () => {
                         const isStudent = m.from === 'student';
                         return (
                           <div key={i} className={`flex ${isStudent ? 'justify-end' : 'justify-start'}`}>
-                            <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm ${isStudent ? 'bg-[#2B6830] text-white rounded-br-sm' : 'bg-[#E8F4EC] text-slate-800 rounded-bl-sm border border-green-100'}`}>
+                            <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm ${isStudent ? 'bg-primary text-white rounded-br-sm' : 'bg-primary-light text-slate-800 rounded-bl-sm border border-green-100'}`}>
                               <p className={`text-[10px] font-bold mb-0.5 ${isStudent ? 'text-green-200' : 'text-green-700'}`}>{isStudent ? 'Bạn' : `Phản hồi từ ${m.name || 'Nhà trường'}`}</p>
                               <p className="leading-relaxed whitespace-pre-line">{m.content}</p>
                               <p className={`text-[10px] mt-1 ${isStudent ? 'text-green-200' : 'text-slate-400'}`}>{m.date && new Date(m.date).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</p>
@@ -376,10 +376,10 @@ const Feedback = () => {
                       })}
                     </div>
 
-                    {/* Ô trả lời lại — học viên bổ sung thông tin / hỏi đáp với GV */}
+                    {/* Ô trả lời lại, học viên bổ sung thông tin / hỏi đáp với GV */}
                     <div className="flex gap-2 pt-1">
                       <input
-                        className="flex-1 border border-slate-200 px-4 py-2.5 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition"
+                        className="flex-1 border border-slate-200 px-4 py-2.5 rounded-xl text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition"
                         placeholder="Nhập trả lời cho giáo viên..."
                         value={replyText}
                         onChange={e => setReplyText(e.target.value)}

@@ -4,7 +4,7 @@ import { ref, onValue, set } from 'firebase/database';
 import { VAPID_KEY } from '../notifyConfig';
 
 // ============================================================
-// NOTIFICATION ENGINE — thông báo trình duyệt + âm thanh chuông
+// NOTIFICATION ENGINE, thông báo trình duyệt + âm thanh chuông
 // Hoạt động khi app đang mở (kể cả ở tab khác / cửa sổ thu nhỏ).
 // - Học viên: báo bài/thông báo mới · lịch học sắp bắt đầu (30')
 //             · đơn đổi được xác nhận / từ chối
@@ -32,7 +32,7 @@ const playDing = () => {
       osc.start(now + delay);
       osc.stop(now + delay + 0.7);
     });
-  } catch (e) { /* trình duyệt chặn audio khi chưa có tương tác — bỏ qua */ }
+  } catch (e) { /* trình duyệt chặn audio khi chưa có tương tác, bỏ qua */ }
 };
 
 // --- Bắn thông báo trình duyệt + chuông ---
@@ -87,9 +87,9 @@ const useMyOrderStatusWatcher = (userId) => {
           const items = (r.items || []).map(i => `${i.name} ×${i.qty}`).join(', ');
           const kind = r.channel === 'gift' ? 'đổi quà' : 'đổi món';
           if (status === 'confirmed') {
-            fireNotify(`✅ Yêu cầu ${kind} đã được xác nhận`, `${items} — ${r.channel === 'gift' ? 'nhận quà từ BOD' : 'nhận tại quầy Fresh Fit'} nhé!`);
+            fireNotify(`✅ Yêu cầu ${kind} đã được xác nhận`, `${items}, ${r.channel === 'gift' ? 'nhận quà từ BOD' : 'nhận tại quầy Fresh Fit'} nhé!`);
           } else if (status === 'rejected') {
-            fireNotify(`❌ Yêu cầu ${kind} bị từ chối`, `${items}${r.rejectReason ? ` — Lý do: ${r.rejectReason}` : ''}. Credits đã được hoàn lại.`);
+            fireNotify(`❌ Yêu cầu ${kind} bị từ chối`, `${items}${r.rejectReason ? `, Lý do: ${r.rejectReason}` : ''}. Credits đã được hoàn lại.`);
           }
         }
       });
@@ -151,7 +151,7 @@ const PermissionBanner = ({ onGranted }) => {
           playDing(); // mở khóa audio bằng tương tác này luôn
           setShow(false);
         }}
-        className="shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold text-white bg-[#2B6830] hover:bg-[#1E5225] transition-colors"
+        className="shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold text-white bg-primary hover:bg-primary-hover transition-colors"
       >
         Bật thông báo
       </button>
@@ -182,7 +182,7 @@ export const StudentNotifyEngine = ({ currentUser }) => {
   // Đăng ký FCM token nếu đã có quyền (push khi đóng trình duyệt)
   useEffect(() => { registerFcmToken(currentUser?.id); }, [currentUser?.id]);
 
-  // 3. Nhắc lịch học: còn ≤30 phút nữa bắt đầu — mỗi lớp nhắc 1 lần/ngày
+  // 3. Nhắc lịch học: còn ≤30 phút nữa bắt đầu, mỗi lớp nhắc 1 lần/ngày
   const [classes, setClasses] = useState([]);
   useEffect(() => {
     const unsub = onValue(ref(db, 'classes'), (snap) => {
@@ -241,9 +241,9 @@ export const StaffNotifyEngine = ({ currentUser, ffAccess, bodAccess }) => {
     const items = (r.items || []).map(i => `${i.name} ×${i.qty}`).join(', ');
     const isGift = r.channel === 'gift';
     if (isGift && bodAccess) {
-      fireNotify('🎁 Đơn đổi quà mới (BOD duyệt)', `${r.studentName}: ${items} — ${r.totalCredits}⭐`);
+      fireNotify('🎁 Đơn đổi quà mới (BOD duyệt)', `${r.studentName}: ${items}, ${r.totalCredits}⭐`);
     } else if (!isGift && ffAccess) {
-      fireNotify('🛎️ Yêu cầu đổi món mới', `${r.studentName}: ${items} — ${r.totalCredits}⭐${r.note ? ` · 📝 ${r.note}` : ''}`);
+      fireNotify('🛎️ Yêu cầu đổi món mới', `${r.studentName}: ${items}, ${r.totalCredits}⭐${r.note ? ` · 📝 ${r.note}` : ''}`);
     }
   }, !!currentUser?.id && (ffAccess || bodAccess));
 

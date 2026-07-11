@@ -19,8 +19,8 @@ export const BusyOverlay = ({ show }) => {
   if (!show) return null;
   return (
     <div className="fixed inset-0 z-[99] bg-[#F7FAF7]/95 flex flex-col items-center justify-center text-center p-6">
-      <div className="w-12 h-12 rounded-full border-4 border-[#E8F4EC] border-t-[#2B6830] animate-spin" />
-      <p className="mt-4 font-bold text-[#1E5225] text-[15px] max-w-md">{BUSY_MSGS[i]}</p>
+      <div className="w-12 h-12 rounded-full border-4 border-primary-light border-t-primary animate-spin" />
+      <p className="mt-4 font-bold text-primary-hover text-[15px] max-w-md">{BUSY_MSGS[i]}</p>
       <p className="mt-1.5 text-slate-500 text-sm">Vui lòng đợi trong giây lát…</p>
     </div>
   );
@@ -32,8 +32,8 @@ export const BandChips = ({ bands }) => (
     {BAND_KEYS.map((k) => {
       const b = Number(bands && bands[k]);
       return (
-        <div key={k} className="bg-[#E8F4EC] rounded-xl px-3.5 py-2 text-center min-w-[54px]">
-          <b className="block text-lg text-[#1E5225]">{Number.isFinite(b) ? Math.floor(b) : '–'}</b>
+        <div key={k} className="bg-primary-light rounded-xl px-3.5 py-2 text-center min-w-[54px]">
+          <b className="block text-lg text-primary-hover">{Number.isFinite(b) ? Math.floor(b) : '–'}</b>
           <span className="text-[11px] font-bold text-slate-500">{k}</span>
         </div>
       );
@@ -44,7 +44,7 @@ export const BandChips = ({ bands }) => (
 // Lỗi ngữ pháp/từ vựng: ❌ em nói → ✅ nên nói + giải thích
 export const FbErrorItem = ({ e }) => (
   <div className="border-l-[3px] border-amber-600 bg-[#FFFAF2] rounded-r-xl px-3 py-2 my-2 text-sm">
-    ❌ <b className="text-red-700">{e.you_said}</b> → ✅ <b className="text-[#1E5225]">{e.better}</b>
+    ❌ <b className="text-red-700">{e.you_said}</b> → ✅ <b className="text-primary-hover">{e.better}</b>
     <br />
     <span className="text-slate-500">
       <MdBold text={e.explain_vi} />
@@ -76,7 +76,7 @@ export const ErrBox = ({ msg }) =>
 
 // Badge phần thi (port .partbadge)
 export const PartBadge = ({ children }) => (
-  <span className="inline-block bg-[#2B6830] text-white font-extrabold text-[13px] px-4 py-1.5 rounded-full tracking-wide">
+  <span className="inline-block bg-primary text-white font-extrabold text-[13px] px-4 py-1.5 rounded-full tracking-wide">
     {children}
   </span>
 );

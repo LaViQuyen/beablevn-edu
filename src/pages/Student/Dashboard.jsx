@@ -5,7 +5,7 @@ import { db } from '../../firebase';
 import { ref, onValue, update } from 'firebase/database';
 
 // ============================================================
-// SKELETON CARD — thay thế "Đang tải..."
+// SKELETON CARD, thay thế "Đang tải..."
 // ============================================================
 const SkeletonCard = () => (
   <div className="card-std p-5 md:p-6 animate-pulse">
@@ -17,7 +17,7 @@ const SkeletonCard = () => (
 );
 
 // ============================================================
-// MINI STAT CHIP — dùng trong header
+// MINI STAT CHIP, dùng trong header
 // ============================================================
 const StatChip = ({ label, value, color }) => (
   <div className={`rounded-xl px-4 py-3 ${color} flex flex-col`}>
@@ -232,7 +232,7 @@ const StudentDashboard = () => {
             </p>
             <div className="flex gap-3 justify-center">
               <button onClick={() => setExtensionPopup(false)} className="px-4 py-2 bg-slate-100 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-200 transition-colors">Hủy</button>
-              <button onClick={handleRequestExtension} className="px-5 py-2 bg-[#2B6830] text-white rounded-xl text-sm font-bold hover:bg-[#1E5225] transition-colors">Xác nhận gửi</button>
+              <button onClick={handleRequestExtension} className="px-5 py-2 bg-primary text-white rounded-xl text-sm font-bold hover:bg-primary-hover transition-colors">Xác nhận gửi</button>
             </div>
           </div>
         </div>
@@ -255,7 +255,7 @@ const StudentDashboard = () => {
       )}
 
       {/* ===== HEADER CHÀO ===== */}
-      <div className="bg-gradient-to-r from-[#2B6830] to-[#3D8B47] rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
+      <div className="bg-gradient-to-r from-primary to-primary-medium rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
         <div className="relative z-10">
           <p className="text-green-200 text-sm font-medium">
             {new Date().toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit' })}
@@ -271,11 +271,11 @@ const StudentDashboard = () => {
             <div className="flex flex-wrap gap-3">
               <StatChip
                 label="Chuyên cần"
-                value={attendanceStats.rate !== null ? `${attendanceStats.rate}%` : '—'}
+                value={attendanceStats.rate !== null ? `${attendanceStats.rate}%` : '–'}
                 color="bg-white/15 text-white"
               />
               <StatChip label="Số lớp" value={myClasses.length} color="bg-white/15 text-white" />
-              <StatChip label="Buổi đã học" value={attendanceStats.total || '—'} color="bg-white/15 text-white" />
+              <StatChip label="Buổi đã học" value={attendanceStats.total || '–'} color="bg-white/15 text-white" />
               <Link to="/student/credits" className="block">
                 <StatChip
                   label="BAVN Credits ⭐"
@@ -372,15 +372,15 @@ const StudentDashboard = () => {
             <span className="shrink-0 text-xs font-bold text-slate-400 bg-slate-100 px-3.5 py-2 rounded-xl border border-slate-200">Đổi quà →</span>
           </button>
         ) : (
-          <Link to="/student/credits" className="block bg-white rounded-2xl border border-green-100 shadow-sm p-4 flex items-center gap-4 hover:border-[#2B6830]/40 hover:shadow-md transition-all group">
-            <div className="w-12 h-12 rounded-xl bg-[#E8F4EC] flex items-center justify-center shrink-0 text-2xl">🌿</div>
+          <Link to="/student/credits" className="block bg-white rounded-2xl border border-green-100 shadow-sm p-4 flex items-center gap-4 hover:border-primary/40 hover:shadow-md transition-all group">
+            <div className="w-12 h-12 rounded-xl bg-primary-light flex items-center justify-center shrink-0 text-2xl">🌿</div>
             <div className="flex-1 min-w-0">
               <p className="stat-label">Ví BAVN Credits</p>
               <p className="font-bold text-slate-800 text-sm">
-                Bạn có <span className="text-[#2B6830]">{totalBonus} điểm Bonus</span> = <span className="text-[#2B6830]">{totalCredits} credits</span> — đổi đồ uống, đồ ăn Fresh Fit và quà tặng
+                Bạn có <span className="text-primary">{totalBonus} điểm Bonus</span> = <span className="text-primary">{totalCredits} credits</span>, đổi đồ uống, đồ ăn Fresh Fit và quà tặng
               </p>
             </div>
-            <span className="shrink-0 text-xs font-bold text-[#2B6830] bg-[#E8F4EC] px-3.5 py-2 rounded-xl border border-green-100 group-hover:bg-green-100 transition-colors">Đổi quà →</span>
+            <span className="shrink-0 text-xs font-bold text-primary bg-primary-light px-3.5 py-2 rounded-xl border border-green-100 group-hover:bg-green-100 transition-colors">Đổi quà →</span>
           </Link>
         )
       )}
@@ -408,18 +408,18 @@ const StudentDashboard = () => {
           </div>
           <div className="flex-1 min-w-0">
             <p className="stat-label">Điểm gần nhất</p>
-            <p className="font-bold text-slate-800 text-sm truncate">{latestScore.content || '—'}</p>
+            <p className="font-bold text-slate-800 text-sm truncate">{latestScore.content || '–'}</p>
             <p className="text-xs text-slate-400">{typeLabel[latestScore.type] || latestScore.type} · {new Date(latestScore.date).toLocaleDateString('vi-VN')}</p>
           </div>
-          <div className="text-3xl font-extrabold text-[#2B6830] shrink-0">
-            {latestScore.score ?? '—'}
+          <div className="text-3xl font-extrabold text-primary shrink-0">
+            {latestScore.score ?? '–'}
           </div>
         </div>
       )}
 
       {/* ===== DANH SÁCH LỚP HỌC ===== */}
       <div>
-        <h2 className="text-base font-bold text-[#2B6830] mb-3 flex items-center gap-2">
+        <h2 className="text-base font-bold text-primary mb-3 flex items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443m-7.007 11.55A5.981 5.981 0 006.75 15.75v-1.5" />
           </svg>
@@ -435,19 +435,19 @@ const StudentDashboard = () => {
             {myClasses.map((cls) => (
               <div key={cls.id} className="card-std p-5 md:p-6 hover:shadow-md transition-all group">
                 <div className="flex justify-between items-start mb-3">
-                  <div className="bg-[#E8F4EC] text-[#2B6830] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">
+                  <div className="bg-primary-light text-primary text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">
                     {cls.room || 'Online'}
                   </div>
                 </div>
-                <h3 className="font-bold text-lg text-slate-800 mb-1 group-hover:text-[#2B6830] transition-colors">{cls.name}</h3>
+                <h3 className="font-bold text-lg text-slate-800 mb-1 group-hover:text-primary transition-colors">{cls.name}</h3>
                 <p className="text-slate-500 text-xs mb-4">GV: {cls.teacherName || 'Đang cập nhật'}</p>
                 <div className="pt-4 border-t border-slate-100 flex justify-between items-center text-xs">
                   <span className="text-slate-400 font-medium">Lịch học:</span>
-                  <span className="font-bold text-slate-700">{cls.schedule || '—'}</span>
+                  <span className="font-bold text-slate-700">{cls.schedule || '–'}</span>
                 </div>
                 <div className="flex justify-between items-center text-xs mt-2">
                   <span className="text-slate-400 font-medium">Giờ học:</span>
-                  <span className="font-mono text-slate-600">{cls.startTime && cls.endTime ? `${cls.startTime} – ${cls.endTime}` : '—'}</span>
+                  <span className="font-mono text-slate-600">{cls.startTime && cls.endTime ? `${cls.startTime} – ${cls.endTime}` : '–'}</span>
                 </div>
               </div>
             ))}

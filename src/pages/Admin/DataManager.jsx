@@ -116,7 +116,7 @@ const DataManager = () => {
     <div className="space-y-6 pb-20">
       {/* PAGE HEADER */}
       <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
-        <div className="p-2 bg-[#E8F4EC] rounded-xl text-[#3D8B47]">
+        <div className="p-2 bg-primary-light rounded-xl text-primary-medium">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
             <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
           </svg>
@@ -138,7 +138,7 @@ const DataManager = () => {
 
       {/* FORM NHẬP LIỆU */}
       <div className="card-std p-5 md:p-6">
-        <h2 className="section-title mb-4">{editingId ? '✏️ Cập nhật Lớp' : '➕ Thêm Lớp Mới'}</h2>
+        <h2 className="section-title mb-4">{editingId ? 'Cập nhật Lớp' : 'Thêm Lớp Mới'}</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
           <input
             className="input-base"
@@ -165,7 +165,7 @@ const DataManager = () => {
             onChange={e => setFormData({...formData, schedule: e.target.value})}
           />
 
-          {/* DROPDOWN CHỌN GIÁO VIÊN — tính năng mới */}
+          {/* DROPDOWN CHỌN GIÁO VIÊN, tính năng mới */}
           <div className="flex flex-col">
             <label className="stat-label mb-1">Giáo viên phụ trách</label>
             <select
@@ -218,7 +218,7 @@ const DataManager = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
           <h2 className="section-title">Danh sách Lớp học ({filteredClasses.length})</h2>
           <div className="flex flex-col md:flex-row gap-3">
-            <select className="p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 bg-slate-50 md:min-w-[180px]" value={selectedClassFilter} onChange={(e) => setSelectedClassFilter(e.target.value)}>
+            <select className="p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 bg-slate-50 md:min-w-[180px]" value={selectedClassFilter} onChange={(e) => setSelectedClassFilter(e.target.value)}>
               <option value="all">-- Tất cả các lớp --</option>
               {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
@@ -248,19 +248,19 @@ const DataManager = () => {
               {filteredClasses.map((c, index) => (
                 <tr key={c.id}>
                   <td className="text-center text-slate-400 font-bold">{index + 1}</td>
-                  <td className="font-bold text-[#2B6830]">{c.name}</td>
-                  <td className="text-slate-600">{c.room || '—'}</td>
-                  <td className="text-slate-600">{c.subject || '—'}</td>
+                  <td className="font-bold text-primary">{c.name}</td>
+                  <td className="text-slate-600">{c.room || '–'}</td>
+                  <td className="text-slate-600">{c.subject || '–'}</td>
                   <td>
                     {c.teacherName
                       ? <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded border border-emerald-200">{c.teacherName}</span>
                       : <span className="text-xs text-slate-300 italic">Chưa phân công</span>
                     }
                   </td>
-                  <td><span className="text-[10px] font-bold bg-[#E8F4EC] text-[#2B6830] px-2 py-1 rounded border border-green-100 whitespace-nowrap">{c.schedule || '—'}</span></td>
-                  <td className="text-xs text-slate-500 font-mono whitespace-nowrap">{c.startTime || '—'} - {c.endTime || '—'}</td>
+                  <td><span className="text-[10px] font-bold bg-primary-light text-primary px-2 py-1 rounded border border-green-100 whitespace-nowrap">{c.schedule || '–'}</span></td>
+                  <td className="text-xs text-slate-500 font-mono whitespace-nowrap">{c.startTime || '–'} - {c.endTime || '–'}</td>
                   <td className="text-right space-x-2">
-                    <button onClick={() => handleEdit(c)} className="text-[#2B6830] text-xs font-bold border border-[#2B6830] px-3 py-1.5 rounded-xl hover:bg-[#2B6830] hover:text-white transition-all">Sửa</button>
+                    <button onClick={() => handleEdit(c)} className="text-primary text-xs font-bold border border-primary px-3 py-1.5 rounded-xl hover:bg-primary hover:text-white transition-all">Sửa</button>
                     <button onClick={() => handleDelete(c.id)} className="text-red-500 text-xs font-bold border border-red-300 px-3 py-1.5 rounded-xl hover:bg-red-500 hover:text-white transition-all">Xóa</button>
                   </td>
                 </tr>
@@ -283,9 +283,9 @@ const DataManager = () => {
             <div key={c.id} className="p-4 border border-slate-200 rounded-xl bg-white shadow-sm flex flex-col gap-3">
               <div className="flex justify-between items-start">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-[#E8F4EC] text-[#2B6830] flex items-center justify-center font-bold text-xs">{index + 1}</div>
+                  <div className="w-8 h-8 rounded-full bg-primary-light text-primary flex items-center justify-center font-bold text-xs">{index + 1}</div>
                   <div>
-                    <h4 className="font-bold text-[#2B6830] text-sm">{c.name}</h4>
+                    <h4 className="font-bold text-primary text-sm">{c.name}</h4>
                     <p className="text-xs text-slate-500">{c.subject || 'Chưa cập nhật môn'}</p>
                   </div>
                 </div>
@@ -304,16 +304,16 @@ const DataManager = () => {
               <div className="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-2 rounded border border-slate-100">
                 <div>
                   <span className="text-slate-400 block mb-0.5">Lịch học</span>
-                  <span className="font-bold text-[#2B6830]">{c.schedule || '—'}</span>
+                  <span className="font-bold text-primary">{c.schedule || '–'}</span>
                 </div>
                 <div className="text-right">
                   <span className="text-slate-400 block mb-0.5">Thời gian</span>
-                  <span className="font-mono text-slate-700">{c.startTime || '—'} - {c.endTime || '—'}</span>
+                  <span className="font-mono text-slate-700">{c.startTime || '–'} - {c.endTime || '–'}</span>
                 </div>
               </div>
 
               <div className="flex gap-2 border-t border-slate-100 pt-3">
-                <button onClick={() => handleEdit(c)} className="flex-1 py-2 text-[#2B6830] bg-[#E8F4EC] rounded-xl text-xs font-bold border border-green-200 active:bg-green-100">Sửa</button>
+                <button onClick={() => handleEdit(c)} className="flex-1 py-2 text-primary bg-primary-light rounded-xl text-xs font-bold border border-green-200 active:bg-green-100">Sửa</button>
                 <button onClick={() => handleDelete(c.id)} className="flex-1 py-2 text-red-600 bg-red-50 rounded-xl text-xs font-bold border border-red-200 active:bg-red-100">Xóa</button>
               </div>
             </div>

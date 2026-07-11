@@ -23,7 +23,7 @@ const exportToPDF = (snapshot) => {
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <title>Thống kê Buổi học — ${dateStr}</title>
+  <title>Thống kê Buổi học, ${dateStr}</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -62,7 +62,7 @@ const exportToPDF = (snapshot) => {
 </head>
 <body>
   <div class="header">
-    <h2>BE ABLE VN — Thống kê Buổi học</h2>
+    <h2>BE ABLE VN, Thống kê Buổi học</h2>
     <p class="meta">Thời điểm chốt: <strong>${dateStr}</strong> &nbsp;·&nbsp; Tổng số: <strong>${snapshot.records?.length || 0} học viên</strong></p>
   </div>
   <table>
@@ -79,7 +79,7 @@ const exportToPDF = (snapshot) => {
     </thead>
     <tbody>${rows}</tbody>
   </table>
-  <p class="footer">Xuất từ Hệ thống 2SOL / Be Able VN &nbsp;—&nbsp; ${new Date().toLocaleDateString('vi-VN')}</p>
+  <p class="footer">Xuất từ Hệ thống 2SOL / Be Able VN &nbsp;·&nbsp; ${new Date().toLocaleDateString('vi-VN')}</p>
   <script>window.onload = () => { window.print(); };<\/script>
 </body>
 </html>`;
@@ -138,7 +138,7 @@ const TuitionHistory = () => {
 
   return (
     <div className="space-y-4">
-      <p className="text-xs text-slate-400 font-medium">{snapshots.length} lần chốt — mới nhất trước</p>
+      <p className="text-xs text-slate-400 font-medium">{snapshots.length} lần chốt, mới nhất trước</p>
       {snapshots.map((snap) => (
         <div key={snap.id} className="card-std p-5 hover:shadow-md transition-shadow">
           <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -159,7 +159,7 @@ const TuitionHistory = () => {
                 })}
               </p>
               <p className="text-xs text-slate-500 mt-1 ml-9">
-                <span className="font-bold text-[#2B6830]">{snap.count || snap.records?.length || 0}</span> học viên
+                <span className="font-bold text-primary">{snap.count || snap.records?.length || 0}</span> học viên
               </p>
             </div>
 

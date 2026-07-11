@@ -88,7 +88,7 @@ const ClassList = () => {
   const getStudentClassIds = (student) =>
     Array.isArray(student.classIds) ? student.classIds : (student.classId ? [student.classId] : []);
 
-  // Tên các lớp của học viên (A-Z) để hiển thị badge — chỉ trong các lớp GV phụ trách
+  // Tên các lớp của học viên (A-Z) để hiển thị badge, chỉ trong các lớp GV phụ trách
   const getStudentClassNames = (student) =>
     getStudentClassIds(student)
       .map(id => classMap.get(id)?.name)
@@ -102,7 +102,7 @@ const ClassList = () => {
     return m;
   }, [allClasses]);
 
-  // Tên ĐỦ các lớp của học viên (kể cả lớp GV không phụ trách) — dùng cho popup chi tiết
+  // Tên ĐỦ các lớp của học viên (kể cả lớp GV không phụ trách), dùng cho popup chi tiết
   const getStudentAllClassNames = (student) =>
     getStudentClassIds(student)
       .map(id => allClassMap.get(id)?.name)
@@ -123,7 +123,7 @@ const ClassList = () => {
     [classes]
   );
 
-  // Lọc + sắp xếp học viên — chỉ tính lại khi dữ liệu/bộ lọc đổi
+  // Lọc + sắp xếp học viên, chỉ tính lại khi dữ liệu/bộ lọc đổi
   const filteredStudents = useMemo(() => {
     const nameQuery = viNorm(nameSearch); // tìm tên không dấu/hoa thường
     return students.filter(st => {
@@ -160,18 +160,18 @@ const ClassList = () => {
 
         <div className="flex flex-wrap gap-2 w-full md:w-auto">
           {/* Lọc theo lớp (chỉ các lớp GV phụ trách) */}
-          <select className="border border-slate-200 p-2 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 bg-slate-50 font-medium text-[#2B6830] w-36" value={classFilter} onChange={(e) => setClassFilter(e.target.value)}>
+          <select className="border border-slate-200 p-2 rounded-xl text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 bg-slate-50 font-medium text-primary w-36" value={classFilter} onChange={(e) => setClassFilter(e.target.value)}>
             <option value="">Tất cả lớp</option>
             {classOptions.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
           {/* Lọc theo môn học (subject admin set cho lớp) */}
-          <select className="border border-slate-200 p-2 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 bg-slate-50 font-medium text-[#2B6830] w-36" value={programFilter} onChange={(e) => setProgramFilter(e.target.value)}>
+          <select className="border border-slate-200 p-2 rounded-xl text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 bg-slate-50 font-medium text-primary w-36" value={programFilter} onChange={(e) => setProgramFilter(e.target.value)}>
             <option value="">Tất cả môn học</option>
             {programOptions.map(p => <option key={p} value={p}>{p}</option>)}
           </select>
           <div className="relative flex-1 min-w-[180px]">
             <input
-              className="w-full border border-slate-200 pl-7 pr-3 py-2 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10"
+              className="w-full border border-slate-200 pl-7 pr-3 py-2 rounded-xl text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
               placeholder="Tìm tên học viên..."
               value={nameSearch}
               onChange={e => setNameSearch(e.target.value)}
@@ -199,7 +199,7 @@ const ClassList = () => {
           const attRate = getAttendanceRate(st);
           const isLowAtt = attRate !== null && attRate < 70;
           const rsv = getReserveStatus(st); // 'active' | 'ending' | null
-          const bd = getBirthdayNotice(st); // { cake, message } — xét cả HV lẫn PH
+          const bd = getBirthdayNotice(st); // { cake, message }, xét cả HV lẫn PH
 
           return (
             <div
@@ -208,7 +208,7 @@ const ClassList = () => {
               className={`flex justify-between items-center p-4 border rounded-xl hover:shadow-md transition-all bg-white group cursor-pointer ${rsv ? RESERVE_CARD : isLowAtt ? 'border-red-200 bg-red-50/30' : 'border-slate-100 hover:border-green-100'}`}
             >
               <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${rsv ? 'bg-yellow-100 text-yellow-700' : isLowAtt ? 'bg-red-100 text-red-600' : 'bg-slate-50 text-[#2B6830]'}`}>
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${rsv ? 'bg-yellow-100 text-yellow-700' : isLowAtt ? 'bg-red-100 text-red-600' : 'bg-slate-50 text-primary'}`}>
                   {(st.name || '?').charAt(0)}
                 </div>
                 <div>
@@ -235,14 +235,14 @@ const ClassList = () => {
                       {attRate}%
                     </span>
                   ) : (
-                    <span className="text-xs text-slate-300 italic">—</span>
+                    <span className="text-xs text-slate-300 italic">–</span>
                   )}
                 </div>
 
                 {/* Lịch học / tên lớp */}
                 <div className="flex flex-col items-end gap-1">
                   {infoList.map((info, i) => (
-                    <span key={i} className="text-[10px] font-bold bg-[#E8F4EC] text-[#2B6830] px-2 py-1 rounded border border-green-100 whitespace-nowrap">{info}</span>
+                    <span key={i} className="text-[10px] font-bold bg-primary-light text-primary px-2 py-1 rounded border border-green-100 whitespace-nowrap">{info}</span>
                   ))}
                 </div>
               </div>

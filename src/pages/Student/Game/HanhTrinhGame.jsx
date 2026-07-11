@@ -87,10 +87,10 @@ export default function HanhTrinhGame() {
 
   const hostRef = useRef(null);   // div chứa canvas Phaser
   const gameRef = useRef(null);   // instance Phaser.Game
-  const stageWrapRef = useRef(null); // wrapper bọc canvas — phần tử xin toàn màn hình
+  const stageWrapRef = useRef(null); // wrapper bọc canvas, phần tử xin toàn màn hình
   const progressRef = useRef({ beaten: {}, unlockedSkills: false });
 
-  // Tỉ lệ khung hình NGANG của thiết bị — để game tràn hết màn hình khi xoay ngang,
+  // Tỉ lệ khung hình NGANG của thiết bị, để game tràn hết màn hình khi xoay ngang,
   // không còn viền đen 2 bên (Phaser dựng canvas đúng tỉ lệ này thay vì cố định 16:9).
   const landscapeAspect = useMemo(() => {
     const long = Math.max(window.innerWidth, window.innerHeight);
@@ -243,7 +243,7 @@ export default function HanhTrinhGame() {
   const remainingPlays = isStaff ? 999999 : Math.min(poolLeft, dailyLeft); // lượt thực dùng được lúc này
   const canPlay = unlocked && remainingPlays > 0 && progLoaded;
 
-  // --- BẢNG XẾP HẠNG theo SAO tích lũy — TÁCH RIÊNG: học viên xem bảng học viên,
+  // --- BẢNG XẾP HẠNG theo SAO tích lũy, TÁCH RIÊNG: học viên xem bảng học viên,
   //     nhân sự (staff/admin) xem bảng nhân sự. Hai bảng không lẫn vào nhau. ---
   const leaderboard = useMemo(() => {
     return Object.entries(allGames)
@@ -281,7 +281,7 @@ export default function HanhTrinhGame() {
     } catch (e) { setPseudoFs(true); }
   };
 
-  // Vào game (màn bản đồ). KHÔNG trừ lượt ở đây — lượt bị trừ khi VÀO TỪNG ẢI (trong MapScene).
+  // Vào game (màn bản đồ). KHÔNG trừ lượt ở đây, lượt bị trừ khi VÀO TỪNG ẢI (trong MapScene).
   const startGame = () => {
     if (!canPlay) return;
     goImmersive();                 // tự xoay ngang + full màn hình khi bắt đầu lượt chơi
@@ -379,7 +379,7 @@ export default function HanhTrinhGame() {
             <span className="text-sm font-bold text-slate-600 hidden sm:inline truncate">
               Cấp độ: {RANK_NAMES[rank - 1]} · {'❤️'.repeat(heartsFor(rank))}
             </span>
-            {/* Nút toàn màn hình — trải nghiệm tốt nhất khi xoay ngang */}
+            {/* Nút toàn màn hình, trải nghiệm tốt nhất khi xoay ngang */}
             <button
               onClick={enterFullscreen}
               className="px-3 py-2 rounded-lg font-bold text-white text-sm shrink-0 flex items-center gap-1"
@@ -413,7 +413,7 @@ export default function HanhTrinhGame() {
             </button>
           )}
 
-          {/* Overlay NHẮC XOAY NGANG — chỉ hiện khi điện thoại đang để dọc */}
+          {/* Overlay NHẮC XOAY NGANG, chỉ hiện khi điện thoại đang để dọc */}
           {isPortrait && (
             <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 px-6 text-center bg-[#1a2a40]/95 backdrop-blur-sm rounded-2xl">
               <div className="text-6xl animate-pulse">🔄📱</div>
@@ -451,7 +451,7 @@ export default function HanhTrinhGame() {
           <div className="text-5xl mb-2">🎮</div>
           <h1 className="text-2xl font-black tracking-wide">HÀNH TRÌNH TRƯỞNG THÀNH</h1>
           <p className="text-sm opacity-90 mt-1">
-            Vượt 24 ải học đường — chiến đấu với những “tật xấu”, tiến hóa từ Mầm Non đến Đại Học.
+            Vượt 24 ải học đường, chiến đấu với những “tật xấu”, tiến hóa từ Mầm Non đến Đại Học.
           </p>
         </div>
 
@@ -472,9 +472,9 @@ export default function HanhTrinhGame() {
           </div>
 
           {/* Cách lên cấp: VƯỢT ẢI, không phải tích Bonus */}
-          <div className="rounded-xl bg-[#F2F8F4] border border-green-100 p-3 text-center">
+          <div className="rounded-xl bg-primary-subtle border border-green-100 p-3 text-center">
             <p className="text-[11px] text-slate-500 leading-relaxed">
-              Cấp độ nhân vật tăng khi bạn <b className="text-[#2B6830]">vượt qua các ải Boss</b> — mỗi lần lên cấp được thêm <b>tim (HP)</b> và mở thêm <b>vũ khí / kỹ năng</b>. Bonus tích lũy chỉ dùng để <b>mở khóa</b> game.
+              Cấp độ nhân vật tăng khi bạn <b className="text-primary">vượt qua các ải Boss</b>, mỗi lần lên cấp được thêm <b>tim (HP)</b> và mở thêm <b>vũ khí / kỹ năng</b>. Bonus tích lũy chỉ dùng để <b>mở khóa</b> game.
             </p>
           </div>
 
@@ -491,8 +491,8 @@ export default function HanhTrinhGame() {
             </div>
           ) : (
             <>
-              {/* Thẻ LƯỢT CHƠI — kiếm bằng học tập, có trần mỗi ngày */}
-              <div className="rounded-xl border border-green-100 bg-[#F2F8F4] p-4">
+              {/* Thẻ LƯỢT CHƠI, kiếm bằng học tập, có trần mỗi ngày */}
+              <div className="rounded-xl border border-green-100 bg-primary-subtle p-4">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">Lượt chơi</span>
                   <span className="text-xs font-bold text-slate-500">{isStaff ? 'Nhân sự' : `Hôm nay: ${todayUsed}/${DAILY_CAP}`}</span>
@@ -539,14 +539,14 @@ export default function HanhTrinhGame() {
             ) : (
               <ul className="divide-y divide-slate-100">
                 {leaderboard.slice(0, 10).map((row, i) => (
-                  <li key={row.id} className={`flex items-center gap-3 px-4 py-2 text-sm ${row.id === uid ? 'bg-[#E8F4EC] font-bold' : ''}`}>
+                  <li key={row.id} className={`flex items-center gap-3 px-4 py-2 text-sm ${row.id === uid ? 'bg-primary-light font-bold' : ''}`}>
                     <span className={`w-6 text-center font-black ${i < 3 ? 'text-amber-500' : 'text-slate-400'}`}>{i + 1}</span>
                     <span className="flex-1 truncate text-slate-700">{row.name}{row.id === uid ? ' (Bạn)' : ''}</span>
                     <span className="font-black" style={{ color: FOREST }}>⭐ {row.stars}</span>
                   </li>
                 ))}
                 {myBoardIndex >= 10 && (
-                  <li className="flex items-center gap-3 px-4 py-2 text-sm bg-[#E8F4EC] font-bold border-t-2 border-dashed border-green-200">
+                  <li className="flex items-center gap-3 px-4 py-2 text-sm bg-primary-light font-bold border-t-2 border-dashed border-green-200">
                     <span className="w-6 text-center font-black text-slate-400">{myBoardIndex + 1}</span>
                     <span className="flex-1 truncate text-slate-700">{leaderboard[myBoardIndex].name} (Bạn)</span>
                     <span className="font-black" style={{ color: FOREST }}>⭐ {leaderboard[myBoardIndex].stars}</span>

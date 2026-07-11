@@ -19,7 +19,7 @@ const Notifications = () => {
     const [iframeLoading, setIframeLoading] = useState(true);
 
     const LABELS = {
-        'báo bài': 'bg-[#E8F4EC] text-green-700 border-green-200',
+        'báo bài': 'bg-primary-light text-green-700 border-green-200',
         'quan trọng': 'bg-red-50 text-red-700 border-red-200',
         'sự kiện': 'bg-yellow-50 text-yellow-700 border-yellow-200'
     };
@@ -127,7 +127,7 @@ const Notifications = () => {
             )}
             {/* ------------------------------------------------------------- */}
             <div className="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
-                <div className="p-2 bg-[#E8F4EC] rounded-xl text-[#2B6830]">
+                <div className="p-2 bg-primary-light rounded-xl text-primary">
                     <IconBell />
                 </div>
                 <div>
@@ -150,7 +150,7 @@ const Notifications = () => {
                             <button
                                 key={f.id}
                                 onClick={() => setFilterLabel(f.id)}
-                                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${filterLabel === f.id ? 'bg-white text-[#2B6830] shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${filterLabel === f.id ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                             >
                                 {f.label}
                             </button>
@@ -158,7 +158,7 @@ const Notifications = () => {
                     </div>
                     <div className="flex-1 min-w-[180px] relative">
                         <input
-                            className="w-full border border-slate-200 pl-8 pr-4 py-2 rounded-xl text-xs outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition"
+                            className="w-full border border-slate-200 pl-8 pr-4 py-2 rounded-xl text-xs outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition"
                             placeholder="Tìm theo tiêu đề..."
                             value={searchTerm}
                             onChange={e => setSearchTerm(e.target.value)}
@@ -186,7 +186,7 @@ const Notifications = () => {
                         <div className="bg-white rounded-xl border border-dashed border-slate-200 p-8 text-center">
                             <p className="text-slate-400 text-sm">{notifications.length === 0 ? 'Chưa có thông báo nào.' : 'Không tìm thấy thông báo phù hợp.'}</p>
                             {(filterLabel !== 'all' || searchTerm) && (
-                                <button onClick={() => { setFilterLabel('all'); setSearchTerm(''); }} className="mt-2 text-[#2B6830] text-xs font-bold hover:underline">Xóa bộ lọc</button>
+                                <button onClick={() => { setFilterLabel('all'); setSearchTerm(''); }} className="mt-2 text-primary text-xs font-bold hover:underline">Xóa bộ lọc</button>
                             )}
                         </div>
                     ) : filteredNotifications.map((noti) => {
@@ -197,7 +197,7 @@ const Notifications = () => {
 
                                     <div className="flex items-center gap-2 mb-1">
                                         {noti.type === 'link' ? (
-                                            <span className="bg-[#E8F4EC] text-green-700 text-[10px] font-bold px-2.5 py-1 rounded-md border border-green-100 flex items-center gap-1 uppercase tracking-wide">
+                                            <span className="bg-primary-light text-green-700 text-[10px] font-bold px-2.5 py-1 rounded-md border border-green-100 flex items-center gap-1 uppercase tracking-wide">
                                                 <IconLink /> Link
                                             </span>
                                         ) : (
@@ -219,7 +219,7 @@ const Notifications = () => {
                                         className={noti.type === 'content' ? "cursor-pointer group/content" : ""}
                                         onClick={() => { if (noti.type === 'content') toggleExpand(noti.id); }}
                                     >
-                                        <h3 className={`font-bold text-sm md:text-base mb-2 transition-colors ${noti.type === 'content' ? 'text-slate-800 group-hover/content:text-[#2B6830]' : 'text-slate-800'}`}>
+                                        <h3 className={`font-bold text-sm md:text-base mb-2 transition-colors ${noti.type === 'content' ? 'text-slate-800 group-hover/content:text-primary' : 'text-slate-800'}`}>
                                             {noti.title}
                                         </h3>
 
@@ -228,7 +228,7 @@ const Notifications = () => {
                                                 href={noti.linkUrl}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#2B6830] bg-[#E8F4EC] hover:bg-green-100 px-3.5 py-2 rounded-xl border border-green-100 transition-colors w-fit mt-1"
+                                                className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary bg-primary-light hover:bg-green-100 px-3.5 py-2 rounded-xl border border-green-100 transition-colors w-fit mt-1"
                                             >
                                                 <IconLink /> Mở liên kết
                                             </a>
@@ -250,7 +250,7 @@ const Notifications = () => {
                                                             // Sửa name lấy theo title mới:
                                                             setSelectedFile({ url: noti.attachmentUrl, name: (noti.attachmentTitle || noti.attachmentName) }); 
                                                         }}
-                                                        className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-[#2B6830] bg-[#E8F4EC] hover:bg-green-100 px-3.5 py-2.5 rounded-xl border border-green-100 transition-colors w-fit"
+                                                        className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-primary bg-primary-light hover:bg-green-100 px-3.5 py-2.5 rounded-xl border border-green-100 transition-colors w-fit"
                                                     >
                                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13" /></svg>
                                                         
@@ -272,13 +272,13 @@ const Notifications = () => {
                     <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl h-[85vh] flex flex-col overflow-hidden border border-slate-100">
                         {/* Header */}
                         <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-slate-100 shrink-0">
-                            <h3 className="text-sm font-bold text-[#2B6830] truncate">{selectedFile.name || 'Tài liệu đính kèm'}</h3>
+                            <h3 className="text-sm font-bold text-primary truncate">{selectedFile.name || 'Tài liệu đính kèm'}</h3>
                             <div className="flex items-center gap-2 shrink-0">
                                 <a
                                     href={selectedFile.url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-xs font-semibold text-[#2B6830] bg-[#E8F4EC] hover:bg-green-100 px-3 py-1.5 rounded-xl border border-green-100 transition-colors"
+                                    className="text-xs font-semibold text-primary bg-primary-light hover:bg-green-100 px-3 py-1.5 rounded-xl border border-green-100 transition-colors"
                                 >
                                     Mở tab mới
                                 </a>
@@ -291,11 +291,11 @@ const Notifications = () => {
                                 </button>
                             </div>
                         </div>
-                        {/* Nội dung file — nhúng qua Google Docs Viewer */}
+                        {/* Nội dung file, nhúng qua Google Docs Viewer */}
                         <div className="relative flex-1 bg-slate-50">
                             {iframeLoading && (
                                 <div className="absolute inset-0 flex items-center justify-center">
-                                    <div className="w-8 h-8 border-4 border-green-100 border-t-[#2B6830] rounded-full animate-spin" />
+                                    <div className="w-8 h-8 border-4 border-green-100 border-t-primary rounded-full animate-spin" />
                                 </div>
                             )}
                             <iframe

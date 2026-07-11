@@ -114,7 +114,7 @@ const BandPill = ({ band, prefix = 'Band' }) => {
   return (
     <span
       className={`inline-flex items-center shrink-0 px-2.5 py-1 rounded-full text-xs font-bold ${
-        high ? 'bg-amber-100 text-amber-700' : 'bg-[#E8F4EC] text-[#2B6830]'
+        high ? 'bg-amber-100 text-amber-700' : 'bg-primary-light text-primary'
       }`}
     >
       {prefix} {n != null && !Number.isInteger(n) ? n.toFixed(1) : String(band)}
@@ -126,7 +126,7 @@ const BulletList = ({ items, highlight }) => (
   <ul className="space-y-1">
     {items.map((s, i) => (
       <li key={i} className="text-sm text-slate-600 leading-relaxed flex gap-2">
-        <span className="text-[#2B6830] shrink-0">•</span>
+        <span className="text-primary shrink-0">•</span>
         <span><MdRich text={String(s)} className={highlight} /></span>
       </li>
     ))}
@@ -156,7 +156,7 @@ const IssueList = ({ issues }) => (
             {o.problem && <span>{String(o.problem)} </span>}
             {o.fix && (
               <span>
-                <b className="text-[#1E5225]">→ Sửa:</b> {String(o.fix)}
+                <b className="text-primary-hover">→ Sửa:</b> {String(o.fix)}
               </span>
             )}
           </span>
@@ -191,9 +191,9 @@ const SpeakingDetail = ({ rec }) => {
   return (
     <div className="space-y-4">
       {drill.done != null && (
-        <p className="text-sm text-slate-600 bg-[#F2F8F4] rounded-xl px-3 py-2">
-          Em đã luyện <b className="text-[#2B6830]">{num(drill.done) ?? 0}</b> câu Part 1, trong đó{' '}
-          <b className="text-[#2B6830]">{num(drill.cleanFirst) ?? 0}</b> câu nói đúng ngay lần đầu.
+        <p className="text-sm text-slate-600 bg-primary-subtle rounded-xl px-3 py-2">
+          Em đã luyện <b className="text-primary">{num(drill.done) ?? 0}</b> câu Part 1, trong đó{' '}
+          <b className="text-primary">{num(drill.cleanFirst) ?? 0}</b> câu nói đúng ngay lần đầu.
           Mỗi lần luyện lại là một bước tiến 💪
         </p>
       )}
@@ -215,11 +215,11 @@ const SpeakingDetail = ({ rec }) => {
               const b = num(bands[k]);
               return (
                 <div key={k} className="flex gap-3 items-start bg-slate-50 rounded-xl px-3 py-2">
-                  <span className="shrink-0 w-9 h-9 rounded-lg bg-[#E8F4EC] text-[#2B6830] font-extrabold flex items-center justify-center">
+                  <span className="shrink-0 w-9 h-9 rounded-lg bg-primary-light text-primary font-extrabold flex items-center justify-center">
                     {b != null ? Math.floor(b) : '?'}
                   </span>
                   <div className="min-w-0">
-                    <p className="text-xs font-bold text-[#1E5225]">
+                    <p className="text-xs font-bold text-primary-hover">
                       {CRIT_NAMES[k]} ({k})
                     </p>
                     {perCrit[k] && (
@@ -258,7 +258,7 @@ const SpeakingDetail = ({ rec }) => {
               <div key={i} className="rounded-xl border border-slate-100 p-3 space-y-2">
                 <p className="text-sm font-bold text-slate-700">
                   {q.part != null && (
-                    <span className="inline-block text-[10px] font-bold bg-[#2B6830] text-white rounded px-1.5 py-0.5 mr-2 align-middle">
+                    <span className="inline-block text-[10px] font-bold bg-primary text-white rounded px-1.5 py-0.5 mr-2 align-middle">
                       PART {String(q.part)}
                     </span>
                   )}
@@ -281,11 +281,11 @@ const SpeakingDetail = ({ rec }) => {
                   </p>
                 )}
                 {q.revised && (
-                  <div className="bg-[#F2F8F4] rounded-lg px-3 py-2">
-                    <p className="text-[10px] font-bold text-[#2B6830] uppercase tracking-wide">
+                  <div className="bg-primary-subtle rounded-lg px-3 py-2">
+                    <p className="text-[10px] font-bold text-primary uppercase tracking-wide">
                       ✍ Chỉnh theo phương pháp Be Able VN
                     </p>
-                    <p className="text-sm text-[#1E5225] leading-relaxed">{String(q.revised)}</p>
+                    <p className="text-sm text-primary-hover leading-relaxed">{String(q.revised)}</p>
                   </div>
                 )}
               </div>
@@ -316,14 +316,14 @@ const WritingDetail = ({ summary }) => {
           <SecTitle>Hai ý của em</SecTitle>
           <div className="text-sm text-slate-600 space-y-1 leading-relaxed">
             {s.cause && (
-              <p><b className="text-[#1E5225]">Ý 1 · Nguyên nhân:</b> {String(s.cause)}</p>
+              <p><b className="text-primary-hover">Ý 1 · Nguyên nhân:</b> {String(s.cause)}</p>
             )}
             {s.effect && (
-              <p><b className="text-[#1E5225]">Ý 2 · Hệ quả:</b> {String(s.effect)}</p>
+              <p><b className="text-primary-hover">Ý 2 · Hệ quả:</b> {String(s.effect)}</p>
             )}
             {s.base && (
               <p>
-                <b className="text-[#1E5225]">Câu xuất phát (band ~5):</b>{' '}
+                <b className="text-primary-hover">Câu xuất phát (band ~5):</b>{' '}
                 <i>{String(s.base)}</i>
               </p>
             )}
@@ -343,7 +343,7 @@ const WritingDetail = ({ summary }) => {
               <div key={i} className="rounded-xl border border-slate-100 p-3 space-y-2">
                 <div className="flex items-center gap-2 flex-wrap">
                   <BandPill band={st.band} />
-                  <span className="text-sm font-bold text-[#1E5225]">
+                  <span className="text-sm font-bold text-primary-hover">
                     {st.level_title ? String(st.level_title) : `Bậc ${i + 1}`}
                   </span>
                 </div>
@@ -354,19 +354,19 @@ const WritingDetail = ({ summary }) => {
                 )}
                 {sts.length > 0 && (
                   <div className="space-y-1">
-                    <p className="text-xs font-bold text-[#1E5225]">Điểm tốt:</p>
+                    <p className="text-xs font-bold text-primary-hover">Điểm tốt:</p>
                     <BulletList items={sts} highlight="text-emerald-700 font-semibold" />
                   </div>
                 )}
                 {iss.length > 0 && (
                   <div className="space-y-1">
-                    <p className="text-xs font-bold text-[#1E5225]">Cần chỉnh:</p>
+                    <p className="text-xs font-bold text-primary-hover">Cần chỉnh:</p>
                     <IssueList issues={iss} />
                   </div>
                 )}
                 {fb.model_sentence && (
                   <p className="text-sm text-slate-600 leading-relaxed">
-                    <b className="text-[#1E5225]">Câu mẫu tham khảo:</b>{' '}
+                    <b className="text-primary-hover">Câu mẫu tham khảo:</b>{' '}
                     <i>{String(fb.model_sentence)}</i>
                   </p>
                 )}
@@ -407,10 +407,10 @@ const IntroDetail = ({ summary }) => {
           {(prompt.view1_en || prompt.view2_en) && (
             <div className="text-sm text-slate-600 space-y-0.5">
               {prompt.view1_en && (
-                <p><b className="text-[#1E5225]">Quan điểm 1:</b> {String(prompt.view1_en)}</p>
+                <p><b className="text-primary-hover">Quan điểm 1:</b> {String(prompt.view1_en)}</p>
               )}
               {prompt.view2_en && (
-                <p><b className="text-[#1E5225]">Quan điểm 2:</b> {String(prompt.view2_en)}</p>
+                <p><b className="text-primary-hover">Quan điểm 2:</b> {String(prompt.view2_en)}</p>
               )}
             </div>
           )}
@@ -429,7 +429,7 @@ const IntroDetail = ({ summary }) => {
           <div key={i} className="rounded-xl border border-slate-100 p-3 space-y-2">
             <div className="flex items-center gap-2 flex-wrap">
               <BandPill band={c.overall_band} />
-              <span className="text-sm font-bold text-[#1E5225]">
+              <span className="text-sm font-bold text-primary-hover">
                 {c.title ? String(c.title) : `Cấu phần ${i + 1}`}
               </span>
               <span
@@ -447,12 +447,12 @@ const IntroDetail = ({ summary }) => {
             )}
             {critKeys.length > 0 && (
               <div className="space-y-1">
-                <p className="text-xs font-bold text-[#1E5225]">Band theo 4 tiêu chí:</p>
+                <p className="text-xs font-bold text-primary-hover">Band theo 4 tiêu chí:</p>
                 {critKeys.map((k) => {
                   const o = asObj(crit[k]);
                   return (
                     <p key={k} className="text-sm text-slate-600 leading-relaxed">
-                      <b className="text-[#2B6830]">
+                      <b className="text-primary">
                         {INTRO_CRIT[k]} ({k}){o.band != null ? ` · Band ${String(o.band)}` : ''}:
                       </b>{' '}
                       {o.comment ? String(o.comment) : ''}
@@ -463,25 +463,25 @@ const IntroDetail = ({ summary }) => {
             )}
             {sts.length > 0 && (
               <div className="space-y-1">
-                <p className="text-xs font-bold text-[#1E5225]">Điểm tốt:</p>
+                <p className="text-xs font-bold text-primary-hover">Điểm tốt:</p>
                 <BulletList items={sts} highlight="text-emerald-700 font-semibold" />
               </div>
             )}
             {iss.length > 0 && (
               <div className="space-y-1">
-                <p className="text-xs font-bold text-[#1E5225]">Cần chỉnh:</p>
+                <p className="text-xs font-bold text-primary-hover">Cần chỉnh:</p>
                 <IssueList issues={iss} />
               </div>
             )}
             {(ex.band7 || ex.band8 || ex.band9) && (
-              <div className="space-y-1 bg-[#F2F8F4] rounded-lg px-3 py-2">
-                <p className="text-xs font-bold text-[#2B6830]">Câu mẫu nâng band:</p>
+              <div className="space-y-1 bg-primary-subtle rounded-lg px-3 py-2">
+                <p className="text-xs font-bold text-primary">Câu mẫu nâng band:</p>
                 {[['band7', 'Band 7'], ['band8', 'Band 8'], ['band9', 'Band 9']].map(([key, lbl]) => {
                   const e = asObj(ex[key]);
                   if (!e.sentence) return null;
                   return (
                     <div key={key} className="text-sm text-slate-600 leading-relaxed">
-                      <b className="text-[#2B6830]">{lbl}:</b> <i>{String(e.sentence)}</i>
+                      <b className="text-primary">{lbl}:</b> <i>{String(e.sentence)}</i>
                       {e.note && <p className="text-xs text-slate-400">→ {String(e.note)}</p>}
                     </div>
                   );
@@ -523,7 +523,7 @@ const HistoryItem = ({ item, open, onToggle }) => {
     sub = (
       <div className="flex items-center gap-1.5 flex-wrap">
         {bandChips.map(({ k, b }) => (
-          <span key={k} className="text-[11px] font-bold bg-[#E8F4EC] text-[#2B6830] px-2 py-0.5 rounded-md">
+          <span key={k} className="text-[11px] font-bold bg-primary-light text-primary px-2 py-0.5 rounded-md">
             {k} {Math.floor(b)}
           </span>
         ))}
@@ -547,7 +547,7 @@ const HistoryItem = ({ item, open, onToggle }) => {
     if (lastBand != null) pill = <BandPill band={lastBand} />;
     sub = (
       <span className="text-xs text-slate-500">
-        Đạt <b className="text-[#2B6830]">{done}/{total}</b> bậc nâng band
+        Đạt <b className="text-primary">{done}/{total}</b> bậc nâng band
         {s.student_level ? ` · Trình độ ước lượng ${String(s.student_level)}` : ''}
       </span>
     );
@@ -565,13 +565,13 @@ const HistoryItem = ({ item, open, onToggle }) => {
     if (overall != null) pill = <BandPill band={overall} />;
     sub = (
       <span className="text-xs text-slate-500">
-        <b className="text-[#2B6830]">{passedCount}/{total}</b> cấu phần đạt Band 7
+        <b className="text-primary">{passedCount}/{total}</b> cấu phần đạt Band 7
       </span>
     );
   }
 
   return (
-    <Card padding={false} className={open ? 'ring-1 ring-[#2B6830]/15' : ''}>
+    <Card padding={false} className={open ? 'ring-1 ring-primary/15' : ''}>
       <button
         type="button"
         onClick={onToggle}
@@ -669,7 +669,7 @@ const CoachHistory = () => {
         </div>
         <Link
           to="/student/resources"
-          className="inline-flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-[#2B6830] shadow-sm hover:bg-[#F2F8F4] transition-colors"
+          className="inline-flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-primary shadow-sm hover:bg-primary-subtle transition-colors"
         >
           ← Công cụ
         </Link>
@@ -712,7 +712,7 @@ const CoachHistory = () => {
           action={
             <Link
               to="/student/resources"
-              className="inline-flex items-center gap-2 bg-[#2B6830] text-white rounded-xl px-4 py-2.5 text-sm font-bold shadow-sm hover:bg-[#1E5225] transition-colors"
+              className="inline-flex items-center gap-2 bg-primary text-white rounded-xl px-4 py-2.5 text-sm font-bold shadow-sm hover:bg-primary-hover transition-colors"
             >
               Vào luyện ngay
             </Link>

@@ -21,7 +21,7 @@ export class MapScene extends Phaser.Scene {
 
     this.add.text(SW/2, 172, '🎟️ Lượt vào ải còn hôm nay: ' + EXTERNAL.playsLeft, { fontSize:'14px', color:'#FFD23F', fontStyle:'bold', backgroundColor:'rgba(0,0,0,0.35)', padding:{x:10,y:4} }).setOrigin(0.5).setDepth(60);
 
-    // Lời mở đầu chương theo cấp học (cốt truyện) — nền HỒNG PHẤN, chữ ĐỎ ĐÔ
+    // Lời mở đầu chương theo cấp học (cốt truyện), nền HỒNG PHẤN, chữ ĐỎ ĐÔ
     this.add.text(SW/2, 204, RANK_STORY[prog.rank-1] || '', { fontFamily:'Be Vietnam Pro', fontSize:'12px', color:'#7B1E3B', fontStyle:'italic bold', align:'center', wordWrap:{width:Math.min(820, SW-80)}, backgroundColor:'rgba(252,228,236,0.96)', padding:{x:12, y:6} }).setOrigin(0.5).setDepth(6);
 
     const resetBtn = this.add.text(SW - 18, 30, '🔄 Chơi lại từ đầu', { fontSize:'14px', color:'#ffffff', fontStyle:'bold', backgroundColor:'#C0392B', padding:{x:11,y:7} }).setOrigin(1, 0.5).setDepth(60).setInteractive({useHandCursor:true});

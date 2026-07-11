@@ -5,10 +5,10 @@ import { ref, onValue, push, update, remove } from 'firebase/database';
 import * as XLSX from 'xlsx'; // xuất file Excel tổng kết (FF+)
 
 // ============================================================
-// FRESH FIT — Cổng nhân sự FF / FF+
+// FRESH FIT, Cổng nhân sự FF / FF+
 // Tab 1: Yêu cầu đổi credits (xác nhận = trừ đúng ví: Bonus hoặc Credits +)
-// Tab 2: Quản lý Menu (món + giá + ảnh + mô tả) — 1 credit = 1.000đ
-// Tab 3: Nạp Credits + (chỉ FF+) — học viên nạp tiền mặt quy đổi credits
+// Tab 2: Quản lý Menu (món + giá + ảnh + mô tả), 1 credit = 1.000đ
+// Tab 3: Nạp Credits + (chỉ FF+), học viên nạp tiền mặt quy đổi credits
 // ============================================================
 
 const CATEGORY_META = {
@@ -27,7 +27,7 @@ const STATUS_META = {
 
 
 // ============================================================
-// LỌC THEO KỲ: ngày / tuần (T2–CN) / tháng — neo theo ngày chọn
+// LỌC THEO KỲ: ngày / tuần (T2–CN) / tháng, neo theo ngày chọn
 // ============================================================
 const TIME_LABEL = { all: 'Tất cả', day: 'Ngày', week: 'Tuần', month: 'Tháng' };
 
@@ -78,14 +78,14 @@ const FreshFit = () => {
   const [menuCatFilter, setMenuCatFilter] = useState('all');
   const [menuSearch, setMenuSearch] = useState(''); // tìm kiếm nhanh món trong tab Quản lý Menu
 
-  // Lọc theo kỳ — riêng cho từng tab
+  // Lọc theo kỳ, riêng cho từng tab
   const [orderTime, setOrderTime] = useState('all');       // Yêu cầu đổi
   const [orderAnchor, setOrderAnchor] = useState(todayStr());
   const [topupTime, setTopupTime] = useState('all');       // Lịch sử Credits +
   const [topupAnchor, setTopupAnchor] = useState(todayStr());
   const [processing, setProcessing] = useState(null);
   const [confirmTarget, setConfirmTarget] = useState(null);
-  const [rejectReason, setRejectReason] = useState(''); // lý do từ chối — bắt buộc, học viên sẽ thấy
+  const [rejectReason, setRejectReason] = useState(''); // lý do từ chối, bắt buộc, học viên sẽ thấy
   const [toastMsg, setToastMsg] = useState('');
   const showToast = (msg) => { setToastMsg(msg); setTimeout(() => setToastMsg(''), 4000); };
 
@@ -101,7 +101,7 @@ const FreshFit = () => {
   const [topupNote, setTopupNote] = useState('');
   const [topupConfirming, setTopupConfirming] = useState(false); // bấm lần 2 mới nạp
 
-  // Theo dõi cờ FF / FF+ realtime — admin gán/gỡ có hiệu lực ngay
+  // Theo dõi cờ FF / FF+ realtime, admin gán/gỡ có hiệu lực ngay
   useEffect(() => {
     if (!currentUser?.id) return;
     if (isAdmin) { setFfAccess(true); setFfPlus(true); return; }
@@ -185,7 +185,7 @@ const FreshFit = () => {
           note: `Đổi quà: ${itemsText(r.items)}`,
         };
       } else if (r.userType === 'staff') {
-        // Nhân sự đổi món — trừ ví Credits do BOD grant
+        // Nhân sự đổi món, trừ ví Credits do BOD grant
         const bal = getStaffBalance(r.studentId);
         if (bal < need) {
           showToast(`⚠️ ${r.studentName} chỉ còn ${bal} Credits (cần ${need}). Hãy Từ chối yêu cầu này.`);
@@ -201,7 +201,7 @@ const FreshFit = () => {
           date: timestamp,
         };
       } else {
-        // Trừ ví Credits (từ Bonus) — ghi record bonus ÂM vào sổ điểm
+        // Trừ ví Credits (từ Bonus), ghi record bonus ÂM vào sổ điểm
         const needBonus = need * 2; // 1 credit = 2 bonus
         const balances = getBonusBalances(r.studentId);
         const totalAvail = balances.reduce((a, b) => a + b.bonus, 0);
@@ -253,7 +253,7 @@ const FreshFit = () => {
         rejectedAt: new Date().toISOString(),
         rejectReason: rejectReason.trim(), // học viên thấy lý do này trong lịch sử đổi quà
       });
-      showToast(`Đã từ chối yêu cầu của ${r.studentName} — credits được hoàn lại tự động.`);
+      showToast(`Đã từ chối yêu cầu của ${r.studentName}, credits được hoàn lại tự động.`);
       setRejectReason('');
     } catch (e) {
       showToast('❌ Lỗi: ' + e.message);
@@ -315,7 +315,7 @@ const FreshFit = () => {
     return acc;
   }, { in: 0, out: 0 }), [topupHistory]);
 
-  // --- XUẤT EXCEL (FF+) — 2 nút riêng, nội dung riêng ---
+  // --- XUẤT EXCEL (FF+), 2 nút riêng, nội dung riêng ---
   const periodLabel = (mode, anchor) => mode === 'all' ? 'TatCa' : `${TIME_LABEL[mode]}_${anchor}`;
   const periodNote = (mode, anchor) => `${TIME_LABEL[mode]}${mode !== 'all' ? ' · neo ' + anchor : ''}`;
 
@@ -445,7 +445,7 @@ const FreshFit = () => {
     showToast('Đã xóa món khỏi menu.');
   };
 
-  // FF chỉ thấy & xử lý đơn MÓN ĂN/UỐNG — đơn quà (channel 'gift') do BOD xử lý ở BAVN Center
+  // FF chỉ thấy & xử lý đơn MÓN ĂN/UỐNG, đơn quà (channel 'gift') do BOD xử lý ở BAVN Center
   const ffOrders = redemptions.filter(r => (r.channel || 'ff') !== 'gift');
   const filteredRedemptions = ffOrders
     .filter(r => statusFilter === 'all' || r.status === statusFilter)
@@ -499,13 +499,13 @@ const FreshFit = () => {
                     : <>Xác nhận đổi <b>{itemsText(confirmTarget.r.items)}</b>, sẽ trừ <b className="text-red-600">{confirmTarget.r.totalCredits * 2} điểm Bonus</b> ({confirmTarget.r.totalCredits} credits) của <b>{confirmTarget.r.studentName}</b>?</>)
                 : <>Từ chối yêu cầu của <b>{confirmTarget.r.studentName}</b>? {(confirmTarget.r.wallet || 'bonus') !== 'cash' && 'Credits sẽ được hoàn lại cho học viên.'}</>}
             </p>
-            {/* Lý do từ chối — bắt buộc, hiển thị cho học viên */}
+            {/* Lý do từ chối, bắt buộc, hiển thị cho học viên */}
             {confirmTarget.action === 'reject' && (
               <textarea
                 rows={2}
                 autoFocus
                 className={`w-full border p-3 rounded-xl text-sm outline-none transition resize-none ${rejectReason.trim() ? 'border-slate-200 focus:border-red-400 focus:ring-2 focus:ring-red-100' : 'border-red-300 focus:border-red-400 focus:ring-2 focus:ring-red-100'}`}
-                placeholder="Lý do từ chối (bắt buộc — VD: món đã hết nguyên liệu, hết hàng trong hôm nay...)"
+                placeholder="Lý do từ chối (bắt buộc, VD: món đã hết nguyên liệu, hết hàng trong hôm nay...)"
                 value={rejectReason}
                 maxLength={200}
                 onChange={e => setRejectReason(e.target.value)}
@@ -516,7 +516,7 @@ const FreshFit = () => {
               <button
                 onClick={() => confirmTarget.action === 'confirm' ? handleConfirm(confirmTarget.r) : handleReject(confirmTarget.r)}
                 disabled={processing === confirmTarget.r.id || (confirmTarget.action === 'reject' && !rejectReason.trim())}
-                className={`px-4 py-2 rounded-xl text-sm font-bold text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${confirmTarget.action === 'confirm' ? 'bg-[#2B6830] hover:bg-[#1E5225]' : 'bg-red-500 hover:bg-red-600'}`}
+                className={`px-4 py-2 rounded-xl text-sm font-bold text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${confirmTarget.action === 'confirm' ? 'bg-primary hover:bg-primary-hover' : 'bg-red-500 hover:bg-red-600'}`}
               >
                 {processing === confirmTarget.r.id ? 'Đang xử lý...' : confirmTarget.action === 'confirm' ? 'Xác nhận trừ credits' : 'Từ chối'}
               </button>
@@ -525,41 +525,41 @@ const FreshFit = () => {
         </div>
       )}
 
-      {/* MODAL SỬA MÓN — có link ảnh + mô tả */}
+      {/* MODAL SỬA MÓN, có link ảnh + mô tả */}
       {editItem && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full space-y-3 border border-slate-100 max-h-[90vh] overflow-y-auto">
-            <h3 className="font-bold text-[#2B6830]">Sửa món</h3>
-            <input className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition"
+            <h3 className="font-bold text-primary">Sửa món</h3>
+            <input className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition"
               value={editItem.name} onChange={e => setEditItem({ ...editItem, name: e.target.value })} placeholder="Tên món" />
             <div className="flex gap-2">
-              <select className="flex-1 border border-slate-200 p-3 rounded-xl text-sm outline-none bg-white focus:border-[#2B6830] transition"
+              <select className="flex-1 border border-slate-200 p-3 rounded-xl text-sm outline-none bg-white focus:border-primary transition"
                 value={editItem.category} onChange={e => setEditItem({ ...editItem, category: e.target.value })}>
                 <option value="sothich">🧋 Theo sở thích</option>
                 <option value="thucduong">🌿 Thực dưỡng</option>
               </select>
-              <input type="number" min="1" className="w-24 border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] transition"
+              <input type="number" min="1" className="w-24 border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-primary transition"
                 value={editItem.price} onChange={e => setEditItem({ ...editItem, price: e.target.value })} placeholder="Giá ⭐" />
             </div>
-            <input className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] transition" list="ff-groups"
+            <input className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-primary transition" list="ff-groups"
               value={editItem.group || ''} onChange={e => setEditItem({ ...editItem, group: e.target.value })} placeholder="Nhóm món (VD: Trà sữa, Món chính...)" />
             {/* Thời gian có món (phút), tùy chọn: học viên thấy "Có món sau ~X phút" */}
-            <input type="number" min="1" className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] transition"
+            <input type="number" min="1" className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-primary transition"
               value={editItem.prepMinutes || ''} onChange={e => setEditItem({ ...editItem, prepMinutes: e.target.value })} placeholder="⏱ Thời gian có món (phút, tùy chọn)" />
-            {/* Link ảnh món — học viên thấy ảnh cạnh món trên menu */}
-            <input className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] transition font-mono"
+            {/* Link ảnh món, học viên thấy ảnh cạnh món trên menu */}
+            <input className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-primary transition font-mono"
               value={editItem.imageUrl || ''} onChange={e => setEditItem({ ...editItem, imageUrl: e.target.value })} placeholder="Link ảnh món (https://...)" />
             {editItem.imageUrl?.trim() && (
               <div className="h-44 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-center overflow-hidden">
                 <img src={normalizeImageUrl(editItem.imageUrl)} alt="Xem trước" className="max-w-full max-h-full object-contain" onError={(e) => { e.target.parentElement.style.display = 'none'; }} />
               </div>
             )}
-            {/* Mô tả món — hiện khi học viên bấm vào thẻ món */}
-            <textarea rows={3} className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] transition resize-none"
+            {/* Mô tả món, hiện khi học viên bấm vào thẻ món */}
+            <textarea rows={3} className="w-full border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-primary transition resize-none"
               value={editItem.description || ''} onChange={e => setEditItem({ ...editItem, description: e.target.value })} placeholder="Mô tả món (nguyên liệu, hương vị, calo...)" />
             <div className="flex gap-3 justify-end pt-1">
               <button onClick={() => setEditItem(null)} className="px-4 py-2 rounded-xl text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">Hủy</button>
-              <button onClick={handleSaveEdit} className="px-4 py-2 rounded-xl text-sm font-bold text-white bg-[#2B6830] hover:bg-[#1E5225] transition-colors">Lưu</button>
+              <button onClick={handleSaveEdit} className="px-4 py-2 rounded-xl text-sm font-bold text-white bg-primary hover:bg-primary-hover transition-colors">Lưu</button>
             </div>
           </div>
         </div>
@@ -580,9 +580,9 @@ const FreshFit = () => {
 
       {/* HEADER */}
       <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
-        <div className="p-2 bg-[#E8F4EC] rounded-xl text-[#2B6830] text-xl leading-none">🌿</div>
+        <div className="p-2 bg-primary-light rounded-xl text-primary text-xl leading-none">🌿</div>
         <div>
-          <h2 className="page-title">Fresh Fit — BAVN Credits</h2>
+          <h2 className="page-title">Fresh Fit, BAVN Credits</h2>
           <p className="page-sub">Duyệt yêu cầu đổi credits, quản lý menu{ffPlus && ', nạp Credits +'} · 1 credit = 1.000đ.</p>
         </div>
       </div>
@@ -591,14 +591,14 @@ const FreshFit = () => {
       <div className="flex gap-2 md:gap-3 flex-wrap">
         <button
           onClick={() => setActiveTab('orders')}
-          className={`flex-1 md:flex-none md:px-5 py-3 rounded-xl text-sm font-semibold transition-all border flex items-center justify-center gap-2 ${activeTab === 'orders' ? 'bg-[#2B6830] text-white border-[#2B6830]' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
+          className={`flex-1 md:flex-none md:px-5 py-3 rounded-xl text-sm font-semibold transition-all border flex items-center justify-center gap-2 ${activeTab === 'orders' ? 'bg-primary text-white border-primary' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
         >
           📥 Yêu cầu đổi
           {pendingCount > 0 && <span className="w-5 h-5 bg-amber-400 text-amber-900 text-[10px] font-bold rounded-full flex items-center justify-center">{pendingCount > 9 ? '9+' : pendingCount}</span>}
         </button>
         <button
           onClick={() => setActiveTab('menu')}
-          className={`flex-1 md:flex-none md:px-5 py-3 rounded-xl text-sm font-semibold transition-all border ${activeTab === 'menu' ? 'bg-[#2B6830] text-white border-[#2B6830]' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
+          className={`flex-1 md:flex-none md:px-5 py-3 rounded-xl text-sm font-semibold transition-all border ${activeTab === 'menu' ? 'bg-primary text-white border-primary' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
         >
           🍽️ Quản lý Menu ({menu.length})
         </button>
@@ -617,7 +617,7 @@ const FreshFit = () => {
           <div className="flex gap-1.5 flex-wrap mb-2">
             {['pending', 'confirmed', 'rejected', 'all'].map(st => (
               <button key={st} onClick={() => setStatusFilter(st)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors ${statusFilter === st ? 'bg-[#2B6830] text-white border-[#2B6830]' : 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100'}`}>
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors ${statusFilter === st ? 'bg-primary text-white border-primary' : 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100'}`}>
                 {st === 'all' ? 'Tất cả' : STATUS_META[st].label}
               </button>
             ))}
@@ -637,7 +637,7 @@ const FreshFit = () => {
                 className="px-3 py-1.5 rounded-xl text-xs font-bold border border-slate-200 bg-white text-slate-600 outline-none focus:border-amber-400" />
             )}
             <span className="text-[11px] font-bold text-slate-400 ml-auto">{filteredRedemptions.length} yêu cầu</span>
-            {/* Xuất Excel Yêu cầu đổi theo kỳ của tab này — chỉ FF+ */}
+            {/* Xuất Excel Yêu cầu đổi theo kỳ của tab này, chỉ FF+ */}
             {ffPlus && (
               <button onClick={() => exportOrdersXlsx(orderTime, orderAnchor)}
                 title="Xuất Excel danh sách yêu cầu đổi theo kỳ đang chọn"
@@ -686,7 +686,7 @@ const FreshFit = () => {
                           {users[r.studentId]?.isDemo && <span className="ml-2 text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase bg-amber-100 text-amber-700 border-amber-300">🧪 Demo</span>}
                         </p>
                         <p className="text-xs text-slate-500 mt-0.5">{itemsText(r.items)}</p>
-                        {/* Ghi chú điều chỉnh món của học viên — nổi bật cho quầy dễ thấy */}
+                        {/* Ghi chú điều chỉnh món của học viên, nổi bật cho quầy dễ thấy */}
                         {r.note && (
                           <p className="text-xs font-bold text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5 mt-1.5 inline-block">📝 {r.note}</p>
                         )}
@@ -695,12 +695,12 @@ const FreshFit = () => {
                       <div className="flex flex-col items-end gap-1 shrink-0">
                         <div className="flex items-center gap-1.5">
                           {/* Đơn tiền mặt: badge amber nổi bật để quầy nhớ THU TIỀN khi giao */}
-                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase ${wallet === 'cash' ? 'bg-amber-400 text-amber-900 border-amber-500' : wallet === 'plus' ? 'bg-sky-50 text-sky-700 border-sky-200' : 'bg-[#E8F4EC] text-[#2B6830] border-green-200'}`}>
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase ${wallet === 'cash' ? 'bg-amber-400 text-amber-900 border-amber-500' : wallet === 'plus' ? 'bg-sky-50 text-sky-700 border-sky-200' : 'bg-primary-light text-primary border-green-200'}`}>
                             {wallet === 'cash' ? '💵 TIỀN MẶT' : wallet === 'plus' ? '💳 Credits +' : '⭐ Credits'}
                           </span>
                           <span className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase ${meta.cls}`}>{meta.label}</span>
                         </div>
-                        <span className={`text-base font-extrabold ${wallet === 'cash' ? 'text-amber-700' : 'text-[#2B6830]'}`}>
+                        <span className={`text-base font-extrabold ${wallet === 'cash' ? 'text-amber-700' : 'text-primary'}`}>
                           {wallet === 'cash'
                             ? <>{((Number(r.totalCredits) || 0) * 1000).toLocaleString('vi-VN')}đ <span className="text-[10px] text-amber-600 font-bold">thu tại quầy</span></>
                             : <>{r.totalCredits} ⭐ {wallet !== 'plus' && <span className="text-[10px] text-slate-400 font-bold">= {r.totalCredits * 2} Bonus</span>}</>}
@@ -711,13 +711,13 @@ const FreshFit = () => {
                     {r.status === 'pending' && (
                       <div className="flex items-center justify-between gap-3 pt-2.5 border-t border-slate-100 flex-wrap">
                         <p className={`text-[11px] font-bold ${enough ? 'text-slate-500' : 'text-red-600'}`}>
-                          {availText}{!enough && ' — KHÔNG ĐỦ'}
+                          {availText}{!enough && ', KHÔNG ĐỦ'}
                         </p>
                         <div className="flex gap-2">
                           <button onClick={() => { setRejectReason(''); setConfirmTarget({ r, action: 'reject' }); }}
                             className="px-4 py-2 rounded-xl text-xs font-bold text-red-600 bg-red-50 border border-red-100 hover:bg-red-100 transition-colors">Từ chối</button>
                           <button onClick={() => setConfirmTarget({ r, action: 'confirm' })} disabled={!enough}
-                            className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-[#2B6830] hover:bg-[#1E5225] transition-colors disabled:opacity-40 disabled:cursor-not-allowed">Xác nhận & trừ credits</button>
+                            className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-primary hover:bg-primary-hover transition-colors disabled:opacity-40 disabled:cursor-not-allowed">Xác nhận & trừ credits</button>
                         </div>
                       </div>
                     )}
@@ -762,7 +762,7 @@ const FreshFit = () => {
                       <div>
                         <p className="text-sm font-bold text-slate-700">
                           {u.name}{u.id === currentUser.id && <span className="text-sky-600"> (chính mình)</span>}
-                          <span className={`ml-2 text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase ${u.role === 'staff' ? 'bg-purple-50 text-purple-700 border-purple-200' : 'bg-[#E8F4EC] text-[#2B6830] border-green-200'}`}>
+                          <span className={`ml-2 text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase ${u.role === 'staff' ? 'bg-purple-50 text-purple-700 border-purple-200' : 'bg-primary-light text-primary border-green-200'}`}>
                             {u.role === 'staff' ? 'Nhân sự' : 'Học viên'}
                           </span>
                         </p>
@@ -800,7 +800,7 @@ const FreshFit = () => {
                 </div>
                 <input
                   className="flex-1 p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-sky-500 transition"
-                  placeholder="Ghi chú (tùy chọn — VD: nạp 50k ngày 7/6)"
+                  placeholder="Ghi chú (tùy chọn, VD: nạp 50k ngày 7/6)"
                   value={topupNote}
                   onChange={e => setTopupNote(e.target.value)}
                 />
@@ -822,7 +822,7 @@ const FreshFit = () => {
                       .sort((a, b) => new Date(b.date) - new Date(a.date))
                       .map(h => (
                         <div key={h.id} className="flex items-center justify-between p-2.5 bg-slate-50 rounded-lg border border-slate-100 text-xs">
-                          <span className="text-slate-600 truncate mr-2">{h.note || '—'} <span className="text-slate-400">· {h.by}</span></span>
+                          <span className="text-slate-600 truncate mr-2">{h.note || '–'} <span className="text-slate-400">· {h.by}</span></span>
                           <span className="flex items-center gap-2 shrink-0">
                             <span className="text-slate-400 font-mono">{new Date(h.date).toLocaleDateString('vi-VN')}</span>
                             <b className={h.amount >= 0 ? 'text-sky-700' : 'text-red-500'}>{h.amount >= 0 ? '+' : ''}{h.amount}</b>
@@ -835,10 +835,10 @@ const FreshFit = () => {
             </div>
           )}
 
-          {/* LỊCH SỬ CREDITS + TOÀN HỆ THỐNG — luôn hiển thị, lọc theo kỳ + xuất Excel */}
+          {/* LỊCH SỬ CREDITS + TOÀN HỆ THỐNG, luôn hiển thị, lọc theo kỳ + xuất Excel */}
           <div className="pt-4 border-t border-slate-100">
             <div className="flex items-center justify-between gap-2 flex-wrap mb-2">
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wide">📜 Lịch sử Credits + {topupTime === 'all' ? 'gần đây' : `(${TIME_LABEL[topupTime].toLowerCase()})`} — toàn hệ thống</p>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wide">📜 Lịch sử Credits + {topupTime === 'all' ? 'gần đây' : `(${TIME_LABEL[topupTime].toLowerCase()})`}, toàn hệ thống</p>
               <button onClick={() => exportTopupXlsx(topupTime, topupAnchor)}
                 title="Xuất Excel lịch sử nạp/trừ Credits + theo kỳ đang chọn"
                 className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-sky-600 hover:bg-sky-700 transition-colors">
@@ -871,7 +871,7 @@ const FreshFit = () => {
                   <div key={h.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100 text-xs">
                     <div className="min-w-0 mr-2">
                       <p className="font-bold text-slate-700 truncate">{h.studentName}</p>
-                      <p className="text-slate-500 truncate">{h.note || '—'} <span className="text-slate-400">· bởi {h.by}</span></p>
+                      <p className="text-slate-500 truncate">{h.note || '–'} <span className="text-slate-400">· bởi {h.by}</span></p>
                     </div>
                     <div className="flex flex-col items-end shrink-0">
                       <b className={`text-sm ${h.amount >= 0 ? 'text-sky-700' : 'text-red-500'}`}>{h.amount >= 0 ? '+' : ''}{h.amount} ⭐</b>
@@ -888,7 +888,7 @@ const FreshFit = () => {
           {/* FORM THÊM MÓN + NHẬP MENU CÓ SẴN */}
           <div className="card-std p-5">
             <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
-              <h3 className="text-sm font-bold text-[#2B6830] uppercase tracking-wide">Thêm món mới</h3>
+              <h3 className="text-sm font-bold text-primary uppercase tracking-wide">Thêm món mới</h3>
             </div>
             {/* Gợi ý nhóm món cho ô nhập */}
             <datalist id="ff-groups">
@@ -898,19 +898,19 @@ const FreshFit = () => {
               <option value="Healthy Drinks" />
             </datalist>
             <form onSubmit={handleAddMenuItem} className="flex flex-col md:flex-row gap-2">
-              <input className="flex-1 border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] focus:ring-2 focus:ring-[#2B6830]/10 transition"
+              <input className="flex-1 border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition"
                 placeholder="Tên món (VD: Nước ép cam)" value={menuForm.name} onChange={e => setMenuForm({ ...menuForm, name: e.target.value })} />
-              <select className="border border-slate-200 p-3 rounded-xl text-sm outline-none bg-white focus:border-[#2B6830] transition"
+              <select className="border border-slate-200 p-3 rounded-xl text-sm outline-none bg-white focus:border-primary transition"
                 value={menuForm.category} onChange={e => setMenuForm({ ...menuForm, category: e.target.value })}>
                 <option value="sothich">🧋 Theo sở thích</option>
                 <option value="thucduong">🌿 Thực dưỡng</option>
               </select>
-              <input className="w-full md:w-40 border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] transition" list="ff-groups"
+              <input className="w-full md:w-40 border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-primary transition" list="ff-groups"
                 placeholder="Nhóm món" value={menuForm.group} onChange={e => setMenuForm({ ...menuForm, group: e.target.value })} />
-              <input type="number" min="1" className="w-full md:w-28 border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] transition"
+              <input type="number" min="1" className="w-full md:w-28 border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-primary transition"
                 placeholder="Giá (⭐)" value={menuForm.price} onChange={e => setMenuForm({ ...menuForm, price: e.target.value })} />
               {/* Thời gian có món (phút), tùy chọn */}
-              <input type="number" min="1" className="w-full md:w-28 border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-[#2B6830] transition"
+              <input type="number" min="1" className="w-full md:w-28 border border-slate-200 p-3 rounded-xl text-sm outline-none focus:border-primary transition"
                 placeholder="⏱ Phút" title="Thời gian có món (phút), tùy chọn" value={menuForm.prepMinutes} onChange={e => setMenuForm({ ...menuForm, prepMinutes: e.target.value })} />
               <button type="submit" className="btn-primary">+ Thêm</button>
             </form>
@@ -920,19 +920,19 @@ const FreshFit = () => {
           {/* DANH SÁCH MÓN */}
           <div className="card-std p-5">
             <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
-              <h3 className="text-sm font-bold text-[#2B6830] uppercase tracking-wide">Menu hiện tại ({filteredMenu.length})</h3>
+              <h3 className="text-sm font-bold text-primary uppercase tracking-wide">Menu hiện tại ({filteredMenu.length})</h3>
               <div className="flex gap-1.5 flex-wrap">
-                {/* Quà tặng đã tách sang BAVN Center (BOD quản lý) — FF chỉ quản món ăn/uống */}
+                {/* Quà tặng đã tách sang BAVN Center (BOD quản lý), FF chỉ quản món ăn/uống */}
                 {['all', 'sothich', 'thucduong'].map(cat => (
                   <button key={cat} onClick={() => setMenuCatFilter(cat)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors ${menuCatFilter === cat ? 'bg-[#2B6830] text-white border-[#2B6830]' : 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100'}`}>
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors ${menuCatFilter === cat ? 'bg-primary text-white border-primary' : 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100'}`}>
                     {cat === 'all' ? 'Tất cả' : `${CATEGORY_META[cat].icon} ${CATEGORY_META[cat].label}`}
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Ô TÌM KIẾM NHANH MÓN — theo tên hoặc nhóm món */}
+            {/* Ô TÌM KIẾM NHANH MÓN, theo tên hoặc nhóm món */}
             <div className="relative mb-4">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-slate-400"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
@@ -952,12 +952,12 @@ const FreshFit = () => {
             </div>
 
             {filteredMenu.length === 0 ? (
-              <p className="text-xs text-slate-400 italic text-center py-6 bg-slate-50 rounded-xl border border-dashed border-slate-200">Chưa có món nào — thêm món mới hoặc bấm "Nhập menu Fresh Fit có sẵn".</p>
+              <p className="text-xs text-slate-400 italic text-center py-6 bg-slate-50 rounded-xl border border-dashed border-slate-200">Chưa có món nào, thêm món mới hoặc bấm "Nhập menu Fresh Fit có sẵn".</p>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {filteredMenu.map(item => (
                   <div key={item.id} className={`group rounded-xl border overflow-hidden flex flex-col transition-all duration-200 hover:-translate-y-1.5 hover:shadow-xl ${item.available === false ? 'border-slate-200 bg-slate-50 opacity-60' : 'border-slate-200 bg-white hover:border-green-300'}`}>
-                    {/* Ảnh món lớn phía trên — hover phóng to để kiểm tra rõ món */}
+                    {/* Ảnh món lớn phía trên, hover phóng to để kiểm tra rõ món */}
                     {item.imageUrl && (
                       <div className="h-40 overflow-hidden bg-slate-50 flex items-center justify-center">
                         <img
@@ -971,7 +971,7 @@ const FreshFit = () => {
                     <div className="p-4 flex flex-col gap-2 flex-1">
                       <div className="flex items-start gap-3">
                         <div className="min-w-0 flex-1">
-                          <p className="font-bold text-slate-800 text-sm leading-snug group-hover:text-[#2B6830] transition-colors">{CATEGORY_META[item.category]?.icon || '🛍️'} {item.name}</p>
+                          <p className="font-bold text-slate-800 text-sm leading-snug group-hover:text-primary transition-colors">{CATEGORY_META[item.category]?.icon || '🛍️'} {item.name}</p>
                           <p className="text-[10px] font-bold text-slate-400 uppercase mt-0.5">
                             {CATEGORY_META[item.category]?.label || 'Khác'}{item.group && ` · ${item.group}`}{item.available === false && ' · ĐANG ẨN'}
                           </p>
@@ -980,7 +980,7 @@ const FreshFit = () => {
                             <p className="text-[10px] font-bold text-amber-600 mt-0.5">⏱ Có món sau ~{item.prepMinutes} phút</p>
                           )}
                         </div>
-                        <span className="shrink-0 text-sm font-extrabold text-[#2B6830] bg-[#E8F4EC] px-2.5 py-1 rounded-lg border border-green-100">{item.price} ⭐</span>
+                        <span className="shrink-0 text-sm font-extrabold text-primary bg-primary-light px-2.5 py-1 rounded-lg border border-green-100">{item.price} ⭐</span>
                       </div>
                       <div className="flex gap-2 pt-1 mt-auto">
                         <button onClick={() => toggleAvailable(item)}
@@ -988,7 +988,7 @@ const FreshFit = () => {
                           {item.available === false ? 'Hiện lại' : 'Tạm ẩn'}
                         </button>
                         <button onClick={() => setEditItem({ ...item })}
-                          className="flex-1 py-1.5 rounded-lg text-[11px] font-bold text-[#2B6830] bg-[#E8F4EC] border border-green-100 hover:bg-green-100 transition-colors">Sửa</button>
+                          className="flex-1 py-1.5 rounded-lg text-[11px] font-bold text-primary bg-primary-light border border-green-100 hover:bg-green-100 transition-colors">Sửa</button>
                         <button onClick={() => setDeleteItem(item)}
                           className="flex-1 py-1.5 rounded-lg text-[11px] font-bold text-red-600 bg-red-50 border border-red-100 hover:bg-red-100 transition-colors">Xóa</button>
                       </div>

@@ -9,9 +9,9 @@ import {
 } from '../../data/skins';
 
 // ============================================================
-// CỬA HÀNG SKIN — Học viên CHỦ ĐỘNG dùng Credits đổi skin + nhận skin theo MỐC.
+// CỬA HÀNG SKIN, Học viên CHỦ ĐỘNG dùng Credits đổi skin + nhận skin theo MỐC.
 // Catalog đọc từ DB `skins/` (Admin quản lý); DB trống → dùng bộ mặc định.
-// - Skin 'purchase': trừ thẳng Bonus (ghi record âm vào scores) — 1 nguồn chân lý.
+// - Skin 'purchase': trừ thẳng Bonus (ghi record âm vào scores), 1 nguồn chân lý.
 // - Skin 'milestone': MIỄN PHÍ khi Bonus TÍCH LŨY (tổng điểm dương kiếm được) ≥ mốc.
 // DB: studentSkins/{sid}/owned/{skinId}, /equipped, /purchases
 // ============================================================
@@ -29,7 +29,7 @@ const StudentSkins = () => {
   const [owned, setOwned] = useState({});
   const [equipped, setEquipped] = useState(DEFAULT_SKIN_ID);
   const [purchases, setPurchases] = useState([]);
-  const [staffBonusRecs, setStaffBonusRecs] = useState({}); // bonus nội bộ nhân sự (MOD thưởng) — nguồn mua skin của staff
+  const [staffBonusRecs, setStaffBonusRecs] = useState({}); // bonus nội bộ nhân sự (MOD thưởng), nguồn mua skin của staff
   const [loading, setLoading] = useState(true);
 
   const [busy, setBusy] = useState(false);
@@ -57,7 +57,7 @@ const StudentSkins = () => {
       const p = data.purchases || {};
       setPurchases(Object.values(p).sort((a, b) => new Date(b.date) - new Date(a.date)));
     });
-    // Bonus nội bộ nhân sự (do MOD thưởng) — staff dùng để đổi skin
+    // Bonus nội bộ nhân sự (do MOD thưởng), staff dùng để đổi skin
     const unsubSB = onValue(ref(db, `staffBonus/${currentUser.id}`), (snap) => setStaffBonusRecs(snap.val() || {}));
     return () => { unsubClasses(); unsubScores(); unsubRedeem(); unsubSkinsDb(); unsubMine(); unsubSB(); };
   }, [currentUser?.id]);
@@ -132,7 +132,7 @@ const StudentSkins = () => {
         skinId: skin.id, name: skin.name, credits: 0, kind: 'milestone', date: new Date().toISOString(),
       };
       await update(ref(db), updates);
-      showToast(`🎉 Mở khóa "${skin.name}" — phần thưởng cho sự kiên trì!`);
+      showToast(`🎉 Mở khóa "${skin.name}", phần thưởng cho sự kiên trì!`);
     } catch (e) { showToast('❌ Lỗi: ' + e.message); }
     finally { setBusy(false); }
   };
@@ -222,7 +222,7 @@ const StudentSkins = () => {
       )}
 
       {/* ===== HERO ===== */}
-      <div className="bg-gradient-to-r from-[#2B6830] to-[#3D8B47] rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
+      <div className="bg-gradient-to-r from-primary to-primary-medium rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
         <div className="relative z-10 flex items-center gap-5 flex-wrap">
           <StudentAvatar skin={resolve(equipped)} name={currentUser?.name} size={80} />
           <div className="min-w-0">
@@ -230,21 +230,21 @@ const StudentSkins = () => {
             <p className="text-2xl font-extrabold leading-tight truncate">{currentUser?.name}</p>
             <div className="flex items-end gap-2 mt-2">
               {isStaff
-                ? <><span className="text-3xl font-extrabold leading-none">{loading ? '—' : staffBonusBalance}</span>
+                ? <><span className="text-3xl font-extrabold leading-none">{loading ? '–' : staffBonusBalance}</span>
                   <span className="text-green-200 font-bold mb-0.5 text-sm">Bonus nhân sự</span></>
-                : <><span className="text-3xl font-extrabold leading-none">{loading ? '—' : availableCredits}</span>
+                : <><span className="text-3xl font-extrabold leading-none">{loading ? '–' : availableCredits}</span>
                   <span className="text-green-200 font-bold mb-0.5 text-sm">credits khả dụng</span></>}
             </div>
           </div>
         </div>
-        <p className="text-green-200/80 text-[11px] mt-4 relative z-10">{isStaff ? '💡 Bonus do cấp quản lý (MOD) thưởng — dùng để đổi skin & làm cơ sở xét thưởng quý/năm. Chơi game không giới hạn lượt.' : '💡 Mỗi 2 Bonus = 1 Credit. Đổi skin bằng Credit, hoặc nhận miễn phí khi đạt mốc học tập. Không hộp ngẫu nhiên.'}</p>
+        <p className="text-green-200/80 text-[11px] mt-4 relative z-10">{isStaff ? '💡 Bonus do cấp quản lý (MOD) thưởng, dùng để đổi skin & làm cơ sở xét thưởng quý/năm. Chơi game không giới hạn lượt.' : '💡 Mỗi 2 Bonus = 1 Credit. Đổi skin bằng Credit, hoặc nhận miễn phí khi đạt mốc học tập. Không hộp ngẫu nhiên.'}</p>
         <div className="absolute right-0 top-0 w-40 h-40 bg-white/10 rounded-full -mr-16 -mt-16 blur-3xl" />
       </div>
 
       {/* ===== GAME HÀNH TRÌNH TRƯỞNG THÀNH (khu thi đua) ===== */}
       <button
         onClick={() => navigate(`${base}/games/hanh-trinh`)}
-        className="w-full text-left bg-gradient-to-r from-[#1E5225] to-[#2B6830] rounded-2xl p-5 text-white shadow-lg relative overflow-hidden hover:brightness-110 transition"
+        className="w-full text-left bg-gradient-to-r from-primary-hover to-primary rounded-2xl p-5 text-white shadow-lg relative overflow-hidden hover:brightness-110 transition"
       >
         <div className="relative z-10 flex items-center gap-4">
           <div className="text-4xl">🎮</div>
@@ -268,16 +268,16 @@ const StudentSkins = () => {
 
       {/* ===== BỘ SƯU TẬP ===== */}
       <div className="card-std p-5">
-        <h3 className="text-sm font-bold text-[#2B6830] mb-3 uppercase tracking-wide">🎒 Bộ sưu tập của tôi ({ownedSkins.length})</h3>
+        <h3 className="text-sm font-bold text-primary mb-3 uppercase tracking-wide">🎒 Bộ sưu tập của tôi ({ownedSkins.length})</h3>
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
           {ownedSkins.map(skin => {
             const active = equipped === skin.id;
             return (
               <button key={skin.id} onClick={() => equipSkin(skin.id)}
-                className={`flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all ${active ? 'border-[#2B6830] bg-[#E8F4EC]/50 ring-2 ring-[#2B6830]/15' : 'border-slate-100 hover:border-green-300 bg-white'}`}>
+                className={`flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all ${active ? 'border-primary bg-primary-light/50 ring-2 ring-primary/15' : 'border-slate-100 hover:border-green-300 bg-white'}`}>
                 <StudentAvatar skin={skin} size={48} />
                 <span className="text-[11px] font-bold text-slate-600 truncate w-full text-center">{skin.name}</span>
-                {active ? <span className="text-[9px] font-bold text-[#2B6830] uppercase">Đang dùng</span>
+                {active ? <span className="text-[9px] font-bold text-primary uppercase">Đang dùng</span>
                         : <span className="text-[9px] font-bold text-slate-400 uppercase">Trang bị</span>}
               </button>
             );
@@ -285,12 +285,12 @@ const StudentSkins = () => {
         </div>
       </div>
 
-      {/* ===== CỬA HÀNG SKIN NHÂN SỰ — đổi bằng Bonus nhân sự (MOD thưởng) ===== */}
+      {/* ===== CỬA HÀNG SKIN NHÂN SỰ, đổi bằng Bonus nhân sự (MOD thưởng) ===== */}
       {isStaff && (
       <div className="card-std p-5">
         <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
-          <h3 className="text-sm font-bold text-[#2B6830] uppercase tracking-wide">🛍️ Cửa hàng Skin (nhân sự)</h3>
-          <span className="text-xs font-bold text-slate-500">Bonus: <span className="text-[#2B6830]">{staffBonusBalance}</span></span>
+          <h3 className="text-sm font-bold text-primary uppercase tracking-wide">🛍️ Cửa hàng Skin (nhân sự)</h3>
+          <span className="text-xs font-bold text-slate-500">Bonus: <span className="text-primary">{staffBonusBalance}</span></span>
         </div>
         <p className="text-xs text-slate-400 mb-4">Skin do Admin cấp cho nhân sự. Đổi bằng Bonus được cấp quản lý (MOD) thưởng.</p>
         {staffShopSkins.length === 0 ? (
@@ -304,16 +304,16 @@ const StudentSkins = () => {
               const affordable = (Number(skin.cost) || 0) <= staffBonusBalance;
               const confirming = confirmSkin === skin.id;
               return (
-                <div key={skin.id} className={`rounded-xl border overflow-hidden flex flex-col items-center text-center p-4 gap-2 transition-all ${ownedThis ? 'border-green-200 bg-[#E8F4EC]/30' : 'border-slate-200 bg-white hover:border-green-300'}`}>
+                <div key={skin.id} className={`rounded-xl border overflow-hidden flex flex-col items-center text-center p-4 gap-2 transition-all ${ownedThis ? 'border-green-200 bg-primary-light/30' : 'border-slate-200 bg-white hover:border-green-300'}`}>
                   <StudentAvatar skin={skin} size={64} />
                   <p className="font-bold text-slate-800 text-sm leading-snug">{skin.name}</p>
                   <span className={`text-[9px] font-bold px-2 py-0.5 rounded border uppercase ${meta.cls}`}>{meta.label}</span>
                   {ownedThis ? (
-                    active ? <span className="mt-1 w-full py-2 rounded-xl text-xs font-bold text-[#2B6830] bg-[#E8F4EC] border border-green-200">✓ Đang trang bị</span>
-                           : <button onClick={() => equipSkin(skin.id)} className="mt-1 w-full py-2 rounded-xl text-xs font-bold text-white bg-[#2B6830] hover:bg-[#1E5225] transition-colors">Trang bị</button>
+                    active ? <span className="mt-1 w-full py-2 rounded-xl text-xs font-bold text-primary bg-primary-light border border-green-200">✓ Đang trang bị</span>
+                           : <button onClick={() => equipSkin(skin.id)} className="mt-1 w-full py-2 rounded-xl text-xs font-bold text-white bg-primary hover:bg-primary-hover transition-colors">Trang bị</button>
                   ) : (
                     <button onClick={() => buyStaffSkin(skin)} disabled={busy || !affordable}
-                      className={`mt-1 w-full py-2 rounded-xl text-xs font-bold text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${confirming ? 'bg-amber-500 hover:bg-amber-600' : 'bg-[#2B6830] hover:bg-[#1E5225]'}`}>
+                      className={`mt-1 w-full py-2 rounded-xl text-xs font-bold text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${confirming ? 'bg-amber-500 hover:bg-amber-600' : 'bg-primary hover:bg-primary-hover'}`}>
                       {confirming ? `Bấm lần nữa (−${skin.cost})` : affordable ? `Đổi · ${skin.cost} Bonus` : `Cần ${skin.cost} Bonus`}
                     </button>
                   )}
@@ -325,14 +325,14 @@ const StudentSkins = () => {
       </div>
       )}
 
-      {/* ===== SKIN MỐC HỌC TẬP (chỉ học viên — nhân sự không có kinh tế Bonus) ===== */}
+      {/* ===== SKIN MỐC HỌC TẬP (chỉ học viên, nhân sự không có kinh tế Bonus) ===== */}
       {!isStaff && milestoneSkins.length > 0 && (
         <div className="card-std p-5">
           <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
             <h3 className="text-sm font-bold text-emerald-700 uppercase tracking-wide">🎯 Mở khóa theo nỗ lực</h3>
             <span className="text-xs font-bold text-slate-500">Bonus tích lũy: <span className="text-emerald-700">{lifetimeBonus}</span></span>
           </div>
-          <p className="text-xs text-slate-400 mb-4">Học đều, kiếm Bonus — đạt mốc là skin tự mở, miễn phí. Không tốn Credit.</p>
+          <p className="text-xs text-slate-400 mb-4">Học đều, kiếm Bonus, đạt mốc là skin tự mở, miễn phí. Không tốn Credit.</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
             {milestoneSkins.map(skin => {
               const ownedThis = isOwned(skin.id);
@@ -368,10 +368,10 @@ const StudentSkins = () => {
         </div>
       )}
 
-      {/* ===== CỬA HÀNG (mua bằng Credit) — chỉ học viên ===== */}
+      {/* ===== CỬA HÀNG (mua bằng Credit), chỉ học viên ===== */}
       {!isStaff && (
       <div className="card-std p-5">
-        <h3 className="text-sm font-bold text-[#2B6830] mb-4 uppercase tracking-wide">🛍️ Cửa hàng Skin</h3>
+        <h3 className="text-sm font-bold text-primary mb-4 uppercase tracking-wide">🛍️ Cửa hàng Skin</h3>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
           {purchaseSkins.map(skin => {
             const ownedThis = isOwned(skin.id);
@@ -380,16 +380,16 @@ const StudentSkins = () => {
             const affordable = skin.cost <= availableCredits;
             const confirming = confirmSkin === skin.id;
             return (
-              <div key={skin.id} className={`rounded-xl border overflow-hidden flex flex-col items-center text-center p-4 gap-2 transition-all ${ownedThis ? 'border-green-200 bg-[#E8F4EC]/30' : 'border-slate-200 bg-white hover:border-green-300 hover:-translate-y-1 hover:shadow-md'}`}>
+              <div key={skin.id} className={`rounded-xl border overflow-hidden flex flex-col items-center text-center p-4 gap-2 transition-all ${ownedThis ? 'border-green-200 bg-primary-light/30' : 'border-slate-200 bg-white hover:border-green-300 hover:-translate-y-1 hover:shadow-md'}`}>
                 <StudentAvatar skin={skin} size={64} />
                 <p className="font-bold text-slate-800 text-sm leading-snug">{skin.name}</p>
                 <span className={`text-[9px] font-bold px-2 py-0.5 rounded border uppercase ${meta.cls}`}>{meta.label}</span>
                 {ownedThis ? (
-                  active ? <span className="mt-1 w-full py-2 rounded-xl text-xs font-bold text-[#2B6830] bg-[#E8F4EC] border border-green-200">✓ Đang trang bị</span>
-                         : <button onClick={() => equipSkin(skin.id)} className="mt-1 w-full py-2 rounded-xl text-xs font-bold text-white bg-[#2B6830] hover:bg-[#1E5225] transition-colors">Trang bị</button>
+                  active ? <span className="mt-1 w-full py-2 rounded-xl text-xs font-bold text-primary bg-primary-light border border-green-200">✓ Đang trang bị</span>
+                         : <button onClick={() => equipSkin(skin.id)} className="mt-1 w-full py-2 rounded-xl text-xs font-bold text-white bg-primary hover:bg-primary-hover transition-colors">Trang bị</button>
                 ) : (
                   <button onClick={() => buySkin(skin)} disabled={busy || !affordable}
-                    className={`mt-1 w-full py-2 rounded-xl text-xs font-bold text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${confirming ? 'bg-amber-500 hover:bg-amber-600' : 'bg-[#2B6830] hover:bg-[#1E5225]'}`}>
+                    className={`mt-1 w-full py-2 rounded-xl text-xs font-bold text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${confirming ? 'bg-amber-500 hover:bg-amber-600' : 'bg-primary hover:bg-primary-hover'}`}>
                     {confirming ? `Bấm lần nữa (−${skin.cost} ⭐)` : affordable ? `Đổi · ${skin.cost} ⭐` : `Cần ${skin.cost} ⭐`}
                   </button>
                 )}
@@ -402,7 +402,7 @@ const StudentSkins = () => {
 
       {/* ===== LỊCH SỬ đổi skin ===== */}
       <div className="card-std p-5">
-        <h3 className="text-sm font-bold text-[#2B6830] mb-3 uppercase tracking-wide">Lịch sử nhận skin</h3>
+        <h3 className="text-sm font-bold text-primary mb-3 uppercase tracking-wide">Lịch sử nhận skin</h3>
         {purchases.length === 0 ? (
           <p className="text-xs text-slate-400 italic">{isStaff ? 'Chưa đổi skin nào. Tích Bonus do MOD thưởng để đổi nhé!' : 'Chưa nhận skin nào. Học chăm để gom Credit và đạt mốc nhé!'}</p>
         ) : (
@@ -418,7 +418,7 @@ const StudentSkins = () => {
                 </div>
                 {p.kind === 'milestone' || p.credits === 0
                   ? <span className="text-xs font-extrabold text-emerald-600 shrink-0">🎯 Mốc học tập</span>
-                  : <span className="text-sm font-extrabold text-[#2B6830] shrink-0">−{p.credits} ⭐</span>}
+                  : <span className="text-sm font-extrabold text-primary shrink-0">−{p.credits} ⭐</span>}
               </div>
             ))}
           </div>

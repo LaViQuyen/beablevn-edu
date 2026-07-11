@@ -70,7 +70,7 @@ const isFs = () => !!(document.fullscreenElement || document.webkitFullscreenEle
 
 /* ---------- UI phụ ---------- */
 const Spin = () => (
-  <span className="inline-block w-4 h-4 border-[3px] border-[#3D8B47] border-t-transparent rounded-full animate-spin shrink-0" />
+  <span className="inline-block w-4 h-4 border-[3px] border-primary-medium border-t-transparent rounded-full animate-spin shrink-0" />
 );
 const Loading = ({ text }) => (
   <span className="inline-flex items-center gap-2 text-slate-500 text-sm">
@@ -80,9 +80,9 @@ const Loading = ({ text }) => (
 );
 
 const CALLOUT_TONES = {
-  green: 'bg-[#E8F4EC] border-[#2B6830]',
+  green: 'bg-primary-light border-primary',
   warn: 'bg-[#FCEEE8] border-[#C0392B]',
-  gold: 'bg-[#F2F8F4] border-[#B8860B]',
+  gold: 'bg-primary-subtle border-[#B8860B]',
 };
 const Callout = ({ tone = 'green', className = '', children }) => (
   <div className={`border-l-4 rounded-lg px-4 py-3 text-[14.5px] leading-relaxed ${CALLOUT_TONES[tone] || CALLOUT_TONES.green} ${className}`}>
@@ -91,11 +91,11 @@ const Callout = ({ tone = 'green', className = '', children }) => (
 );
 
 const FieldLabel = ({ children, className = '' }) => (
-  <label className={`block text-[13px] font-semibold text-[#1E5225] mb-1.5 ${className}`}>{children}</label>
+  <label className={`block text-[13px] font-semibold text-primary-hover mb-1.5 ${className}`}>{children}</label>
 );
 
 const BandPill = ({ children, gold = false }) => (
-  <span className={`inline-block text-[13px] font-bold text-white px-3 py-1 rounded-full whitespace-nowrap ${gold ? 'bg-[#B8860B]' : 'bg-[#2B6830]'}`}>
+  <span className={`inline-block text-[13px] font-bold text-white px-3 py-1 rounded-full whitespace-nowrap ${gold ? 'bg-[#B8860B]' : 'bg-primary'}`}>
     {children}
   </span>
 );
@@ -543,7 +543,7 @@ const WritingCoach = () => {
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <Link
           to="/student/resources"
-          className="inline-flex items-center gap-1.5 bg-[#E8F4EC] border-[1.5px] border-[#C9E2CF] text-[#2B6830] rounded-xl px-3.5 py-2 text-sm font-bold hover:bg-[#dceee2] transition-colors"
+          className="inline-flex items-center gap-1.5 bg-primary-light border-[1.5px] border-[#C9E2CF] text-primary rounded-xl px-3.5 py-2 text-sm font-bold hover:bg-[#dceee2] transition-colors"
         >
           ← Công cụ
         </Link>
@@ -551,7 +551,7 @@ const WritingCoach = () => {
 
       {/* Hero */}
       <div className="text-center mt-4 mb-1 px-2">
-        <h1 className="text-[22px] md:text-[25px] font-extrabold text-[#2B6830] uppercase tracking-wide">
+        <h1 className="text-[22px] md:text-[25px] font-extrabold text-primary uppercase tracking-wide">
           Writing Coach
         </h1>
         <p className="text-sm text-slate-500 mt-2 leading-relaxed">
@@ -565,7 +565,7 @@ const WritingCoach = () => {
           <div
             key={i}
             className={`flex-1 h-1.5 rounded-full transition-colors ${
-              i < stepCur ? 'bg-[#2B6830]' : i === stepCur ? 'bg-[#B8860B]' : 'bg-[#C9E2CF]'
+              i < stepCur ? 'bg-primary' : i === stepCur ? 'bg-[#B8860B]' : 'bg-[#C9E2CF]'
             }`}
           />
         ))}
@@ -574,7 +574,7 @@ const WritingCoach = () => {
       {/* ============ BƯỚC 1: CHỌN CHỦ ĐỀ ============ */}
       {screen === 'topic' && (
         <Card className="mb-4">
-          <h2 className="text-lg font-bold text-[#1E5225]">Bước 1 · Bắt đầu</h2>
+          <h2 className="text-lg font-bold text-primary-hover">Bước 1 · Bắt đầu</h2>
           <p className="text-[13.5px] text-slate-500 leading-relaxed mt-2">
             Chọn một chủ đề thường gặp trong IELTS Writing Task 2, hoặc tự nhập chủ đề / câu hỏi đề bài.
           </p>
@@ -588,8 +588,8 @@ const WritingCoach = () => {
                   onClick={() => { setSelTopic(t); setCustomTopic(''); }}
                   className={`px-4 py-2.5 rounded-full text-[13.5px] font-semibold border-[1.5px] transition-colors ${
                     sel
-                      ? 'bg-[#2B6830] text-white border-[#2B6830]'
-                      : 'bg-[#F2F8F4] text-[#1E5225] border-[#C9E2CF] hover:bg-[#E8F4EC] hover:border-[#2B6830]'
+                      ? 'bg-primary text-white border-primary'
+                      : 'bg-primary-subtle text-primary-hover border-[#C9E2CF] hover:bg-primary-light hover:border-primary'
                   }`}
                 >
                   {t}
@@ -623,7 +623,7 @@ const WritingCoach = () => {
       {/* ============ BƯỚC 2: HỎI SOCRATIC ============ */}
       {screen === 'socratic' && (
         <Card className="mb-4">
-          <h2 className="text-lg font-bold text-[#1E5225]">Bước 2 · Xác định vấn đề cụ thể</h2>
+          <h2 className="text-lg font-bold text-primary-hover">Bước 2 · Xác định vấn đề cụ thể</h2>
           <p className="text-[13.5px] text-slate-500 leading-relaxed mt-1">
             Trả lời <b>từng câu hỏi một</b>. Mỗi câu chỉ hỏi một điều, cứ trả lời ngắn gọn theo
             gợi ý bên dưới câu hỏi.
@@ -634,7 +634,7 @@ const WritingCoach = () => {
             <div className="mt-3">
               {qa.map((x, i) => (
                 <div key={i} className="my-1.5 text-sm leading-relaxed">
-                  <div><b className="text-[#1E5225]">Q{i + 1}:</b> {x.q}</div>
+                  <div><b className="text-primary-hover">Q{i + 1}:</b> {x.q}</div>
                   <div className="text-slate-600">↳ {x.a}</div>
                 </div>
               ))}
@@ -642,7 +642,7 @@ const WritingCoach = () => {
           )}
 
           {/* Hộp câu hỏi hiện tại */}
-          <div className="bg-[#F2F8F4] border border-[#C9E2CF] rounded-xl p-4 mt-3 mb-3.5">
+          <div className="bg-primary-subtle border border-[#C9E2CF] rounded-xl p-4 mt-3 mb-3.5">
             {socErr ? (
               <div>
                 <Callout tone="warn">{socErr}</Callout>
@@ -659,19 +659,19 @@ const WritingCoach = () => {
               <Loading text={qCount === 0 ? 'Đang tạo câu hỏi đầu tiên...' : 'Đang phân tích câu trả lời...'} />
             ) : (
               <>
-                <div className="text-xs font-bold uppercase tracking-wide text-[#2B6830]">
+                <div className="text-xs font-bold uppercase tracking-wide text-primary">
                   Câu hỏi {qCount}/3
                 </div>
-                <div className="text-[17px] font-bold text-[#1E5225] mt-1">❓ {curQ.en}</div>
+                <div className="text-[17px] font-bold text-primary-hover mt-1">❓ {curQ.en}</div>
                 <div className="text-[13.5px] text-slate-500 mt-1">{curQ.vi}</div>
                 <div className="bg-white border border-dashed border-[#C9E2CF] rounded-lg px-3 py-2.5 mt-3 text-[13.5px] leading-relaxed">
                   <div>
-                    <span className="font-bold text-[#2B6830]">Gợi ý:</span>{' '}
+                    <span className="font-bold text-primary">Gợi ý:</span>{' '}
                     <MdBold text={curQ.guide} />
                   </div>
                   <div className="mt-1.5">
-                    <span className="font-bold text-[#2B6830]">Ví dụ trả lời:</span>{' '}
-                    <i className="text-[#1E5225]">{curQ.example}</i>
+                    <span className="font-bold text-primary">Ví dụ trả lời:</span>{' '}
+                    <i className="text-primary-hover">{curQ.example}</i>
                   </div>
                 </div>
               </>
@@ -697,20 +697,20 @@ const WritingCoach = () => {
       {/* ============ BƯỚC 3: PHÂN LOẠI Ý ============ */}
       {screen === 'ideas' && (
         <Card className="mb-4">
-          <h2 className="text-lg font-bold text-[#1E5225]">Bước 3 · Hai ý của bạn</h2>
+          <h2 className="text-lg font-bold text-primary-hover">Bước 3 · Hai ý của bạn</h2>
           <p className="text-[13.5px] text-slate-500 leading-relaxed mt-1">
             Đây là vấn đề bạn sẽ viết, gồm <b>nguyên nhân (Ý 1)</b> dẫn đến <b>hệ quả (Ý 2)</b>:
           </p>
           <div className="flex flex-col md:flex-row gap-3 items-stretch my-3.5">
-            <div className="flex-1 bg-[#F2F8F4] border border-[#C9E2CF] rounded-xl px-4 py-3.5">
-              <div className="text-xs font-bold uppercase tracking-wide text-[#2B6830]">Ý 1 · Nguyên nhân</div>
+            <div className="flex-1 bg-primary-subtle border border-[#C9E2CF] rounded-xl px-4 py-3.5">
+              <div className="text-xs font-bold uppercase tracking-wide text-primary">Ý 1 · Nguyên nhân</div>
               <div className="mt-1.5 text-[14.5px] leading-relaxed">
                 {ideasLoading ? 'Đang tổng hợp...' : ideasErr ? `Lỗi: ${ideasErr}` : (cause || '–')}
               </div>
             </div>
-            <div className="grid place-items-center text-2xl text-[#2B6830] font-extrabold rotate-90 md:rotate-0">→</div>
-            <div className="flex-1 bg-[#F2F8F4] border border-[#C9E2CF] rounded-xl px-4 py-3.5">
-              <div className="text-xs font-bold uppercase tracking-wide text-[#2B6830]">Ý 2 · Hệ quả</div>
+            <div className="grid place-items-center text-2xl text-primary font-extrabold rotate-90 md:rotate-0">→</div>
+            <div className="flex-1 bg-primary-subtle border border-[#C9E2CF] rounded-xl px-4 py-3.5">
+              <div className="text-xs font-bold uppercase tracking-wide text-primary">Ý 2 · Hệ quả</div>
               <div className="mt-1.5 text-[14.5px] leading-relaxed">
                 {ideasLoading ? '...' : (effect || '–')}
               </div>
@@ -747,7 +747,7 @@ const WritingCoach = () => {
       {screen === 'ladder' && (
         <Card className="mb-4">
           <div className="flex items-center justify-between gap-2.5 mb-2 flex-wrap">
-            <h2 className="text-lg font-bold text-[#1E5225]">{L.title}</h2>
+            <h2 className="text-lg font-bold text-primary-hover">{L.title}</h2>
             <BandPill gold={!!L.high}>{L.band}</BandPill>
           </div>
 
@@ -781,14 +781,14 @@ const WritingCoach = () => {
           )}
 
           <Callout tone="gold" className="mt-3">
-            <div className="text-xs font-bold text-[#1E5225]">NHẮC LẠI HAI Ý CỦA BẠN</div>
+            <div className="text-xs font-bold text-primary-hover">NHẮC LẠI HAI Ý CỦA BẠN</div>
             <div className="text-sm mt-1">
               <b>Ý 1:</b> {cause} &nbsp;→&nbsp; <b>Ý 2:</b> {effect}
             </div>
           </Callout>
 
           <Callout className="mt-3">
-            <div className="text-xs font-bold text-[#1E5225]">
+            <div className="text-xs font-bold text-primary-hover">
               CÂU XUẤT PHÁT CỦA BẬC NÀY: hãy BIẾN ĐỔI câu này, đừng nộp y nguyên
             </div>
             <div className="italic mt-1">{prevSentence || '–'}</div>
@@ -820,14 +820,14 @@ const WritingCoach = () => {
           )}
           {feedback && feedback.r && (
             <div className="mt-4 border-t border-dashed border-[#C9E2CF] pt-4">
-              <div className="text-xl font-extrabold text-[#1E5225]">
+              <div className="text-xl font-extrabold text-primary-hover">
                 Band ước lượng: {feedback.r.band_estimate || '–'}
               </div>
               {Array.isArray(feedback.r.strengths) && feedback.r.strengths.length > 0 && (
                 <div className="my-3">
-                  <h4 className="text-xs font-bold uppercase tracking-wide text-[#1E5225] mb-1.5">✓ Điểm tốt</h4>
+                  <h4 className="text-xs font-bold uppercase tracking-wide text-primary-hover mb-1.5">✓ Điểm tốt</h4>
                   {feedback.r.strengths.map((s, i) => (
-                    <div key={i} className="bg-[#E8F4EC] rounded-lg px-3 py-2.5 my-1.5 text-sm leading-relaxed">
+                    <div key={i} className="bg-primary-light rounded-lg px-3 py-2.5 my-1.5 text-sm leading-relaxed">
                       <MdBold text={s} />
                     </div>
                   ))}
@@ -835,7 +835,7 @@ const WritingCoach = () => {
               )}
               {Array.isArray(feedback.r.issues) && feedback.r.issues.length > 0 && (
                 <div className="my-3">
-                  <h4 className="text-xs font-bold uppercase tracking-wide text-[#1E5225] mb-1.5">Cần chỉnh</h4>
+                  <h4 className="text-xs font-bold uppercase tracking-wide text-primary-hover mb-1.5">Cần chỉnh</h4>
                   {feedback.r.issues.map((it, i) => {
                     const ty = String(it.type || 'pragmatics').toLowerCase();
                     return (
@@ -856,8 +856,8 @@ const WritingCoach = () => {
               )}
               {feedback.r.model_sentence && (
                 <div className="my-3">
-                  <h4 className="text-xs font-bold uppercase tracking-wide text-[#1E5225] mb-1.5">Câu mẫu tham khảo</h4>
-                  <div className="bg-white border-[1.5px] border-[#2B6830] rounded-lg px-3.5 py-3 text-[15px] italic leading-relaxed">
+                  <h4 className="text-xs font-bold uppercase tracking-wide text-primary-hover mb-1.5">Câu mẫu tham khảo</h4>
+                  <div className="bg-white border-[1.5px] border-primary rounded-lg px-3.5 py-3 text-[15px] italic leading-relaxed">
                     {feedback.r.model_sentence}
                   </div>
                 </div>
@@ -869,7 +869,7 @@ const WritingCoach = () => {
               )}
               <div
                 className={`rounded-xl px-4 py-3 font-bold text-center text-white mt-3.5 ${
-                  feedback.r.passed ? 'bg-[#2B6830]' : 'bg-[#9A6A2B]'
+                  feedback.r.passed ? 'bg-primary' : 'bg-[#9A6A2B]'
                 }`}
               >
                 {feedback.r.passed ? '✓ Đạt yêu cầu bậc này!' : 'Gần đúng rồi, chỉnh thêm theo góp ý nhé.'}
@@ -899,7 +899,7 @@ const WritingCoach = () => {
       {/* ============ BƯỚC 5: HOÀN THÀNH ============ */}
       {screen === 'done' && (
         <Card className="mb-4">
-          <h2 className="text-lg font-bold text-[#1E5225]">🎉 Hoàn thành thang nâng band!</h2>
+          <h2 className="text-lg font-bold text-primary-hover">🎉 Hoàn thành thang nâng band!</h2>
           <p className="text-[13.5px] text-slate-500 mt-1">
             Hành trình câu của bạn, từ band 5 đến band 8+:
           </p>
@@ -926,10 +926,10 @@ const WritingCoach = () => {
             {saveState === 'saving' && <Loading text="Đang lưu lịch sử luyện tập..." />}
             {saveState === 'ok' && (
               <>
-                <span className="text-sm font-semibold text-[#2B6830]">✓ Đã lưu vào Lịch sử luyện tập.</span>
+                <span className="text-sm font-semibold text-primary">✓ Đã lưu vào Lịch sử luyện tập.</span>
                 <Link
                   to="/student/resources/history"
-                  className="text-sm font-bold text-[#2B6830] underline underline-offset-2"
+                  className="text-sm font-bold text-primary underline underline-offset-2"
                 >
                   Xem lịch sử
                 </Link>
@@ -956,7 +956,7 @@ const WritingCoach = () => {
 
       {/* ============ OVERLAY GIÁM SÁT RỜI MÀN HÌNH ============ */}
       {guardOverlay && (
-        <div className="fixed inset-0 z-[100] bg-[#1E5225]/[0.97] text-white flex items-center justify-center p-6 text-center">
+        <div className="fixed inset-0 z-[100] bg-primary-hover/[0.97] text-white flex items-center justify-center p-6 text-center">
           <div className="max-w-md">
             {guardOverlay.kind === 'warn' ? (
               <>
@@ -970,7 +970,7 @@ const WritingCoach = () => {
                 <button
                   type="button"
                   onClick={resumeFromWarn}
-                  className="bg-white text-[#2B6830] font-bold rounded-xl px-6 py-3 text-sm hover:bg-[#E8F4EC] transition-colors active:scale-[0.98]"
+                  className="bg-white text-primary font-bold rounded-xl px-6 py-3 text-sm hover:bg-primary-light transition-colors active:scale-[0.98]"
                 >
                   Quay lại luyện tập
                 </button>
@@ -986,7 +986,7 @@ const WritingCoach = () => {
                 <button
                   type="button"
                   onClick={resetSession}
-                  className="bg-white text-[#2B6830] font-bold rounded-xl px-6 py-3 text-sm hover:bg-[#E8F4EC] transition-colors active:scale-[0.98]"
+                  className="bg-white text-primary font-bold rounded-xl px-6 py-3 text-sm hover:bg-primary-light transition-colors active:scale-[0.98]"
                 >
                   Bắt đầu phiên mới
                 </button>

@@ -1,5 +1,5 @@
 // ============================================================
-// DANH MỤC SKIN (AVATAR) — Cửa hàng đổi skin bằng BAVN Credits
+// DANH MỤC SKIN (AVATAR), Cửa hàng đổi skin bằng BAVN Credits
 // ------------------------------------------------------------
 // Thiết kế CHỦ ĐÍCH (behavioral econ + sư phạm của Bak):
 //  - KHÔNG hộp ngẫu nhiên / loot box (tránh cơ chế cờ bạc với trẻ).
@@ -61,7 +61,7 @@ export const SKINS = [
   { id: 'trophy',  name: 'Quán Quân',    rarity: 'legendary', cost: 150, order: 12,
     emoji: '🏆', gradient: ['#F59E0B', '#92400E'], ring: '#FCD34D' },
 
-  // ----- CỘT MỐC (miễn phí — tự mở khi đạt Bonus tích lũy) -----
+  // ----- CỘT MỐC (miễn phí, tự mở khi đạt Bonus tích lũy) -----
   { id: 'sprout_star', name: 'Khởi Đầu Vững', rarity: 'rare', cost: 0, order: 13,
     emoji: '🌟', gradient: ['#10B981', '#047857'], ring: '#34D399',
     unlock: 'milestone', threshold: 50 },
@@ -91,7 +91,7 @@ export const normalizeSkin = (s = {}, id) => ({
   unlock: s.unlock === 'milestone' ? 'milestone' : 'purchase',
   threshold: Number(s.threshold) || 0,
   order: Number(s.order) || 0,
-  // Skin có được cấp cho NHÂN SỰ (staff/giáo viên) dùng không — do Admin bật/tắt.
+  // Skin có được cấp cho NHÂN SỰ (staff/giáo viên) dùng không, do Admin bật/tắt.
   // Mặc định FALSE: nhân sự KHÔNG tự có skin, phải được Admin cho phép.
   staffAllowed: !!s.staffAllowed,
 });
