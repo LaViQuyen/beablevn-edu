@@ -34,8 +34,9 @@ const StudentSkins = () => {
 
   const [busy, setBusy] = useState(false);
   const [confirmSkin, setConfirmSkin] = useState(null);
-  const [toastMsg, setToastMsg] = useState('');
-  const showToast = (msg) => { setToastMsg(msg); setTimeout(() => setToastMsg(''), 3500); };
+  // Toast phân loại: màu theo type (không suy từ emoji)
+  const [toast, setToast] = useState({ msg: '', type: 'success' });
+  const showToast = (msg, type = 'success') => { setToast({ msg, type }); setTimeout(() => setToast((t) => ({ ...t, msg: '' })), 3500); };
 
   const myClassIds = currentUser?.classIds
     ? (Array.isArray(currentUser.classIds) ? currentUser.classIds : Object.values(currentUser.classIds))
@@ -115,8 +116,8 @@ const StudentSkins = () => {
     if (!isOwned(skinId)) return;
     try {
       await update(ref(db, `studentSkins/${currentUser.id}`), { equipped: skinId });
-      showToast('✅ Đã trang bị skin mới!');
-    } catch (e) { showToast('❌ Lỗi: ' + e.message); }
+      showToast('Đã trang bị skin mới!', 'success');
+    } catch (e) { showToast('Lỗi: ' + e.message, 'error'); }
   };
 
   // --- NHẬN skin mốc (miễn phí) ---
@@ -132,8 +133,8 @@ const StudentSkins = () => {
         skinId: skin.id, name: skin.name, credits: 0, kind: 'milestone', date: new Date().toISOString(),
       };
       await update(ref(db), updates);
-      showToast(`🎉 Mở khóa "${skin.name}", phần thưởng cho sự kiên trì!`);
-    } catch (e) { showToast('❌ Lỗi: ' + e.message); }
+      showToast(`Mở khóa "${skin.name}", phần thưởng cho sự kiên trì!`, 'success');
+    } catch (e) { showToast('Lỗi: ' + e.message, 'error'); }
     finally { setBusy(false); }
   };
 
@@ -142,13 +143,13 @@ const StudentSkins = () => {
     if (isOwned(skin.id)) return equipSkin(skin.id);
     const need = Number(skin.cost) || 0;
     if (confirmSkin !== skin.id) { setConfirmSkin(skin.id); return; }
-    if (need > availableCredits) { setConfirmSkin(null); return showToast('⚠️ Không đủ credits khả dụng!'); }
+    if (need > availableCredits) { setConfirmSkin(null); return showToast('Không đủ credits khả dụng!', 'warning'); }
 
     setBusy(true);
     try {
       const needBonus = need * 2;
       const totalAvail = bonusBalances.reduce((a, b) => a + b.bonus, 0);
-      if (totalAvail < needBonus) { setBusy(false); setConfirmSkin(null); return showToast('⚠️ Không đủ điểm Bonus!'); }
+      if (totalAvail < needBonus) { setBusy(false); setConfirmSkin(null); return showToast('Không đủ điểm Bonus!', 'warning'); }
 
       const timestamp = new Date().toISOString();
       const today = timestamp.slice(0, 10);
@@ -173,9 +174,9 @@ const StudentSkins = () => {
       };
       await update(ref(db), updates);
       setConfirmSkin(null);
-      showToast(`✅ Đã mua & trang bị "${skin.name}"! (−${need} credits)`);
+      showToast(`Đã mua & trang bị "${skin.name}" (−${need} credits)`, 'success');
     } catch (e) {
-      showToast('❌ Lỗi: ' + e.message);
+      showToast('Lỗi: ' + e.message, 'error');
     } finally {
       setBusy(false);
     }
@@ -186,7 +187,7 @@ const StudentSkins = () => {
     if (isOwned(skin.id)) return equipSkin(skin.id);
     const need = Number(skin.cost) || 0;
     if (confirmSkin !== skin.id) { setConfirmSkin(skin.id); return; }
-    if (need > staffBonusBalance) { setConfirmSkin(null); return showToast('⚠️ Không đủ Bonus nhân sự!'); }
+    if (need > staffBonusBalance) { setConfirmSkin(null); return showToast('Không đủ Bonus nhân sự!', 'warning'); }
     setBusy(true);
     try {
       const timestamp = new Date().toISOString();
@@ -204,8 +205,8 @@ const StudentSkins = () => {
       };
       await update(ref(db), updates);
       setConfirmSkin(null);
-      showToast(`✅ Đã đổi "${skin.name}"! (−${need} Bonus)`);
-    } catch (e) { showToast('❌ Lỗi: ' + e.message); }
+      showToast(`Đã đổi "${skin.name}" (−${need} Bonus)`, 'success');
+    } catch (e) { showToast('Lỗi: ' + e.message, 'error'); }
     finally { setBusy(false); }
   };
 
@@ -214,10 +215,9 @@ const StudentSkins = () => {
 
   return (
     <div className="space-y-6 animate-fade-in-up pb-10">
-      {toastMsg && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[60] px-5 py-3 rounded-xl shadow-lg text-sm font-medium text-white max-w-[90vw]"
-          style={{ background: toastMsg.startsWith('✅') || toastMsg.startsWith('🎉') ? '#059669' : toastMsg.startsWith('⚠️') ? '#d97706' : '#dc2626' }}>
-          {toastMsg}
+      {toast.msg && (
+        <div className={`fixed top-4 left-1/2 -translate-x-1/2 z-[60] px-5 py-3 rounded-xl shadow-lg text-sm font-medium text-white max-w-[90vw] animate-fade-in-up ${toast.type === 'error' ? 'bg-red-500' : toast.type === 'warning' ? 'bg-amber-500' : 'bg-emerald-600'}`}>
+          {toast.msg}
         </div>
       )}
 

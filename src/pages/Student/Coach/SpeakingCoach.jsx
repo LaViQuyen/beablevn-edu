@@ -226,7 +226,7 @@ const SpeakingCoach = () => {
           </div>
 
           <div className="card card-body space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
               <Select label="Band mục tiêu" value={band} onChange={(e) => setBand(e.target.value)}>
                 {BAND_OPTIONS.map((b) => (
                   <option key={b} value={b}>
