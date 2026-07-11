@@ -92,12 +92,58 @@ async function geminiOnce(useModel, baseConfig, parts, thinking, apiKey) {
   }
 
   const out = await res.json();
-  // Truy xuat giong out["candidates"][0]["content"]["parts"][0]["text"] cua nguon.
-  // Thieu tang nao se nem TypeError, duoc coi nhu loi tam va retry (nhu KeyError Python).
-  const text = out["candidates"][0]["content"]["parts"][0]["text"];
-  if (text === undefined) {
+  // KHAC NGUON CO CHU DICH: nguon lay parts[0].text, nhung gemini-3.5 + thinking
+  // thinh thoang tra NHIEU text part. Quan sat thuc te: part co the la manh noi tiep,
+  // nhung cung co the CHONG LAP/phat lai, nen ghep mu hay lay part dau deu co the ra
+  // JSON hong (loi "bam thu lai" ngau nhien cua ban Flask). Cach xu ly: neu nhieu part,
+  // thu lan luot ban ghep roi tung part (dai truoc), chon ban extractJson parse duoc.
+  // Thieu tang candidates/content van nem TypeError va duoc retry (nhu KeyError Python).
+  const outParts = out["candidates"][0]["content"]["parts"];
+  const texts = (outParts || [])
+    .map(function (p) {
+      return p && p.text !== undefined ? p.text : "";
+    })
+    .filter(function (t) {
+      return t !== "";
+    });
+  let text;
+  if (texts.length <= 1) {
+    text = texts[0];
+  } else {
+    const candidates = [texts.join("")].concat(
+      texts.slice().sort(function (a, b) {
+        return b.length - a.length;
+      })
+    );
+    for (let ci = 0; ci < candidates.length; ci++) {
+      try {
+        extractJson(candidates[ci]);
+        text = candidates[ci];
+        break;
+      } catch (e) {
+        // ban nay khong parse duoc, thu ban ke
+      }
+    }
+    if (text === undefined) text = texts.join(""); // het cach: de tang tren bao loi retry
+    console.warn(
+      "[coach/gemini] model tra " + texts.length + " text part, da chon ban parse duoc."
+    );
+  }
+  if (!text) {
     // Mo phong KeyError("text") cua Python (JS tra undefined thay vi nem loi)
     throw new TypeError("Phản hồi model thiếu trường 'text'.");
+  }
+  // KHAC NGUON CO CHU DICH (do luong thuc te ~20% voi gemini-3.5-flash): model
+  // thinh thoang CAT CUT JSON giua chung du da bat responseMimeType JSON (dut giua
+  // cau, thieu ngoac dong; dung bug "Unterminated string" trong lich su ban Flask).
+  // Kiem tra parse NGAY TAI DAY va nem Error thuong (khong .status) de roi vao
+  // nhanh retry loi tam cua callGemini (3 lan + fallback model) thay vi bat
+  // hoc vien "bam thu lai" ngau nhien nhu ban goc.
+  try {
+    extractJson(text);
+  } catch (e) {
+    console.warn("[coach/gemini] JSON cat cut tu model " + useModel + ", se thu lai.");
+    throw new Error("Phản hồi model chưa hoàn chỉnh.");
   }
   return text;
 }
