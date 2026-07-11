@@ -231,7 +231,7 @@ const StudentCredits = () => {
               <button
                 onClick={() => submitRedeem('bonus')}
                 disabled={submitting || cartTotal > availableCredits}
-                className="w-full flex items-center justify-between p-4 rounded-xl border-2 border-green-200 bg-primary-light/50 hover:border-primary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-between p-4 rounded-xl border-2 border-green-200 bg-primary-light/50 hover:border-primary hover:shadow-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <span className="text-sm font-bold text-primary">⭐ Credits <span className="font-medium text-slate-500">(quy đổi từ Bonus)</span></span>
                 <span className="text-sm font-extrabold text-primary">Còn {availableCredits}</span>
@@ -239,7 +239,7 @@ const StudentCredits = () => {
               <button
                 onClick={() => submitRedeem('plus')}
                 disabled={submitting || cartTotal > availablePlus}
-                className="w-full flex items-center justify-between p-4 rounded-xl border-2 border-sky-200 bg-sky-50/50 hover:border-sky-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-between p-4 rounded-xl border-2 border-sky-200 bg-sky-50/50 hover:border-sky-500 hover:shadow-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <span className="text-sm font-bold text-sky-700">💳 Credits + <span className="font-medium text-slate-500">(đã nạp)</span></span>
                 <span className="text-sm font-extrabold text-sky-700">Còn {availablePlus}</span>
@@ -248,7 +248,7 @@ const StudentCredits = () => {
               <button
                 onClick={() => submitRedeem('cash')}
                 disabled={submitting || cartHasGift}
-                className="w-full flex items-center justify-between p-4 rounded-xl border-2 border-amber-200 bg-amber-50/50 hover:border-amber-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-between p-4 rounded-xl border-2 border-amber-200 bg-amber-50/50 hover:border-amber-500 hover:shadow-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <span className="text-sm font-bold text-amber-700">💵 Tiền mặt <span className="font-medium text-slate-500">(trả tại quầy)</span></span>
                 <span className="text-sm font-extrabold text-amber-700">{(cartTotal * 1000).toLocaleString('vi-VN')}đ</span>
@@ -305,11 +305,11 @@ const StudentCredits = () => {
       )}
 
       {/* ===== HERO: 2 VÍ CREDITS ===== */}
-      <div className="bg-gradient-to-r from-primary to-primary-medium rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
+      <div className="bg-gradient-to-r from-primary to-primary-medium rounded-2xl p-6 text-white shadow-lg ring-1 ring-white/10 transition-shadow duration-300 hover:shadow-xl relative overflow-hidden">
         <div className="relative z-10">
           <p className="text-green-200 text-xs font-bold uppercase tracking-wider">Ví BAVN Credits</p>
           <div className="flex items-end gap-2 mt-1 mb-4">
-            <span className="text-5xl font-extrabold leading-none">{loading ? '–' : availableCredits}</span>
+            <span className="text-5xl font-extrabold leading-none tracking-tight drop-shadow-sm">{loading ? '–' : availableCredits}</span>
             <span className="text-green-200 font-bold mb-1">credits khả dụng</span>
           </div>
           <div className="flex flex-wrap gap-3">
@@ -336,6 +336,7 @@ const StudentCredits = () => {
           <p className="text-green-200/80 text-[11px] mt-3">💡 Mỗi 2 điểm Bonus = 1 Credit = 1.000đ. <b>Credits +</b> là phần nạp thêm bằng tiền mặt tại quầy Fresh Fit (gặp nhân sự FF+).</p>
         </div>
         <div className="absolute right-0 top-0 w-40 h-40 bg-white/10 rounded-full -mr-16 -mt-16 blur-3xl" />
+        <div className="absolute left-0 bottom-0 w-32 h-32 bg-primary-medium/40 rounded-full -ml-12 -mb-12 blur-3xl" />
       </div>
 
       {/* ===== BONUS THEO TỪNG LỚP ===== */}
@@ -346,7 +347,7 @@ const StudentCredits = () => {
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {bonusByClass.map(b => (
-              <div key={b.classId} className="bg-slate-50 border border-slate-100 rounded-xl p-3">
+              <div key={b.classId} className="bg-slate-50 border border-slate-100 rounded-xl p-3 transition-all hover:-translate-y-0.5 hover:shadow-sm hover:border-green-200">
                 <p className="text-xs font-bold text-slate-500 truncate" title={b.className}>{b.className}</p>
                 <p className="text-2xl font-extrabold text-primary mt-1">{b.bonus} <span className="text-[10px] font-bold text-slate-400 uppercase">bonus</span></p>
               </div>
@@ -364,7 +365,7 @@ const StudentCredits = () => {
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors ${activeCategory === cat ? 'bg-primary text-white border-primary' : 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100'}`}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${activeCategory === cat ? 'bg-primary text-white border-primary shadow-sm' : 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100 hover:border-green-300'}`}
               >
                 {cat === 'all' ? 'Tất cả' : `${CATEGORY_META[cat].icon} ${CATEGORY_META[cat].label}`}
               </button>
@@ -426,7 +427,7 @@ const StudentCredits = () => {
                           <p className="text-[10px] font-bold text-amber-600 mt-0.5">⏱ Có món sau ~{item.prepMinutes} phút</p>
                         )}
                       </div>
-                      <span className="shrink-0 text-sm font-extrabold text-primary bg-white px-2.5 py-1 rounded-lg border border-green-100">{item.price} ⭐</span>
+                      <span className="shrink-0 text-sm font-extrabold text-primary bg-white px-2.5 py-1 rounded-lg border border-green-100 shadow-sm">{item.price} ⭐</span>
                     </div>
                     <div className="flex items-center justify-end gap-2 mt-auto pt-2" onClick={e => e.stopPropagation()}>
                       {qty > 0 && (
@@ -446,7 +447,7 @@ const StudentCredits = () => {
 
         {/* THANH GIỎ + GỬI YÊU CẦU */}
         {cartCount > 0 && (
-          <div className="mt-4 p-4 bg-primary-light border border-green-200 rounded-xl flex flex-col md:flex-row md:items-center gap-3">
+          <div className="mt-4 p-4 bg-primary-light border border-green-200 rounded-2xl shadow-sm flex flex-col md:flex-row md:items-center gap-3">
             <div className="flex-1 min-w-0">
               <p className="text-xs font-bold text-primary uppercase tracking-wide mb-0.5">Giỏ đổi quà ({cartCount} món)</p>
               <p className="text-xs text-slate-600 truncate">
@@ -471,7 +472,7 @@ const StudentCredits = () => {
               <button
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="px-5 py-2.5 rounded-xl text-xs font-bold text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-primary hover:bg-primary-hover"
+                className="px-5 py-2.5 rounded-xl text-xs font-bold text-white shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed bg-primary hover:bg-primary-hover"
               >
                 {submitting ? 'Đang gửi...' : 'Gửi yêu cầu đổi'}
               </button>
@@ -490,7 +491,7 @@ const StudentCredits = () => {
             {myRedemptions.map(r => {
               const meta = STATUS_META[r.status] || STATUS_META.pending;
               return (
-                <div key={r.id} className="flex items-start justify-between gap-3 p-3.5 rounded-xl border border-slate-100 bg-slate-50/50">
+                <div key={r.id} className={`flex items-start justify-between gap-3 p-3.5 rounded-xl border border-slate-100 bg-slate-50/50 transition-all hover:shadow-sm hover:border-slate-200 ${r.status === 'confirmed' ? 'border-l-[3px] border-l-primary bg-primary-light/30' : ''}`}>
                   <div className="min-w-0">
                     <p className="text-sm font-bold text-slate-700 leading-snug">{itemsText(r.items)}</p>
                     {r.note && <p className="text-[11px] text-amber-700 mt-0.5">📝 {r.note}</p>}

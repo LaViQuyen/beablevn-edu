@@ -219,14 +219,14 @@ const MyGrades = () => {
     }
 
     return (
-      <div className="bg-white rounded-xl border border-slate-200 p-4">
+      <div className="bg-white rounded-2xl border border-slate-200 p-4 transition-all hover:shadow-sm">
         <div className="flex items-start justify-between gap-2 mb-2">
           <div>
             <p className="section-title">{meta.label}</p>
             <p className="text-sm font-semibold" style={{ color: meta.color }}>{meta.meaning}</p>
           </div>
           {data.length > 0 && (
-            <span className="shrink-0 text-xs font-bold text-slate-400 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-100">{data.length} cột điểm</span>
+            <span className="shrink-0 text-xs font-bold text-slate-500 bg-primary-light px-2.5 py-1.5 rounded-full border border-green-100">{data.length} cột điểm</span>
           )}
         </div>
         {body}
@@ -253,7 +253,7 @@ const MyGrades = () => {
     const summaryText = catKey === 'bonus' ? `Tổng: ${total}` : `TB: ${avg}`;
 
     return (
-        <div className={`p-4 rounded-xl border flex flex-col h-full ${colorClass}`}>
+        <div className={`p-4 rounded-2xl border flex flex-col h-full transition-all hover:shadow-sm ${colorClass}`}>
             <div className="flex justify-between items-start mb-3 pb-3 border-b border-black/5">
                 <div className="pr-2">
                   <h4 className="font-bold text-sm leading-tight">{label}</h4>
@@ -264,7 +264,7 @@ const MyGrades = () => {
 
             <div className="flex-1 overflow-y-auto space-y-2 max-h-[350px] pr-1 custom-scrollbar">
                 {records.length > 0 ? records.map(r => (
-                    <div key={r.id} className="bg-white/80 p-3 rounded-xl shadow-sm text-xs transition-all hover:bg-white">
+                    <div key={r.id} className="bg-white/80 p-3 rounded-xl shadow-sm text-xs transition-all hover:bg-white hover:shadow-md hover:-translate-y-0.5">
                         <div className="flex justify-between font-bold text-primary mb-1.5">
                             <span className="text-sm">{r.score} điểm</span>
                             <span className="text-slate-500 font-mono font-medium">{new Date(r.date).toLocaleDateString('vi-VN')}</span>
@@ -302,7 +302,7 @@ const MyGrades = () => {
         <div className="card-std p-4 md:p-6">
 
             {/* Thanh công cụ: Chọn lớp & Hiển thị Xếp hạng */}
-            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-5 mb-6">
+            <div className="bg-slate-50 p-4 md:p-5 rounded-2xl border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-5 mb-6">
                 <div className="w-full md:w-1/3">
                     <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Lọc xem theo Lớp</label>
                     <select
@@ -315,21 +315,21 @@ const MyGrades = () => {
                 </div>
 
                 {selectedClass && rankInfo && (
-                    <div className="flex gap-4 md:gap-8 bg-white px-5 py-3 rounded-xl border border-slate-200 shadow-sm w-full md:w-auto">
+                    <div className="flex gap-4 md:gap-8 bg-gradient-to-br from-white to-primary-subtle px-5 py-4 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all w-full md:w-auto">
                         <div className="text-center pr-4 md:pr-8 border-r border-slate-100">
                             <p className="stat-label mb-1" title="Assignment(10%) + Formative(20%) + MMT(30%) + EOMT(40%)">Điểm Tổng Kết</p>
-                            <p className="text-3xl font-extrabold leading-tight text-primary">{rankInfo.totalScore}</p>
+                            <p className="text-3xl md:text-4xl font-extrabold leading-tight tracking-tight tabular-nums text-primary">{rankInfo.totalScore}</p>
                         </div>
                         <div className="text-center pr-2">
-                            <p className="stat-label mb-1">Xếp hạng của bạn</p>
-                            <p className="text-3xl font-extrabold leading-tight text-emerald-600">#{rankInfo.rank} <span className="text-sm font-bold text-slate-400">/ {rankInfo.totalStudents}</span></p>
+                            <p className="stat-label mb-1">🏆 Xếp hạng của bạn</p>
+                            <p className="text-3xl md:text-4xl font-extrabold leading-tight tracking-tight tabular-nums bg-gradient-to-br from-amber-500 to-amber-600 bg-clip-text text-transparent">#{rankInfo.rank} <span className="text-sm font-bold text-slate-400">/ {rankInfo.totalStudents}</span></p>
                         </div>
                     </div>
                 )}
             </div>
 
             {/* ===== CƠ CHẾ TÍNH ĐIỂM & XẾP HẠNG, minh bạch cho Phụ huynh & Học viên ===== */}
-            <div className="bg-primary-light/60 rounded-xl border border-green-200 p-4 md:p-5 mb-6">
+            <div className="bg-primary-light/60 rounded-2xl border border-green-200 p-4 md:p-5 mb-6">
                 <h3 className="section-title mb-3">📐 Cơ chế tính điểm & xếp hạng</h3>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     {/* Công thức điểm tổng kết */}

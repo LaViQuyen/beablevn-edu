@@ -239,12 +239,13 @@ const StudentSkins = () => {
         </div>
         <p className="text-green-200/80 text-[11px] mt-4 relative z-10">{isStaff ? '💡 Bonus do cấp quản lý (MOD) thưởng, dùng để đổi skin & làm cơ sở xét thưởng quý/năm. Chơi game không giới hạn lượt.' : '💡 Mỗi 2 Bonus = 1 Credit. Đổi skin bằng Credit, hoặc nhận miễn phí khi đạt mốc học tập. Không hộp ngẫu nhiên.'}</p>
         <div className="absolute right-0 top-0 w-40 h-40 bg-white/10 rounded-full -mr-16 -mt-16 blur-3xl" />
+        <div className="absolute left-0 bottom-0 w-32 h-32 bg-white/5 rounded-full -ml-10 -mb-10 blur-2xl" />
       </div>
 
       {/* ===== GAME HÀNH TRÌNH TRƯỞNG THÀNH (khu thi đua) ===== */}
       <button
         onClick={() => navigate(`${base}/games/hanh-trinh`)}
-        className="w-full text-left bg-gradient-to-r from-primary-hover to-primary rounded-2xl p-5 text-white shadow-lg relative overflow-hidden hover:brightness-110 transition"
+        className="w-full text-left bg-gradient-to-r from-primary-hover to-primary rounded-2xl p-5 text-white shadow-lg relative overflow-hidden transition-all hover:-translate-y-0.5 hover:shadow-xl hover:brightness-[1.03]"
       >
         <div className="relative z-10 flex items-center gap-4">
           <div className="text-4xl">🎮</div>
@@ -274,7 +275,7 @@ const StudentSkins = () => {
             const active = equipped === skin.id;
             return (
               <button key={skin.id} onClick={() => equipSkin(skin.id)}
-                className={`flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all ${active ? 'border-primary bg-primary-light/50 ring-2 ring-primary/15' : 'border-slate-100 hover:border-green-300 bg-white'}`}>
+                className={`flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all ${active ? 'border-primary bg-primary-light/50 ring-2 ring-primary/15' : 'border-slate-100 hover:border-green-300 hover:-translate-y-0.5 hover:shadow-sm bg-white'}`}>
                 <StudentAvatar skin={skin} size={48} />
                 <span className="text-[11px] font-bold text-slate-600 truncate w-full text-center">{skin.name}</span>
                 {active ? <span className="text-[9px] font-bold text-primary uppercase">Đang dùng</span>
@@ -304,7 +305,7 @@ const StudentSkins = () => {
               const affordable = (Number(skin.cost) || 0) <= staffBonusBalance;
               const confirming = confirmSkin === skin.id;
               return (
-                <div key={skin.id} className={`rounded-xl border overflow-hidden flex flex-col items-center text-center p-4 gap-2 transition-all ${ownedThis ? 'border-green-200 bg-primary-light/30' : 'border-slate-200 bg-white hover:border-green-300'}`}>
+                <div key={skin.id} className={`rounded-xl border overflow-hidden flex flex-col items-center text-center p-4 gap-2 transition-all ${ownedThis ? 'border-green-200 bg-primary-light/30' : 'border-slate-200 bg-white hover:border-green-300 hover:-translate-y-1 hover:shadow-md'}${skin.rarity === 'legendary' && !ownedThis ? ' ring-1 ring-amber-200/50 shadow-sm shadow-amber-500/5' : ''}`}>
                   <StudentAvatar skin={skin} size={64} />
                   <p className="font-bold text-slate-800 text-sm leading-snug">{skin.name}</p>
                   <span className={`text-[9px] font-bold px-2 py-0.5 rounded border uppercase ${meta.cls}`}>{meta.label}</span>
@@ -341,7 +342,7 @@ const StudentSkins = () => {
               const pct = Math.min(100, Math.round((lifetimeBonus / Math.max(1, skin.threshold)) * 100));
               const meta = RARITY_META[skin.rarity];
               return (
-                <div key={skin.id} className={`rounded-xl border p-4 flex flex-col items-center text-center gap-2 transition-all ${ownedThis ? 'border-emerald-200 bg-emerald-50/40' : reached ? 'border-emerald-300 bg-white' : 'border-slate-200 bg-slate-50/60'}`}>
+                <div key={skin.id} className={`rounded-xl border p-4 flex flex-col items-center text-center gap-2 transition-all ${ownedThis ? 'border-emerald-200 bg-emerald-50/40 hover:-translate-y-0.5 hover:shadow-md' : reached ? 'border-amber-300 bg-gradient-to-b from-amber-50/70 to-white ring-1 ring-amber-200/60 shadow-sm shadow-amber-500/10 hover:-translate-y-0.5 hover:shadow-md' : 'border-slate-200 bg-slate-50/60'}`}>
                   <div className={reached || ownedThis ? '' : 'opacity-40 grayscale'}>
                     <StudentAvatar skin={skin} size={60} />
                   </div>
@@ -352,11 +353,11 @@ const StudentSkins = () => {
                     active ? <span className="mt-1 w-full py-2 rounded-xl text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200">✓ Đang trang bị</span>
                            : <button onClick={() => equipSkin(skin.id)} className="mt-1 w-full py-2 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition-colors">Trang bị</button>
                   ) : reached ? (
-                    <button onClick={() => claimMilestone(skin)} disabled={busy} className="mt-1 w-full py-2 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition-colors disabled:opacity-50">🎁 Nhận miễn phí</button>
+                    <button onClick={() => claimMilestone(skin)} disabled={busy} className="mt-1 w-full py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 shadow-sm shadow-amber-500/30 transition-all disabled:opacity-50">🎁 Nhận miễn phí</button>
                   ) : (
                     <div className="mt-1 w-full">
-                      <div className="h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                        <div className="h-full bg-emerald-500 rounded-full transition-all" style={{ width: `${pct}%` }} />
+                      <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                        <div className="h-full bg-gradient-to-r from-emerald-400 to-emerald-500 rounded-full transition-all" style={{ width: `${pct}%` }} />
                       </div>
                       <p className="text-[10px] font-bold text-slate-400 mt-1">{lifetimeBonus}/{skin.threshold} bonus</p>
                     </div>
@@ -380,7 +381,7 @@ const StudentSkins = () => {
             const affordable = skin.cost <= availableCredits;
             const confirming = confirmSkin === skin.id;
             return (
-              <div key={skin.id} className={`rounded-xl border overflow-hidden flex flex-col items-center text-center p-4 gap-2 transition-all ${ownedThis ? 'border-green-200 bg-primary-light/30' : 'border-slate-200 bg-white hover:border-green-300 hover:-translate-y-1 hover:shadow-md'}`}>
+              <div key={skin.id} className={`rounded-xl border overflow-hidden flex flex-col items-center text-center p-4 gap-2 transition-all ${ownedThis ? 'border-green-200 bg-primary-light/30' : 'border-slate-200 bg-white hover:border-green-300 hover:-translate-y-1 hover:shadow-md'}${skin.rarity === 'legendary' && !ownedThis ? ' ring-1 ring-amber-200/50 shadow-sm shadow-amber-500/5' : ''}`}>
                 <StudentAvatar skin={skin} size={64} />
                 <p className="font-bold text-slate-800 text-sm leading-snug">{skin.name}</p>
                 <span className={`text-[9px] font-bold px-2 py-0.5 rounded border uppercase ${meta.cls}`}>{meta.label}</span>
@@ -408,7 +409,7 @@ const StudentSkins = () => {
         ) : (
           <div className="space-y-2.5">
             {purchases.map((p, i) => (
-              <div key={i} className="flex items-center justify-between gap-3 p-3.5 rounded-xl border border-slate-100 bg-slate-50/50">
+              <div key={i} className="flex items-center justify-between gap-3 p-3.5 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-white hover:border-slate-200 transition-colors">
                 <div className="flex items-center gap-3 min-w-0">
                   <StudentAvatar skin={resolve(p.skinId)} size={36} ring={false} />
                   <div className="min-w-0">
@@ -417,7 +418,7 @@ const StudentSkins = () => {
                   </div>
                 </div>
                 {p.kind === 'milestone' || p.credits === 0
-                  ? <span className="text-xs font-extrabold text-emerald-600 shrink-0">🎯 Mốc học tập</span>
+                  ? <span className="text-[11px] font-extrabold text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2.5 py-1 shrink-0">🎯 Mốc học tập</span>
                   : <span className="text-sm font-extrabold text-primary shrink-0">−{p.credits} ⭐</span>}
               </div>
             ))}
