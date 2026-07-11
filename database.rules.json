@@ -150,7 +150,23 @@
     "studentGames": {
       ".read": "auth != null",
       "$uid": {
-        ".write": "auth != null && (auth.uid === $uid || auth.token.role === 'staff' || auth.token.role === 'admin')"
+        ".write": "auth != null && (auth.uid === $uid || auth.token.role === 'staff' || auth.token.role === 'admin')",
+        "hanhTrinh": {
+          "totalStars": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && (auth.token.role === 'admin' || auth.token.role === 'staff' || (data.exists() ? (newData.val() >= data.val() && newData.val() <= data.val() + 5000) : newData.val() <= 5000))"
+          },
+          "playsUsed":      { ".validate": "newData.isNumber() && newData.val() >= 0" },
+          "unlockedSkills": { ".validate": "newData.isBoolean()" },
+          "rank":           { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 5" },
+          "updatedAt":      { ".validate": "newData.isString() && newData.val().length <= 40" },
+          "beaten": {
+            "$k": { ".validate": "newData.isBoolean() && $k.matches(/^([0-9]|[12][0-9]|30)$/)" }
+          },
+          "playLog": {
+            "$d": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 500" }
+          },
+          "$other": { ".validate": false }
+        }
       }
     },
 
