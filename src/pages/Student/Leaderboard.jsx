@@ -208,15 +208,17 @@ const StudentLeaderboard = () => {
               const r = podium[pos];
               if (!r) return <div key={pos} />;
               const heights = { 0: 'h-32', 1: 'h-24', 2: 'h-20' };
+              // Bục vàng/bạc/đồng khớp huy chương, quán quân nổi bật hơn
+              const barColor = { 0: 'from-amber-400 to-yellow-500 shadow-lg shadow-amber-500/25', 1: 'from-slate-300 to-slate-400', 2: 'from-orange-300 to-amber-600' };
               const isMe = r.id === currentUser?.id;
               return (
-                <div key={r.id} className="flex flex-col items-center">
-                  <div className="text-2xl mb-1">{MEDAL[r.rank - 1]}</div>
-                  <StudentAvatar skin={resolveSkin(r.id)} name={r.name} size={pos === 0 ? 64 : 52} />
+                <div key={r.id} className={`flex flex-col items-center transition-transform ${pos === 0 ? 'scale-105' : ''}`}>
+                  <div className={`mb-1 ${pos === 0 ? 'text-3xl drop-shadow-md' : 'text-2xl'}`}>{MEDAL[r.rank - 1]}</div>
+                  <StudentAvatar skin={resolveSkin(r.id)} name={r.name} size={pos === 0 ? 68 : 52} />
                   <p className={`text-xs font-bold mt-1.5 text-center truncate w-full px-1 ${isMe ? 'text-primary' : 'text-slate-700'}`}>{r.name}{isMe && ' (Bạn)'}</p>
                   <div className="text-[11px] font-extrabold">{renderValue(r)}</div>
-                  <div className={`${heights[pos]} w-full mt-2 rounded-t-xl bg-gradient-to-t from-primary to-primary-medium flex items-start justify-center pt-2`}>
-                    <span className="text-white font-extrabold text-lg">{r.rank}</span>
+                  <div className={`${heights[pos]} w-full mt-2 rounded-t-xl bg-gradient-to-t ${barColor[pos]} flex items-start justify-center pt-2`}>
+                    <span className="text-white font-extrabold text-lg drop-shadow">{r.rank}</span>
                   </div>
                 </div>
               );
@@ -228,7 +230,7 @@ const StudentLeaderboard = () => {
             <h3 className="text-sm font-bold text-primary mb-3 uppercase tracking-wide px-1">Top 20, {activeTab.label}</h3>
             <div className="space-y-1.5">
               {top.map(r => (
-                <div key={r.id} className={`flex items-center gap-3 p-2.5 rounded-xl border ${r.id === currentUser?.id ? 'bg-primary-light border-primary/30' : 'bg-white border-slate-100'}`}>
+                <div key={r.id} className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all ${r.id === currentUser?.id ? 'bg-primary-light border-primary/30 shadow-sm' : 'bg-white border-slate-100 hover:border-primary/20 hover:shadow-sm'}`}>
                   <span className={`w-7 text-center font-extrabold text-sm shrink-0 ${r.rank <= 3 ? 'text-primary' : 'text-slate-400'}`}>
                     {r.rank <= 3 ? MEDAL[r.rank - 1] : r.rank}
                   </span>
