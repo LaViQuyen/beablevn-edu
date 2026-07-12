@@ -184,13 +184,16 @@
     },
 
     "tuitionRecords": {
-      ".read": "auth != null",
+      ".read": "auth != null && auth.token.role === 'admin'",
       ".write": "auth != null && auth.token.role === 'admin'",
-      "$id": {
-        "extensionRequested":   { ".write": "auth != null && (auth.token.role === 'admin' || (auth.token.role === 'student' && root.child('users').child(auth.uid).child('studentCode').val() === root.child('tuitionRecords').child($id).child('studentCode').val() && root.child('tuitionRecords').child($id).child('studentCode').val() !== '' && root.child('tuitionRecords').child($id).child('status').val() === 'Chờ'))", ".validate": "newData.isBoolean()" },
-        "extensionRequestedAt": { ".write": "auth != null && (auth.token.role === 'admin' || (auth.token.role === 'student' && root.child('users').child(auth.uid).child('studentCode').val() === root.child('tuitionRecords').child($id).child('studentCode').val() && root.child('tuitionRecords').child($id).child('studentCode').val() !== '' && root.child('tuitionRecords').child($id).child('status').val() === 'Chờ'))", ".validate": "newData.isString() && newData.val().length <= 40" },
-        "extensionApproved":    { ".write": "auth != null && (auth.token.role === 'admin' || (auth.token.role === 'student' && root.child('users').child(auth.uid).child('studentCode').val() === root.child('tuitionRecords').child($id).child('studentCode').val() && root.child('tuitionRecords').child($id).child('studentCode').val() !== '' && root.child('tuitionRecords').child($id).child('status').val() === 'Chờ' && newData.val() === false))", ".validate": "newData.isBoolean()" },
-        "status":               { ".write": "auth != null && (auth.token.role === 'admin' || (auth.token.role === 'student' && root.child('users').child(auth.uid).child('studentCode').val() === root.child('tuitionRecords').child($id).child('studentCode').val() && root.child('tuitionRecords').child($id).child('studentCode').val() !== '' && root.child('tuitionRecords').child($id).child('status').val() === 'Chờ' && newData.val() === 'Chờ duyệt gia hạn'))" }
+      "$code": {
+        ".read": "auth != null && (auth.token.role === 'admin' || root.child('users').child(auth.uid).child('studentCode').val() === $code)",
+        "$id": {
+          "extensionRequested":   { ".write": "auth != null && (auth.token.role === 'admin' || (auth.token.role === 'student' && root.child('users').child(auth.uid).child('studentCode').val() === $code && root.child('tuitionRecords').child($code).child($id).child('status').val() === 'Chờ'))", ".validate": "newData.isBoolean()" },
+          "extensionRequestedAt": { ".write": "auth != null && (auth.token.role === 'admin' || (auth.token.role === 'student' && root.child('users').child(auth.uid).child('studentCode').val() === $code && root.child('tuitionRecords').child($code).child($id).child('status').val() === 'Chờ'))", ".validate": "newData.isString() && newData.val().length <= 40" },
+          "extensionApproved":    { ".write": "auth != null && (auth.token.role === 'admin' || (auth.token.role === 'student' && root.child('users').child(auth.uid).child('studentCode').val() === $code && root.child('tuitionRecords').child($code).child($id).child('status').val() === 'Chờ' && newData.val() === false))", ".validate": "newData.isBoolean()" },
+          "status":               { ".write": "auth != null && (auth.token.role === 'admin' || (auth.token.role === 'student' && root.child('users').child(auth.uid).child('studentCode').val() === $code && root.child('tuitionRecords').child($code).child($id).child('status').val() === 'Chờ' && newData.val() === 'Chờ duyệt gia hạn'))" }
+        }
       }
     },
 

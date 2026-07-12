@@ -119,11 +119,13 @@ const StudentLayout = () => {
   const [tuitionRecord, setTuitionRecord] = useState(null); // record học phí đáng chú ý nhất
   const [overdueBlockPopup, setOverdueBlockPopup] = useState(false);
 
-  // Subscribe học phí: học viên có thể có nhiều record (mỗi lớp một dòng)
+  // Subscribe học phí: cấu trúc tuitionRecords/{mã HV}/{recordId}, học viên chỉ
+  // đọc được nhánh của chính mình (rules chặn đọc công nợ học viên khác)
   useEffect(() => {
-    if (!currentUser?.studentCode) return;
-    const unsub = onValue(ref(db, 'tuitionRecords'), (snap) => {
-      const picked = pickPrimaryTuitionRecord(snap.val(), currentUser.studentCode);
+    const code = String(currentUser?.studentCode || '').trim();
+    if (!code || /[.#$/\[\]]/.test(code)) return;
+    const unsub = onValue(ref(db, `tuitionRecords/${code}`), (snap) => {
+      const picked = pickPrimaryTuitionRecord(snap.val());
       setTuitionRecord(picked ? picked.record : null);
     });
     return () => unsub();

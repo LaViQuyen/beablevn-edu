@@ -53,11 +53,11 @@ const autoUpdateOverdue = async (records) => {
     const d = new Date(r.paymentDeadline + 'T00:00:00');
     if (isNaN(d.getTime())) return;
     if (r.status === 'Chờ' && d < today) {
-      updates[`tuitionRecords/${r.id}/status`] = 'Quá hạn';
+      updates[`tuitionRecords/${r.dbCode}/${r.id}/status`] = 'Quá hạn';
     }
     if (r.status === 'Chờ duyệt gia hạn') {
       const grace = new Date(d); grace.setDate(grace.getDate() + 7);
-      if (grace < today) updates[`tuitionRecords/${r.id}/status`] = 'Quá hạn';
+      if (grace < today) updates[`tuitionRecords/${r.dbCode}/${r.id}/status`] = 'Quá hạn';
     }
   });
   if (Object.keys(updates).length) await update(ref(db), updates);
@@ -68,7 +68,7 @@ const autoUpdateOverdue = async (records) => {
 const rowToRecord = (row) => {
   const code = String(row[0] || '').trim().toUpperCase();
   const name = String(row[1] || '').trim();
-  if (!code && !name) return null;
+  if (!code) return null; // Mã HV bắt buộc: là key nhánh + điều kiện rules + khớp banner học viên
   const rawStatus = String(row[6] || '').trim();
   return {
     studentCode:       code,
@@ -81,9 +81,21 @@ const rowToRecord = (row) => {
   };
 };
 
-// Khóa so trùng khi nhập bổ sung: Mã HV (fallback tên) + Lớp
+// Khóa so trùng khi nhập bổ sung: Mã HV + Lớp
 const mergeKey = (r) =>
-  `${String(r.studentCode || r.name || '').trim().toUpperCase()}||${String(r.className || '').trim().toUpperCase()}`;
+  `${String(r.studentCode || '').trim().toUpperCase()}||${String(r.className || '').trim().toUpperCase()}`;
+
+// Key Firebase không được chứa . # $ / [ ]
+const toKeySafe = (s) => s.replace(/[.#$/\[\]]/g, '-');
+
+// Mã canonical làm KEY nhánh tuitionRecords/{mã}: ưu tiên đúng chuỗi đang lưu trong
+// node users (rules so sánh CHÍNH XÁC với users/{uid}/studentCode), không tìm thấy
+// thì dùng bản UPPERCASE. codeMap: UPPER(mã users) -> mã users nguyên bản.
+const canonicalCode = (raw, codeMap) => {
+  const up = String(raw || '').trim().toUpperCase();
+  if (!up) return '';
+  return toKeySafe(codeMap[up] || up);
+};
 
 // Escape HTML khi chèn dữ liệu record vào cửa sổ in (chống HTML injection từ file Excel)
 const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -201,6 +213,7 @@ const EditModal = ({ record, onSave, onClose }) => {
 
   const handleSave = () => {
     if (!form.name.trim()) return setErr('Vui lòng nhập Họ và tên.');
+    if (!form.studentCode.trim()) return setErr('Vui lòng nhập Mã HV (bắt buộc để khớp tài khoản học viên).');
     if (!form.className.trim()) return setErr('Vui lòng nhập Lớp.');
     setErr('');
     onSave(form);
@@ -350,6 +363,9 @@ const TuitionManager = () => {
   const [sortDir, setSortDir]               = useState('asc');
   const fileInputRef = useRef(null);
 
+  // Bản đồ mã HV: UPPER(mã trong users) -> mã nguyên bản (đối soát khi import/lưu)
+  const [codeMap, setCodeMap] = useState({});
+
   // History state
   const [snapshots, setSnapshots]     = useState([]);
   const [filterMonth, setFilterMonth] = useState(''); // '1'..'12'
@@ -359,9 +375,23 @@ const TuitionManager = () => {
   useEffect(() => {
     const unsubRec = onValue(ref(db, 'tuitionRecords'), (snap) => {
       const data = snap.val() || {};
-      const arr = Object.entries(data).map(([id, val]) => ({ id, ...val }));
+      // Cấu trúc: tuitionRecords/{mã HV}/{recordId} → trải phẳng để hiển thị bảng
+      const arr = [];
+      Object.entries(data).forEach(([code, recs]) => {
+        Object.entries(recs || {}).forEach(([id, val]) => arr.push({ id, dbCode: code, ...val }));
+      });
       setRecords(arr);
       autoUpdateOverdue(arr);
+    });
+    // Node users: lấy mã HV nguyên bản để làm key nhánh (rules so sánh chính xác)
+    const unsubUsers = onValue(ref(db, 'users'), (snap) => {
+      const data = snap.val() || {};
+      const m = {};
+      Object.values(data).forEach((u) => {
+        const c = String(u?.studentCode || '').trim();
+        if (c) m[c.toUpperCase()] = c;
+      });
+      setCodeMap(m);
     });
     const unsubSnap = onValue(ref(db, 'tuitionSnapshots'), (snap) => {
       const data = snap.val() || {};
@@ -370,7 +400,7 @@ const TuitionManager = () => {
         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       setSnapshots(arr);
     });
-    return () => { unsubRec(); unsubSnap(); };
+    return () => { unsubRec(); unsubSnap(); unsubUsers(); };
   }, []);
 
   // Toast phân loại: success (xanh) / error (đỏ) / warning (vàng). Màu lấy TỪ type, không suy từ emoji.
@@ -411,15 +441,19 @@ const TuitionManager = () => {
     try {
       // Dedupe: file có 2 dòng trùng Mã HV + Lớp thì lấy dòng CUỐI (không sinh record trùng)
       const uniqueRows = [...new Map(rows.map((r) => [mergeKey(r), r])).values()];
+      // Đối soát với node users: mã không khớp học viên nào vẫn được lưu nhưng cảnh báo
+      const unmatched = uniqueRows.filter((r) => !codeMap[String(r.studentCode).trim().toUpperCase()]).length;
+      const warnTail = unmatched > 0 ? ` Lưu ý: ${unmatched} dòng có Mã HV không khớp học viên nào trong hệ thống.` : '';
       if (mode === 'replace') {
         // MỘT lệnh set duy nhất: vừa xoá vừa ghi atomic, không có cửa sổ mất trắng dữ liệu
         const obj = {};
         uniqueRows.forEach((r) => {
+          const code = canonicalCode(r.studentCode, codeMap);
           const key = push(ref(db, 'tuitionRecords')).key;
-          obj[key] = { ...r, extensionRequested: false, extensionApproved: false, importedAt: now };
+          (obj[code] = obj[code] || {})[key] = { ...r, studentCode: code, extensionRequested: false, extensionApproved: false, importedAt: now };
         });
         await set(ref(db, 'tuitionRecords'), obj);
-        showToast(`Import thành công ${uniqueRows.length} học viên (đã thay thế toàn bộ danh sách cũ).`, 'success');
+        showToast(`Import thành công ${uniqueRows.length} học viên (đã thay thế toàn bộ danh sách cũ).${warnTail}`, unmatched ? 'warning' : 'success');
       } else {
         // Nhập bổ sung: so trùng Mã HV + Lớp với danh sách hiện tại
         const existing = new Map();
@@ -427,11 +461,15 @@ const TuitionManager = () => {
         const updates = {};
         let updated = 0, added = 0;
         uniqueRows.forEach((r) => {
-          const match = existing.get(mergeKey(r));
+          const code = canonicalCode(r.studentCode, codeMap);
+          const rec = { ...r, studentCode: code };
+          const match = existing.get(mergeKey(rec));
           if (match) {
-            // Cập nhật đè record cũ; dữ liệu file là mới nhất nên reset cờ gia hạn
-            updates[`tuitionRecords/${match.id}`] = {
-              ...r,
+            // Cập nhật đè record cũ; dữ liệu file là mới nhất nên reset cờ gia hạn.
+            // Mã canonical đổi (vd học viên vừa được tạo tài khoản) → dời nhánh atomic.
+            if (match.dbCode !== code) updates[`tuitionRecords/${match.dbCode}/${match.id}`] = null;
+            updates[`tuitionRecords/${code}/${match.id}`] = {
+              ...rec,
               extensionRequested: false,
               extensionApproved:  false,
               importedAt:         match.importedAt || now,
@@ -440,12 +478,12 @@ const TuitionManager = () => {
             updated++;
           } else {
             const key = push(ref(db, 'tuitionRecords')).key;
-            updates[`tuitionRecords/${key}`] = { ...r, extensionRequested: false, extensionApproved: false, importedAt: now };
+            updates[`tuitionRecords/${code}/${key}`] = { ...rec, extensionRequested: false, extensionApproved: false, importedAt: now };
             added++;
           }
         });
         await update(ref(db), updates);
-        showToast(`Nhập bổ sung xong: cập nhật ${updated} dòng, thêm mới ${added} dòng.`, 'success');
+        showToast(`Nhập bổ sung xong: cập nhật ${updated} dòng, thêm mới ${added} dòng.${warnTail}`, unmatched ? 'warning' : 'success');
       }
     } catch (err) {
       showToast('Lỗi import: ' + err.message, 'error');
@@ -475,9 +513,10 @@ const TuitionManager = () => {
   // ── Lưu chỉnh sửa / thêm mới ─────────────────────────────────────────────
   const handleSaveEdit = async (form) => {
     if (!editTarget) return;
+    const code = canonicalCode(form.studentCode, codeMap);
     const base = {
       name:              form.name.trim(),
-      studentCode:       form.studentCode.trim().toUpperCase(),
+      studentCode:       code,
       className:         form.className.trim(),
       remainingSessions: Number(form.remainingSessions) || 0,
       addedSessions:     Number(form.addedSessions) || 0,
@@ -487,7 +526,7 @@ const TuitionManager = () => {
     try {
       if (!editTarget.id) {
         // Thêm học viên mới (import lẻ bằng tay)
-        await set(push(ref(db, 'tuitionRecords')), {
+        await set(push(ref(db, `tuitionRecords/${code}`)), {
           ...base,
           extensionRequested: false,
           extensionApproved:  false,
@@ -508,7 +547,16 @@ const TuitionManager = () => {
         // học viên hiện "Bạn có Thông báo học phí mới" thay vì "Hệ thống đã cập nhật hạn"
         updates.extensionApproved = false;
       }
-      await update(ref(db, `tuitionRecords/${editTarget.id}`), updates);
+      if (editTarget.dbCode === code) {
+        await update(ref(db, `tuitionRecords/${code}/${editTarget.id}`), updates);
+      } else {
+        // Mã HV đổi → dời record sang nhánh mới (một lệnh atomic, không mất dữ liệu giữa chừng)
+        const { id: _id, dbCode: _dbCode, ...rest } = editTarget;
+        await update(ref(db), {
+          [`tuitionRecords/${editTarget.dbCode}/${editTarget.id}`]: null,
+          [`tuitionRecords/${code}/${editTarget.id}`]: { ...rest, ...updates },
+        });
+      }
       setEditTarget(null);
       showToast('Đã cập nhật thông tin học viên.', 'success');
     } catch (err) {
@@ -519,7 +567,7 @@ const TuitionManager = () => {
   // ── Xóa record ───────────────────────────────────────────────────────────
   const confirmDelete = async () => {
     try {
-      await remove(ref(db, `tuitionRecords/${deleteTarget}`));  // xoá 1 học viên
+      await remove(ref(db, `tuitionRecords/${deleteTarget.dbCode}/${deleteTarget.id}`));  // xoá 1 học viên
       setDeleteTarget(null);
       showToast('Đã xóa học viên khỏi danh sách.', 'success');
     } catch (err) {
@@ -728,7 +776,7 @@ const TuitionManager = () => {
           {/* Excel format hint */}
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-xs text-blue-700 leading-relaxed">
             <span className="font-bold">Định dạng Excel (hàng đầu = tiêu đề, bỏ qua):</span>
-            <span className="mx-1">A=Mã HV · B=Họ và tên · C=Lớp · D=Buổi còn lại · E=Buổi cộng thêm · F=Hạn thanh toán (DD/MM/YYYY) · G=Tình trạng.</span>
+            <span className="mx-1">A=Mã HV (bắt buộc, dòng thiếu mã sẽ bị bỏ qua) · B=Họ và tên · C=Lớp · D=Buổi còn lại · E=Buổi cộng thêm · F=Hạn thanh toán (DD/MM/YYYY) · G=Tình trạng.</span>
             <span>Sau khi chọn file có thể chọn <span className="font-bold">Nhập bổ sung</span> (import lẻ, giữ danh sách cũ) hoặc <span className="font-bold text-red-600">Thay thế toàn bộ</span>.</span>
           </div>
 
@@ -812,7 +860,7 @@ const TuitionManager = () => {
                             Sửa
                           </button>
                           <button
-                            onClick={() => setDeleteTarget(r.id)}
+                            onClick={() => setDeleteTarget({ dbCode: r.dbCode, id: r.id })}
                             className="text-red-500 border border-red-200 px-2 py-1 rounded text-xs font-bold hover:bg-red-500 hover:text-white transition-all"
                           >
                             Xóa

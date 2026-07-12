@@ -319,3 +319,40 @@ exports.coachSpeaking = coach.coachSpeaking;
 exports.coachWriting = coach.coachWriting;
 exports.coachIntro = coach.coachIntro;
 exports.coachTts = coach.coachTts;
+
+// ============================================================
+// HỌC PHÍ: tự động đánh "Quá hạn" mỗi ngày 00:10 giờ VN.
+// Cấu trúc node: tuitionRecords/{mã HV}/{recordId}.
+// - 'Chờ' đã lố paymentDeadline → 'Quá hạn'.
+// - 'Chờ duyệt gia hạn' được ân hạn đúng 7 ngày (cam kết trong popup Gia hạn
+//   phía học viên), lố quá deadline + 7 ngày mà admin chưa xử lý → 'Quá hạn'.
+// Client vẫn có autoUpdateOverdue + effectiveTuitionStatus làm lớp phòng thủ thứ 2,
+// cron này bảo đảm DB đúng trạng thái kể cả khi không ai mở trang Học phí.
+// ============================================================
+exports.tuitionAutoOverdue = onSchedule(
+  { schedule: '10 0 * * *', timeZone: 'Asia/Ho_Chi_Minh', region: 'asia-southeast1' },
+  async () => {
+    const data = (await db.ref('tuitionRecords').get()).val() || {};
+    // Hôm nay theo giờ VN, dạng YYYY-MM-DD (so sánh chuỗi được vì cùng định dạng)
+    const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' });
+    const updates = {};
+    for (const [code, recs] of Object.entries(data)) {
+      for (const [id, r] of Object.entries(recs || {})) {
+        if (!r || !r.paymentDeadline || typeof r.paymentDeadline !== 'string') continue;
+        if (r.status === 'Chờ' && r.paymentDeadline < todayStr) {
+          updates[`tuitionRecords/${code}/${id}/status`] = 'Quá hạn';
+        }
+        if (r.status === 'Chờ duyệt gia hạn') {
+          const d = new Date(r.paymentDeadline + 'T00:00:00Z');
+          if (isNaN(d.getTime())) continue;
+          d.setUTCDate(d.getUTCDate() + 7);
+          if (d.toISOString().slice(0, 10) < todayStr) {
+            updates[`tuitionRecords/${code}/${id}/status`] = 'Quá hạn';
+          }
+        }
+      }
+    }
+    if (Object.keys(updates).length) await db.ref().update(updates);
+    console.log(`tuitionAutoOverdue: chuyển ${Object.keys(updates).length} record sang Quá hạn.`);
+  }
+);

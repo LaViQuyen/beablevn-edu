@@ -86,7 +86,12 @@ const AdminLayout = () => {
   useEffect(() => {
     const unsub = onValue(ref(db, 'tuitionRecords'), (snap) => {
       const data = snap.val() || {};
-      setExtensionCount(Object.values(data).filter((r) => r?.status === 'Chờ duyệt gia hạn').length);
+      let n = 0;
+      // Cấu trúc: tuitionRecords/{mã HV}/{recordId}
+      Object.values(data).forEach((recs) => {
+        Object.values(recs || {}).forEach((r) => { if (r?.status === 'Chờ duyệt gia hạn') n++; });
+      });
+      setExtensionCount(n);
     });
     return () => unsub();
   }, []);

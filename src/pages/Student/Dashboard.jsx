@@ -130,18 +130,20 @@ const StudentDashboard = () => {
     return () => { unsubClasses(); unsubAtt(); unsubScores(); };
   }, [currentUser?.id]);
 
-  // 4. Theo dõi bản ghi học phí của học viên (theo studentCode).
-  // Học viên có thể có NHIỀU record (mỗi lớp một dòng) nên chọn record đáng chú ý
-  // nhất (Quá hạn trước, rồi hạn gần nhất) thay vì lấy record đầu tiên tìm thấy.
+  // 4. Theo dõi học phí: cấu trúc tuitionRecords/{mã HV}/{recordId}, học viên chỉ
+  // đọc được nhánh của CHÍNH mình (rules), không còn tải cả node công nợ về client.
+  const myTuitionCode = String(currentUser?.studentCode || '').trim();
   useEffect(() => {
-    if (!currentUser?.studentCode) return;
-    const unsub = onValue(ref(db, 'tuitionRecords'), (snap) => {
-      const picked = pickPrimaryTuitionRecord(snap.val(), currentUser.studentCode);
+    // Mã chứa ký tự cấm của key Firebase → không có nhánh học phí hợp lệ
+    if (!myTuitionCode || /[.#$/\[\]]/.test(myTuitionCode)) return;
+    const unsub = onValue(ref(db, `tuitionRecords/${myTuitionCode}`), (snap) => {
+      const picked = pickPrimaryTuitionRecord(snap.val());
       setTuitionRecordId(picked ? picked.id : null);
       setTuitionRecord(picked ? picked.record : null);
     });
     return () => unsub();
-  }, [currentUser?.studentCode]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [myTuitionCode]);
 
   // Màu chuyên cần theo ngưỡng
   const getAttColor = (rate) => {
@@ -191,7 +193,7 @@ const StudentDashboard = () => {
   const handleRequestExtension = async () => {
     if (!tuitionRecordId) return;
     try {
-      await update(ref(db, `tuitionRecords/${tuitionRecordId}`), {
+      await update(ref(db, `tuitionRecords/${myTuitionCode}/${tuitionRecordId}`), {
         extensionRequested:   true,
         extensionRequestedAt: new Date().toISOString(),
         extensionApproved:    false,

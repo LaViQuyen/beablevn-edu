@@ -41,13 +41,11 @@ export const effectiveTuitionStatus = (record) => {
 // Một học viên có thể có NHIỀU record (mỗi lớp một dòng). Chọn record "đáng chú ý
 // nhất" để hiển thị banner/khoá tính năng: Quá hạn trước, rồi đang chờ thanh toán
 // (hạn gần nhất trước), cuối cùng mới tới Đã thanh toán.
-// data: object thô từ node tuitionRecords. Trả về { id, record } hoặc null.
-export const pickPrimaryTuitionRecord = (data, studentCode) => {
-  if (!data || !studentCode) return null;
-  const code = String(studentCode).trim().toUpperCase();
-  const mine = Object.entries(data).filter(
-    ([, v]) => String(v?.studentCode || '').trim().toUpperCase() === code
-  );
+// subtree: object {recordId: record} tại nhánh tuitionRecords/{mã HV} của CHÍNH học
+// viên (cấu trúc theo mã: rules chỉ cho học viên đọc nhánh của mình).
+export const pickPrimaryTuitionRecord = (subtree) => {
+  if (!subtree) return null;
+  const mine = Object.entries(subtree).filter(([, v]) => v && typeof v === 'object');
   if (mine.length === 0) return null;
 
   const rank = ([, r]) => {
