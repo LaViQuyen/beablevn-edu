@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { db } from '../../firebase';
 import { ref, onValue, update, remove, set, push } from 'firebase/database';
 import * as XLSX from 'xlsx';
+import { getDaysLeft } from '../../utils/tuition';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -23,6 +24,13 @@ const fmtDate = (d) => {
   try { return new Date(d + 'T00:00:00').toLocaleDateString('vi-VN'); } catch { return d; }
 };
 
+const fmtDateTime = (iso) => {
+  if (!iso) return '';
+  try {
+    return new Date(iso).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+  } catch { return ''; }
+};
+
 const STATUS_STYLE = {
   'Quá hạn':             'bg-red-100 text-red-700 border border-red-200',
   'Đã thanh toán':       'bg-green-100 text-green-700 border border-green-200',
@@ -34,35 +42,69 @@ const statusStyle = (s) => STATUS_STYLE[s] || STATUS_STYLE['Chờ'];
 
 const STATUS_OPTIONS = ['Chờ', 'Đã thanh toán', 'Chờ duyệt gia hạn', 'Quá hạn'];
 
-// Auto-mark overdue: chỉ cập nhật "Chờ" đã qua deadline → "Quá hạn"
+// Auto-mark overdue: "Chờ" đã qua deadline → "Quá hạn".
+// "Chờ duyệt gia hạn" được ân hạn đúng 7 ngày như popup cam kết với học viên;
+// lố quá deadline + 7 ngày mà admin chưa xử lý thì hệ thống tự chuyển "Quá hạn".
 const autoUpdateOverdue = async (records) => {
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const updates = {};
   records.forEach((r) => {
-    if (r.status === 'Chờ' && r.paymentDeadline) {
-      const d = new Date(r.paymentDeadline + 'T00:00:00');
-      if (d < today) updates[`tuitionRecords/${r.id}/status`] = 'Quá hạn';
+    if (!r.paymentDeadline) return;
+    const d = new Date(r.paymentDeadline + 'T00:00:00');
+    if (isNaN(d.getTime())) return;
+    if (r.status === 'Chờ' && d < today) {
+      updates[`tuitionRecords/${r.id}/status`] = 'Quá hạn';
+    }
+    if (r.status === 'Chờ duyệt gia hạn') {
+      const grace = new Date(d); grace.setDate(grace.getDate() + 7);
+      if (grace < today) updates[`tuitionRecords/${r.id}/status`] = 'Quá hạn';
     }
   });
   if (Object.keys(updates).length) await update(ref(db), updates);
 };
 
-// ─── PDF Export ───────────────────────────────────────────────────────────────
+// Chuyển 1 hàng Excel thành record học phí. Trả về null nếu hàng trống.
+// Cột: [0] Mã HV  [1] Họ và tên  [2] Lớp  [3] Buổi còn lại  [4] Buổi cộng thêm  [5] Hạn TT  [6] Tình trạng
+const rowToRecord = (row) => {
+  const code = String(row[0] || '').trim().toUpperCase();
+  const name = String(row[1] || '').trim();
+  if (!code && !name) return null;
+  const rawStatus = String(row[6] || '').trim();
+  return {
+    studentCode:       code,
+    name,
+    className:         String(row[2] || '').trim(),
+    remainingSessions: Number(row[3]) || 0,
+    addedSessions:     Number(row[4]) || 0,
+    paymentDeadline:   parseExcelDate(row[5]),
+    status:            STATUS_OPTIONS.includes(rawStatus) ? rawStatus : 'Chờ',
+  };
+};
 
-const exportToPDF = (snapshotRecords, snapshotTitle) => {
-  const now = new Date();
+// Khóa so trùng khi nhập bổ sung: Mã HV (fallback tên) + Lớp
+const mergeKey = (r) =>
+  `${String(r.studentCode || r.name || '').trim().toUpperCase()}||${String(r.className || '').trim().toUpperCase()}`;
+
+// Escape HTML khi chèn dữ liệu record vào cửa sổ in (chống HTML injection từ file Excel)
+const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+// ─── PDF Export ───────────────────────────────────────────────────────────────
+// Trả về false nếu trình duyệt chặn popup (caller tự hiện toast, không dùng alert)
+
+const exportToPDF = (snapshotRecords, snapshotTitle, snapshotAt) => {
+  const now = snapshotAt ? new Date(snapshotAt) : new Date();
   const dateStr = now.toLocaleString('vi-VN');
   const rows = (snapshotRecords || [])
     .map((r, i) => `
       <tr>
         <td style="text-align:center">${i + 1}</td>
-        <td>${r.studentCode || ''}</td>
-        <td>${r.name || ''}</td>
-        <td>${r.className || ''}</td>
-        <td style="text-align:center">${r.remainingSessions ?? ''}</td>
-        <td style="text-align:center">${r.addedSessions ?? 0}</td>
+        <td>${esc(r.studentCode)}</td>
+        <td>${esc(r.name)}</td>
+        <td>${esc(r.className)}</td>
+        <td style="text-align:center">${esc(r.remainingSessions ?? '')}</td>
+        <td style="text-align:center">${esc(r.addedSessions ?? 0)}</td>
         <td>${r.paymentDeadline ? new Date(r.paymentDeadline + 'T00:00:00').toLocaleDateString('vi-VN') : ''}</td>
-        <td>${r.status || ''}</td>
+        <td>${esc(r.status)}</td>
       </tr>`)
     .join('');
 
@@ -105,19 +147,21 @@ const exportToPDF = (snapshotRecords, snapshotTitle) => {
     </thead>
     <tbody>${rows}</tbody>
   </table>
-  <p class="footer">Xuất từ Hệ thống 2SOL / Be Able VN &nbsp;·&nbsp; ${now.toLocaleDateString('vi-VN')}</p>
+  <p class="footer">Xuất từ Hệ thống 2SOL / Be Able VN &nbsp;·&nbsp; ${new Date().toLocaleDateString('vi-VN')}</p>
   <script>window.onload = () => { window.print(); };<\/script>
 </body>
 </html>`;
 
   const win = window.open('', '_blank', 'width=1000,height=700');
-  if (!win) { alert('Trình duyệt chặn popup. Vui lòng cho phép popup để xuất PDF.'); return; }
+  if (!win) return false;
   win.document.open(); win.document.write(html); win.document.close();
+  return true;
 };
 
-// ─── EditModal ────────────────────────────────────────────────────────────────
+// ─── EditModal (dùng cho cả Chỉnh sửa và Thêm học viên mới) ──────────────────
 
 const EditModal = ({ record, onSave, onClose }) => {
+  const isNew = !record.id;
   const [form, setForm] = useState({
     name:              record.name || '',
     studentCode:       record.studentCode || '',
@@ -127,6 +171,7 @@ const EditModal = ({ record, onSave, onClose }) => {
     paymentDeadline:   record.paymentDeadline || '',
     status:            record.status || 'Chờ',
   });
+  const [err, setErr] = useState('');
 
   const f = (key) => (e) => setForm((prev) => ({ ...prev, [key]: e.target.value }));
 
@@ -140,15 +185,46 @@ const EditModal = ({ record, onSave, onClose }) => {
     }));
   };
 
+  // Dời hạn thêm 7 ngày (đúng cam kết trong popup Gia hạn phía học viên),
+  // trạng thái quay về "Chờ" để banner học viên trở lại màu vàng Cấp 1.
+  const addSevenDays = () => {
+    setForm((prev) => {
+      // Mốc +7 tính từ max(hôm nay, hạn cũ): admin duyệt trễ thì hạn mới không rơi vào quá khứ
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      const oldDl = prev.paymentDeadline ? new Date(prev.paymentDeadline + 'T00:00:00') : today;
+      const base = oldDl > today ? oldDl : today;
+      base.setDate(base.getDate() + 7);
+      const iso = `${base.getFullYear()}-${String(base.getMonth() + 1).padStart(2, '0')}-${String(base.getDate()).padStart(2, '0')}`;
+      return { ...prev, paymentDeadline: iso, status: 'Chờ' };
+    });
+  };
+
+  const handleSave = () => {
+    if (!form.name.trim()) return setErr('Vui lòng nhập Họ và tên.');
+    if (!form.className.trim()) return setErr('Vui lòng nhập Lớp.');
+    setErr('');
+    onSave(form);
+  };
+
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[70] p-4">
       <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-lg border border-slate-100 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-bold text-primary text-base">Chỉnh sửa học viên</h3>
+          <h3 className="font-bold text-primary text-base">{isNew ? 'Thêm học viên' : 'Chỉnh sửa học viên'}</h3>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
           </button>
         </div>
+
+        {/* Học viên đã bấm Gia hạn → gợi ý admin dời hạn +7 ngày */}
+        {record.extensionRequested && (
+          <div className="mb-4 bg-purple-50 border border-purple-200 rounded-xl p-3 text-xs text-purple-700 leading-relaxed">
+            <span className="font-bold">Học viên đã yêu cầu gia hạn</span>
+            {record.extensionRequestedAt ? ` lúc ${fmtDateTime(record.extensionRequestedAt)}` : ''}. Bấm nút
+            <span className="font-bold"> +7 ngày</span> để dời hạn theo cam kết, trạng thái sẽ trở về "Chờ" và banner
+            của học viên tự chuyển về màu vàng.
+          </div>
+        )}
 
         <div className="space-y-3">
           <div className="space-y-1">
@@ -180,7 +256,17 @@ const EditModal = ({ record, onSave, onClose }) => {
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label className="stat-label">Hạn thanh toán</label>
+              <div className="flex items-center justify-between">
+                <label className="stat-label">Hạn thanh toán</label>
+                <button
+                  type="button"
+                  onClick={addSevenDays}
+                  title="Dời hạn thanh toán thêm 7 ngày, trạng thái về Chờ"
+                  className="text-[10px] font-bold text-purple-700 bg-purple-50 border border-purple-200 px-1.5 py-0.5 rounded hover:bg-purple-100 transition-colors"
+                >
+                  +7 ngày
+                </button>
+              </div>
               <input type="date" className="w-full border border-slate-200 p-2.5 rounded-xl text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10" value={form.paymentDeadline} onChange={handleDeadlineChange} />
               <p className="text-[10px] text-slate-400">Để trống → tự động "Đã thanh toán"</p>
             </div>
@@ -193,9 +279,11 @@ const EditModal = ({ record, onSave, onClose }) => {
           </div>
         </div>
 
+        {err && <p className="text-xs text-red-500 font-medium mt-3">{err}</p>}
+
         <div className="flex gap-3 justify-end mt-5">
           <button onClick={onClose} className="btn-secondary">Hủy</button>
-          <button onClick={() => onSave(form)} className="btn-primary">Lưu thay đổi</button>
+          <button onClick={handleSave} className="btn-primary">{isNew ? 'Thêm học viên' : 'Lưu thay đổi'}</button>
         </div>
       </div>
     </div>
@@ -217,27 +305,55 @@ const ConfirmModal = ({ title, message, onConfirm, onCancel, confirmLabel = 'Xó
   </div>
 );
 
+// ─── ImportChoiceModal: chọn Nhập bổ sung (import lẻ) hoặc Thay thế toàn bộ ──
+
+const ImportChoiceModal = ({ count, currentCount, onAppend, onReplace, onCancel }) => (
+  <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[80] p-4">
+    <div className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full space-y-4 border border-slate-100">
+      <p className="text-base font-bold text-slate-800">Đã đọc {count} dòng dữ liệu từ file</p>
+      <div className="space-y-2 text-sm text-slate-600 leading-relaxed">
+        <p>
+          <span className="font-bold text-primary">Nhập bổ sung (import lẻ):</span> dòng trùng
+          <span className="font-bold"> Mã HV + Lớp</span> sẽ được cập nhật đè, dòng mới được thêm vào.
+          Danh sách hiện tại giữ nguyên.
+        </p>
+        <p>
+          <span className="font-bold text-red-600">Thay thế toàn bộ:</span> XOÁ {currentCount} học viên hiện tại
+          và ghi lại từ đầu bằng dữ liệu file. Không thể hoàn tác.
+        </p>
+      </div>
+      <div className="flex gap-2 justify-end flex-wrap">
+        <button onClick={onCancel} className="btn-secondary">Hủy</button>
+        <button onClick={onAppend} className="btn-primary">Nhập bổ sung</button>
+        <button onClick={onReplace} className="btn-danger">Thay thế toàn bộ</button>
+      </div>
+    </div>
+  </div>
+);
+
 // ─── TuitionManager ───────────────────────────────────────────────────────────
 
 const TuitionManager = () => {
   const [activeSubTab, setActiveSubTab] = useState('stats');
 
   // Stats state
-  const [records, setRecords]             = useState([]);
-  const [filterName, setFilterName]       = useState('');
-  const [filterClass, setFilterClass]     = useState('');
+  const [records, setRecords]               = useState([]);
+  const [filterName, setFilterName]         = useState('');
+  const [filterClass, setFilterClass]       = useState('');
   const [filterSessions, setFilterSessions] = useState('');
-  const [editTarget, setEditTarget]       = useState(null);
-  const [deleteTarget, setDeleteTarget]   = useState(null);
-  const [toast, setToast]                 = useState({ msg: '', type: 'success' });
-  const [pendingImport, setPendingImport] = useState(null); // {updates, count} chờ admin xác nhận thay thế toàn bộ
-  const [sortKey, setSortKey]             = useState('');
-  const [sortDir, setSortDir]             = useState('asc');
+  const [filterStatus, setFilterStatus]     = useState('');
+  const [editTarget, setEditTarget]         = useState(null); // record đang sửa, {} = thêm mới
+  const [deleteTarget, setDeleteTarget]     = useState(null);
+  const [toast, setToast]                   = useState({ msg: '', type: 'success' });
+  const [pendingImport, setPendingImport]   = useState(null); // {rows, count} chờ admin chọn chế độ nhập
+  const [sortKey, setSortKey]               = useState('');
+  const [sortDir, setSortDir]               = useState('asc');
   const fileInputRef = useRef(null);
 
   // History state
-  const [snapshots, setSnapshots]         = useState([]);
-  const [filterMonth, setFilterMonth]     = useState('');
+  const [snapshots, setSnapshots]     = useState([]);
+  const [filterMonth, setFilterMonth] = useState(''); // '1'..'12'
+  const [filterYear, setFilterYear]   = useState(''); // '2026'...
 
   // ── Firebase listeners ────────────────────────────────────────────────────
   useEffect(() => {
@@ -263,7 +379,7 @@ const TuitionManager = () => {
     setTimeout(() => setToast((t) => ({ ...t, msg: '' })), 3500);
   };
 
-  // ── Import Excel: PARSE trước, chờ admin XÁC NHẬN rồi mới thay thế toàn bộ ──
+  // ── Import Excel: PARSE trước, admin chọn Nhập bổ sung / Thay thế toàn bộ ──
   const handleImport = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -272,35 +388,12 @@ const TuitionManager = () => {
       try {
         const wb   = XLSX.read(evt.target.result, { type: 'binary' });
         const ws   = wb.Sheets[wb.SheetNames[0]];
-        const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
-        if (rows.length < 2) return showToast('File không có dữ liệu (cần ít nhất 1 hàng dữ liệu sau header).', 'error');
-
-        // Cột: [0] Mã HV  [1] Họ và tên  [2] Lớp  [3] Buổi còn lại  [4] Buổi cộng thêm  [5] Hạn TT  [6] Tình trạng
-        const updates = {};
-        let count = 0;
-        for (let i = 1; i < rows.length; i++) {
-          const row  = rows[i];
-          const code = String(row[0] || '').trim();
-          const name = String(row[1] || '').trim();
-          if (!code && !name) continue;
-          const newKey = push(ref(db, 'tuitionRecords')).key;
-          updates[`tuitionRecords/${newKey}`] = {
-            studentCode:        code,
-            name,
-            className:          String(row[2] || '').trim(),
-            remainingSessions:  Number(row[3]) || 0,
-            addedSessions:      Number(row[4]) || 0,
-            paymentDeadline:    parseExcelDate(row[5]),
-            status:             String(row[6] || 'Chờ').trim() || 'Chờ',
-            extensionRequested: false,
-            extensionApproved:  false,
-            importedAt:         new Date().toISOString(),
-          };
-          count++;
-        }
-        if (count === 0) return showToast('Không đọc được dòng dữ liệu hợp lệ nào từ file.', 'error');
-        // KHÔNG ghi ngay: chờ xác nhận (chống một cú bấm nhầm xoá sạch dữ liệu tiền bạc).
-        setPendingImport({ updates, count });
+        const raw  = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+        if (raw.length < 2) return showToast('File không có dữ liệu (cần ít nhất 1 hàng dữ liệu sau header).', 'error');
+        const rows = raw.slice(1).map(rowToRecord).filter(Boolean); // bỏ hàng tiêu đề + hàng trống
+        if (rows.length === 0) return showToast('Không đọc được dòng dữ liệu hợp lệ nào từ file.', 'error');
+        // KHÔNG ghi ngay: chờ admin chọn chế độ (chống một cú bấm nhầm xoá sạch dữ liệu tiền bạc).
+        setPendingImport({ rows, count: rows.length });
       } catch (err) {
         showToast('Lỗi đọc file: ' + err.message, 'error');
       }
@@ -309,14 +402,51 @@ const TuitionManager = () => {
     e.target.value = '';
   };
 
-  // Thực thi thay thế toàn bộ danh sách SAU khi admin xác nhận trong ConfirmModal
-  const confirmImport = async () => {
+  // Thực thi import SAU khi admin chọn chế độ trong ImportChoiceModal.
+  // mode 'replace' = thay thế toàn bộ; mode 'append' = nhập bổ sung (import lẻ).
+  const confirmImport = async (mode) => {
     if (!pendingImport) return;
-    const { updates, count } = pendingImport;
+    const { rows } = pendingImport;
+    const now = new Date().toISOString();
     try {
-      await set(ref(db, 'tuitionRecords'), null);       // 1. xoá toàn bộ dữ liệu cũ
-      if (count > 0) await update(ref(db), updates);    // 2. ghi dữ liệu mới
-      showToast(`Import thành công ${count} học viên (đã thay thế toàn bộ danh sách cũ).`, 'success');
+      // Dedupe: file có 2 dòng trùng Mã HV + Lớp thì lấy dòng CUỐI (không sinh record trùng)
+      const uniqueRows = [...new Map(rows.map((r) => [mergeKey(r), r])).values()];
+      if (mode === 'replace') {
+        // MỘT lệnh set duy nhất: vừa xoá vừa ghi atomic, không có cửa sổ mất trắng dữ liệu
+        const obj = {};
+        uniqueRows.forEach((r) => {
+          const key = push(ref(db, 'tuitionRecords')).key;
+          obj[key] = { ...r, extensionRequested: false, extensionApproved: false, importedAt: now };
+        });
+        await set(ref(db, 'tuitionRecords'), obj);
+        showToast(`Import thành công ${uniqueRows.length} học viên (đã thay thế toàn bộ danh sách cũ).`, 'success');
+      } else {
+        // Nhập bổ sung: so trùng Mã HV + Lớp với danh sách hiện tại
+        const existing = new Map();
+        records.forEach((rec) => existing.set(mergeKey(rec), rec));
+        const updates = {};
+        let updated = 0, added = 0;
+        uniqueRows.forEach((r) => {
+          const match = existing.get(mergeKey(r));
+          if (match) {
+            // Cập nhật đè record cũ; dữ liệu file là mới nhất nên reset cờ gia hạn
+            updates[`tuitionRecords/${match.id}`] = {
+              ...r,
+              extensionRequested: false,
+              extensionApproved:  false,
+              importedAt:         match.importedAt || now,
+              updatedAt:          now,
+            };
+            updated++;
+          } else {
+            const key = push(ref(db, 'tuitionRecords')).key;
+            updates[`tuitionRecords/${key}`] = { ...r, extensionRequested: false, extensionApproved: false, importedAt: now };
+            added++;
+          }
+        });
+        await update(ref(db), updates);
+        showToast(`Nhập bổ sung xong: cập nhật ${updated} dòng, thêm mới ${added} dòng.`, 'success');
+      }
     } catch (err) {
       showToast('Lỗi import: ' + err.message, 'error');
     } finally {
@@ -334,33 +464,50 @@ const TuitionManager = () => {
         count:     records.length,
         records:   records.map((r) => ({ ...r })),
       });
-      exportToPDF(records, 'Thống kê Buổi học trả trước còn lại');
-      showToast('Đã chốt và xuất PDF.', 'success');
+      const ok = exportToPDF(records, 'Thống kê Buổi học trả trước còn lại');
+      if (ok) showToast('Đã chốt và xuất PDF.', 'success');
+      else showToast('Đã chốt, nhưng trình duyệt chặn popup. Cho phép popup rồi tải lại từ tab Danh sách phiên bản.', 'warning');
     } catch (err) {
       showToast('Lỗi chốt: ' + err.message, 'error');
     }
   };
 
-  // ── Lưu chỉnh sửa ────────────────────────────────────────────────────────
+  // ── Lưu chỉnh sửa / thêm mới ─────────────────────────────────────────────
   const handleSaveEdit = async (form) => {
     if (!editTarget) return;
-    const updates = {
-      name:              form.name,
-      studentCode:       form.studentCode,
-      className:         form.className,
-      remainingSessions: Number(form.remainingSessions),
-      addedSessions:     Number(form.addedSessions),
+    const base = {
+      name:              form.name.trim(),
+      studentCode:       form.studentCode.trim().toUpperCase(),
+      className:         form.className.trim(),
+      remainingSessions: Number(form.remainingSessions) || 0,
+      addedSessions:     Number(form.addedSessions) || 0,
       paymentDeadline:   form.paymentDeadline,
       status:            form.status,
-      updatedAt:         new Date().toISOString(),
     };
-    // Nếu admin đã xử lý gia hạn → clear flag extensionRequested
-    if (editTarget.extensionRequested && form.status !== 'Chờ duyệt gia hạn') {
-      updates.extensionRequested  = false;
-      updates.extensionApproved   = true;
-      updates.extensionApprovedAt = new Date().toISOString();
-    }
     try {
+      if (!editTarget.id) {
+        // Thêm học viên mới (import lẻ bằng tay)
+        await set(push(ref(db, 'tuitionRecords')), {
+          ...base,
+          extensionRequested: false,
+          extensionApproved:  false,
+          importedAt:         new Date().toISOString(),
+        });
+        setEditTarget(null);
+        showToast('Đã thêm học viên vào danh sách.', 'success');
+        return;
+      }
+      const updates = { ...base, updatedAt: new Date().toISOString() };
+      // Nếu admin đã xử lý gia hạn → clear flag extensionRequested
+      if (editTarget.extensionRequested && form.status !== 'Chờ duyệt gia hạn') {
+        updates.extensionRequested  = false;
+        updates.extensionApproved   = true;
+        updates.extensionApprovedAt = new Date().toISOString();
+      } else if (!editTarget.extensionRequested && form.paymentDeadline !== (editTarget.paymentDeadline || '')) {
+        // Admin đặt hạn MỚI ngoài luồng gia hạn (chu kỳ học phí mới): reset cờ để banner
+        // học viên hiện "Bạn có Thông báo học phí mới" thay vì "Hệ thống đã cập nhật hạn"
+        updates.extensionApproved = false;
+      }
       await update(ref(db, `tuitionRecords/${editTarget.id}`), updates);
       setEditTarget(null);
       showToast('Đã cập nhật thông tin học viên.', 'success');
@@ -418,6 +565,7 @@ const TuitionManager = () => {
     }
     if (filterClass && !r.className?.toLowerCase().includes(filterClass.toLowerCase())) return false;
     if (filterSessions && String(r.remainingSessions) !== filterSessions) return false;
+    if (filterStatus && r.status !== filterStatus) return false;
     return true;
   });
 
@@ -427,20 +575,17 @@ const TuitionManager = () => {
   const sessionValues = [...new Set(records.map((r) => r.remainingSessions))].filter((v) => v !== undefined).sort((a, b) => a - b);
   const extensionCount = records.filter((r) => r.status === 'Chờ duyệt gia hạn').length;
 
-  // ── Snapshot filter ───────────────────────────────────────────────────────
-  const monthOptions = [...new Set(
-    snapshots.map((s) => {
-      const d = new Date(s.createdAt);
-      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-    })
-  )].sort((a, b) => b.localeCompare(a));
+  // ── Snapshot filter: 2 dropdown Tháng và Năm ─────────────────────────────
+  const yearOptions = [...new Set(snapshots.map((s) => new Date(s.createdAt).getFullYear()))]
+    .filter((y) => !isNaN(y))
+    .sort((a, b) => b - a);
 
-  const filteredSnapshots = filterMonth
-    ? snapshots.filter((s) => {
-        const d = new Date(s.createdAt);
-        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}` === filterMonth;
-      })
-    : snapshots;
+  const filteredSnapshots = snapshots.filter((s) => {
+    const d = new Date(s.createdAt);
+    if (filterYear && d.getFullYear() !== Number(filterYear)) return false;
+    if (filterMonth && d.getMonth() + 1 !== Number(filterMonth)) return false;
+    return true;
+  });
 
   // ─── Render ───────────────────────────────────────────────────────────────
   return (
@@ -459,11 +604,11 @@ const TuitionManager = () => {
       {editTarget && <EditModal record={editTarget} onSave={handleSaveEdit} onClose={() => setEditTarget(null)} />}
       {deleteTarget && <ConfirmModal title="Xóa học viên này khỏi danh sách?" message="Hành động không thể hoàn tác." onConfirm={confirmDelete} onCancel={() => setDeleteTarget(null)} />}
       {pendingImport && (
-        <ConfirmModal
-          title="Thay thế toàn bộ danh sách học phí?"
-          message={`Thao tác này sẽ XOÁ ${records.length} học viên hiện tại và ghi ${pendingImport.count} dòng từ file mới. Không thể hoàn tác.`}
-          confirmLabel="Thay thế"
-          onConfirm={confirmImport}
+        <ImportChoiceModal
+          count={pendingImport.count}
+          currentCount={records.length}
+          onAppend={() => confirmImport('append')}
+          onReplace={() => confirmImport('replace')}
           onCancel={() => setPendingImport(null)}
         />
       )}
@@ -504,7 +649,7 @@ const TuitionManager = () => {
           {/* Bộ lọc */}
           <div className="card-std p-5">
             <p className="stat-label mb-3">Bộ lọc</p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
               <input
                 className="input-base"
                 placeholder="Tìm tên hoặc mã học viên..."
@@ -527,6 +672,14 @@ const TuitionManager = () => {
                 <option value="">Tất cả số buổi</option>
                 {sessionValues.map((v) => <option key={v} value={v}>{v} buổi</option>)}
               </select>
+              <select
+                className="input-base"
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+              >
+                <option value="">Tất cả tình trạng</option>
+                {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
+              </select>
             </div>
           </div>
 
@@ -543,8 +696,17 @@ const TuitionManager = () => {
               Import Excel
             </button>
             <button
+              onClick={() => setEditTarget({})}
+              className="btn-secondary"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+              </svg>
+              Thêm học viên
+            </button>
+            <button
               onClick={handleChot}
-              className="btn-primary"
+              className="btn-danger"
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -566,8 +728,8 @@ const TuitionManager = () => {
           {/* Excel format hint */}
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-xs text-blue-700 leading-relaxed">
             <span className="font-bold">Định dạng Excel (hàng đầu = tiêu đề, bỏ qua):</span>
-            <span className="mx-1">A=Mã HV · B=Họ và tên · C=Lớp · D=Buổi còn lại · E=Buổi cộng thêm · F=Hạn thanh toán (DD/MM/YYYY) · G=Tình trạng</span>
-            <span className="font-bold text-red-600">Import sẽ THAY THẾ toàn bộ danh sách hiện tại.</span>
+            <span className="mx-1">A=Mã HV · B=Họ và tên · C=Lớp · D=Buổi còn lại · E=Buổi cộng thêm · F=Hạn thanh toán (DD/MM/YYYY) · G=Tình trạng.</span>
+            <span>Sau khi chọn file có thể chọn <span className="font-bold">Nhập bổ sung</span> (import lẻ, giữ danh sách cũ) hoặc <span className="font-bold text-red-600">Thay thế toàn bộ</span>.</span>
           </div>
 
           {/* Bảng */}
@@ -588,7 +750,7 @@ const TuitionManager = () => {
                       <th key={key} className={cls}>
                         <button
                           onClick={() => handleSort(key)}
-                          className="flex items-center gap-1 hover:text-white/80 transition-colors font-bold uppercase text-[11px] tracking-wide"
+                          className={`flex items-center gap-1 hover:text-primary transition-colors font-bold uppercase text-[11px] tracking-wide ${cls === 'text-center' ? 'mx-auto' : ''}`}
                         >
                           {label}
                           <span className="text-[10px] leading-none">
@@ -605,11 +767,13 @@ const TuitionManager = () => {
                     <tr>
                       <td colSpan="8" className="p-10 text-center text-slate-400 italic">
                         {records.length === 0
-                          ? 'Chưa có dữ liệu. Nhấn "Import Excel" để nhập danh sách.'
+                          ? 'Chưa có dữ liệu. Nhấn "Import Excel" để nhập danh sách hoặc "Thêm học viên" để nhập lẻ.'
                           : 'Không tìm thấy học viên phù hợp với bộ lọc.'}
                       </td>
                     </tr>
-                  ) : filteredRecords.map((r) => (
+                  ) : filteredRecords.map((r) => {
+                    const dl = getDaysLeft(r.paymentDeadline);
+                    return (
                     <tr
                       key={r.id}
                       className={`hover:bg-slate-50 transition-colors ${r.status === 'Chờ duyệt gia hạn' ? 'bg-purple-50/50' : ''}`}
@@ -623,11 +787,21 @@ const TuitionManager = () => {
                       <td className="text-center">
                         <span className="font-bold text-blue-600">{r.addedSessions ?? 0}</span>
                       </td>
-                      <td className="text-slate-700 whitespace-nowrap">{fmtDate(r.paymentDeadline)}</td>
+                      <td className="whitespace-nowrap">
+                        <span className="text-slate-700">{fmtDate(r.paymentDeadline)}</span>
+                        {dl !== null && r.status !== 'Đã thanh toán' && (
+                          <p className={`text-[10px] font-medium ${dl < 0 ? 'text-red-500' : dl <= 3 ? 'text-amber-600' : 'text-slate-400'}`}>
+                            {dl < 0 ? `Lố ${-dl} ngày` : dl === 0 ? 'Hạn hôm nay' : `Còn ${dl} ngày`}
+                          </p>
+                        )}
+                      </td>
                       <td>
                         <span className={`text-xs font-bold px-2 py-1 rounded-lg whitespace-nowrap ${statusStyle(r.status)}`}>
                           {r.status || 'Chờ'}
                         </span>
+                        {r.status === 'Chờ duyệt gia hạn' && r.extensionRequestedAt && (
+                          <p className="text-[10px] text-purple-500 mt-1 whitespace-nowrap">Y/c lúc {fmtDateTime(r.extensionRequestedAt)}</p>
+                        )}
                       </td>
                       <td>
                         <div className="flex gap-2 justify-end">
@@ -646,7 +820,7 @@ const TuitionManager = () => {
                         </div>
                       </td>
                     </tr>
-                  ))}
+                  );})}
                 </tbody>
               </table>
             </div>
@@ -657,18 +831,25 @@ const TuitionManager = () => {
       {/* ══ TAB: DANH SÁCH PHIÊN BẢN ════════════════════════════════════════ */}
       {activeSubTab === 'history' && (
         <div className="space-y-4">
-          {/* Filter tháng/năm */}
+          {/* Bộ lọc Tháng + Năm */}
           <div className="flex items-center gap-3 flex-wrap">
             <select
-              className="p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 bg-white min-w-[180px]"
+              className="p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 bg-white min-w-[140px]"
               value={filterMonth}
               onChange={(e) => setFilterMonth(e.target.value)}
             >
               <option value="">Tất cả tháng</option>
-              {monthOptions.map((m) => {
-                const [y, mo] = m.split('-');
-                return <option key={m} value={m}>Tháng {parseInt(mo)}/{y}</option>;
-              })}
+              {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
+                <option key={m} value={m}>Tháng {m}</option>
+              ))}
+            </select>
+            <select
+              className="p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 bg-white min-w-[120px]"
+              value={filterYear}
+              onChange={(e) => setFilterYear(e.target.value)}
+            >
+              <option value="">Tất cả năm</option>
+              {yearOptions.map((y) => <option key={y} value={y}>Năm {y}</option>)}
             </select>
             {snapshots.length > 0 && (
               <span className="text-xs text-slate-400 font-medium">{filteredSnapshots.length} / {snapshots.length} phiên bản</span>
@@ -682,7 +863,7 @@ const TuitionManager = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
               </svg>
               <p className="text-slate-400 font-medium text-sm">
-                {snapshots.length === 0 ? 'Chưa có phiên bản nào.' : 'Không có phiên bản trong tháng đã chọn.'}
+                {snapshots.length === 0 ? 'Chưa có phiên bản nào.' : 'Không có phiên bản trong thời gian đã chọn.'}
               </p>
               <p className="text-slate-300 text-xs mt-1">Nhấn "Chốt" ở tab Thống kê để tạo phiên bản mới.</p>
             </div>
@@ -704,7 +885,11 @@ const TuitionManager = () => {
                       </p>
                     </div>
                     <button
-                      onClick={() => exportToPDF(snap.records, 'Thống kê Buổi học trả trước còn lại')}
+                      onClick={() => {
+                        if (!exportToPDF(snap.records, 'Thống kê Buổi học trả trước còn lại', snap.createdAt)) {
+                          showToast('Trình duyệt chặn popup. Vui lòng cho phép popup để xuất PDF.', 'error');
+                        }
+                      }}
                       className="btn-danger shrink-0"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">

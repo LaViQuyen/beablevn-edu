@@ -7,6 +7,7 @@ import { ref, update, get, onValue } from 'firebase/database';
 import bcrypt from 'bcryptjs';
 import { StudentNotifyEngine } from '../NotificationEngine'; // thông báo + chuông: báo bài, nhắc lịch học, trạng thái đổi quà
 import StudentAvatar from '../StudentAvatar'; // avatar cho khối danh tính người đăng nhập
+import { effectiveTuitionStatus, pickPrimaryTuitionRecord } from '../../utils/tuition';
 
 const Icons = {
   Dashboard: ({ active }) => (
@@ -115,21 +116,21 @@ const StudentLayout = () => {
   const [moreOpen, setMoreOpen] = useState(false); // Drawer "Thêm" trên mobile
 
   // ─── Trạng thái học phí để khoá menu khi Quá hạn ─────────────────────────
-  const [tuitionStatus, setTuitionStatus] = useState(null); // null | 'Chờ' | 'Quá hạn' | 'Đã đóng'
+  const [tuitionRecord, setTuitionRecord] = useState(null); // record học phí đáng chú ý nhất
   const [overdueBlockPopup, setOverdueBlockPopup] = useState(false);
 
-  // Subscribe trạng thái học phí
+  // Subscribe học phí: học viên có thể có nhiều record (mỗi lớp một dòng)
   useEffect(() => {
     if (!currentUser?.studentCode) return;
     const unsub = onValue(ref(db, 'tuitionRecords'), (snap) => {
-      const data = snap.val() || {};
-      const entry = Object.values(data).find((v) => v.studentCode === currentUser.studentCode);
-      setTuitionStatus(entry?.status || null);
+      const picked = pickPrimaryTuitionRecord(snap.val(), currentUser.studentCode);
+      setTuitionRecord(picked ? picked.record : null);
     });
     return () => unsub();
   }, [currentUser?.studentCode]);
 
-  const isOverdue = tuitionStatus === 'Quá hạn';
+  // Quá hạn HIỆU LỰC: gồm cả record 'Chờ' đã lố hạn (đồng bộ logic với Dashboard)
+  const isOverdue = effectiveTuitionStatus(tuitionRecord) === 'Quá hạn';
 
   // Xử lý click menu bị khoá khi quá hạn
   const handleBlockedMenuClick = (e) => {
@@ -159,6 +160,17 @@ const StudentLayout = () => {
   // Thu tu the bottom nav - dung cho VUOT NGANG chuyen the;
   // khi Qua han hoc phi thi BO cac the bi khoa khoi day vuot (khong lach duoc popup)
   const LOCKED_WHEN_OVERDUE = ['credits', 'skins', 'resources', 'notifications'];
+
+  // Chặn truy cập TRỰC TIẾP bằng URL vào trang bị khoá khi Quá hạn
+  // (khoá nút menu là chưa đủ: học viên có thể gõ /student/credits trên thanh địa chỉ)
+  useEffect(() => {
+    if (!isOverdue) return;
+    if (LOCKED_WHEN_OVERDUE.some((k) => location.pathname.includes(k))) {
+      setOverdueBlockPopup(true);
+      navigate('/student/dashboard', { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOverdue, location.pathname]);
   const TABS = [
     { key: 'dashboard',     to: '/student/dashboard' },
     { key: 'attendance',    to: '/student/attendance' },
@@ -205,15 +217,16 @@ const StudentLayout = () => {
 
     setLoadingPass(true);
     try {
-      const userRef = ref(db, `users/${currentUser.id}`);
-      const snapshot = await get(userRef);
-      const userData = snapshot.val();
-      const isMatch = bcrypt.compareSync(passForm.oldPass, userData.password);
+      // Mật khẩu lưu ở node RIÊNG userAuth (không nằm trong users) để đọc users không lộ credential.
+      const authRef = ref(db, `userAuth/${currentUser.id}`);
+      const snapshot = await get(authRef);
+      const userData = snapshot.val() || {};
+      const isMatch = bcrypt.compareSync(passForm.oldPass, userData.password || '');
       if (!isMatch) { setPassError("Mật khẩu cũ không đúng!"); setLoadingPass(false); return; }
 
       const salt = bcrypt.genSaltSync(10);
       const newHash = bcrypt.hashSync(passForm.newPass, salt);
-      await update(userRef, { password: newHash });
+      await update(authRef, { password: newHash });
 
       setPassSuccess("Đổi mật khẩu thành công!");
       setPassForm({ oldPass: '', newPass: '', confirmPass: '' });

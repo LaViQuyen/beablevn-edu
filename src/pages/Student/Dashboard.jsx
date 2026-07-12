@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { db } from '../../firebase';
 import { ref, onValue, update } from 'firebase/database';
+import { getDaysLeft, effectiveTuitionStatus, pickPrimaryTuitionRecord } from '../../utils/tuition';
 
 // ============================================================
 // SKELETON CARD, thay thế "Đang tải..."
@@ -59,7 +60,7 @@ const StudentDashboard = () => {
   // --- Thông báo học phí ---
   const [tuitionRecord, setTuitionRecord]           = useState(null);   // record từ tuitionRecords/
   const [tuitionRecordId, setTuitionRecordId]       = useState(null);   // key của record
-  const [extensionPopup, setExtensionPopup]         = useState(false);  // popup gia hạn
+  const [extensionPopup, setExtensionPopup]         = useState(null);   // null | 'ok' | 'error': popup KẾT QUẢ gửi gia hạn
   const [overduePopup, setOverduePopup]             = useState(false);  // popup quá hạn
   const [creditsBlockedPopup, setCreditsBlockedPopup] = useState(false); // popup khóa credits
 
@@ -129,30 +130,18 @@ const StudentDashboard = () => {
     return () => { unsubClasses(); unsubAtt(); unsubScores(); };
   }, [currentUser?.id]);
 
-  // 4. Theo dõi bản ghi học phí của học viên (theo studentCode)
+  // 4. Theo dõi bản ghi học phí của học viên (theo studentCode).
+  // Học viên có thể có NHIỀU record (mỗi lớp một dòng) nên chọn record đáng chú ý
+  // nhất (Quá hạn trước, rồi hạn gần nhất) thay vì lấy record đầu tiên tìm thấy.
   useEffect(() => {
     if (!currentUser?.studentCode) return;
     const unsub = onValue(ref(db, 'tuitionRecords'), (snap) => {
-      const data = snap.val() || {};
-      const entry = Object.entries(data).find(([, v]) => v.studentCode === currentUser.studentCode);
-      if (entry) {
-        setTuitionRecordId(entry[0]);
-        setTuitionRecord(entry[1]);
-      } else {
-        setTuitionRecordId(null);
-        setTuitionRecord(null);
-      }
+      const picked = pickPrimaryTuitionRecord(snap.val(), currentUser.studentCode);
+      setTuitionRecordId(picked ? picked.id : null);
+      setTuitionRecord(picked ? picked.record : null);
     });
     return () => unsub();
   }, [currentUser?.studentCode]);
-
-  // Tính số ngày đến hạn thanh toán
-  const getDaysLeft = (deadline) => {
-    if (!deadline) return null;
-    const d = new Date(deadline + 'T00:00:00');
-    const today = new Date(); today.setHours(0, 0, 0, 0);
-    return Math.ceil((d - today) / (1000 * 60 * 60 * 24));
-  };
 
   // Màu chuyên cần theo ngưỡng
   const getAttColor = (rate) => {
@@ -167,35 +156,38 @@ const StudentDashboard = () => {
 
   // ─── Logic banner học phí ────────────────────────────────────────────────
   const daysLeft = getDaysLeft(tuitionRecord?.paymentDeadline);
+  // Trạng thái hiệu lực: record 'Chờ' đã lố hạn được coi là 'Quá hạn' NGAY phía
+  // client, không chờ admin mở trang Học phí để autoUpdateOverdue ghi DB.
+  const effStatus = effectiveTuitionStatus(tuitionRecord);
   const tuitionStatus = tuitionRecord?.status;
   const deadlineDisplay = tuitionRecord?.paymentDeadline
     ? new Date(tuitionRecord.paymentDeadline + 'T00:00:00').toLocaleDateString('vi-VN')
     : '';
 
-  // Cấp độ banner
-  // 3 = Quá hạn (status = 'Quá hạn')
-  // 2 = Chờ + còn <= 3 ngày
-  // 1 = Chờ + còn <= 7 ngày (và > 3 ngày)
-  // 0 = Không hiển thị (không có record, Đã đóng, hoặc còn > 7 ngày)
+  // Cấp độ banner (theo spec):
+  // 3 = Quá hạn (DB ghi 'Quá hạn', hoặc 'Chờ' đã lố hạn)
+  // 2 = Chờ / Chờ duyệt gia hạn + còn từ và dưới 3 ngày
+  // 1 = Chờ / Chờ duyệt gia hạn + còn TRÊN 3 ngày (hoặc chưa rõ hạn)
+  // 0 = Không hiển thị (không có record hoặc Đã thanh toán)
   const bannerLevel = (() => {
     if (!tuitionRecord) return 0;
-    if (tuitionStatus === 'Quá hạn') return 3;
+    if (effStatus === 'Quá hạn') return 3;
     // "Chờ" và "Chờ duyệt gia hạn" đều hiện banner (đang chờ thanh toán)
     if (tuitionStatus === 'Chờ' || tuitionStatus === 'Chờ duyệt gia hạn') {
       if (daysLeft !== null && daysLeft <= 3) return 2;  // ≤3 ngày → đỏ (urgent)
-      if (daysLeft === null || daysLeft <= 7) return 1;  // ≤7 ngày (hoặc chưa rõ hạn) → vàng (nhắc nhở)
-      return 0; // >7 ngày → chưa cần nhắc
+      return 1; // trên 3 ngày hoặc chưa rõ hạn → vàng (nhắc nhở)
     }
     return 0; // Đã thanh toán hoặc trạng thái khác
   })();
 
-  // Đã gia hạn chờ duyệt (extensionRequested = true và chưa approved)
-  const extensionPending = tuitionRecord?.extensionRequested && !tuitionRecord?.extensionApproved;
+  // Đang chờ admin duyệt gia hạn: dựa thẳng vào status (một nguồn sự thật, khớp rules)
+  const extensionPending = tuitionStatus === 'Chờ duyệt gia hạn';
 
   // Admin vừa duyệt gia hạn (extensionApproved = true)
   const extensionApproved = tuitionRecord?.extensionApproved;
 
-  // Gửi yêu cầu gia hạn
+  // Gửi yêu cầu gia hạn NGAY khi bấm nút (spec: 1 cú bấm = ghi nhận), popup chỉ báo kết quả.
+  // Ghi thất bại (rules chặn / mất mạng) thì KHÔNG im lặng: báo học viên gọi hotline.
   const handleRequestExtension = async () => {
     if (!tuitionRecordId) return;
     try {
@@ -205,9 +197,10 @@ const StudentDashboard = () => {
         extensionApproved:    false,
         status:               'Chờ duyệt gia hạn',
       });
-      setExtensionPopup(false);
+      setExtensionPopup('ok');
     } catch (e) {
       console.error('Lỗi gửi yêu cầu gia hạn:', e);
+      setExtensionPopup('error');
     }
   };
 
@@ -216,24 +209,38 @@ const StudentDashboard = () => {
   return (
     <div className="space-y-6 animate-fade-in-up pb-6">
 
-      {/* ===== POPUP GIA HẠN ===== */}
+      {/* ===== POPUP KẾT QUẢ GIA HẠN (hiện SAU khi yêu cầu đã được ghi nhận) ===== */}
       {extensionPopup && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[80] p-4">
           <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full text-center space-y-4 border border-slate-100">
-            <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center mx-auto">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="#3b82f6" className="w-6 h-6">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-              </svg>
-            </div>
-            <p className="font-bold text-slate-800">Yêu cầu Gia hạn</p>
-            <p className="text-sm text-slate-600 leading-relaxed">
-              BE ABLE VN tiếp nhận yêu cầu gia hạn. Thời hạn được dời thêm <strong>07 ngày</strong>.<br />
-              <span className="text-slate-500">Hotline Tài vụ: <strong>088 699 7099</strong></span>
-            </p>
-            <div className="flex gap-3 justify-center">
-              <button onClick={() => setExtensionPopup(false)} className="px-4 py-2 bg-slate-100 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-200 transition-colors">Hủy</button>
-              <button onClick={handleRequestExtension} className="px-5 py-2 bg-primary text-white rounded-xl text-sm font-bold hover:bg-primary-hover transition-colors">Xác nhận gửi</button>
-            </div>
+            {extensionPopup === 'ok' ? (
+              <>
+                <div className="w-12 h-12 rounded-full bg-primary-light flex items-center justify-center mx-auto">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="#2B6830" className="w-6 h-6">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <p className="font-bold text-slate-800">Đã tiếp nhận yêu cầu</p>
+                <p className="text-sm text-slate-600 leading-relaxed">
+                  BE ABLE VN tiếp nhận yêu cầu gia hạn. Thời hạn được dời thêm <strong>07 ngày</strong>.<br />
+                  <span className="text-slate-500">Hotline Tài vụ: <strong>088 699 7099</strong></span>
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mx-auto">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="#dc2626" className="w-6 h-6">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                  </svg>
+                </div>
+                <p className="font-bold text-slate-800">Chưa gửi được yêu cầu</p>
+                <p className="text-sm text-slate-600 leading-relaxed">
+                  Hệ thống chưa ghi nhận được yêu cầu gia hạn của bạn. Vui lòng thử lại hoặc liên hệ
+                  hotline Tài vụ <strong>088 699 7099</strong> để được hỗ trợ trực tiếp.
+                </p>
+              </>
+            )}
+            <button onClick={() => setExtensionPopup(null)} className="px-6 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:bg-primary-hover transition-colors">Đã hiểu</button>
           </div>
         </div>
       )}
@@ -276,13 +283,23 @@ const StudentDashboard = () => {
               />
               <StatChip label="Số lớp" value={myClasses.length} color="bg-white/15 text-white" />
               <StatChip label="Buổi đã học" value={attendanceStats.total || '–'} color="bg-white/15 text-white" />
-              <Link to="/student/credits" className="block">
-                <StatChip
-                  label="BAVN Credits ⭐"
-                  value={totalCredits}
-                  color="bg-white/25 text-white ring-1 ring-white/40 hover:bg-white/30 transition-colors cursor-pointer"
-                />
-              </Link>
+              {isOverdue ? (
+                <button type="button" onClick={() => setCreditsBlockedPopup(true)} className="block text-left">
+                  <StatChip
+                    label="BAVN Credits ⭐"
+                    value={totalCredits}
+                    color="bg-white/15 text-white/70 ring-1 ring-white/20 cursor-pointer"
+                  />
+                </button>
+              ) : (
+                <Link to="/student/credits" className="block">
+                  <StatChip
+                    label="BAVN Credits ⭐"
+                    value={totalCredits}
+                    color="bg-white/25 text-white ring-1 ring-white/40 hover:bg-white/30 transition-colors cursor-pointer"
+                  />
+                </Link>
+              )}
             </div>
           )}
         </div>
@@ -329,7 +346,7 @@ const StudentDashboard = () => {
             <span className="shrink-0 px-3 py-1.5 bg-slate-200 text-slate-600 rounded-xl text-xs font-bold cursor-default">Chờ xét duyệt</span>
           ) : (
             <button
-              onClick={() => setExtensionPopup(true)}
+              onClick={handleRequestExtension}
               className="shrink-0 px-3 py-1.5 bg-red-600 text-white rounded-xl text-xs font-bold hover:bg-red-700 transition-colors active:scale-95"
             >
               Gia hạn

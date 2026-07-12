@@ -3,6 +3,8 @@ import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useSwipeTabs } from '../useSwipeTabs';
 import StudentAvatar from '../StudentAvatar'; // avatar cho khối danh tính người đăng nhập
+import { db } from '../../firebase';
+import { ref, onValue } from 'firebase/database';
 
 const Icons = {
   Dashboard: ({ active }) => (
@@ -78,6 +80,16 @@ const AdminLayout = () => {
   const navigate = useNavigate();
   const { logout, currentUser } = useAuth(); // logout + user hiện tại (khối danh tính)
   const [moreOpen, setMoreOpen] = useState(false); // Drawer "Thêm" trên mobile
+  const [extensionCount, setExtensionCount] = useState(0); // số yêu cầu gia hạn học phí chờ duyệt
+
+  // Đếm yêu cầu "Chờ duyệt gia hạn" để admin thấy ngay trên thẻ Học phí
+  useEffect(() => {
+    const unsub = onValue(ref(db, 'tuitionRecords'), (snap) => {
+      const data = snap.val() || {};
+      setExtensionCount(Object.values(data).filter((r) => r?.status === 'Chờ duyệt gia hạn').length);
+    });
+    return () => unsub();
+  }, []);
 
   const isActive = (path) => location.pathname.includes(path);
   // Moi the co be rong toi thieu co dinh + khong co lai (shrink-0) de thanh nav cuon ngang duoc
@@ -171,7 +183,13 @@ const AdminLayout = () => {
             <Icons.Import active={isActive('import')} /> Import học viên
           </Link>
           <Link to="/admin/tuition" className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive('tuition') ? 'bg-primary/10 text-primary' : 'text-slate-600 hover:bg-slate-50'}`}>
-            <Icons.Tuition active={isActive('tuition')} /> Học phí
+            <Icons.Tuition active={isActive('tuition')} />
+            <span className="flex-1">Học phí</span>
+            {extensionCount > 0 && (
+              <span className="w-5 h-5 bg-purple-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center shrink-0">
+                {extensionCount > 9 ? '9+' : extensionCount}
+              </span>
+            )}
           </Link>
         </nav>
 
@@ -209,7 +227,13 @@ const AdminLayout = () => {
         <Link to="/admin/dashboard" className={mobileLinkClass('dashboard')}><Icons.Dashboard active={isActive('dashboard')} /><span className="text-[10px] font-medium">Tổng quan</span></Link>
         <Link to="/admin/students" className={mobileLinkClass('students')}><Icons.Student active={isActive('students')} /><span className="text-[10px] font-medium">Học viên</span></Link>
         <Link to="/admin/staff" className={mobileLinkClass('staff')}><Icons.Staff active={isActive('staff')} /><span className="text-[10px] font-medium">Nhân sự</span></Link>
-        <Link to="/admin/tuition" className={mobileLinkClass('tuition')}><Icons.Tuition active={isActive('tuition')} /><span className="text-[10px] font-medium">Học phí</span></Link>
+        <Link to="/admin/tuition" className={mobileLinkClass('tuition')}>
+          <span className="relative">
+            <Icons.Tuition active={isActive('tuition')} />
+            {extensionCount > 0 && <span className="absolute -top-1 -right-1.5 min-w-[16px] h-4 px-1 bg-purple-600 text-white text-[9px] font-bold rounded-full flex items-center justify-center">{extensionCount > 9 ? '9+' : extensionCount}</span>}
+          </span>
+          <span className="text-[10px] font-medium">Học phí</span>
+        </Link>
         <button
           onClick={() => setMoreOpen(true)}
           aria-label="Thêm chức năng"
