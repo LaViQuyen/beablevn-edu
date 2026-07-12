@@ -70,6 +70,16 @@ export default function useSpeakingFlow({
   // của câu VỪA nói, phát local nên không tốn quota; ghi đè mỗi lượt thu
   const myAudioRef = useRef(null);
   const myPlayerRef = useRef(null);
+
+  // Server kết luận chỉ có tạp âm (no_speech): rút lại phần vừa cộng vào đồng hồ
+  // lượng nói, để "Đã nói X phút" không bị thổi phồng bởi tiếng ồn/gõ phím
+  function revokeTalkOnNoSpeech(d) {
+    if (d && d.no_speech && fluencyRef.current) {
+      talkMsRef.current = Math.max(0, talkMsRef.current - (fluencyRef.current.voicedMs || 0));
+      setTalkMs(talkMsRef.current);
+      fluencyRef.current = null;
+    }
+  }
   // Hồ sơ trôi chảy của lượt thu gần nhất + tổng ms có giọng nói cả phiên
   const fluencyRef = useRef(null);
   const talkMsRef = useRef(0);
@@ -96,6 +106,13 @@ export default function useSpeakingFlow({
     myPlayerRef.current = a;
     const p = a.play();
     if (p && p.catch) p.catch(() => {});
+  }
+
+  // Phát giọng giám khảo mà KHÔNG chồng lên bản thu của học viên đang phát
+  // (stopVoice của speak.js chỉ biết audio TTS, không biết myPlayerRef)
+  function speakSafe(text) {
+    stopMyAudio();
+    speak(text);
   }
 
   // ---- Giám sát gian lận (chỉ Thi thật), đình chỉ = port banTest() ----
@@ -213,7 +230,7 @@ export default function useSpeakingFlow({
 
   function speakAgainNow() {
     const it = queue[qiRef.current];
-    if (it) speak(speechFor(it));
+    if (it) speakSafe(speechFor(it));
   }
 
   // ---- Thu âm ----
@@ -339,6 +356,7 @@ export default function useSpeakingFlow({
         prev_feedback: attemptRef.current === 2 ? lastFeedbackRef.current : null,
       });
       if (gen !== genRef.current) return;
+      revokeTalkOnNoSpeech(d);
       evaluationsRef.current.push({
         part: item.part, question: item.q, attempt: attemptRef.current,
         bands: d.bands, errors: d.errors, pronunciation: d.pronunciation,
@@ -376,6 +394,7 @@ export default function useSpeakingFlow({
 
   function retryAnswer() {
     attemptRef.current = 2;
+    stopMyAudio();
     setFeedback(null);
     setBtns({});
     setTimer((t) => ({ ...t, label: "🔊 Giám khảo: Let's try that again..." }));
@@ -419,6 +438,7 @@ export default function useSpeakingFlow({
     const item = queue[qiRef.current];
     // Im lặng / quá ngắn: báo nói lại, KHÔNG tính vào số lần thử
     if (d.no_speech) {
+      revokeTalkOnNoSpeech(d);
       setDrillFb(null);
       setError(d.no_speech);
       setBtns({ record: '🎤 Nói lại' });
@@ -458,11 +478,12 @@ export default function useSpeakingFlow({
   }
 
   function hearModel() {
-    if (drillModelRef.current) speak(drillModelRef.current);
+    if (drillModelRef.current) speakSafe(drillModelRef.current);
   }
 
   function drillRetry() {
     attemptRef.current += 1; // tính thêm một lần thử
+    stopMyAudio();
     setDrillFb(null);
     setBtns({});
     setTimer((t) => ({ ...t, label: "🔊 Giám khảo: Let's try that again..." }));
@@ -570,6 +591,6 @@ export default function useSpeakingFlow({
     // trạng thái hiển thị + hành động (gắn vào nút)
     qi, partIntro, timer, btns, error, feedback, drillFb, busy, finishRetry, elapsed, talkMs, guard,
     startAnswer, stopAnswer, sendEval, retryAnswer, drillRetry, hearModel, advance, finishTest, speakAgainNow,
-    playMyAudio, hasMyAudio,
+    playMyAudio, hasMyAudio, speakSafe,
   };
 }

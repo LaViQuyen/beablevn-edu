@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { MdRich } from '../shared/mdText';
 import { speak } from '../shared/speak';
 import { ChunkChips, PartBadge } from './bits';
-import { CRIT_NAMES, BAND_KEYS, BOTTLENECK_STAGES } from './constants';
+import { CRIT_NAMES, BAND_KEYS, BOTTLENECK_STAGES, fmtTalkMs } from './constants';
 
 /*
  * MÀN BÁO CÁO CUỐI PHIÊN: port #screenReport + renderReport() của speaking.html.
@@ -55,12 +55,6 @@ const RevisedText = ({ original, revised }) => {
   );
 };
 
-// Đổi ms thành "X phút Y giây" cho dòng đồng hồ lượng nói
-const fmtTalk = (ms) => {
-  const s = Math.round(ms / 1000);
-  const m = Math.floor(s / 60);
-  return m > 0 ? `${m} phút ${s % 60} giây` : `${s} giây`;
-};
 
 const ReportView = ({ report, studentName, modeLabel, targetBand, onRestart }) => {
   const d = report || {};
@@ -81,7 +75,7 @@ const ReportView = ({ report, studentName, modeLabel, targetBand, onRestart }) =
       </p>
       {Number(d._talkMs) >= 30000 && (
         <p className="text-center text-[13px] text-slate-600 bg-primary-subtle rounded-xl px-4 py-2.5 mt-2.5 leading-relaxed">
-          🗣 Phiên này em đã nói thật sự <b className="text-primary">{fmtTalk(Number(d._talkMs))}</b>. Mỗi phút
+          🗣 Phiên này em đã nói thật sự <b className="text-primary">{fmtTalkMs(Number(d._talkMs))}</b>. Mỗi phút
           nói thật là một quân domino: luyện đủ nhiều thì tự tin, tự động và trôi chảy sẽ tự đổ theo.
         </p>
       )}

@@ -4,7 +4,7 @@ import { useAuth } from '../../../context/AuthContext';
 import { Input, Select, Toast } from '../../../components/UI';
 import { callCoach } from './shared/coachApi';
 import { speak, stopVoice, unlockAudio } from './shared/speak';
-import { BAND_OPTIONS, DEFAULT_BAND, DRILL_COUNT, MODE_GOALS } from './speaking/constants';
+import { BAND_OPTIONS, DEFAULT_BAND, DRILL_COUNT, MODE_GOALS, fmtTalkMs } from './speaking/constants';
 import { ErrBox, PartBadge } from './speaking/bits';
 import ExamRunner from './speaking/ExamRunner';
 import ReportView from './speaking/ReportView';
@@ -346,12 +346,8 @@ const SpeakingCoach = () => {
             {Number(drillStats.talkMs) >= 30000 && (
               <p className="text-[13px] text-slate-600 bg-primary-subtle rounded-xl px-4 py-2.5 my-2 leading-relaxed">
                 🗣 Phiên này em đã nói thật sự{' '}
-                <b className="text-primary">
-                  {Math.floor(drillStats.talkMs / 60000) > 0
-                    ? `${Math.floor(drillStats.talkMs / 60000)} phút ${Math.round(drillStats.talkMs / 1000) % 60} giây`
-                    : `${Math.round(drillStats.talkMs / 1000)} giây`}
-                </b>
-                . Luyện đủ nhiều thì tự tin, tự động và trôi chảy sẽ tự đổ theo như domino.
+                <b className="text-primary">{fmtTalkMs(drillStats.talkMs)}</b>. Luyện đủ nhiều thì tự tin,
+                tự động và trôi chảy sẽ tự đổ theo như domino.
               </p>
             )}
             <div className="mt-3">

@@ -95,12 +95,22 @@ export const HighlightTranscript = ({ text, errors, pron }) => {
   const s = String(text == null ? '' : text);
   const lower = s.toLowerCase();
   const marks = [];
+  // Chỉ nhận vị trí có RANH GIỚI TỪ hai đầu, kẻo "go" bị tô đè lên "good",
+  // "is" tô đè lên "This" (needle là text tự do từ model, không tin mù)
+  const isWordChar = (ch) => /[a-z0-9']/.test(ch || '');
   const addMarks = (needleRaw, kind) => {
     const needle = String(needleRaw || '').trim().toLowerCase();
     if (needle.length < 2) return;
-    const start = lower.indexOf(needle);
-    if (start === -1) return;
-    marks.push({ start, end: start + needle.length, kind });
+    let idx = lower.indexOf(needle);
+    while (idx !== -1) {
+      const before = idx > 0 ? lower[idx - 1] : '';
+      const after = lower[idx + needle.length] || '';
+      if (!isWordChar(before) && !isWordChar(after)) {
+        marks.push({ start: idx, end: idx + needle.length, kind });
+        return;
+      }
+      idx = lower.indexOf(needle, idx + 1);
+    }
   };
   (errors || []).forEach((e) => addMarks(e && e.you_said, 'err'));
   (pron || []).forEach((p) => addMarks(p && p.word, 'pron'));
@@ -203,7 +213,9 @@ export const ChunkChips = ({ chunks, onSpeak, title }) => {
     const t = c && typeof c.chunk === 'string' ? c.chunk.trim() : '';
     if (!t || seen.has(t.toLowerCase()) || list.length >= 8) return;
     seen.add(t.toLowerCase());
-    list.push({ chunk: t, use: c.use_when_vi || '' });
+    // use_when_vi cũng phải là chuỗi: model trả object/số thì bỏ, kẻo React
+    // throw "Objects are not valid as a React child" và trắng màn feedback
+    list.push({ chunk: t, use: typeof c.use_when_vi === 'string' ? c.use_when_vi : '' });
   });
   if (!list.length) return null;
   return (

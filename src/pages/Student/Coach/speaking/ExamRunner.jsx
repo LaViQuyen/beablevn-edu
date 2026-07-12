@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from 'react';
 import { MdBold } from '../shared/mdText';
-import { speak } from '../shared/speak';
 import useSpeakingFlow from './useSpeakingFlow';
 import {
   BandChips, BusyOverlay, ChunkChips, ErrBox, FbErrorItem, FbPronItem, FluencyBar,
@@ -157,10 +156,12 @@ const ExamRunner = (props) => {
               </p>
             ) : null}
             <BandChips bands={feedback.bands} />
-            <FluencyBar
-              stats={feedback._fluency}
-              onSpeakFiller={() => speak(FILLER_PHRASES.join('. '))}
-            />
+            {!feedback.no_speech && (
+              <FluencyBar
+                stats={feedback._fluency}
+                onSpeakFiller={() => flow.speakSafe(FILLER_PHRASES.join('. '))}
+              />
+            )}
             <b className="text-[13px]">Em đã nói:</b>
             {feedback.no_speech ? (
               <TranscriptBox>{`(${feedback.no_speech})`}</TranscriptBox>
@@ -202,7 +203,7 @@ const ExamRunner = (props) => {
                 <div>
                   <button
                     type="button"
-                    onClick={() => speak(feedback.upgrade)}
+                    onClick={() => flow.speakSafe(feedback.upgrade)}
                     className="mt-2 bg-white text-primary border-[1.5px] border-primary rounded-xl px-3.5 py-1.5 text-[12.5px] font-semibold hover:bg-primary-subtle transition-colors"
                   >
                     🔊 Nghe câu mẫu, nhại theo
@@ -210,7 +211,7 @@ const ExamRunner = (props) => {
                 </div>
               </div>
             ) : null}
-            <ChunkChips chunks={feedback.chunks} onSpeak={(t) => speak(t)} />
+            <ChunkChips chunks={feedback.chunks} onSpeak={flow.speakSafe} />
             {methodTips.length > 0 && (
               <div className="bg-primary-subtle border border-[#C9E2CF] border-l-[3px] border-l-primary-medium rounded-r-xl px-3.5 py-3 my-2.5 text-sm">
                 <div className="font-bold text-primary-hover text-xs uppercase tracking-wide mb-1.5">
@@ -254,7 +255,7 @@ const ExamRunner = (props) => {
           onHearModel={flow.hearModel}
           onPlayMine={flow.playMyAudio}
           hasMine={flow.hasMyAudio()}
-          onSpeakChunk={(t) => speak(t)}
+          onSpeakChunk={flow.speakSafe}
         />
       </div>
 

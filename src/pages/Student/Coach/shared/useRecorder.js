@@ -13,8 +13,11 @@ import { useEffect, useRef, useState } from 'react';
  *   giọng (everVoiced) và đã qua 1500ms đầu, máy đo hỏng thì không tự cắt.
  * - Hồ sơ trôi chảy (nâng cấp 07/2026, tài liệu Teaching Speaking A.3): đếm thêm
  *   pausesOver2s (số lần ngừng nói liên tục >2s GIỮA các đoạn có giọng) và
- *   longestPauseMs (lần ngừng dài nhất). Số đo từ peak nên chỉ là ƯỚC TÍNH,
- *   caller phải ẩn khi voiceMeterOk = false.
+ *   longestPauseMs (lần ngừng lâu nhất). Một quãng ngừng chỉ được CHỐT khi giọng
+ *   nói QUAY LẠI, nên im lặng đuôi (trước auto-stop / hết giờ / bấm Xong) và im
+ *   lặng đầu (chưa mở lời) KHÔNG bao giờ bị đếm. durationMs = khoảng từ tiếng nói
+ *   đầu tiên đến tiếng nói cuối cùng (máy đo hỏng thì fallback tổng thời gian thu).
+ *   Số đo từ peak nên chỉ là ƯỚC TÍNH, caller phải ẩn khi voiceMeterOk = false.
  * - Blob → base64 bằng FileReader.readAsDataURL cắt prefix (không btoa spread).
  * - Cap 8MB base64: vượt quá trả lỗi rõ ràng qua onError.
  *
@@ -41,8 +44,10 @@ export default function useRecorder() {
   const voicedRef = useRef(0);
   const meterOkRef = useRef(false);
   const optsRef = useRef({});
-  // Hồ sơ trôi chảy: thời điểm bắt đầu thu + số lần ngừng dài + lần ngừng lâu nhất
+  // Hồ sơ trôi chảy: mốc bắt đầu thu, tiếng nói đầu/cuối, số lần ngừng dài
   const startedAtRef = useRef(0);
+  const firstVoiceRef = useRef(0);
+  const lastVoiceRef = useRef(0);
   const pausesRef = useRef(0);
   const longestPauseRef = useRef(0);
 
@@ -97,7 +102,8 @@ export default function useRecorder() {
     optsRef.current = opts;
     voicedRef.current = 0;
     meterOkRef.current = false;
-    startedAtRef.current = Date.now();
+    firstVoiceRef.current = 0;
+    lastVoiceRef.current = 0;
     pausesRef.current = 0;
     longestPauseRef.current = 0;
 
@@ -121,13 +127,19 @@ export default function useRecorder() {
     rec.onstop = () => {
       const blob = new Blob(chunksRef.current, { type: rec.mimeType || 'audio/webm' });
       const cb = optsRef.current;
+      // durationMs: khoảng từ tiếng nói đầu đến tiếng nói cuối (loại im lặng
+      // đầu/đuôi khỏi tỉ lệ trôi chảy); máy đo hỏng thì fallback tổng thời gian thu
+      const spanMs =
+        meterOkRef.current && firstVoiceRef.current && lastVoiceRef.current
+          ? Math.max(0, lastVoiceRef.current - firstVoiceRef.current)
+          : Math.max(0, Date.now() - startedAtRef.current);
       const meta = {
         mime: (rec.mimeType || 'audio/webm').split(';')[0],
         size: blob.size,
         voicedMs: Math.round(voicedRef.current),
         voiceMeterOk: meterOkRef.current,
         // Hồ sơ trôi chảy (ước tính, chỉ tin khi voiceMeterOk)
-        durationMs: Math.max(0, Date.now() - startedAtRef.current),
+        durationMs: spanMs,
         pausesOver2s: pausesRef.current,
         longestPauseMs: Math.round(longestPauseRef.current),
       };
@@ -149,6 +161,9 @@ export default function useRecorder() {
       };
       fr.readAsDataURL(blob);
     };
+    // Mốc bắt đầu THU THẬT (sau khi đã được cấp quyền mic, không tính thời gian
+    // chờ hộp thoại xin quyền), dùng làm fallback durationMs khi máy đo hỏng
+    startedAtRef.current = Date.now();
     rec.start(1000);
     setState('recording');
 
@@ -176,7 +191,6 @@ export default function useRecorder() {
       let lastSound = Date.now();
       let lastTick = Date.now();
       let everVoiced = false;
-      let pauseCounted = false; // mỗi quãng im lặng >2s chỉ đếm 1 lần
       meterIdRef.current = setInterval(() => {
         an.getByteTimeDomainData(data);
         let peak = 0;
@@ -185,19 +199,22 @@ export default function useRecorder() {
           if (d > peak) peak = d;
         }
         const now = Date.now();
-        const gap = now - lastSound; // im lặng liên tục tính tới tick này
         if (peak > 6) {
-          lastSound = now;
-          everVoiced = true;
-          pauseCounted = false; // quãng im lặng vừa kết thúc, sẵn sàng đếm quãng mới
-          voicedRef.current += now - lastTick; // cộng dồn thời gian có giọng
-        } else if (everVoiced) {
-          // Chỉ tính ngừng GIỮA các đoạn nói (im lặng trước khi mở lời không tính)
-          if (gap > longestPauseRef.current) longestPauseRef.current = gap;
-          if (gap > 2000 && !pauseCounted) {
-            pausesRef.current += 1;
-            pauseCounted = true;
+          // Quãng ngừng chỉ được CHỐT khi giọng nói QUAY LẠI: im lặng đuôi
+          // (trước auto-stop / hết giờ / bấm Xong) không bao giờ bị đếm
+          if (everVoiced) {
+            const gap = now - lastSound;
+            if (gap > 2000) {
+              pausesRef.current += 1;
+              if (gap > longestPauseRef.current) longestPauseRef.current = gap;
+            }
+          } else {
+            firstVoiceRef.current = now;
           }
+          lastSound = now;
+          lastVoiceRef.current = now;
+          everVoiced = true;
+          voicedRef.current += now - lastTick; // cộng dồn thời gian có giọng
         }
         lastTick = now;
         const sil = optsRef.current.silenceMs;

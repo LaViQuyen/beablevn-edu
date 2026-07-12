@@ -167,6 +167,15 @@ export const SOS_STRATEGIES = [
   },
 ];
 
+// Đổi ms thành "X phút Y giây": tính GIÂY trước rồi suy ra phút để không lệch
+// tại biên 59.5-60s (floor phút + round giây độc lập sẽ hiện "1 phút 0 giây"
+// cho 119.7s). Dùng chung cho ReportView và màn hoàn thành Luyện Part 1.
+export function fmtTalkMs(ms) {
+  const s = Math.round(ms / 1000);
+  const m = Math.floor(s / 60);
+  return m > 0 ? `${m} phút ${s % 60} giây` : `${s} giây`;
+}
+
 // 4 giai đoạn sản xuất lời nói theo Levelt (tài liệu A.1), dùng cho khối
 // "Điểm nghẽn của em" trong báo cáo cuối phiên
 export const BOTTLENECK_STAGES = [
