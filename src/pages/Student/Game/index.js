@@ -11,7 +11,7 @@ import { End } from './scenes/EndScene';
 // opts = { initial: {rank, beaten, unlockedSkills}, onSave: fn(progress) }
 export function createGame(parent, opts){
   opts = opts || {};
-  configureExternal({ initial: opts.initial, onSave: opts.onSave, onStars: opts.onStars, onConsume: opts.onConsume, playsLeft: opts.playsLeft });
+  configureExternal({ initial: opts.initial, onSave: opts.onSave, onStageResult: opts.onStageResult, onConsume: opts.onConsume, playsLeft: opts.playsLeft });
   // mở khóa audio sau cử chỉ đầu tiên của người dùng
   document.addEventListener('click', initAudio, { once: true });
   document.addEventListener('touchstart', initAudio, { once: true });

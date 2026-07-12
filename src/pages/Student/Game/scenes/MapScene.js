@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { RANKS, LEVELS, heartsFor } from '../config';
+import { RANKS, LEVELS, heartsFor, FONT, BRAND, MONSTER_DEFS } from '../config';
 import { initAudio } from '../audio';
 import { loadProg, saveProg, EXTERNAL, resetProgressCache } from '../progress';
 import { buildScenery } from '../scenery';
@@ -14,24 +14,26 @@ export class MapScene extends Phaser.Scene {
 
     const title = this.add.text(SW/2, 60, 'HÀNH TRÌNH TRƯỞNG THÀNH', { fontFamily:'Be Vietnam Pro', fontSize:'38px', color:'#ffffff', fontStyle:'900', stroke: '#1E5225', strokeThickness: 6 }).setOrigin(0.5);
     title.setShadow(0, 8, 'rgba(0,0,0,0.4)', 10);
-    this.add.text(SW/2, 110, 'Cấp độ: ' + RANKS[prog.rank-1] + '   ·   ' + '❤️'.repeat(heartsFor(prog.rank)), { fontSize:'18px', color:'#ffffff', fontStyle:'bold', backgroundColor:'rgba(0,0,0,0.3)', padding:{x:10, y:5} }).setOrigin(0.5);
+    this.add.text(SW/2, 110, 'Cấp độ: ' + RANKS[prog.rank-1] + '   ·   ' + '❤️'.repeat(heartsFor(prog.rank)), { fontFamily:FONT, fontSize:'18px', color:'#ffffff', fontStyle:'bold', backgroundColor:'rgba(0,0,0,0.3)', padding:{x:10, y:5} }).setOrigin(0.5);
 
     const skillStatus = prog.unlockedSkills ? "ĐÃ SỞ HỮU (Lễ Nghĩa & Thái Độ)" : "CHƯA MỞ KHÓA (Vượt Ải Ẩn Sưu Tầm để nhận)";
-    this.add.text(SW/2, 145, `✨ Kỹ năng đặc biệt: ${skillStatus}`, { fontSize:'13px', color: prog.unlockedSkills?'#7ED957':'#FF5A6E', fontStyle:'bold' }).setOrigin(0.5);
+    this.add.text(SW/2, 145, `✨ Kỹ năng đặc biệt: ${skillStatus}`, { fontFamily:FONT, fontSize:'13px', color: prog.unlockedSkills?'#7ED957':'#FF5A6E', fontStyle:'bold' }).setOrigin(0.5);
 
-    this.add.text(SW/2, 172, '🎟️ Lượt vào ải còn hôm nay: ' + EXTERNAL.playsLeft, { fontSize:'14px', color:'#FFD23F', fontStyle:'bold', backgroundColor:'rgba(0,0,0,0.35)', padding:{x:10,y:4} }).setOrigin(0.5).setDepth(60);
+    this.add.text(SW/2, 172, '🎟️ Lượt vào ải còn hôm nay: ' + EXTERNAL.playsLeft, { fontFamily:FONT, fontSize:'14px', color:'#FFD23F', fontStyle:'bold', backgroundColor:'rgba(0,0,0,0.35)', padding:{x:10,y:4} }).setOrigin(0.5).setDepth(60);
 
     // Lời mở đầu chương theo cấp học (cốt truyện), nền HỒNG PHẤN, chữ ĐỎ ĐÔ
     this.add.text(SW/2, 204, RANK_STORY[prog.rank-1] || '', { fontFamily:'Be Vietnam Pro', fontSize:'12px', color:'#7B1E3B', fontStyle:'italic bold', align:'center', wordWrap:{width:Math.min(820, SW-80)}, backgroundColor:'rgba(252,228,236,0.96)', padding:{x:12, y:6} }).setOrigin(0.5).setDepth(6);
 
-    const resetBtn = this.add.text(SW - 18, 30, '🔄 Chơi lại từ đầu', { fontSize:'14px', color:'#ffffff', fontStyle:'bold', backgroundColor:'#C0392B', padding:{x:11,y:7} }).setOrigin(1, 0.5).setDepth(60).setInteractive({useHandCursor:true});
+    const resetBtn = this.add.text(SW - 18, 30, '🔄 Chơi lại từ đầu', { fontFamily:FONT, fontSize:'14px', color:'#ffffff', fontStyle:'bold', backgroundColor:'#C0392B', padding:{x:11,y:7} }).setOrigin(1, 0.5).setDepth(60).setInteractive({useHandCursor:true});
     resetBtn.on('pointerover', () => resetBtn.setBackgroundColor('#e04b3a'));
     resetBtn.on('pointerout', () => resetBtn.setBackgroundColor('#C0392B'));
     resetBtn.on('pointerdown', () => {
       if (window.confirm('Xóa toàn bộ tiến trình và chơi lại từ Mầm Non?')) {
-        const keepRank = (EXTERNAL.initial && EXTERNAL.initial.rank) || 1;
-        EXTERNAL.initial = { rank: keepRank, beaten: {}, unlockedSkills: false };
-        saveProg({ rank: keepRank, beaten: {}, unlockedSkills: false }, { reset: true }); // reset CHỦ ĐỘNG: cho phép xóa tiến trình trên DB
+        // Reset THẬT về cấp 1 (Mầm Non): trước đây giữ keepRank cao khiến game cho chơi ải đầu
+        // với 7 tim + đủ vũ khí trong khi HUD React hiển thị "Mầm Non · 3 tim" (lệch), và DB lưu
+        // rank cao với beaten rỗng nên phiên sau tụt cấp. Đặt cứng rank 1 cho nhất quán với beaten rỗng.
+        EXTERNAL.initial = { rank: 1, beaten: {}, unlockedSkills: false };
+        saveProg({ rank: 1, beaten: {}, unlockedSkills: false }, { reset: true }); // reset CHỦ ĐỘNG: cho phép xóa tiến trình trên DB
         resetProgressCache();
         this.scene.start('Map', { page: 0 });
       }
@@ -50,27 +52,38 @@ export class MapScene extends Phaser.Scene {
       const beaten = !!prog.beaten[globalIndex]; const x=x0 + i*(cardW+gap), y=310;
       const card = this.add.container(x, y); const shadow = this.add.rectangle(0, 10, cardW, 180, 0x000000, 0.25);
       let cardBgColor = unlocked ? 0xffffff : 0xdfe6ee; if(lv.isCollectStage) cardBgColor = unlocked ? 0xFFF0F5 : 0xdfe6ee;
-      const bg = this.add.rectangle(0, 0, cardW, 180, cardBgColor, 1).setStrokeStyle(4, lv.isCollectStage ? 0xFF69B4 : (unlocked ? 0x3D8B47 : 0xaab6c2)).setInteractive({useHandCursor:unlocked});
-      const txtRank = this.add.text(0, -70, lv.isCollectStage ? 'ẢI ẨN' : 'Cấp '+lv.rank, { fontSize:'13px', color: lv.isCollectStage? '#FF69B4' : '#3D8B47', fontStyle:'900' }).setOrigin(0.5);
-      const icon = this.add.image(0, -15, unlocked ? (lv.isBoss ? 'boss_'+lv.rank : 'flag') : 'lock').setScale(0.8);
-      const txtName = this.add.text(0, 40, lv.name, { fontSize:'15px', color:unlocked?'#1E5225':'#7e8a98', fontStyle:'bold', align:'center', wordWrap:{width:130} }).setOrigin(0.5);
-      let statusTxt = 'Khoá'; let sColor = '#8693a1'; if(beaten) { statusTxt = '✓ Đã qua'; sColor = '#2B6830'; } else if(unlocked) { statusTxt = '▶ Vào chơi'; sColor = '#d63d54'; }
-      const txtStatus = this.add.text(0, 75, statusTxt, { fontSize:'13px', color:sColor, fontStyle:'bold' }).setOrigin(0.5);
+      const bg = this.add.rectangle(0, 0, cardW, 180, cardBgColor, 1).setStrokeStyle(4, lv.isCollectStage ? 0xFF69B4 : (unlocked ? BRAND.forestNum : 0xaab6c2)).setInteractive({useHandCursor:unlocked});
+      const txtRank = this.add.text(0, -70, lv.isCollectStage ? 'ẢI ẨN' : 'Cấp '+lv.rank, { fontFamily:FONT, fontSize:'13px', color: lv.isCollectStage? '#FF69B4' : BRAND.forest, fontStyle:'900' }).setOrigin(0.5);
+      // Icon thẻ đa dạng: boss dùng ảnh boss; ải Ẩn dùng biểu tượng kỹ năng; ải thường lấy quái đặc
+      // trưng của cấp (thay vì tất cả chung 1 lá cờ) để bản đồ bớt đơn điệu; ải khóa dùng ổ khóa.
+      let iconKey = 'lock';
+      if (unlocked) {
+        if (lv.isBoss) iconKey = 'boss_' + lv.rank;
+        else if (lv.isCollectStage) iconKey = 'w_lenghia';
+        else iconKey = (MONSTER_DEFS[lv.rank] && MONSTER_DEFS[lv.rank][0] && MONSTER_DEFS[lv.rank][0].sprite) || 'flag';
+      }
+      const icon = this.add.image(0, -15, iconKey).setScale(lv.isBoss ? 0.8 : 0.9);
+      const txtName = this.add.text(0, 40, lv.name, { fontFamily:FONT, fontSize:'15px', color:unlocked?BRAND.darkForest:'#7e8a98', fontStyle:'bold', align:'center', wordWrap:{width:130} }).setOrigin(0.5);
+      let statusTxt = 'Khoá'; let sColor = '#8693a1'; if(beaten) { statusTxt = '✓ Đã qua'; sColor = BRAND.forest; } else if(unlocked) { statusTxt = '▶ Vào chơi'; sColor = '#d63d54'; }
+      const txtStatus = this.add.text(0, 75, statusTxt, { fontFamily:FONT, fontSize:'13px', color:sColor, fontStyle:'bold' }).setOrigin(0.5);
       card.add([shadow, bg, txtRank, icon, txtName, txtStatus]);
       if(unlocked) {
         bg.on('pointerover', () => { this.tweens.add({targets:card, scale:1.08, y:y-10, duration:200, ease:'Back.out'}); });
         bg.on('pointerout', () => { this.tweens.add({targets:card, scale:1, y:y, duration:200, ease:'Power2'}); });
-        bg.on('pointerdown',()=> {
+        bg.on('pointerdown', async ()=> {
           initAudio();
           if (EXTERNAL.playsLeft <= 0) { this.showNoPlay(); return; }
+          // Chờ server xác nhận còn lượt (giao dịch nguyên tử trên playLog) trước khi vào ải:
+          // chống mở 2 thiết bị cùng chơi vượt trần DAILY_CAP.
+          const ok = EXTERNAL.onConsume ? await EXTERNAL.onConsume() : true;
+          if (ok === false) { EXTERNAL.playsLeft = 0; this.showNoPlay(); return; }
           EXTERNAL.playsLeft -= 1;
-          if (EXTERNAL.onConsume) EXTERNAL.onConsume();
           this.scene.start('PlayScene', { stage: globalIndex });
         });
       }
     });
 
-    const btnStyle = { fontSize:'16px', color:'#fff', fontStyle:'bold', backgroundColor:'#3D8B47', padding:{x:15, y:8} };
+    const btnStyle = { fontFamily:FONT, fontSize:'16px', color:'#fff', fontStyle:'bold', backgroundColor:BRAND.forest, padding:{x:15, y:8} };
     if(this.page > 0) this.add.text(SW/2 - 140, 465, '◀ Trang trước', btnStyle).setOrigin(0.5).setInteractive({useHandCursor:true}).on('pointerdown', ()=>this.scene.start('Map', {page: this.page - 1}));
     if(this.page < totalPages - 1) this.add.text(SW/2 + 140, 465, 'Trang sau ▶', btnStyle).setOrigin(0.5).setInteractive({useHandCursor:true}).on('pointerdown', ()=>this.scene.start('Map', {page: this.page + 1}));
   }
@@ -78,7 +91,7 @@ export class MapScene extends Phaser.Scene {
   showNoPlay(){
     const SW = this.scale.width;
     if (this._noPlayMsg && this._noPlayMsg.active) this._noPlayMsg.destroy();
-    this._noPlayMsg = this.add.text(SW/2, 250, '🎟️ Hết lượt vào ải hôm nay!\nĐi học & tích Bonus để có thêm lượt.', { fontSize:'18px', color:'#ffffff', fontStyle:'bold', align:'center', backgroundColor:'#C0392B', padding:{x:18,y:12} }).setOrigin(0.5).setDepth(200);
+    this._noPlayMsg = this.add.text(SW/2, 250, '🎟️ Hết lượt vào ải hôm nay!\nĐi học & tích Bonus để có thêm lượt.', { fontFamily:FONT, fontSize:'18px', color:'#ffffff', fontStyle:'bold', align:'center', backgroundColor:'#C0392B', padding:{x:18,y:12} }).setOrigin(0.5).setDepth(200);
     this.tweens.add({ targets:this._noPlayMsg, alpha:0, y:225, duration:1600, delay:1000, onComplete:()=>{ if(this._noPlayMsg) this._noPlayMsg.destroy(); } });
   }
 }

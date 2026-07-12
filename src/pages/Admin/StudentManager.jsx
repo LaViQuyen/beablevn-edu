@@ -124,9 +124,10 @@ const StudentManager = () => {
       await set(newUserRef, {
         name: formData.name, loginId: formData.studentCode,
         studentCode: formData.studentCode, username: formData.studentCode,
-        password: hashedPassword, email: loginEmail,
+        email: loginEmail,
         role: 'student', classIds, createdAt: new Date().toISOString()
       });
+      await set(ref(db, `userAuth/${newUserRef.key}`), { password: hashedPassword }); // mật khẩu ở node RIÊNG (không nằm trong users)
       showSuccess(`✅ Đã thêm "${formData.name}" · ID: ${formData.studentCode}`);
       setFormData({ name: '', password: 'BAVNbavn', studentCode: '', classId1: '', classId2: '', classId3: '', classId4: '', role: 'student' });
     } catch (error) { showSuccess('❌ Lỗi: ' + error.message); }
@@ -153,7 +154,7 @@ const StudentManager = () => {
     try {
       const salt = bcrypt.genSaltSync(10);
       const hashedPassword = bcrypt.hashSync(newPass, salt);
-      await update(ref(db, `users/${student.id}`), { password: hashedPassword });
+      await update(ref(db, `userAuth/${student.id}`), { password: hashedPassword });
       showSuccess(`Đã đổi mật khẩu cho "${student.name}"`);
     } catch (error) { showSuccess('❌ Lỗi: ' + error.message); }
   };

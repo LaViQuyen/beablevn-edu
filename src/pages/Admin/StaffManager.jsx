@@ -106,15 +106,16 @@ const StaffManager = () => {
     try {
       const salt = bcrypt.genSaltSync(10);
       const hashedPassword = bcrypt.hashSync(formData.password, salt);
+      const { password: _pw, ...staffData } = formData; // loại password khỏi bản ghi users (kể cả plaintext)
       const newUserRef = push(ref(db, 'users'));
       await set(newUserRef, {
-        ...formData,
+        ...staffData,
         email: `${formData.username.trim()}@beable.vn`,
         loginId: formData.username,
-        password: hashedPassword,
         role: 'staff',
         createdAt: new Date().toISOString()
       });
+      await set(ref(db, `userAuth/${newUserRef.key}`), { password: hashedPassword }); // mật khẩu ở node RIÊNG userAuth
       showSuccess(`Đã tạo nhân sự "${formData.name}" · ID: ${formData.username}`);
       setFormData({ name: '', username: '', password: 'BAVNbavn', subRole: 'teacher', assignedClasses: [], ffAccess: false, ffPlusAccess: false, bodAccess: false, modAccess: false });
     } catch (error) { showSuccess('❌ Lỗi: ' + error.message); }
@@ -167,7 +168,7 @@ const StaffManager = () => {
     try {
       const salt = bcrypt.genSaltSync(10);
       const hashedPassword = bcrypt.hashSync(newPass, salt);
-      await update(ref(db, `users/${staff.id}`), { password: hashedPassword });
+      await update(ref(db, `userAuth/${staff.id}`), { password: hashedPassword });
       showSuccess(`Đã đổi mật khẩu cho "${staff.name}" · Mật khẩu mới: ${newPass}`);
     } catch (error) { showSuccess('❌ Lỗi: ' + error.message); }
   };

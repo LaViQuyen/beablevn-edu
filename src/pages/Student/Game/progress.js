@@ -1,6 +1,6 @@
 // Cầu nối tiến trình với React/Firebase
 let PROGRESS = null;
-export let EXTERNAL = { initial: { rank:1, beaten:{}, unlockedSkills:false }, onSave: null, onStars: null, onConsume: null, playsLeft: 0 };
+export let EXTERNAL = { initial: { rank:1, beaten:{}, unlockedSkills:false }, onSave: null, onStageResult: null, onConsume: null, playsLeft: 0 };
 
 export function loadProg(){
   if(PROGRESS) return PROGRESS;
@@ -20,7 +20,7 @@ export function configureExternal(opts){
   opts = opts || {};
   if (opts.initial) EXTERNAL.initial = opts.initial;
   EXTERNAL.onSave = opts.onSave || null;
-  EXTERNAL.onStars = opts.onStars || null; // báo về React để cộng dồn sao (xếp hạng)
+  EXTERNAL.onStageResult = opts.onStageResult || null; // báo về React -> Cloud Function chấm điểm + ghi tiến trình
   EXTERNAL.onConsume = opts.onConsume || null; // báo về React để TRỪ 1 lượt khi vào 1 ải
   EXTERNAL.playsLeft = (typeof opts.playsLeft === 'number') ? opts.playsLeft : 0; // số lượt còn được vào ải hôm nay
   PROGRESS = null;

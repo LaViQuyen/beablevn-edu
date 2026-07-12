@@ -215,8 +215,11 @@ exports.issueToken = onCall({ region: 'asia-southeast1' }, async (req) => {
     throw new HttpsError('permission-denied', 'Tài khoản đã bị khóa. Liên hệ trung tâm.');
   }
 
-  // 3) Xác thực mật khẩu (bcrypt nếu hash $2..., ngược lại so plaintext kế thừa)
-  const stored = String(user.password || '');
+  // 3) Xác thực mật khẩu. Mật khẩu lưu ở node RIÊNG `userAuth/{uid}/password` (không nằm trong
+  //    `users`) để đọc node users không lộ credential. Fallback về user.password cho tài khoản
+  //    chưa được backfill (giai đoạn chuyển tiếp).
+  const authSnap = await db.ref(`userAuth/${uid}/password`).get();
+  const stored = String(authSnap.val() || user.password || '');
   const ok = stored.startsWith('$2') ? bcrypt.compareSync(password, stored) : stored === password;
   if (!ok) throw new HttpsError('unauthenticated', 'Sai tên đăng nhập hoặc mật khẩu.');
 
@@ -234,6 +237,81 @@ exports.issueToken = onCall({ region: 'asia-southeast1' }, async (req) => {
   // 5) Trả token + hồ sơ an toàn (bỏ password) để client set currentUser
   const { password: _omit, ...safeUser } = user;
   return { token, user: { id: uid, ...safeUser } };
+});
+
+// ============================================================
+// GAME "Hành Trình Trưởng Thành" — CHẤM ĐIỂM & TIẾN TRÌNH PHÍA SERVER.
+// Vì sao: totalStars/beaten/rank/unlockedSkills từng do CLIENT tự ghi -> học viên mở DevTools
+// grind điểm vô hạn hoặc tự set beaten để nhảy cấp không cần chơi. Nay các trường này CHỈ
+// Function (Admin SDK) ghi được; RTDB rules chặn student ghi. Function validate: ải phải mở khóa
+// TUẦN TỰ, điểm bị chặn TRẦN, sao chỉ cộng lần vượt ĐẦU mỗi ải.
+// (Lượt chơi playsUsed/playLog vẫn do client trừ như cũ, rule append-only đã chặn reset.)
+// ============================================================
+const GAME_LEVELS = 25;        // config.js LEVELS.length
+const STAGE_SCORE_CAP = 3000;  // trần điểm 1 lượt (1 lượt xuất sắc thực tế < ~2500)
+
+// Mở khóa ải theo tiến trình (mirror MapScene): ải i mở khi beaten[i-1]; ải 4 & 5 cần beaten[3].
+function isStageUnlocked(stage, beaten) {
+  if (stage === 0) return true;
+  if (stage === 4 || stage === 5) return !!beaten['3'];
+  return !!beaten[String(stage - 1)];
+}
+// Cấp từ tiến trình (mirror rankFromProgress, bỏ ải 4 = Ải Ẩn).
+function rankFromBeaten(beaten) {
+  let maxBeaten = -1;
+  Object.keys(beaten || {}).forEach((k) => {
+    if (beaten[k] && parseInt(k, 10) !== 4) maxBeaten = Math.max(maxBeaten, parseInt(k, 10));
+  });
+  if (maxBeaten >= 19) return 5;
+  if (maxBeaten >= 15) return 4;
+  if (maxBeaten >= 10) return 3;
+  if (maxBeaten >= 3) return 2;
+  return 1;
+}
+
+exports.submitStageResult = onCall({ region: 'asia-southeast1' }, async (req) => {
+  const uid = req.auth && req.auth.uid;
+  if (!uid) throw new HttpsError('unauthenticated', 'Cần đăng nhập.');
+  const stage = Number(req.data && req.data.stage);
+  const won = (req.data && req.data.won) === true;
+  const score = Math.max(0, Math.min(STAGE_SCORE_CAP, Math.floor(Number(req.data && req.data.score) || 0)));
+  if (!Number.isInteger(stage) || stage < 0 || stage >= GAME_LEVELS) {
+    throw new HttpsError('invalid-argument', 'Ải không hợp lệ.');
+  }
+  if (!won) return { ok: true, ignored: true }; // thua: không đổi tiến trình
+
+  const node = db.ref(`studentGames/${uid}/hanhTrinh`);
+  const cur = (await node.get()).val() || {};
+  const beaten = cur.beaten || {};
+
+  // Chặn nhảy cóc: ải phải đang mở khóa theo tiến trình hiện tại
+  if (!isStageUnlocked(stage, beaten)) {
+    throw new HttpsError('permission-denied', 'Ải chưa mở khóa.');
+  }
+
+  const firstClear = !beaten[String(stage)];
+  const newBeaten = Object.assign({}, beaten, { [String(stage)]: true });
+  const newRank = Math.max(Number(cur.rank) || 1, rankFromBeaten(newBeaten));
+  const updates = {
+    [`beaten/${stage}`]: true,
+    rank: newRank,
+    updatedAt: new Date().toISOString(),
+  };
+  if (stage === 4) updates.unlockedSkills = true; // Ải Ẩn -> mở kỹ năng Lễ Nghĩa & Thái Độ
+  if (firstClear && score > 0) {
+    updates.totalStars = (Number(cur.totalStars) || 0) + score; // sao chỉ cộng lần vượt ĐẦU
+  }
+  await node.update(updates);
+  return { ok: true, firstClear, rank: newRank };
+});
+
+exports.resetGameProgress = onCall({ region: 'asia-southeast1' }, async (req) => {
+  const uid = req.auth && req.auth.uid;
+  if (!uid) throw new HttpsError('unauthenticated', 'Cần đăng nhập.');
+  await db.ref(`studentGames/${uid}/hanhTrinh`).update({
+    beaten: null, unlockedSkills: false, rank: 1, updatedAt: new Date().toISOString(),
+  });
+  return { ok: true };
 });
 
 const coach = require('./coach'); // IELTS COACH: dispatcher tại functions/coach/index.js

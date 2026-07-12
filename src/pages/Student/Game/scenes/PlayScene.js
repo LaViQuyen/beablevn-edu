@@ -1,9 +1,12 @@
 import Phaser from 'phaser';
-import { W, H, LEVELS, MONSTER_DEFS, heartsFor } from '../config';
+import { W, H, LEVELS, MONSTER_DEFS, heartsFor, FONT } from '../config';
 import { loadProg, saveProg, EXTERNAL } from '../progress';
 import { buildScenery } from '../scenery';
 import { initAudio, playSfx } from '../audio';
-import { LEVEL_STORY } from '../story';
+import { LEVEL_STORY, VOCAB_EN } from '../story';
+
+// Nhãn quái song ngữ Anh-Việt (thấm từ vựng qua tiếp xúc lặp lại). VD "Lười Biếng · Laziness".
+const bilingual = (name) => name + (VOCAB_EN[name] ? ' · ' + VOCAB_EN[name] : '');
 
 export class PlayScene extends Phaser.Scene {
   constructor(){ super('PlayScene'); }
@@ -57,14 +60,17 @@ export class PlayScene extends Phaser.Scene {
     this.walkTween = this.tweens.add({ targets:this.player, angle:{from:-10,to:10}, yoyo:true, repeat:-1, duration:130, ease:'Sine.easeInOut' });
     this.walkTween.pause();
 
-    this.shieldVisual = this.add.circle(this.player.x, this.player.y, 48, 0x00ffff, 0.5).setStrokeStyle(5, 0x00ffff, 1).setVisible(false).setDepth(60);
-    this.shieldCountText = this.add.text(this.player.x, this.player.y - 70, '', {fontSize:'30px', fontStyle:'900', color:'#00ffff', stroke:'#003344', strokeThickness:5}).setOrigin(0.5).setDepth(61).setVisible(false);
+    this.shieldVisual = this.add.circle(this.player.x, this.player.y, 48, 0x39C0ED, 0.5).setStrokeStyle(5, 0x39C0ED, 1).setVisible(false).setDepth(60);
+    this.shieldCountText = this.add.text(this.player.x, this.player.y - 70, '', {fontFamily:FONT, fontSize:'30px', fontStyle:'900', color:'#39C0ED', stroke:'#003344', strokeThickness:5}).setOrigin(0.5).setDepth(61).setVisible(false);
     this.dustEmitter = this.add.particles(0,0,'dust',{ lifespan: 300, speedX: {min:-20, max:20}, speedY: {min:-10, max:0}, scale: {start:0.8, end:0}, alpha: {start:0.5, end:0}, emitting: false }).setDepth(10);
 
     // ===== VFX VỤ NỔ 3 LỚP =====
     this.flashEmitter = this.add.particles(0, 0, 'star', { lifespan:150, scale:{start:2,end:0}, alpha:{start:1,end:0}, tint:0xffffff, blendMode:Phaser.BlendModes.ADD, emitting:false }).setDepth(25);
     this.sparkEmitter = this.add.particles(0, 0, 'dust', { lifespan:800, speed:{min:200,max:400}, scale:{start:0.6,end:0}, alpha:{start:1,end:0}, tint:[0xffaa00,0xff0000,0xffffff], blendMode:Phaser.BlendModes.ADD, gravityY:400, emitting:false }).setDepth(24);
     this.smokeEmitter = this.add.particles(0, 0, 'cloud', { lifespan:1000, speed:{min:20,max:50}, scale:{start:0.1,end:0.4}, alpha:{start:0.5,end:0}, tint:0x333333, emitting:false }).setDepth(23);
+    // Emitter dùng chung cho hiệu ứng "poof" khi trúng đòn (thay vì tạo mới 6 circle + 6 tween mỗi lần
+    // gọi -> giảm cấp phát/huỷ GameObject liên tục, đỡ giật trên điện thoại tầm trung).
+    this.poofEmitter = this.add.particles(0, 0, 'dust', { lifespan:340, speed:{min:40,max:130}, scale:{start:0.9,end:0.2}, alpha:{start:0.95,end:0}, emitting:false }).setDepth(20);
 
     this.shots=this.physics.add.group({allowGravity:false}); this.monsters=this.physics.add.group();
 
@@ -189,7 +195,7 @@ export class PlayScene extends Phaser.Scene {
     const flyingBehavior = (m.behavior==='fly'||m.behavior==='fly_chase'||m.behavior==='fly_drop');
     if(flyingBehavior || (forceY!=null && !keepGravity)){ m.y = (forceY!=null?forceY:(H-200-Math.random()*100)); m.startY=m.y; m.body.setAllowGravity(false); }
     this.tweens.add({targets:m, scaleY: m.scaleY*0.9, duration:400 + Math.random()*200, yoyo:true, repeat:-1, ease:'Sine.easeInOut'});
-    m.nameLabel = this.add.text(m.x, m.y - 45, template.name, { fontSize:'11px', color:'#fff', backgroundColor:'rgba(0,0,0,0.6)', fontStyle:'bold', padding:{x:3,y:1} }).setOrigin(0.5);
+    m.nameLabel = this.add.text(m.x, m.y - 45, bilingual(template.name), { fontFamily:FONT, fontSize:'11px', color:'#fff', backgroundColor:'rgba(0,0,0,0.6)', fontStyle:'bold', padding:{x:3,y:1} }).setOrigin(0.5);
     this.activeMonsters.push(m);
     return m;
   }
@@ -233,11 +239,12 @@ export class PlayScene extends Phaser.Scene {
     this.boss.hp = hpMap[this.levelData.rank] || 20; this.boss.maxHp = this.boss.hp; this.boss.originTint = 0xffffff;
     const speedMap = { 1: 0.4, 2: 0.65, 3: 0.9, 4: 1.2, 5: 1.5 };
     this.boss.speedMulti = speedMap[this.levelData.rank] || 1.0;
+    this.boss.baseSpeedMulti = this.boss.speedMulti; // tốc độ "gốc" để khôi phục sau hiệu ứng chậm/đóng băng (boss có tốc gốc != 1)
     this.physics.add.collider(this.boss, this.floorGroup); this.physics.add.collider(this.boss, this.hazardGroup);
     this.physics.add.overlap(this.shots, this.bossGroup, this.onHitBoss, null, this); this.physics.add.overlap(this.player, this.bossGroup, this.onTouchMonster, null, this);
     let bossName = "BOSS"; if(this.levelData.rank === 1) bossName = "TRÙM VÒI VĨNH"; else if(this.levelData.rank === 2) bossName = "LỖI CHÍNH TẢ"; else if(this.levelData.rank === 3) bossName = "ĐỀ THI VÀO 10"; else if(this.levelData.rank === 4) bossName = "ĐẠI MA VƯƠNG"; else if(this.levelData.rank === 5) bossName = "TỨ ĐẠI TRƯỞNG LÃO";
     this.boss.baseName = bossName;
-    this.boss.nameLabel = this.add.text(this.boss.x, this.boss.y - 80, `${bossName} (${this.boss.hp}/${this.boss.maxHp})`, { fontSize:'14px', color:'#ffffff', fontStyle:'bold', backgroundColor:'#d63d54', padding:{x:4,y:2} }).setOrigin(0.5);
+    this.boss.nameLabel = this.add.text(this.boss.x, this.boss.y - 80, `${bossName} (${this.boss.hp}/${this.boss.maxHp})`, { fontFamily:FONT, fontSize:'14px', color:'#ffffff', fontStyle:'bold', backgroundColor:'#d63d54', padding:{x:4,y:2} }).setOrigin(0.5);
     this.flag.setVisible(false); this.flag.body.enable = false;
     // Vòng bảo vệ (Aura), Trạng thái 1
     this.bossAura = this.add.circle(this.boss.x, this.boss.y, 78, 0x66ccff, 0.22).setStrokeStyle(3, 0x66ccff, 0.9).setDepth(55).setVisible(false);
@@ -258,11 +265,16 @@ export class PlayScene extends Phaser.Scene {
   // ===================== CỐT TRUYỆN (nền hồng phấn, chữ đỏ đô) =====================
   showStoryIntro(){
     const SW=this.scale.width; const line = LEVEL_STORY[this.stage]; if(!line) return;
-    const bg = this.add.rectangle(SW/2, 104, SW-110, 66, 0xFCE4EC, 0.96).setScrollFactor(0).setDepth(80).setStrokeStyle(3, 0xC2185B, 0.95);
-    const txt = this.add.text(SW/2, 104, line, { fontFamily:'Be Vietnam Pro', fontSize:'15px', color:'#7B1E3B', fontStyle:'italic bold', align:'center', wordWrap:{width:SW-150} }).setOrigin(0.5).setScrollFactor(0).setDepth(81);
-    bg.setAlpha(0); txt.setAlpha(0);
-    this.tweens.add({ targets:[bg,txt], alpha:1, duration:420 });
-    this.time.delayedCall(4800, ()=>{ this.tweens.add({ targets:[bg,txt], alpha:0, duration:650, onComplete:()=>{ bg.destroy(); txt.destroy(); } }); });
+    const bg = this.add.rectangle(SW/2, 106, SW-110, 82, 0xFCE4EC, 0.96).setScrollFactor(0).setDepth(80).setStrokeStyle(3, 0xC2185B, 0.95);
+    const txt = this.add.text(SW/2, 96, line, { fontFamily:FONT, fontSize:'15px', color:'#7B1E3B', fontStyle:'italic bold', align:'center', wordWrap:{width:SW-150} }).setOrigin(0.5).setScrollFactor(0).setDepth(81);
+    // Nút "Đã hiểu": buộc 1 cú bấm chủ động thay vì banner tự mờ, để bài học (phần giá trị giáo dục) không bị lướt qua.
+    const btn = this.add.text(SW/2, 133, 'Đã hiểu ✕', { fontFamily:FONT, fontSize:'12px', color:'#ffffff', backgroundColor:'#7B1E3B', padding:{x:9,y:3} }).setOrigin(0.5).setScrollFactor(0).setDepth(82).setInteractive({useHandCursor:true});
+    bg.setAlpha(0); txt.setAlpha(0); btn.setAlpha(0);
+    this.tweens.add({ targets:[bg,txt,btn], alpha:1, duration:420 });
+    let closed=false;
+    const close = ()=>{ if(closed) return; closed=true; this.tweens.add({ targets:[bg,txt,btn], alpha:0, duration:500, onComplete:()=>{ bg.destroy(); txt.destroy(); btn.destroy(); } }); };
+    btn.on('pointerdown', close);
+    this.time.delayedCall(7000, close); // vẫn tự đóng sau 7s nếu không bấm (nới từ 4.8s để kịp đọc)
   }
 
   // ===================== HUD =====================
@@ -271,14 +283,14 @@ export class PlayScene extends Phaser.Scene {
     this.add.rectangle(SW/2, 35, SW-40, 50, 0x000000, 0.4).setScrollFactor(0).setDepth(49).setStrokeStyle(2, 0xffffff, 0.2);
     this.hearts=[]; for(let i=0;i<10;i++) this.hearts.push(this.add.image(46+i*28,35,'heart').setScrollFactor(0).setDepth(50).setScale(0.92));
     this.updateHearts();
-    this.scoreText=this.add.text(SW-140, 35, '⭐ 0', {fontSize:'24px',color:'#FFD23F',fontStyle:'900'}).setOrigin(0,0.5).setScrollFactor(0).setDepth(50);
-    this.add.text(SW/2, 35, this.levelData.name, {fontSize:'16px',color:'#fff',fontStyle:'bold'}).setOrigin(0.5).setScrollFactor(0).setDepth(50);
+    this.scoreText=this.add.text(SW-140, 35, '⭐ 0', {fontFamily:FONT,fontSize:'24px',color:'#FFD23F',fontStyle:'900'}).setOrigin(0,0.5).setScrollFactor(0).setDepth(50);
+    this.add.text(SW/2, 35, this.levelData.name, {fontFamily:FONT,fontSize:'16px',color:'#fff',fontStyle:'bold'}).setOrigin(0.5).setScrollFactor(0).setDepth(50);
   }
   buildStaminaHUD(){
     const SW=this.scale.width;
     this.staminaBg=this.add.rectangle(SW/2, 62, 184, 14, 0x000000, 0.5).setScrollFactor(0).setDepth(50);
     this.staminaBar=this.add.rectangle(SW/2-90, 62, 180, 10, 0x39C0ED).setOrigin(0,0.5).setScrollFactor(0).setDepth(51);
-    this.staminaLabel=this.add.text(SW/2, 46, '⚡ Thể lực', {fontSize:'10px', color:'#BDE9FF', fontStyle:'bold'}).setOrigin(0.5).setScrollFactor(0).setDepth(51);
+    this.staminaLabel=this.add.text(SW/2, 46, '⚡ Thể lực', {fontFamily:FONT, fontSize:'10px', color:'#BDE9FF', fontStyle:'bold'}).setOrigin(0.5).setScrollFactor(0).setDepth(51);
   }
   updateHearts(){ this.hearts.forEach((h,i)=>h.setVisible(!this.hudHidden && i<this.hp)); }
   buildPCUI() {
@@ -296,8 +308,8 @@ export class PlayScene extends Phaser.Scene {
       const x = startX + idx * (boxW + gap); const y = startY + 20;
       this.add.rectangle(x + boxW/2, y, boxW, boxH, 0x000000, 0.5).setStrokeStyle(1, 0xffffff, 0.3).setScrollFactor(0).setDepth(50);
       this.add.image(x + 15, y, sk.icon).setScale(0.8).setScrollFactor(0).setDepth(51);
-      this.add.text(x + 32, y - 8, sk.key.toUpperCase(), {fontSize: '13px', color: '#FFD700', fontStyle: '900'}).setScrollFactor(0).setDepth(51);
-      let t = this.add.text(x + 32, y + 8, sk.name, {fontSize: '10px', color: '#fff'}).setScrollFactor(0).setDepth(51).setOrigin(0, 0.5);
+      this.add.text(x + 32, y - 8, sk.key.toUpperCase(), {fontFamily:FONT, fontSize: '13px', color: '#FFD700', fontStyle: '900'}).setScrollFactor(0).setDepth(51);
+      let t = this.add.text(x + 32, y + 8, sk.name, {fontFamily:FONT, fontSize: '10px', color: '#fff'}).setScrollFactor(0).setDepth(51).setOrigin(0, 0.5);
       if(sk.key === 'n' || sk.key === 'm') this.pcSkillTexts[sk.key] = t;
     });
   }
@@ -315,7 +327,7 @@ export class PlayScene extends Phaser.Scene {
     const createMobileBtn = (x, y, r, key, iconLabel, isCollectSkill = false) => {
       const bg = this.add.circle(x, y, r, isCollectSkill ? 0x4b0082 : 0x000000, 0.5).setStrokeStyle(3, 0xffffff, 0.3).setScrollFactor(0).setDepth(100).setInteractive();
       this.add.image(x, y - r/6, iconLabel).setScale(r/45).setScrollFactor(0).setDepth(101);
-      let t = this.add.text(x, y + r/2, key, {fontSize: `${r/2.5}px`, color: '#FFD700', fontStyle: '900'}).setOrigin(0.5).setScrollFactor(0).setDepth(101);
+      let t = this.add.text(x, y + r/2, key, {fontFamily:FONT, fontSize: `${r/2.5}px`, color: '#FFD700', fontStyle: '900'}).setOrigin(0.5).setScrollFactor(0).setDepth(101);
       bg.on('pointerdown', () => { initAudio(); bg.setFillStyle(0xffffff, 0.4); this.handleSkillInput(key); });
       bg.on('pointerup', () => bg.setFillStyle(isCollectSkill ? 0x4b0082 : 0x000000, 0.5));
       if(isCollectSkill) this.mobileSkillTexts[key] = t;
@@ -340,7 +352,7 @@ export class PlayScene extends Phaser.Scene {
     if(!this.player.active || this._done) return;
     const rank = this.prog.rank; const kUpper = key.toUpperCase();
     if (kUpper === 'N' && this.prog.unlockedSkills) {
-        if (this.leNghiaUses > 0 && this.hp < heartsFor(rank)) { this.leNghiaUses--; this.hp = Math.min(heartsFor(rank), this.hp + 2); this.updateHearts(); playSfx('heal'); this.updateSkillUsesUI(); this.showFloatingText("+2 Máu (Lễ Nghĩa)", 0x7ED957); }
+        if (this.leNghiaUses > 0 && this.hp < heartsFor(rank)) { this.leNghiaUses--; this.hp = Math.min(heartsFor(rank), this.hp + 2); this.updateHearts(); playSfx('heal'); this.updateSkillUsesUI(); this.showFloatingText("Lễ Nghĩa: biết ơn tiếp thêm sức (+2 máu)", 0x7ED957); }
         else if (this.leNghiaUses <= 0) { this.showFloatingText("Hết lượt Lễ Nghĩa (2/ải)", 0xFF5A6E); }
         else { this.showFloatingText("Máu đã đầy", 0x7ED957); }
         return;
@@ -350,7 +362,7 @@ export class PlayScene extends Phaser.Scene {
             this.thaiDoUses--; this.shieldActive = true; this.shieldTimer = 3000;
             this.shieldVisual.setVisible(true).setScale(0.5); this.tweens.add({targets:this.shieldVisual, scale:1, duration:300, ease:'Back.Out'});
             this.shieldCountText.setVisible(true).setText('3');
-            this.updateSkillUsesUI(); this.showFloatingText("Màn Chắn Bất Tử (Thái Độ)", 0x00ffff);
+            this.updateSkillUsesUI(); this.showFloatingText("Thái Độ vững vàng: không gì lay chuyển", 0x00ffff);
         }
         else if (this.shieldActive) { this.showFloatingText("Khiên đang bật", 0x00ffff); }
         else { this.showFloatingText("Hết lượt Thái Độ (2/ải)", 0xFF5A6E); }
@@ -362,14 +374,14 @@ export class PlayScene extends Phaser.Scene {
     if (this.comboStr.includes("UIO") && rank >= 5) { this.fireCombo("UIO"); this.comboStr = ""; isComboFired = true; }
     else if (this.comboStr.includes("JK") && rank >= 2) { this.fireCombo("JK"); this.comboStr = ""; isComboFired = true; }
     if (!isComboFired) this.fireBaseWeapon(kUpper);
-    this.comboTimer = this.time.delayedCall(400, () => { this.comboStr = ""; });
+    this.comboTimer = this.time.delayedCall(700, () => { this.comboStr = ""; }); // nới 400->700ms để ghép combo dễ hơn, nhất là chạm 2 nút xa nhau trên điện thoại
   }
   updateSkillUsesUI() {
       if(this.pcSkillTexts){ if(this.pcSkillTexts['n']) this.pcSkillTexts['n'].setText(`Lễ Nghĩa (${this.leNghiaUses}/2)`); if(this.pcSkillTexts['m']) this.pcSkillTexts['m'].setText(`Thái Độ (${this.thaiDoUses}/2)`); }
       if(this.mobileSkillTexts){ if(this.mobileSkillTexts['N']) this.mobileSkillTexts['N'].setText(`N (${this.leNghiaUses})`); if(this.mobileSkillTexts['M']) this.mobileSkillTexts['M'].setText(`M (${this.thaiDoUses})`); }
   }
   showFloatingText(msg, color) {
-      const t = this.add.text(this.player.x, this.player.y - 60, msg, {fontSize:'16px', fontStyle:'bold', color:'#fff', backgroundColor:Phaser.Display.Color.IntegerToColor(color).rgba, padding:{x:6,y:3}}).setOrigin(0.5).setDepth(70);
+      const t = this.add.text(this.player.x, this.player.y - 60, msg, {fontFamily:FONT, fontSize:'16px', fontStyle:'bold', color:'#fff', backgroundColor:Phaser.Display.Color.IntegerToColor(color).rgba, padding:{x:6,y:3}}).setOrigin(0.5).setDepth(70);
       this.tweens.add({targets:t, y: t.y - 40, alpha:0, duration:1200, onComplete:()=>t.destroy()});
   }
   fireBaseWeapon(key) {
@@ -386,7 +398,7 @@ export class PlayScene extends Phaser.Scene {
     if(this.stamina < cost){ this.staminaWarn(); return; }
     this.spendStamina(cost); playSfx('shoot');
     if (comboType === 'JK') { this.spawnProjectile('w_tay', 600, -150, 1.2, 3); this.spawnProjectile('w_vo', 650, 0, 1.2, 3); this.spawnProjectile('w_tay', 600, 150, 1.2, 3); }
-    else if (comboType === 'UIO') { this.cameras.main.shake(300, 0.02); this.activeMonsters.forEach(m => { if(m.active) { this.explodeMonster(m); } }); }
+    else if (comboType === 'UIO') { this.cameras.main.shake(300, 0.02); this.activeMonsters.slice().forEach(m => { if(m.active) { this.explodeMonster(m); } }); } // slice: tránh splice giữa vòng lặp làm bỏ sót quái
   }
   spawnProjectile(type, speed, vY = 0, scale = 1, tier = 1) {
     const s = this.shots.create(this.player.x + this.facing*22, this.player.y - 4, type);
@@ -398,6 +410,7 @@ export class PlayScene extends Phaser.Scene {
     this.flashEmitter.explode(1, m.x, m.y); this.sparkEmitter.explode(20, m.x, m.y); this.smokeEmitter.explode(5, m.x, m.y);
     this.cameras.main.shake(200, 0.015);
     if(m.nameLabel) m.nameLabel.destroy(); if(m.hpBg) m.hpBg.destroy(); if(m.hpBar) m.hpBar.destroy();
+    const _mi = this.activeMonsters.indexOf(m); if(_mi >= 0) this.activeMonsters.splice(_mi, 1); // gỡ khỏi danh sách để update() & các .some() không quét xác chết mỗi frame
     m.destroy();
     // COMBO-CHAIN: hạ liên tiếp trong 1.3s -> nhân điểm + thưởng thể lực
     const now = this.time.now;
@@ -422,9 +435,9 @@ export class PlayScene extends Phaser.Scene {
     else if (tier === 2) { m.isFrozen = true; m.setTint(0x87CEFA); duration = 2000; playSfx('freeze'); }
     else if (tier === 3) { m.isFrozen = true; m.setTint(0xFFD700); duration = 1500; }
     else if (tier === 4) { m.speedMulti = 0.2; m.setTint(0x9370DB); duration = 3000; }
-    m.effectTimer = this.time.delayedCall(duration, () => { if(m && m.active) { m.speedMulti = 1; m.isFrozen = false; m.setTint(m.originTint); } });
+    m.effectTimer = this.time.delayedCall(duration, () => { if(m && m.active) { m.speedMulti = m.baseSpeedMulti || 1; m.isFrozen = false; m.setTint(m.originTint); } });
   }
-  onHit(shot,monster){ const tier = shot.tier || 1; const mRank = this.levelData.rank; shot.destroy(); if (tier >= mRank) { this.poof(monster.x, monster.y); playSfx('hit'); let dmg = monster.armor ? Math.max(1, tier-2) : tier; monster.hp -= dmg; monster.setTint(0xff0000); this.time.delayedCall(100, () => { if(monster.active) monster.setTint(monster.isFrozen ? 0x87CEFA : (monster.speedMulti<1?0x00BFFF:monster.originTint)); }); if(this.gm==='reflect' && monster.active && !monster.isFrozen){ const atk=this.monsters.create(monster.x,monster.y,'vietau'); atk.setTint(0x8B0000); atk.kind='vietau'; atk.behavior='chase'; this.physics.moveTo(atk,this.player.x,this.player.y,300); this.time.delayedCall(2500,()=>{ if(atk.active) atk.destroy(); }); } if(monster.hp <= 0) this.explodeMonster(monster); } else { this.applyMonsterEffect(monster, tier); this.poof(monster.x, monster.y); } }
+  onHit(shot,monster){ const tier = shot.tier || 1; const mRank = this.levelData.rank; shot.destroy(); if (tier >= mRank) { this.poof(monster.x, monster.y); playSfx('hit'); let dmg = monster.armor ? Math.max(1, tier-2) : tier; monster.hp -= dmg; monster.setTint(0xff0000); this.time.delayedCall(100, () => { if(monster.active) monster.setTint(monster.isFrozen ? 0x87CEFA : (monster.speedMulti<1?0x00BFFF:monster.originTint)); }); if(this.gm==='reflect' && monster.active && !monster.isFrozen){ const atk=this.monsters.create(monster.x,monster.y,'vietau'); atk.setTint(0x8B0000); atk.kind='vietau'; atk.behavior='chase'; this.physics.moveTo(atk,this.player.x,this.player.y,300); this.time.delayedCall(2500,()=>{ if(atk.active) atk.destroy(); }); } if(monster.hp <= 0) this.explodeMonster(monster); } else { this.applyMonsterEffect(monster, tier); this.poof(monster.x, monster.y); if(this.time.now > (this._weakMsgT||0)){ this._weakMsgT = this.time.now + 1400; this.showFloatingText('Vấn đề lớn cần công cụ học cao hơn! Hãy lên cấp', 0xFF5A6E); } } }
   onHitBoss(shot, boss){
     const tier = shot.tier || 1; const mRank = this.levelData.rank; shot.destroy(); this.poof(boss.x, boss.y);
     // TRẠNG THÁI 1: còn đệ tử -> khiên Aura, không gây sát thương
@@ -440,11 +453,12 @@ export class PlayScene extends Phaser.Scene {
     } else { this.applyMonsterEffect(boss, tier); }
   }
   enrageBoss(){
-    this.bossEnraged = true; this.boss.speedMulti *= 2; this.boss.setTint(0xff3333);
+    this.bossEnraged = true; this.boss.speedMulti *= 2; this.boss.baseSpeedMulti = this.boss.speedMulti; this.boss.setTint(0xff3333);
     this.cameras.main.shake(450, 0.02); playSfx('hurt');
     this.showFloatingText("CẬN TỬ! Boss nổi giận!", 0xff3333);
     if(this.boss.nameLabel) this.boss.nameLabel.setText(`${this.boss.baseName} ☠ CẬN TỬ`);
-    // x2 nhịp bắn
+    // x2 nhịp bắn: DỪNG timer gốc trước khi tạo timer enrage, nếu không boss bắn từ CẢ hai (nhịp ~3x, sai độ khó).
+    if(this.bossAtkTimer){ this.bossAtkTimer.remove(false); this.bossAtkTimer = null; }
     this.enrageAtkTimer = this.time.addEvent({ delay: Math.max(350, this.bossAtkDelay/2), loop:true, callback:()=>this.bossAttack(330) });
     this.startEnrageGimmick();
   }
@@ -463,7 +477,7 @@ export class PlayScene extends Phaser.Scene {
 
   onTouchMonster(player, src){ if(this.invuln>0||this._done||this.shieldActive) return; if(this.gm==='lag' && !this.lagActive){ this.triggerLag(); return; } this.invuln=1000; this.hp-=1; this.updateHearts(); playSfx('hurt'); if(this.gm==='stun'){ this.stunT=700; this.showFloatingText("Choáng!", 0x9370DB); } const dir=(src&&src.x>player.x)?-1:1; player.setVelocity(dir*200,-250); this.cameras.main.shake(150,0.01); this.tweens.add({targets:player,alpha:0.2,yoyo:true,repeat:5,duration:80,onComplete:()=>player.setAlpha(1)}); if(this.hp<=0) this.lose(); }
   onHazardHit(player, hazard) { if(this.invuln>0||this._done||this.shieldActive) return; this.invuln=1000; this.hp-=1; this.updateHearts(); playSfx('hurt'); player.setVelocityY(-500); this.cameras.main.shake(200, 0.015); this.tweens.add({targets:player,alpha:0.2,yoyo:true,repeat:5,duration:80,onComplete:()=>player.setAlpha(1)}); if(this.hp<=0) this.lose(); }
-  poof(x,y){ for(let i=0;i<6;i++){ const a=Phaser.Math.PI2*i/6; const p=this.add.circle(x,y,5,0xffffff,0.95); this.tweens.add({targets:p,x:x+Math.cos(a)*36,y:y+Math.sin(a)*36,alpha:0,scale:0.2,duration:340,onComplete:()=>p.destroy()}); } }
+  poof(x,y){ if(this.poofEmitter) this.poofEmitter.explode(6, x, y); }
   setHudVisible(v){ this.hudHidden = !v; if(this.scoreText) this.scoreText.setVisible(v); if(this.staminaBar) this.staminaBar.setVisible(v); if(this.staminaBg) this.staminaBg.setVisible(v); if(this.staminaLabel) this.staminaLabel.setVisible(v); this.updateHearts(); }
 
   setupGimmicks(){
@@ -471,8 +485,8 @@ export class PlayScene extends Phaser.Scene {
     if(gm==='stealth'){ this.activeMonsters.forEach(m=>{ m.dormant=true; m.setVelocity(0,0); }); this.showFloatingText("Đi nhẹ kẻo đánh thức quái!", 0xFFD23F); }
     if(gm==='armor'){ this.activeMonsters.forEach(m=>{ m.armor=true; m.hp+=4; m.maxHp+=4; m.setScale((m.scaleX||1)*1.15); }); this.showFloatingText("Quái có giáp, đánh nhiều phát!", 0xFF8C00); }
     if(gm==='invisible'){ this.activeMonsters.forEach(m=>{ m.ghost=true; m.setAlpha(0.12); if(m.nameLabel) m.nameLabel.setAlpha(0.2); }); this.showFloatingText("Quái tàng hình, tới gần mới hiện!", 0x9370DB); }
-    if(gm==='clones'){ for(let i=0;i<4;i++){ const sx=600+Math.random()*2200; const m=this.monsters.create(sx, H-220-Math.random()*80, 'giành'); m.setTint(0xFFD700); m.setAlpha(0.9); m.kind='giành'; m.behavior='fly'; m.startX=sx; m.startY=m.y; m.body.setAllowGravity(false); m.speedMulti=1; m.hp=2; m.maxHp=2; m.originTint=0xFFD700; m.hpBg=this.add.rectangle(m.x,m.y-60,40,6,0x000000,0.6).setDepth(48); m.hpBar=this.add.rectangle(m.x-20,m.y-60,40,6,0x7ED957).setOrigin(0,0.5).setDepth(49); m.nameLabel=this.add.text(m.x,m.y-45,"Phân Thân",{fontSize:'11px',color:'#fff',backgroundColor:'rgba(0,0,0,0.6)',fontStyle:'bold',padding:{x:3,y:1}}).setOrigin(0.5); this.activeMonsters.push(m);} }
-    if(gm==='summon'){ const all=[].concat(MONSTER_DEFS[1],MONSTER_DEFS[2],MONSTER_DEFS[3],MONSTER_DEFS[4],MONSTER_DEFS[5]); for(let i=0;i<6;i++){ const t=all[Math.floor(Math.random()*all.length)]; const sx=600+Math.random()*2200; const m=this.monsters.create(sx,H-120,t.sprite); m.originTint=t.tint||0xffffff; if(t.tint)m.setTint(t.tint); m.kind=t.sprite; m.behavior='chase'; m.startX=sx; m.speedMulti=1; m.hp=4; m.maxHp=4; m.hpBg=this.add.rectangle(m.x,m.y-60,40,6,0x000000,0.6).setDepth(48); m.hpBar=this.add.rectangle(m.x-20,m.y-60,40,6,0x7ED957).setOrigin(0,0.5).setDepth(49); m.nameLabel=this.add.text(m.x,m.y-45,t.name,{fontSize:'11px',color:'#fff',backgroundColor:'rgba(0,0,0,0.6)',fontStyle:'bold',padding:{x:3,y:1}}).setOrigin(0.5); this.activeMonsters.push(m);} this.showFloatingText("Nợ Môn: quái mọi cấp ùa tới!", 0xFF0000); }
+    if(gm==='clones'){ for(let i=0;i<4;i++){ const sx=600+Math.random()*2200; const m=this.monsters.create(sx, H-220-Math.random()*80, 'giành'); m.setTint(0xFFD700); m.setAlpha(0.9); m.kind='giành'; m.behavior='fly'; m.startX=sx; m.startY=m.y; m.body.setAllowGravity(false); m.speedMulti=1; m.hp=2; m.maxHp=2; m.originTint=0xFFD700; m.hpBg=this.add.rectangle(m.x,m.y-60,40,6,0x000000,0.6).setDepth(48); m.hpBar=this.add.rectangle(m.x-20,m.y-60,40,6,0x7ED957).setOrigin(0,0.5).setDepth(49); m.nameLabel=this.add.text(m.x,m.y-45,bilingual("Phân Thân"),{fontFamily:FONT,fontSize:'11px',color:'#fff',backgroundColor:'rgba(0,0,0,0.6)',fontStyle:'bold',padding:{x:3,y:1}}).setOrigin(0.5); this.activeMonsters.push(m);} }
+    if(gm==='summon'){ const all=[].concat(MONSTER_DEFS[1],MONSTER_DEFS[2],MONSTER_DEFS[3],MONSTER_DEFS[4],MONSTER_DEFS[5]); for(let i=0;i<6;i++){ const t=all[Math.floor(Math.random()*all.length)]; const sx=600+Math.random()*2200; const m=this.monsters.create(sx,H-120,t.sprite); m.originTint=t.tint||0xffffff; if(t.tint)m.setTint(t.tint); m.kind=t.sprite; m.behavior='chase'; m.startX=sx; m.speedMulti=1; m.hp=4; m.maxHp=4; m.hpBg=this.add.rectangle(m.x,m.y-60,40,6,0x000000,0.6).setDepth(48); m.hpBar=this.add.rectangle(m.x-20,m.y-60,40,6,0x7ED957).setOrigin(0,0.5).setDepth(49); m.nameLabel=this.add.text(m.x,m.y-45,bilingual(t.name),{fontFamily:FONT,fontSize:'11px',color:'#fff',backgroundColor:'rgba(0,0,0,0.6)',fontStyle:'bold',padding:{x:3,y:1}}).setOrigin(0.5); this.activeMonsters.push(m);} this.showFloatingText("Nợ Môn: quái mọi cấp ùa tới!", 0xFF0000); }
     if(gm==='thief'){ this.healItems=this.physics.add.group({allowGravity:false}); for(let i=0;i<5;i++){ const it=this.healItems.create(500+i*560, H-72, 'heart'); it.setDepth(15); } this.physics.add.overlap(this.player,this.healItems,(p,it)=>{ if(this.hp<heartsFor(this.prog.rank)){ this.hp++; this.updateHearts(); playSfx('heal'); this.showFloatingText("+1 Máu", 0x7ED957); } it.destroy(); }, null, this); this.physics.add.overlap(this.monsters,this.healItems,(mm,it)=>{ this.poof(it.x,it.y); it.destroy(); }, null, this); this.showFloatingText("Quái Dành Đồ cướp tim, nhặt nhanh!", 0xFF8C00); }
     if(gm==='stamina'){ this.staminaItems=this.physics.add.group({allowGravity:false}); for(let i=0;i<6;i++){ const it=this.staminaItems.create(450+i*480, H-72, 'w_thaido'); it.setDepth(15); } this.physics.add.overlap(this.player,this.staminaItems,(p,it)=>{ this.addStamina(40); playSfx('heal'); this.showFloatingText("+Tỉnh táo (Sữa/Cafe)", 0xFFD23F); it.destroy(); }, null, this); this.showFloatingText("Giữ Thể lực, cạn thì không nhảy được!", 0xFFD23F); }
     if(gm==='dark'){ this.darkOverlay=this.add.rectangle(this.scale.width/2,H/2,this.scale.width,H,0x05060a,0.86).setScrollFactor(0).setDepth(45); this.lightGlow=this.add.circle(this.player.x,this.player.y,150,0xfff2b0,0.16).setDepth(46).setBlendMode(Phaser.BlendModes.ADD); this.showFloatingText("Tối quá, bám theo vùng sáng!", 0xFFD23F); }
@@ -490,7 +504,7 @@ export class PlayScene extends Phaser.Scene {
       this.tweens.add({targets:g,alpha:0,delay:850,duration:1500,onComplete:()=>g.destroy()});
     }}); this.showFloatingText("Viết Ẩu bắn mực che màn hình!", 0x111133); }
     if(gm==='hideHud'){ this.time.addEvent({delay:4500,loop:true,callback:()=>{ if(this._done)return; this.setHudVisible(false); this.time.delayedCall(2000,()=>{ if(!this._done) this.setHudVisible(true); }); }}); this.showFloatingText("Quên Nhớ: thanh máu chốc chốc biến mất!", 0x9999ff); }
-    if(gm==='reverse'){ this.time.addEvent({delay:5000,loop:true,callback:()=>{ if(this._done)return; this.triggerReverse(2600); }}); }
+    if(gm==='reverse'){ this.time.addEvent({delay:7000,loop:true,callback:()=>{ if(this._done)return; this.triggerReverse(1800); }}); } // giảm tần suất/thời lượng đảo hướng (5000/2600 -> 7000/1800) cho bớt ức chế
     if(gm==='mines'){ this.time.addEvent({delay:1700,loop:true,callback:()=>{ if(this._done)return; const src=this.activeMonsters.find(m=>m.active && Math.abs(m.x-this.player.x)<700); if(!src)return; const mine=this.add.circle(src.x,H-46,12,0xff0000,0.9).setDepth(40); this.tweens.add({targets:mine,scale:1.3,yoyo:true,repeat:-1,duration:300}); this.time.delayedCall(1500,()=>{ if(this._done){ mine.destroy(); return; } this.poof(mine.x,mine.y); this.cameras.main.shake(120,0.008); if(Math.abs(this.player.x-mine.x)<70 && Math.abs(this.player.y-mine.y)<90 && this.invuln<=0 && !this.shieldActive){ this.invuln=1000; this.hp--; this.updateHearts(); playSfx('hurt'); if(this.hp<=0) this.lose(); } mine.destroy(); }); }}); this.showFloatingText("Quay Cóp thả phao thi nổ chậm!", 0xFF8C00); }
     if(gm==='lag'){ this.input.on('pointerdown',()=>{ if(this.lagActive) this.lagDec(); }); }
   }
@@ -506,7 +520,7 @@ export class PlayScene extends Phaser.Scene {
     if(gm==='invisible'){ this.activeMonsters.forEach(m=>{ if(!m.active||!m.ghost)return; const d=Phaser.Math.Distance.Between(this.player.x,this.player.y,m.x,m.y); m.setAlpha(d<200?1:0.12); }); }
     if(gm==='stealth'){ this.activeMonsters.forEach(m=>{ if(!m.active||!m.dormant)return; const d=Phaser.Math.Distance.Between(this.player.x,this.player.y,m.x,m.y); if(d<210){ m.dormant=false; m.behavior='chase'; } }); }
     if((gm==='dark'||this.darkOverlay) && this.lightGlow){ this.lightGlow.setPosition(this.player.x,this.player.y); }
-    if(gm==='fireWall' && this.fireWall){ this.fireWall.x += (95+this.levelData.rank*6)*dt/1000; if(this.player.x < this.fireWall.x + 70){ this.lose(); } }
+    if(gm==='fireWall' && this.fireWall){ this.fireWall.x += (95+this.levelData.rank*6)*dt/1000; if(this.player.x < this.fireWall.x + 70 && this.invuln<=0 && !this.shieldActive){ this.invuln=1200; this.hp--; this.updateHearts(); playSfx('hurt'); this.player.setVelocity(320,-260); this.cameras.main.shake(220,0.02); this.showFloatingText("Tường lửa bén gót! Chạy nhanh!", 0xff5a1e); if(this.hp<=0) this.lose(); } } // trước đây chạm tường = thua tức thì; nay trừ 1 tim + đẩy tới (ân xá theo máu), công bằng hơn
   }
 
   update(){
@@ -641,6 +655,6 @@ export class PlayScene extends Phaser.Scene {
     if(!inputLocked && dropDown && !this.player.body.blocked.down) { this.player.setVelocityY(450); }
     if(this.player.y>H+60) this.lose();
   }
-  win(){ if(this._done)return; this._done=true; this.player.setVelocity(0,0); this.physics.pause(); playSfx('win'); const p=loadProg(); p.beaten[this.stage]=true; if (this.isCollectStage) p.unlockedSkills = true; let maxBeaten=-1; Object.keys(p.beaten).forEach(k=>{ if(p.beaten[k] && k != 4) maxBeaten=Math.max(maxBeaten, parseInt(k,10)); }); let newRank = 1; if (maxBeaten >= 19) newRank = 5; else if (maxBeaten >= 15) newRank = 4; else if (maxBeaten >= 10) newRank = 3; else if (maxBeaten >= 3) newRank = 2; p.rank = Math.max(p.rank||1, newRank); saveProg(p); if (EXTERNAL.onStars) EXTERNAL.onStars(this.score); this.scene.start('End',{win:true,score:this.score,stage:this.stage, targetPage: Math.floor(this.stage / 5)}); }
-  lose(){ if(this._done)return; this._done=true; this.physics.pause(); if (EXTERNAL.onStars) EXTERNAL.onStars(this.score); this.scene.start('End',{win:false,score:this.score, targetPage: Math.floor(this.stage / 5)}); }
+  win(){ if(this._done)return; this._done=true; this.player.setVelocity(0,0); this.physics.pause(); playSfx('win'); const p=loadProg(); const oldRank = p.rank||1; p.beaten[this.stage]=true; if (this.isCollectStage) p.unlockedSkills = true; let maxBeaten=-1; Object.keys(p.beaten).forEach(k=>{ if(p.beaten[k] && k != 4) maxBeaten=Math.max(maxBeaten, parseInt(k,10)); }); let newRank = 1; if (maxBeaten >= 19) newRank = 5; else if (maxBeaten >= 15) newRank = 4; else if (maxBeaten >= 10) newRank = 3; else if (maxBeaten >= 3) newRank = 2; p.rank = Math.max(p.rank||1, newRank); saveProg(p); if (EXTERNAL.onStageResult) EXTERNAL.onStageResult(this.stage, this.score); this.scene.start('End',{win:true,score:this.score,stage:this.stage, targetPage: Math.floor(this.stage / 5), rankUp: p.rank > oldRank, newRank: p.rank}); }
+  lose(){ if(this._done)return; this._done=true; this.physics.pause(); this.scene.start('End',{win:false,score:this.score, targetPage: Math.floor(this.stage / 5)}); }
 }

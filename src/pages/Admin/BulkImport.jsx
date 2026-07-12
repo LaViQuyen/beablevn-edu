@@ -105,11 +105,11 @@ const BulkImport = () => {
           loginId: row.studentCode,
           username: row.studentCode,
           email: `${row.studentCode}@beable.vn`,
-          password: hashedPassword,
           role: 'student',
           classIds: row.classIds,
           createdAt: new Date().toISOString(),
         });
+        await set(ref(db, `userAuth/${newRef.key}`), { password: hashedPassword }); // mật khẩu ở node RIÊNG userAuth
         success++;
       } catch (err) {
         console.error(`Lỗi import ${row.name}:`, err);

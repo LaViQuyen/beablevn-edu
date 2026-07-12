@@ -251,15 +251,16 @@ const StaffLayout = () => {
 
     setLoadingPass(true);
     try {
-        const userRef = ref(db, `users/${currentUser.id}`);
-        const snapshot = await get(userRef);
-        const userData = snapshot.val();
-        const isMatch = bcrypt.compareSync(passForm.oldPass, userData.password);
+        // Mật khẩu lưu ở node RIÊNG userAuth (không nằm trong users) để đọc users không lộ credential.
+        const authRef = ref(db, `userAuth/${currentUser.id}`);
+        const snapshot = await get(authRef);
+        const userData = snapshot.val() || {};
+        const isMatch = bcrypt.compareSync(passForm.oldPass, userData.password || '');
         if (!isMatch) { setPassError("Mật khẩu cũ không đúng!"); setLoadingPass(false); return; }
 
         const salt = bcrypt.genSaltSync(10);
         const newHash = bcrypt.hashSync(passForm.newPass, salt);
-        await update(userRef, { password: newHash });
+        await update(authRef, { password: newHash });
 
         setPassSuccess("Đổi mật khẩu thành công!");
         setPassForm({ oldPass: '', newPass: '', confirmPass: '' });

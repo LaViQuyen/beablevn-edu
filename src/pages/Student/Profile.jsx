@@ -59,16 +59,17 @@ const Profile = () => {
 
     setLoading(true);
     try {
-      const userRef = ref(db, `users/${currentUser.id}`);
-      const snapshot = await get(userRef);
-      const data = snapshot.val();
+      // Mật khẩu lưu ở node RIÊNG userAuth (không nằm trong users) để đọc users không lộ credential.
+      const authRef = ref(db, `userAuth/${currentUser.id}`);
+      const snapshot = await get(authRef);
+      const data = snapshot.val() || {};
 
-      const isMatch = bcrypt.compareSync(form.oldPass, data.password);
+      const isMatch = bcrypt.compareSync(form.oldPass, data.password || '');
       if (!isMatch) { setError('Mật khẩu cũ không đúng.'); setLoading(false); return; }
 
       const salt = bcrypt.genSaltSync(10);
       const newHash = bcrypt.hashSync(form.newPass, salt);
-      await update(userRef, { password: newHash });
+      await update(authRef, { password: newHash });
 
       setSuccess('Đổi mật khẩu thành công!');
       setForm({ oldPass: '', newPass: '', confirmPass: '' });

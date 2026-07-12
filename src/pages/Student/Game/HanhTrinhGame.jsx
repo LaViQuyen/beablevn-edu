@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
-import { db } from '../../../firebase';
-import { ref, onValue, update, increment } from 'firebase/database';
+import { db, functions } from '../../../firebase';
+import { ref, onValue, update, increment, runTransaction } from 'firebase/database';
+import { httpsCallable } from 'firebase/functions';
 import { createGame } from './index';
 
 // ============================================================
@@ -25,6 +26,11 @@ const BONUS_PER_PLAY = 50;  // mỗi 50 Bonus tích lũy = +1 lượt vào kho
 
 // Brand
 const FOREST = '#2B6830';
+
+// Ngày hiện tại theo GIỜ VIỆT NAM (UTC+7). Dùng thay new Date().toISOString() (vốn theo UTC)
+// để trần lượt/ngày reset đúng 00:00 giờ VN thay vì 07:00. PHẢI dùng đồng bộ ở cả chỗ đọc
+// (tính dailyLeft) lẫn chỗ ghi (playLog) để khóa ngày trùng khớp.
+const vnDateStr = () => new Date(Date.now() + 7 * 3600 * 1000).toISOString().slice(0, 10);
 
 const RANK_NAMES = ['Mầm Non', 'Tiểu Học', 'THCS', 'THPT', 'Đại Học'];
 // Mốc Bonus -> cấp độ (1..5). Học càng nhiều, nhân vật càng mạnh (nhiều tim + vũ khí).
@@ -235,7 +241,7 @@ export default function HanhTrinhGame() {
 
   // --- LƯỢT CHƠI: 1 lượt = 1 LẦN VÀO ẢI. Kiếm bằng học tập (kho) + trần mỗi ngày ---
   const earnedPlays = attendedCount * ATTEND_PLAY + Math.floor(lifetimeBonus / BONUS_PER_PLAY);
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayStr = vnDateStr();
   const todayUsed = (gameMeta.playLog && gameMeta.playLog[todayStr]) || 0; // số ải đã vào hôm nay
   const poolLeft = Math.max(0, earnedPlays - (gameMeta.playsUsed || 0));   // kho lượt còn (theo học tập)
   const dailyLeft = Math.max(0, DAILY_CAP - todayUsed);                    // còn vào được bao nhiêu ải hôm nay
@@ -301,48 +307,45 @@ export default function HanhTrinhGame() {
     const onSave = (p, meta) => {
       progressRef.current = { beaten: p.beaten || {}, unlockedSkills: !!p.unlockedSkills };
       if (!uid) return;
-      const node = ref(db, `studentGames/${uid}/hanhTrinh`);
       if (meta && meta.reset) {
-        // Reset CHỦ ĐỘNG: trường hợp DUY NHẤT được phép xóa tiến trình
-        update(node, {
-          beaten: null,
-          unlockedSkills: false,
-          rank: Number(p.rank) || 1,
-          updatedAt: new Date().toISOString(),
-        }).catch(() => {});
+        // Reset qua Cloud Function (student KHÔNG còn quyền tự ghi beaten/rank/unlockedSkills).
+        httpsCallable(functions, 'resetGameProgress')().catch(() => {});
         setSavedProgress({ beaten: {}, unlockedSkills: false });
         return;
       }
-      // GHI HỢP NHẤT từng ải (beaten/<i>) thay vì thay cả object `beaten`.
-      // Trước đây ghi đè cả object: client cầm dữ liệu cũ (mạng chậm, tab mở lâu,
-      // chơi 2 thiết bị) sẽ XÓA ải đã vượt làm học viên tụt cấp. Ghi từng key
-      // thì tiến trình chỉ có thể TĂNG, không bao giờ mất.
-      const payload = { updatedAt: new Date().toISOString() };
-      Object.keys(p.beaten || {}).forEach((k) => { if (p.beaten[k]) payload[`beaten/${k}`] = true; });
-      if (p.unlockedSkills) payload.unlockedSkills = true;
-      // rank chỉ ghi TĂNG, không ghi tụt (phòng client cầm tiến trình thiếu)
-      const mergedBeaten = { ...(savedProgress.beaten || {}), ...(p.beaten || {}) };
-      payload.rank = Math.max(Number(p.rank) || 1, rankFromProgress(mergedBeaten));
-      update(node, payload).catch(() => {});
+      // Lưu thường: KHÔNG ghi DB trực tiếp nữa. Việc BỀN HÓA tiến trình (beaten/rank/unlockedSkills/
+      // totalStars) do onStageResult -> Cloud Function submitStageResult đảm nhiệm (server chấm điểm,
+      // chống grind điểm + nhảy cấp). Ở đây chỉ giữ CACHE cục bộ để gameplay phản hồi tức thì.
     };
-    // Cộng dồn SAO sau mỗi lượt chơi (thắng/thua đều tính) -> phục vụ bảng xếp hạng
-    const onStars = (stars) => {
-      if (uid && stars > 0) {
-        update(ref(db, `studentGames/${uid}/hanhTrinh`), { totalStars: increment(stars) }).catch(() => {});
-      }
+    // Báo KẾT QUẢ vượt ải về server để CHẤM ĐIỂM + ghi tiến trình (thay cho onStars cũ). Function
+    // validate mở khóa tuần tự + trần điểm + sao lần vượt đầu; retry 1 lần để bền hóa khi mạng chậm.
+    const onStageResult = (stage, score) => {
+      if (!uid) return;
+      const call = () => httpsCallable(functions, 'submitStageResult')({ stage, won: true, score: Math.max(0, Math.floor(score || 0)) });
+      call().catch(() => { setTimeout(() => { call().catch(() => {}); }, 1500); });
     };
-    // TRỪ 1 lượt mỗi khi VÀO 1 ẢI (MapScene gọi). Dùng increment để chống đè giá trị cũ khi chơi liên tục.
+    // TRỪ 1 lượt mỗi khi VÀO 1 ẢI (MapScene gọi). Trả về Promise<boolean> (true = trừ thành công).
+    // Dùng GIAO DỊCH NGUYÊN TỬ trên playLog/{ngày}: đọc lại giá trị THỰC trên server rồi mới tăng,
+    // và TỪ CHỐI nếu đã đạt trần DAILY_CAP. Nhờ vậy mở 2 thiết bị cùng lúc không vượt được trần
+    // (trước đây mỗi phiên giữ snapshot riêng nên chơi được gấp đôi).
     const onConsume = () => {
-      if (isStaff) return;       // nhân sự chơi không giới hạn -> không trừ lượt
-      if (uid) {
-        const today = new Date().toISOString().slice(0, 10);
-        update(ref(db, `studentGames/${uid}/hanhTrinh`), {
-          playsUsed: increment(1),
-          [`playLog/${today}`]: increment(1),
-        }).catch(() => {});
-      }
+      if (isStaff) return Promise.resolve(true); // nhân sự chơi không giới hạn -> luôn cho vào
+      if (!uid) return Promise.resolve(true);
+      const today = vnDateStr();
+      const dayRef = ref(db, `studentGames/${uid}/hanhTrinh/playLog/${today}`);
+      return runTransaction(dayRef, (cur) => {
+        const n = cur || 0;
+        if (n >= DAILY_CAP) return; // abort: đã hết lượt hôm nay (thiết bị khác đã dùng)
+        return n + 1;
+      }).then((res) => {
+        if (res.committed) {
+          update(ref(db, `studentGames/${uid}/hanhTrinh`), { playsUsed: increment(1) }).catch(() => {});
+          return true;
+        }
+        return false;
+      }).catch(() => true); // lỗi mạng: không chặn oan người chơi
     };
-    const game = createGame(hostRef.current, { initial, onSave, onStars, onConsume, playsLeft: remainingPlays, aspect: landscapeAspect });
+    const game = createGame(hostRef.current, { initial, onSave, onStageResult, onConsume, playsLeft: remainingPlays, aspect: landscapeAspect });
     gameRef.current = game;
     return () => {
       try { game.destroy(true); } catch (e) { /* ignore */ }

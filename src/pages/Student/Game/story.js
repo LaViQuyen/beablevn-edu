@@ -14,6 +14,21 @@ export const RANK_STORY = [
   "Chương V · ĐẠI HỌC, Tự viết đời mình: tự do đi cùng trách nhiệm và kỷ luật."
 ];
 
+// Từ vựng SONG NGỮ Anh-Việt cho tên quái & vũ khí. Bối cảnh trung tâm Anh ngữ: cho học viên
+// thấm từ vựng qua tiếp xúc lặp lại trong game (nhãn hiển thị dạng "Tiếng Việt · English").
+export const VOCAB_EN = {
+  // Quái (thói xấu / nỗi sợ)
+  'Khóc Nhè': 'Whining', 'Yêu Không Ngủ': 'Sleepless', 'Dành Đồ': 'Grabbing',
+  'Viết Ẩu': 'Careless', 'Quên Nhớ': 'Forgetful', 'Nói Chuyện': 'Chatting', 'Lười Biếng': 'Laziness', 'Lạc Đề': 'Off-topic',
+  'Bắt Nạt': 'Bullying', 'Trốn Học': 'Truancy', 'Mê Game': 'Game Addiction', 'Chống Đối': 'Defiance',
+  'Phân Tâm': 'Distraction', 'Quay Cóp': 'Cheating', 'Thức Khuya': 'Late Nights',
+  'Rớt Mạng': 'Offline', 'Cúp Tiết': 'Skipping Class', 'Nợ Môn': 'Failing', 'Nước Đến Chân': 'Procrastination',
+  'Phân Thân': 'Clone',
+  // Vũ khí (công cụ học tập / nhân cách)
+  'Tẩy': 'Eraser', 'Vở': 'Notebook', 'Bút': 'Pen', 'Kiến Thức': 'Knowledge', 'Kỹ Năng': 'Skill', 'Trình Độ': 'Mastery',
+  'Lễ Nghĩa': 'Courtesy', 'Thái Độ': 'Attitude',
+};
+
 // Lời dẫn truyện mỗi ẢI/LỚP (hiện ở đầu màn chơi, theo stage 0..24)
 export const LEVEL_STORY = [
   // CẤP 1: MẦM NON
