@@ -220,7 +220,7 @@ export default function HanhTrinhGame() {
 
     // Bảng xếp hạng theo sao: đọc studentGames mọi học viên + users (lấy tên)
     const unsubGames = onValue(ref(db, 'studentGames'), (snap) => setAllGames(snap.val() || {}), () => {});
-    const unsubUsers = onValue(ref(db, 'users'), (snap) => setAllUsers(snap.val() || {}), () => {});
+    const unsubUsers = onValue(ref(db, 'usersPublic'), (snap) => setAllUsers(snap.val() || {}), () => {}); // danh bạ công khai (tên + vai trò cho BXH)
 
     return () => { unsubScores(); unsubProg(); unsubAtt(); unsubGames(); unsubUsers(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps

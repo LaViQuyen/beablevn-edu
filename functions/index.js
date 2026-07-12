@@ -314,6 +314,32 @@ exports.resetGameProgress = onCall({ region: 'asia-southeast1' }, async (req) =>
   return { ok: true };
 });
 
+// ============================================================
+// DANH BẠ CÔNG KHAI usersPublic — tự MIRROR từ users.
+// Vì sao: node `users` chứa PII (email, mã HV = ID đăng nhập, cờ quyền...). Trước đây mọi học viên
+// đăng nhập đọc được trọn users. Nay users chỉ chính chủ + staff/admin đọc; các trang học viên (bảng
+// vinh danh, liên hệ, phản ánh, game) chuyển sang đọc `usersPublic` chỉ gồm trường KHÔNG nhạy cảm.
+// Trigger này giữ usersPublic luôn khớp users qua MỌI đường ghi (tạo/sửa/xóa), không cần vá tay.
+// ============================================================
+exports.mirrorUserPublic = onValueWritten(
+  { ...DB_OPTS, ref: '/users/{uid}' },
+  async (event) => {
+    const uid = event.params.uid;
+    const after = event.data && event.data.after ? event.data.after.val() : null;
+    const pubRef = db.ref(`usersPublic/${uid}`);
+    if (!after) { await pubRef.remove(); return null; } // user bị xóa -> gỡ khỏi danh bạ công khai
+    const pub = {};
+    if (after.name != null) pub.name = after.name;
+    if (after.role != null) pub.role = after.role;
+    if (after.isDemo != null) pub.isDemo = !!after.isDemo;
+    if (after.classIds != null) pub.classIds = after.classIds;
+    if (after.assignedClasses != null) pub.assignedClasses = after.assignedClasses;
+    if (after.subRole != null) pub.subRole = after.subRole;
+    await pubRef.set(pub);
+    return null;
+  }
+);
+
 const coach = require('./coach'); // IELTS COACH: dispatcher tại functions/coach/index.js
 exports.coachSpeaking = coach.coachSpeaking;
 exports.coachWriting = coach.coachWriting;

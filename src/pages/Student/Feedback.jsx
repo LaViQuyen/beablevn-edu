@@ -159,7 +159,7 @@ const Feedback = () => {
       // 3. Tạo in-app notification cho GV/CCO phụ trách lớp
       // Lấy danh sách staff phụ trách lớp học viên
       try {
-        const usersSnap = await get(ref(db, 'users'));
+        const usersSnap = await get(ref(db, 'usersPublic')); // danh bạ công khai (role/assignedClasses để báo GV phụ trách)
         const usersData = usersSnap.val() || {};
         const staffToNotify = Object.entries(usersData)
           .map(([id, val]) => ({ id, ...val }))

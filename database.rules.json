@@ -4,11 +4,17 @@
     ".write": false,
 
     "users": {
-      ".read": "auth != null",
+      ".read": "auth != null && (auth.token.role === 'staff' || auth.token.role === 'admin')",
       "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
         ".write": "auth != null && (auth.token.role === 'staff' || auth.token.role === 'admin')",
         "password": { ".validate": false }
       }
+    },
+
+    "usersPublic": {
+      ".read": "auth != null",
+      ".write": "auth != null && (auth.token.role === 'staff' || auth.token.role === 'admin')"
     },
 
     "userAuth": {

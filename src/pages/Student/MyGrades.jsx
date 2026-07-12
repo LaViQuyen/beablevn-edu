@@ -28,7 +28,7 @@ const MyGrades = () => {
     if (!currentUser) return;
 
     const classesRef = ref(db, 'classes');
-    const usersRef = ref(db, 'users');
+    const usersRef = ref(db, 'usersPublic'); // danh bạ công khai (role + classIds, không PII)
     const scoresRef = ref(db, 'scores');
 
     let isMounted = true;

@@ -46,7 +46,7 @@ const StudentLeaderboard = () => {
   const [tab, setTab] = useState('effort');
 
   useEffect(() => {
-    const u1 = onValue(ref(db, 'users'), (s) => setUsers(s.val() || {}));
+    const u1 = onValue(ref(db, 'usersPublic'), (s) => setUsers(s.val() || {})); // danh bạ công khai (không PII)
     const u2 = onValue(ref(db, 'scores'), (s) => { setAllScores(s.val() || {}); setLoading(false); });
     const u3 = onValue(ref(db, 'attendance'), (s) => setAttendance(s.val() || {}));
     const u4 = onValue(ref(db, 'studentSkins'), (s) => setStudentSkins(s.val() || {}));

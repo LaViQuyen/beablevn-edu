@@ -24,7 +24,7 @@ const Contact = () => {
   // Lấy danh sách GV/CCO phụ trách lớp của học viên
   useEffect(() => {
     if (!currentUser?.id) return;
-    const unsubUsers = onValue(ref(db, 'users'), (snap) => {
+    const unsubUsers = onValue(ref(db, 'usersPublic'), (snap) => { // danh bạ công khai (name/role/subRole/assignedClasses)
       const data = snap.val() || {};
       const staff = Object.entries(data)
         .map(([id, val]) => ({ id, ...val }))
