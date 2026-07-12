@@ -49,6 +49,9 @@ export default function useSpeakingFlow({
   const [busy, setBusy] = useState(false);
   const [finishRetry, setFinishRetry] = useState(false);
   const [elapsed, setElapsed] = useState('00:00');
+  // Tổng thời gian THẬT SỰ có giọng nói cả phiên (ms), tài liệu Teaching Speaking
+  // B.6: đòn bẩy mạnh nhất là tăng lượng nói thực (chuỗi domino)
+  const [talkMs, setTalkMs] = useState(0);
 
   // ---- trạng thái luồng (mutable, đọc từ callback) ----
   const genRef = useRef(0);
@@ -63,8 +66,37 @@ export default function useSpeakingFlow({
   const timerIdRef = useRef(null);
   const frozenRef = useRef(false);
   const begunRef = useRef(false);
+  // Nghe lại chính mình (Levelt giai đoạn 4, self-monitoring): giữ data URL
+  // của câu VỪA nói, phát local nên không tốn quota; ghi đè mỗi lượt thu
+  const myAudioRef = useRef(null);
+  const myPlayerRef = useRef(null);
+  // Hồ sơ trôi chảy của lượt thu gần nhất + tổng ms có giọng nói cả phiên
+  const fluencyRef = useRef(null);
+  const talkMsRef = useRef(0);
 
   const recorder = useRecorder();
+
+  // Dừng audio "nghe lại em nói" (trước khi thu mới / đổi câu / kết thúc)
+  function stopMyAudio() {
+    if (myPlayerRef.current) {
+      try {
+        myPlayerRef.current.pause();
+        myPlayerRef.current.currentTime = 0;
+      } catch (e) {
+        /* bỏ qua */
+      }
+    }
+  }
+
+  function playMyAudio() {
+    if (!myAudioRef.current) return;
+    stopVoice(); // không phát chồng lên giọng giám khảo
+    stopMyAudio();
+    const a = new Audio(myAudioRef.current);
+    myPlayerRef.current = a;
+    const p = a.play();
+    if (p && p.catch) p.catch(() => {});
+  }
 
   // ---- Giám sát gian lận (chỉ Thi thật), đình chỉ = port banTest() ----
   function banTest(violLog, violations) {
@@ -72,6 +104,7 @@ export default function useSpeakingFlow({
     frozenRef.current = true;
     stopTimer();
     stopVoice();
+    stopMyAudio();
     recorder.abort();
     setBusy(false);
     downloadIncidentReport(studentName, evaluationsRef.current, violLog, violations);
@@ -134,6 +167,9 @@ export default function useSpeakingFlow({
     attemptRef.current = 1;
     lastFeedbackRef.current = null;
     drillPrevRef.current = null;
+    stopMyAudio();
+    myAudioRef.current = null; // audio câu cũ không còn giá trị đối chiếu
+    fluencyRef.current = null;
     setFeedback(null);
     setDrillFb(null);
     setError('');
@@ -185,6 +221,7 @@ export default function useSpeakingFlow({
     const item = queue[qiRef.current];
     stopTimer();
     stopVoice();
+    stopMyAudio(); // không để audio nghe lại lẫn vào lượt thu mới
     const gen = genRef.current;
     // Tự kết thúc khi im lặng: Luyện Part 1 im >3s; Thi thật (Part 1&3) im >5s
     const silenceMs = mode === 'drill' ? DRILL_SILENCE_MS : mode === 'exam' && item.part !== 2 ? SILENCE_MS : null;
@@ -236,7 +273,7 @@ export default function useSpeakingFlow({
   }
 
   // ---- Nhận audio → quyết định chấm (port uploadAnswer) ----
-  function handleAudio({ b64, mime, size, voicedMs, voiceMeterOk }) {
+  function handleAudio({ b64, mime, size, voicedMs, voiceMeterOk, durationMs, pausesOver2s, longestPauseMs }) {
     const item = queue[qiRef.current];
     const hasData = size >= 1000; // thực sự có dữ liệu âm thanh
     const spoke = voiceMeterOk ? voicedMs >= 500 : hasData; // có ít nhất ~0.5s giọng nói
@@ -256,7 +293,28 @@ export default function useSpeakingFlow({
       return;
     }
     speak(ACKS[Math.floor(Math.random() * ACKS.length)]);
-    pendingAudioRef.current = { b64, mime, voicedMs: voiceMeterOk ? Math.round(voicedMs) : null };
+    // Giữ audio của chính học viên để nghe lại (chỉ dùng ở Luyện tập / Luyện Part 1)
+    myAudioRef.current = 'data:' + (mime || 'audio/webm') + ';base64,' + b64;
+    // Hồ sơ trôi chảy của lượt này (chỉ tin số đo khi voiceMeterOk)
+    fluencyRef.current = voiceMeterOk
+      ? {
+          voicedMs: Math.round(voicedMs),
+          durationMs: Math.round(durationMs || 0),
+          pausesOver2s: pausesOver2s || 0,
+          longestPauseMs: Math.round(longestPauseMs || 0),
+        }
+      : null;
+    if (voiceMeterOk) {
+      talkMsRef.current += Math.round(voicedMs);
+      setTalkMs(talkMsRef.current);
+    }
+    pendingAudioRef.current = {
+      b64,
+      mime,
+      voicedMs: voiceMeterOk ? Math.round(voicedMs) : null,
+      pausesOver2s: voiceMeterOk ? pausesOver2s || 0 : null,
+      longestPauseMs: voiceMeterOk ? Math.round(longestPauseMs || 0) : null,
+    };
     if (mode === 'drill') sendDrillEval();
     else sendEval();
   }
@@ -276,6 +334,8 @@ export default function useSpeakingFlow({
         part: item.part, question: item.q, cue_card: item.cue || null,
         target_band: targetBand, attempt: attemptRef.current,
         voiced_ms: pa.voicedMs, // thời lượng giọng nói thực đo được (null nếu máy đo hỏng)
+        pauses_over_2s: pa.pausesOver2s, // số lần ngừng >2s (null nếu máy đo hỏng)
+        longest_pause_ms: pa.longestPauseMs,
         prev_feedback: attemptRef.current === 2 ? lastFeedbackRef.current : null,
       });
       if (gen !== genRef.current) return;
@@ -283,6 +343,8 @@ export default function useSpeakingFlow({
         part: item.part, question: item.q, attempt: attemptRef.current,
         bands: d.bands, errors: d.errors, pronunciation: d.pronunciation,
         improved: d.improved, transcript_excerpt: (d.transcript || '').slice(0, 1500),
+        // Số đo trôi chảy đưa vào dữ liệu tổng kết để model chẩn đoán điểm nghẽn
+        voiced_ms: pa.voicedMs, pauses_over_2s: pa.pausesOver2s,
       });
       pendingAudioRef.current = null;
       setBusy(false);
@@ -291,7 +353,7 @@ export default function useSpeakingFlow({
         advance();
       } else {
         lastFeedbackRef.current = { errors: d.errors, pronunciation: d.pronunciation, retry_focus: d.retry_focus };
-        setFeedback({ ...d, _attempt: attemptRef.current });
+        setFeedback({ ...d, _attempt: attemptRef.current, _fluency: fluencyRef.current });
       }
     } catch (e) {
       if (gen !== genRef.current) return;
@@ -388,7 +450,11 @@ export default function useSpeakingFlow({
       });
     }
     setBtns({});
-    setDrillFb({ d, passed, capReached, attempt: attemptRef.current, isLast: qiRef.current === queue.length - 1 });
+    setDrillFb({
+      d, passed, capReached, attempt: attemptRef.current,
+      isLast: qiRef.current === queue.length - 1,
+      fluency: fluencyRef.current,
+    });
   }
 
   function hearModel() {
@@ -422,12 +488,13 @@ export default function useSpeakingFlow({
     genRef.current += 1;
     stopTimer();
     stopVoice();
-    const stats = { ...drillStatsRef.current, total: queue.length };
+    stopMyAudio();
+    const stats = { ...drillStatsRef.current, total: queue.length, talkMs: talkMsRef.current };
     // Server tự lưu lịch sử phiên qua finalReport → gọi nền, không chặn màn hoàn thành
     callCoach('speaking', 'finalReport', {
       evaluations: evaluationsRef.current,
       target_band: targetBand,
-      meta: { mode: 'drill', topic: topicLabel || '', drillStats: stats },
+      meta: { mode: 'drill', topic: topicLabel || '', drillStats: stats, talkMs: talkMsRef.current },
     }).catch(() => {});
     speak("Great job. You've finished this Part One practice set.");
     onDrillDone(stats);
@@ -440,6 +507,7 @@ export default function useSpeakingFlow({
     frozenRef.current = true;
     genRef.current += 1;
     stopTimer();
+    stopMyAudio();
     setFeedback(null);
     setDrillFb(null);
     setBtns({});
@@ -451,9 +519,11 @@ export default function useSpeakingFlow({
       const d = await callCoach('speaking', 'finalReport', {
         evaluations: evaluationsRef.current,
         target_band: targetBand,
-        meta: { mode, topic: topicLabel || '' },
+        meta: { mode, topic: topicLabel || '', talkMs: talkMsRef.current },
       });
       setBusy(false);
+      // Đồng hồ lượng nói là số đo client, gắn kèm để ReportView hiển thị
+      d._talkMs = talkMsRef.current;
       onReport(d);
     } catch (e) {
       setBusy(false);
@@ -475,6 +545,7 @@ export default function useSpeakingFlow({
       genRef.current += 1;
       stopTimer();
       stopVoice();
+      stopMyAudio();
       if (mode === 'exam') guard.end();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -491,9 +562,14 @@ export default function useSpeakingFlow({
     return () => clearInterval(iv);
   }, []);
 
+  // Có audio của chính học viên để nghe lại không (đọc lúc render, ref đã được
+  // gán TRƯỚC khi setFeedback/setDrillFb nên luôn kịp)
+  const hasMyAudio = () => !!myAudioRef.current;
+
   return {
     // trạng thái hiển thị + hành động (gắn vào nút)
-    qi, partIntro, timer, btns, error, feedback, drillFb, busy, finishRetry, elapsed, guard,
+    qi, partIntro, timer, btns, error, feedback, drillFb, busy, finishRetry, elapsed, talkMs, guard,
     startAnswer, stopAnswer, sendEval, retryAnswer, drillRetry, hearModel, advance, finishTest, speakAgainNow,
+    playMyAudio, hasMyAudio,
   };
 }

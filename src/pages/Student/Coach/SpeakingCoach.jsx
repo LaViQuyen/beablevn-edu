@@ -4,7 +4,7 @@ import { useAuth } from '../../../context/AuthContext';
 import { Input, Select, Toast } from '../../../components/UI';
 import { callCoach } from './shared/coachApi';
 import { speak, stopVoice, unlockAudio } from './shared/speak';
-import { BAND_OPTIONS, DEFAULT_BAND, DRILL_COUNT } from './speaking/constants';
+import { BAND_OPTIONS, DEFAULT_BAND, DRILL_COUNT, MODE_GOALS } from './speaking/constants';
 import { ErrBox, PartBadge } from './speaking/bits';
 import ExamRunner from './speaking/ExamRunner';
 import ReportView from './speaking/ReportView';
@@ -225,6 +225,14 @@ const SpeakingCoach = () => {
             ))}
           </div>
 
+          {/* Mục tiêu buổi luyện theo sub-skill (tài liệu Teaching Speaking phần C:
+              không luyện với mục tiêu macro chung chung) */}
+          {MODE_GOALS[mode] && (
+            <p className="text-[12.5px] text-primary-hover bg-primary-subtle border border-[#C9E2CF] rounded-xl px-3.5 py-2 leading-relaxed">
+              🎯 {MODE_GOALS[mode]}
+            </p>
+          )}
+
           <div className="card card-body space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
               <Select label="Band mục tiêu" value={band} onChange={(e) => setBand(e.target.value)}>
@@ -335,6 +343,17 @@ const SpeakingCoach = () => {
               Em đã luyện <b>{drillStats.total}</b> câu Part 1, trong đó <b>{drillStats.cleanFirst}</b> câu nói
               đúng ngay lần đầu. Mỗi lần luyện lại là một bước tiến 💪
             </p>
+            {Number(drillStats.talkMs) >= 30000 && (
+              <p className="text-[13px] text-slate-600 bg-primary-subtle rounded-xl px-4 py-2.5 my-2 leading-relaxed">
+                🗣 Phiên này em đã nói thật sự{' '}
+                <b className="text-primary">
+                  {Math.floor(drillStats.talkMs / 60000) > 0
+                    ? `${Math.floor(drillStats.talkMs / 60000)} phút ${Math.round(drillStats.talkMs / 1000) % 60} giây`
+                    : `${Math.round(drillStats.talkMs / 1000)} giây`}
+                </b>
+                . Luyện đủ nhiều thì tự tin, tự động và trôi chảy sẽ tự đổ theo như domino.
+              </p>
+            )}
             <div className="mt-3">
               <button type="button" onClick={resetAll} className="btn-primary btn-lg">
                 Luyện bộ mới

@@ -168,6 +168,7 @@ function enforceNoSpeech(data) {
     data.upgrade = "";
     data.need_retry = true;
     data.retry_focus = NO_SPEECH_RETRY_FOCUS;
+    data.chunks = []; // khong co giong noi thi khong duoc goi y cum bo tui
   }
   return data;
 }
@@ -193,6 +194,7 @@ function enforceNoSpeechDrill(data) {
     data.model_answer = "";
     data.coach_script_en = "";
     data.praise_vi = "";
+    data.chunks = []; // khong co giong noi thi khong duoc goi y cum bo tui
   }
   return data;
 }

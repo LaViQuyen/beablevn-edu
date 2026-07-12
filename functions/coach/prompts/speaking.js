@@ -8,8 +8,15 @@
  * 4. buildPart1SetPrompt  : sinh bo cau hoi Part 1 cho che do luyen (drill)
  * 5. buildDrillPrompt     : cham 1 cau tra loi Part 1 o che do luyen (khong cho band)
  *
- * LUU Y PARITY: noi dung chuoi prompt phai GIONG HET BYTE ban Python sau khi render
- * (ke ca em dash, xuong dong, khoang trang). KHONG duoc "cai thien" van ban prompt.
+ * LUU Y PARITY: goc port GIONG HET BYTE ban Python (v2.3). Tu 13/07/2026 file nay
+ * DA RE NHANH CO CHU DICH khoi parity (nang cap su pham theo tai lieu noi bo
+ * "Teaching Speaking"): KHONG duoc revert ve ban Python. Cac field ADDITIVE da them:
+ *   - evaluate:    "chunks" (cum bo tui) + MEASURED co so lan ngung >2s
+ *   - drill:       "chunks"
+ *   - finalReport: "bottleneck" (chan doan diem nghen 4 giai doan Levelt),
+ *                  "chunk_bank" (cum dang hoc thuoc ca phien)
+ *   - JSON_RULES:  cam em dash trong output (quy dinh van phong Bak)
+ * Client render moi field moi CO DIEU KIEN nen response cu/thieu field khong vo.
  * Ham extract_json cua ban Python KHONG port o day (thuoc module khac).
  */
 "use strict";
@@ -149,6 +156,8 @@ OUTPUT RULES:
 - Keep every string concise — this is shown to a student on screen.
 - Inside strings you may highlight key words with **double asterisks** (rendered as bold).
   Do NOT use any other markdown: no headings, no bullet symbols (*, -), no single-asterisk italics.
+- NEVER use the em dash character (—) inside any output string, Vietnamese or English.
+  Use a comma, colon, or parentheses instead.
 `;
 
 // ============================================================
@@ -251,7 +260,7 @@ JSON SCHEMA:
 // ============================================================
 // 2. CHAM 1 CAU TRA LOI, audio dinh kem (port build_evaluate_prompt)
 // ============================================================
-function buildEvaluatePrompt(part, question, cueCard, targetBand, attempt, prevFeedback, voicedMs = null) {
+function buildEvaluatePrompt(part, question, cueCard, targetBand, attempt, prevFeedback, voicedMs = null, pausesOver2s = null, longestPauseMs = null) {
   // part la SO (int tu JSON cua client) giong ban Python; so sanh strict nhu "part == 2"
   let qBlock;
   let lengthNote;
@@ -281,6 +290,16 @@ function buildEvaluatePrompt(part, question, cueCard, targetBand, attempt, prevF
     measured = `\nMEASURED: the device detected about ${secs}s of actual voiced speech in this audio. `
       + "If this is near 0, there is effectively NO answer — do NOT invent one. "
       + "Otherwise use it only as a sanity check; still score by what you actually hear.";
+    // Ho so trong chay (nang cap 07/2026): so lan ngung >2s do may do duoc, giup cham
+    // FC co bang chung (silent pauses vs filled pauses) thay vi doan. Chi la uoc tinh.
+    if (typeof pausesOver2s === "number" && pausesOver2s >= 0) {
+      measured += ` The device also counted about ${Math.trunc(pausesOver2s)} silent pause(s) longer than 2 seconds`;
+      if (typeof longestPauseMs === "number" && longestPauseMs >= 2000) {
+        measured += ` (longest about ${pyRound1Str(longestPauseMs / 1000.0)}s)`;
+      }
+      measured += ". Use this only as supporting evidence for FC (silent pauses hurt fluency; "
+        + "filled pauses like 'well, let me think' are acceptable). Do not fabricate pauses you cannot hear.";
+    }
   }
 
   let retryBlock = "";
@@ -319,6 +338,7 @@ YOUR TASKS (do them in this order):
 7. Decide "need_retry": true if there are pronunciation errors or language errors worth practising again, OR if the answer was thin/undeveloped (encourage a fuller attempt). false only if the answer was clean AND developed.
 8. "retry_focus": one short Vietnamese instruction telling the student exactly what to fix when saying it again (e.g. "Nói lại đầy đủ hơn: thêm 1 lý do và 1 ví dụ, chú ý phát âm /θ/ trong 'think'").
 9. "method_tips": 2-3 góp ý tiếng Việt theo ĐÚNG PHƯƠNG PHÁP BE ABLE của Part ${part} ở trên (chọn đúng khung của Part này). Mỗi tip = 1 câu ngắn, đi thẳng vào điều học viên NÊN làm ở lần sau, KÈM mẫu câu/cấu trúc tiếng Anh cụ thể để dùng ngay (in đậm cụm khoá bằng **...**). Bám vào câu trả lời thực tế của học viên — chỉ ra chỗ áp dụng được phương pháp. Ví dụ Part 1: "Mở rộng theo **R-E-A**: sau khi trả lời, thêm 1 lý do rồi 1 ví dụ." / "Đổi 'I like it' thành **I'm really into it** cho tự nhiên hơn." Nếu là non-answer (im lặng) thì để mảng rỗng [].
+10. "chunks": 2-3 CỤM CÂU NGẮN đáng học thuộc để bật ra tự động lần sau (mỗi cụm TỐI ĐA 6 từ tiếng Anh, plain text không markdown), lấy từ "upgrade" hoặc từ khung phương pháp của Part này (vd "I'm really into...", "When it comes to...", "Generally speaking,..."). Kèm "use_when_vi": 1 vế tiếng Việt cực ngắn nói dùng khi nào. Đây là nguyên liệu luyện automaticity, chọn cụm TÁI DÙNG được cho nhiều chủ đề. Nếu là non-answer thì để mảng rỗng [].
 
 ${JSON_RULES}
 
@@ -341,6 +361,9 @@ JSON SCHEMA:
   "need_retry": true,
   "retry_focus": "...",
   "method_tips": ["góp ý theo phương pháp Be Able của Part này (kèm mẫu câu tiếng Anh in đậm)", "..."],
+  "chunks": [
+    {"chunk": "I'm really into...", "use_when_vi": "nói về sở thích"}
+  ],
   "improved": null,
   "retry_comment": null
 }`;
@@ -377,6 +400,13 @@ YOUR TASKS:
    - "improve_vi": 1-2 câu tiếng Việt NHẬN XÉT chỗ cần cải thiện theo ĐÚNG PHƯƠNG PHÁP BE ABLE của Part đó (Part 1: R-E-A / phrasing like-dislike / 4 bước "what kinds"; Part 2: khung theo loại đề Người-Nơi-Vật-Sự kiện; Part 3: giữ general + 4 bước Answer-Reason-Example-Acknowledge + mẫu so sánh).
    - "revised": bản CHỈNH SỬA hoàn chỉnh phần trả lời của học viên theo phương pháp Be Able VN — viết lại bằng tiếng Anh tự nhiên ở mức band ${targetBand}+, DỰA TRÊN CHÍNH Ý của học viên (KHÔNG bịa nội dung mới), sửa lỗi và áp khung phương pháp của Part đó. Đặt SAU nguyên bản để học viên thấy "nói thế nào thì hay hơn". Part 2 có thể 2-4 câu; Part 1/3 chỉ 1-2 câu.
    Giữ các câu tiếng Việt NGẮN GỌN — đây là bảng học viên đọc trên màn hình.
+9. "bottleneck": chẩn đoán MỘT giai đoạn nghẽn CHÍNH của cả phiên theo mô hình 4 giai đoạn tạo lời nói (Levelt). Suy từ BẰNG CHỨNG tổng hợp trong dữ liệu trên, KHÔNG đoán từ một câu lẻ:
+   - nhiều câu thin/no_answer, câu trả lời ngắn không có ý → "conceptualization" (thiếu ý tưởng, kiến thức nền);
+   - lỗi ngữ pháp/từ vựng dày đặc, kiểu dịch từng từ, nhiều lần ngừng >2s giữa câu (pauses_over_2s) → "formulation" (tắc ở chọn từ/cấu trúc);
+   - danh sách lỗi phát âm dài lặp lại qua nhiều câu → "articulation";
+   - retry không cải thiện, lỗi giống nhau lặp lại mà học viên không tự sửa → "monitoring" (chưa tự nghe ra lỗi của mình).
+   Trả object: "stage" (một trong "conceptualization" | "formulation" | "articulation" | "monitoring"), "why_vi" (1 câu tiếng Việt: bằng chứng vì sao chẩn đoán vậy), "fix_vi" (1 câu tiếng Việt: MỘT việc luyện trúng giai đoạn đó trong 2 tuần tới, vd tắc ý tưởng thì đọc/nghe thêm về chủ đề, tắc cấu trúc thì học thuộc chunks thay vì dịch từng từ, tắc phát âm thì luyện khẩu hình từ cụ thể, yếu tự giám sát thì nghe lại bản thu của mình sau mỗi câu).
+10. "chunk_bank": 4-6 cụm câu đáng học thuộc NHẤT của cả phiên (mỗi cụm TỐI ĐA 6 từ tiếng Anh, plain text), ưu tiên cụm tái dùng được cho nhiều chủ đề, lấy từ các bản "revised" và khung phương pháp Be Able. Kèm "use_when_vi" cực ngắn. Đây là bài tập automaticity học viên mang về.
 
 ${JSON_RULES}
 
@@ -391,6 +421,10 @@ JSON SCHEMA:
   "per_criterion": {"FC": "...", "LR": "...", "GRA": "...", "PR": "..."},
   "per_question": [
     {"part": 1, "question": "...", "transcript": "nguyên văn học viên nói, giữ nguyên lỗi", "good_vi": "...", "improve_vi": "...", "revised": "bản chỉnh sửa tiếng Anh theo phương pháp Be Able, dựa trên ý của học viên"}
+  ],
+  "bottleneck": {"stage": "formulation", "why_vi": "...", "fix_vi": "..."},
+  "chunk_bank": [
+    {"chunk": "When it comes to...", "use_when_vi": "mở đầu mọi chủ đề"}
   ]
 }`;
 }
@@ -477,6 +511,7 @@ YOUR TASKS (in order):
 5. "coach_script_en": a SHORT spoken script (English only, 2-4 sentences) the coach will READ ALOUD to the student. Format: briefly name the 1-2 most important fixes in plain spoken English (e.g. "Watch the past tense — say 'went', not 'go'. And the 'th' in 'think' should be soft."), then say: "Try saying it like this:" followed by the model_answer. Keep it natural and warm, like a teacher speaking. NO Vietnamese here, NO markdown, NO IPA symbols (spell sounds out so they can be read aloud).
 6. "passed": true ONLY if the answer is genuinely clean — no significant grammar errors AND no significant pronunciation errors (judged at the leniency level for this attempt). If there is at least one real grammar or pronunciation error worth fixing, set false. A clean, relevant 2-3 sentence Part 1 answer passes even if short.
 7. "praise_vi": one short Vietnamese sentence praising something real they did (specific, not generic). If passed, make it a congratulation.
+8. "chunks": 1-2 short reusable phrases worth memorising from the model_answer (each MAX 6 English words, plain text, reusable across topics, e.g. "I'm quite keen on..."). Each with "use_when_vi": one very short Vietnamese phrase saying when to use it. Empty array if no_speech.
 
 ${JSON_RULES}
 
@@ -493,7 +528,10 @@ JSON SCHEMA:
   ],
   "model_answer": "corrected English version based on the student's own idea",
   "coach_script_en": "short spoken English coaching ending with the model answer to imitate",
-  "praise_vi": "1 câu khen tiếng Việt"
+  "praise_vi": "1 câu khen tiếng Việt",
+  "chunks": [
+    {"chunk": "I'm quite keen on...", "use_when_vi": "nói về sở thích"}
+  ]
 }`;
 }
 

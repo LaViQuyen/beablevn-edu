@@ -1,7 +1,12 @@
 import React, { useEffect, useRef } from 'react';
 import { MdBold } from '../shared/mdText';
+import { speak } from '../shared/speak';
 import useSpeakingFlow from './useSpeakingFlow';
-import { BandChips, BusyOverlay, ErrBox, FbErrorItem, FbPronItem, PartBadge, TranscriptBox } from './bits';
+import {
+  BandChips, BusyOverlay, ChunkChips, ErrBox, FbErrorItem, FbPronItem, FluencyBar,
+  HighlightTranscript, PartBadge, SosPanel, TranscriptBox,
+} from './bits';
+import { FILLER_PHRASES } from './constants';
 import DrillPanel from './DrillPanel';
 
 /*
@@ -19,8 +24,10 @@ const fmt = (sec) => {
 const ExamRunner = (props) => {
   const { mode, queue } = props;
   const flow = useSpeakingFlow(props);
-  const { qi, partIntro, timer, btns, error, feedback, drillFb, busy, finishRetry, elapsed, guard } = flow;
+  const { qi, partIntro, timer, btns, error, feedback, drillFb, busy, finishRetry, elapsed, talkMs, guard } = flow;
   const fbScrollRef = useRef(null);
+  // Thi thật không lộ bất kỳ hỗ trợ nào giữa bài (phao, thước đo, đồng hồ nói)
+  const isExam = mode === 'exam';
 
   // Cuộn tới thẻ feedback khi vừa có kết quả (port scrollIntoView của gốc)
   useEffect(() => {
@@ -50,7 +57,14 @@ const ExamRunner = (props) => {
               Câu {item.n}/{item.total}
             </span>
           </div>
-          <span className="text-slate-500 text-[13px]">⏱ {elapsed}</span>
+          <span className="text-slate-500 text-[13px]">
+            {!isExam && talkMs >= 1000 && (
+              <span className="text-primary-hover font-semibold mr-2.5" title="Tổng thời gian em thật sự nói trong phiên này">
+                🗣 {fmt(Math.round(talkMs / 1000))}
+              </span>
+            )}
+            ⏱ {elapsed}
+          </span>
         </div>
 
         {partIntro && (
@@ -118,6 +132,9 @@ const ExamRunner = (props) => {
           )}
         </div>
 
+        {/* Phao chiến lược giao tiếp (B.2): học viên TỰ mở khi cần, cấm ở Thi thật */}
+        {!isExam && <SosPanel />}
+
         <ErrBox msg={error} />
 
         {finishRetry && (
@@ -133,14 +150,42 @@ const ExamRunner = (props) => {
         {/* Feedback (chỉ chế độ Luyện tập), port #fbCard + renderFeedback() */}
         {feedback && (
           <div className="card card-body mt-4">
-            <BandChips bands={feedback.bands} />
+            {/* Khen trước, sửa sau (Safety B.5: giảm lo âu khi nói) */}
             {feedback.praise ? (
               <p className="text-primary-hover font-semibold text-sm my-2">
-                <MdBold text={feedback.praise} />
+                🌟 <MdBold text={feedback.praise} />
               </p>
             ) : null}
+            <BandChips bands={feedback.bands} />
+            <FluencyBar
+              stats={feedback._fluency}
+              onSpeakFiller={() => speak(FILLER_PHRASES.join('. '))}
+            />
             <b className="text-[13px]">Em đã nói:</b>
-            <TranscriptBox>{feedback.no_speech ? `(${feedback.no_speech})` : feedback.transcript || ''}</TranscriptBox>
+            {feedback.no_speech ? (
+              <TranscriptBox>{`(${feedback.no_speech})`}</TranscriptBox>
+            ) : (
+              <HighlightTranscript
+                text={feedback.transcript || ''}
+                errors={feedback.errors}
+                pron={feedback.pronunciation}
+              />
+            )}
+            {/* Nghe lại chính mình (Levelt giai đoạn 4: tự giám sát là cơ chế học tập) */}
+            {!feedback.no_speech && flow.hasMyAudio() && (
+              <div className="flex flex-wrap items-center gap-2 my-1">
+                <button
+                  type="button"
+                  onClick={flow.playMyAudio}
+                  className="bg-white text-primary border-[1.5px] border-primary rounded-xl px-3.5 py-1.5 text-[12.5px] font-semibold hover:bg-primary-light transition-colors"
+                >
+                  🎧 Nghe lại em nói
+                </button>
+                <span className="text-[11.5px] text-slate-400">
+                  Nghe mình trước, nghe câu mẫu sau, tự tìm 1 điểm khác nhau rồi mới nói lại.
+                </span>
+              </div>
+            )}
             <div>
               {(feedback.errors || []).map((e, i) => (
                 <FbErrorItem key={i} e={e} />
@@ -154,8 +199,18 @@ const ExamRunner = (props) => {
             {feedback.upgrade ? (
               <div className="bg-primary-light rounded-xl p-3 text-sm my-2">
                 💡 <b>Câu mẫu hay hơn:</b> <MdBold text={feedback.upgrade} />
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => speak(feedback.upgrade)}
+                    className="mt-2 bg-white text-primary border-[1.5px] border-primary rounded-xl px-3.5 py-1.5 text-[12.5px] font-semibold hover:bg-primary-subtle transition-colors"
+                  >
+                    🔊 Nghe câu mẫu, nhại theo
+                  </button>
+                </div>
               </div>
             ) : null}
+            <ChunkChips chunks={feedback.chunks} onSpeak={(t) => speak(t)} />
             {methodTips.length > 0 && (
               <div className="bg-primary-subtle border border-[#C9E2CF] border-l-[3px] border-l-primary-medium rounded-r-xl px-3.5 py-3 my-2.5 text-sm">
                 <div className="font-bold text-primary-hover text-xs uppercase tracking-wide mb-1.5">
@@ -192,7 +247,15 @@ const ExamRunner = (props) => {
         )}
 
         {/* Feedback (chỉ chế độ Luyện Part 1) */}
-        <DrillPanel fb={drillFb} onRetry={flow.drillRetry} onNext={flow.advance} onHearModel={flow.hearModel} />
+        <DrillPanel
+          fb={drillFb}
+          onRetry={flow.drillRetry}
+          onNext={flow.advance}
+          onHearModel={flow.hearModel}
+          onPlayMine={flow.playMyAudio}
+          hasMine={flow.hasMyAudio()}
+          onSpeakChunk={(t) => speak(t)}
+        />
       </div>
 
       <BusyOverlay show={busy} />

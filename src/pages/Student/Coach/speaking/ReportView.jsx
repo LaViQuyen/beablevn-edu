@@ -1,8 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { MdRich } from '../shared/mdText';
-import { PartBadge } from './bits';
-import { CRIT_NAMES, BAND_KEYS } from './constants';
+import { speak } from '../shared/speak';
+import { ChunkChips, PartBadge } from './bits';
+import { CRIT_NAMES, BAND_KEYS, BOTTLENECK_STAGES } from './constants';
 
 /*
  * MÀN BÁO CÁO CUỐI PHIÊN: port #screenReport + renderReport() của speaking.html.
@@ -14,6 +15,52 @@ import { CRIT_NAMES, BAND_KEYS } from './constants';
 const HL_BLUE = 'font-bold text-blue-700 bg-blue-50 px-0.5 rounded';
 const HL_GREEN = 'font-bold text-primary-hover bg-primary-light px-0.5 rounded';
 const HL_RED = 'font-bold text-red-700 bg-red-50 px-0.5 rounded';
+
+// In đậm + gạch chân từ MỚI trong bản chỉnh sửa so với nguyên bản của học viên
+// (Swain noticing the gap: làm khoảng cách hiển thị). Bản sửa khác quá xa
+// (dưới 30% từ trùng) thì hiện thường, tránh gạch loạn cả câu.
+const RevisedText = ({ original, revised }) => {
+  const rev = String(revised || '');
+  if (!rev) return null;
+  const norm = (w) => String(w).toLowerCase().replace(/[^a-z0-9']/g, '');
+  const origSet = new Set(
+    String(original || '')
+      .split(/\s+/)
+      .map(norm)
+      .filter(Boolean)
+  );
+  const parts = rev.split(/(\s+)/);
+  let shared = 0;
+  let total = 0;
+  parts.forEach((w) => {
+    const n = norm(w);
+    if (!n) return;
+    total += 1;
+    if (origSet.has(n)) shared += 1;
+  });
+  if (!origSet.size || !total || shared / total < 0.3) return <>{rev}</>;
+  return (
+    <>
+      {parts.map((w, i) => {
+        const n = norm(w);
+        return n && !origSet.has(n) ? (
+          <b key={i} className="underline decoration-primary decoration-2 underline-offset-2">
+            {w}
+          </b>
+        ) : (
+          w
+        );
+      })}
+    </>
+  );
+};
+
+// Đổi ms thành "X phút Y giây" cho dòng đồng hồ lượng nói
+const fmtTalk = (ms) => {
+  const s = Math.round(ms / 1000);
+  const m = Math.floor(s / 60);
+  return m > 0 ? `${m} phút ${s % 60} giây` : `${s} giây`;
+};
 
 const ReportView = ({ report, studentName, modeLabel, targetBand, onRestart }) => {
   const d = report || {};
@@ -32,6 +79,12 @@ const ReportView = ({ report, studentName, modeLabel, targetBand, onRestart }) =
         {studentName || 'Học viên'} · {modeLabel} · Mục tiêu {targetBand} ·{' '}
         {new Date().toLocaleDateString('vi-VN')}
       </p>
+      {Number(d._talkMs) >= 30000 && (
+        <p className="text-center text-[13px] text-slate-600 bg-primary-subtle rounded-xl px-4 py-2.5 mt-2.5 leading-relaxed">
+          🗣 Phiên này em đã nói thật sự <b className="text-primary">{fmtTalk(Number(d._talkMs))}</b>. Mỗi phút
+          nói thật là một quân domino: luyện đủ nhiều thì tự tin, tự động và trôi chảy sẽ tự đổ theo.
+        </p>
+      )}
 
       <div className="overflow-x-auto mt-3">
         <table className="w-full border-collapse text-sm min-w-[480px]">
@@ -73,6 +126,53 @@ const ReportView = ({ report, studentName, modeLabel, targetBand, onRestart }) =
       <div className="bg-[#F4F7F4] border-l-[3px] border-primary rounded-r-xl px-4 py-3 my-2.5 text-sm leading-relaxed">
         <MdRich text={d.examiner_comment_vi || ''} className={HL_BLUE} />
       </div>
+
+      {/* Chẩn đoán điểm nghẽn theo 4 giai đoạn tạo lời nói (Levelt, tài liệu A.1):
+          chẩn đúng giai đoạn thì luyện mới trúng đích */}
+      {(() => {
+        const bn = d.bottleneck;
+        if (!bn || typeof bn !== 'object') return null;
+        const idx = BOTTLENECK_STAGES.findIndex((st) => st.key === String(bn.stage || '').toLowerCase());
+        if (idx === -1) return null;
+        return (
+          <div className="mt-3">
+            <b>Điểm nghẽn chính của em</b>
+            <div className="border border-[#C9E2CF] rounded-xl px-3.5 py-3 my-2">
+              <div className="flex flex-wrap items-center gap-1.5 mb-2">
+                {BOTTLENECK_STAGES.map((st, i) => (
+                  <React.Fragment key={st.key}>
+                    <span
+                      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[12px] font-semibold ${
+                        i === idx ? 'bg-primary text-white' : 'bg-primary-subtle text-slate-500'
+                      }`}
+                    >
+                      {st.icon} {st.vi}
+                    </span>
+                    {i < BOTTLENECK_STAGES.length - 1 && <span className="text-slate-300 text-xs">→</span>}
+                  </React.Fragment>
+                ))}
+              </div>
+              {bn.why_vi ? (
+                <p className="text-[13.5px] leading-relaxed my-1">
+                  <MdRich text={bn.why_vi} className={HL_BLUE} />
+                </p>
+              ) : null}
+              {bn.fix_vi ? (
+                <p className="text-[13.5px] leading-relaxed my-1 text-primary-hover">
+                  🎯 <MdRich text={bn.fix_vi} className={HL_GREEN} />
+                </p>
+              ) : null}
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Túi cụm câu cả phiên (automaticity qua chunks, Lexical Approach) */}
+      <ChunkChips
+        chunks={d.chunk_bank}
+        onSpeak={(t) => speak(t)}
+        title="🎒 Túi cụm câu phiên này, bấm loa và nhại theo 2-3 lần"
+      />
 
       <b className="block mt-3">Điểm mạnh</b>
       <ul className="list-disc ml-5 my-1.5 text-sm leading-relaxed">
@@ -125,9 +225,9 @@ const ReportView = ({ report, studentName, modeLabel, targetBand, onRestart }) =
                 {q.revised ? (
                   <div className="bg-primary-light border-l-[3px] border-primary-medium rounded-r-lg px-3 py-2 my-2 text-[13.5px] text-primary-hover font-semibold leading-relaxed">
                     <span className="block text-[10.5px] font-bold uppercase tracking-wide text-primary mb-0.5">
-                      ✍ Chỉnh theo phương pháp Be Able VN
+                      ✍ Chỉnh theo phương pháp Be Able VN (từ gạch chân là từ mới so với bản của em)
                     </span>
-                    {q.revised}
+                    <RevisedText original={q.transcript} revised={q.revised} />
                   </div>
                 ) : null}
               </div>

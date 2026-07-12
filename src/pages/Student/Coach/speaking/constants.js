@@ -102,3 +102,76 @@ export const BAND_KEYS = ['FC', 'LR', 'GRA', 'PR'];
 // Danh sách band mục tiêu của select gốc (mặc định chọn 7.0)
 export const BAND_OPTIONS = ['5.0', '5.5', '6.0', '6.5', '7.0', '7.5', '8.0', '8.5'];
 export const DEFAULT_BAND = '7.0';
+
+/* ============================================================
+ * NÂNG CẤP SƯ PHẠM 07/2026 (tham chiếu tài liệu nội bộ
+ * "KIẾN THỨC GIẢNG DẠY KỸ NĂNG NÓI, Teaching Speaking").
+ * Các export dưới đây CHỈ THÊM MỚI, không đổi hằng số cũ
+ * (chuỗi tiếng Anh cũ đang được TTS cache theo text, không sửa).
+ * ============================================================ */
+
+// Mục tiêu buổi luyện theo chế độ (phần C tài liệu: không luyện với mục tiêu
+// macro "cải thiện speaking" chung chung, phải xuống tới sub-skill đo được)
+export const MODE_GOALS = {
+  practice:
+    'Mục tiêu buổi luyện: mở rộng câu trả lời theo R-E-A (trả lời + lý do + ví dụ) và sửa lỗi ngay sau từng câu.',
+  drill:
+    'Mục tiêu buổi luyện: nói đúng ngữ pháp và phát âm từng câu Part 1, lặp lại đến khi bật ra tự nhiên.',
+  exam: 'Mục tiêu buổi luyện: giữ phong độ ổn định trọn 3 phần trong điều kiện thi thật.',
+};
+
+// Từ chêm câu giờ (filled pauses): tài liệu A.3, trôi chảy không phải là
+// không bao giờ dừng mà là DỪNG ĐÚNG CÁCH, im lặng thì thay bằng từ chêm
+export const FILLER_PHRASES = [
+  'Well, let me think...',
+  "That's an interesting question...",
+  'How can I put it...',
+  "Hmm, I'd say...",
+];
+
+// Ngưỡng hiển thị gợi ý filled pauses: im lặng chiếm hơn 35% thời lượng trả lời
+export const SILENCE_RATIO_TIP = 0.35;
+
+// Phao chiến lược giao tiếp (tài liệu B.2, 8 chiến lược): chỉ hiện khi học viên
+// TỰ BẤM mở (dạy lúc cần, không rải hint), tuyệt đối không hiện ở Thi thật
+export const SOS_STRATEGIES = [
+  {
+    name: 'Nói vòng (Circumlocution)',
+    phrase: "It's the thing you use to...",
+    when: 'Quên từ: mô tả công dụng hoặc định nghĩa của nó.',
+  },
+  {
+    name: 'Từ gần nghĩa (Approximation)',
+    phrase: 'a kind of..., something like...',
+    when: 'Thay bằng từ bao quát gần nhất (animal thay cho rhinoceros).',
+  },
+  {
+    name: 'Diễn đạt lại (Paraphrase)',
+    phrase: 'In other words... / What I mean is...',
+    when: 'Câu vừa nói bị rối: nói lại theo cách đơn giản hơn.',
+  },
+  {
+    name: 'Câu giờ (Filled pause)',
+    phrase: 'Well, let me think... / How can I put it...',
+    when: 'Cần thời gian nghĩ: dùng từ chêm thay vì im lặng.',
+  },
+  {
+    name: 'Từ vạn năng (All-purpose word)',
+    phrase: 'thing, stuff, something',
+    when: 'PHAO KHẨN CẤP khi bí hoàn toàn; dùng thường xuyên sẽ mất điểm từ vựng.',
+  },
+  {
+    name: 'Xin nhắc lại câu hỏi',
+    phrase: "I'm sorry, could you ask that question again?",
+    when: 'Chưa nghe rõ đề: hỏi lại tự nhiên, không bị trừ điểm.',
+  },
+];
+
+// 4 giai đoạn sản xuất lời nói theo Levelt (tài liệu A.1), dùng cho khối
+// "Điểm nghẽn của em" trong báo cáo cuối phiên
+export const BOTTLENECK_STAGES = [
+  { key: 'conceptualization', icon: '💭', vi: 'Ý tưởng', en: 'Conceptualization' },
+  { key: 'formulation', icon: '🧩', vi: 'Cấu trúc hóa', en: 'Formulation' },
+  { key: 'articulation', icon: '👄', vi: 'Phát âm', en: 'Articulation' },
+  { key: 'monitoring', icon: '👂', vi: 'Tự giám sát', en: 'Self-monitoring' },
+];

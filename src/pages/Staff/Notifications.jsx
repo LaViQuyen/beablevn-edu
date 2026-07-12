@@ -249,11 +249,12 @@ const Notifications = () => {
             return <p className="text-slate-400 text-sm italic text-center py-8 bg-slate-50 rounded-xl border border-dashed border-slate-200">Không tìm thấy thông báo nào phù hợp.</p>;
         }
 
-        return displayedNotis.map(noti => {
+        const accentColor = (n) => n.label === 'quan trọng' ? '#dc2626' : n.label === 'sự kiện' ? '#ca8a04' : '#2B6830';
+        const renderCard = (noti) => {
             const isExpanded = expandedId === noti.id;
 
             return (
-                <div key={noti.id} className="bg-white p-4 md:p-5 rounded-xl border border-slate-200 flex flex-col gap-3 group hover:border-green-200 transition-all shadow-sm">
+                <div key={noti.id} className="bg-white p-4 md:p-5 rounded-xl border border-slate-200 flex flex-col gap-3 group hover:border-green-200 transition-all shadow-sm" style={{ borderLeft: `4px solid ${accentColor(noti)}` }}>
                     <div className="flex justify-between items-start">
                         <div className="flex items-center gap-2 mb-1">
                             {noti.type === 'link' ? (
@@ -334,7 +335,22 @@ const Notifications = () => {
                     </div>
                 </div>
             );
-        });
+        };
+
+        // Gom nhóm theo lớp (phạm vi); Tin chung (toàn hệ thống) xếp cuối
+        const byScope = {};
+        displayedNotis.forEach(n => { (byScope[n.scope] = byScope[n.scope] || []).push(n); });
+        const scopeKeys = Object.keys(byScope).sort((a, b) => a === 'all' ? 1 : b === 'all' ? -1 : getScopeName(a).localeCompare(getScopeName(b)));
+        return scopeKeys.map(sk => (
+            <div key={sk} className="space-y-3">
+                <div className="flex items-center gap-2 px-0.5">
+                    <span className="text-sm font-black text-primary">{sk === 'all' ? '📢 ' : '📘 '}{getScopeName(sk)}</span>
+                    <span className="text-[10px] font-bold text-primary bg-primary-light px-2 py-0.5 rounded-full border border-green-100">{byScope[sk].length} tin</span>
+                    <div className="flex-1 h-px bg-slate-100" />
+                </div>
+                <div className="space-y-3">{byScope[sk].map(renderCard)}</div>
+            </div>
+        ));
     // Các biến này thay đổi thì danh sách mới cần tải lại:
     }, [notiList, currentUser, filterClass, filterLabel, searchKeyword, expandedId, classes]);
     // === KẾT THÚC ĐOẠN TỐI ƯU ===

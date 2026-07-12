@@ -1,19 +1,21 @@
 import React from 'react';
 import { MdBold } from '../shared/mdText';
-import { FbErrorItem, FbPronItem, TranscriptBox } from './bits';
+import { ChunkChips, FbErrorItem, FbPronItem, FluencyBar, HighlightTranscript } from './bits';
 import { MAX_DRILL_ATTEMPTS } from './constants';
 
 /*
  * Thẻ feedback chế độ LUYỆN PART 1: port #drillCard + renderDrillFeedback()
  * của speaking.html. Nhận kết quả đã phân loại từ ExamRunner:
- *   fb = { d, passed, capReached, attempt, isLast }
+ *   fb = { d, passed, capReached, attempt, isLast, fluency }
  * (d = response drillEvaluate: praise_vi, transcript, grammar_errors,
- *  pronunciation, model_answer, coach_script_en, passed)
+ *  pronunciation, model_answer, coach_script_en, passed, chunks)
+ * Nâng cấp 07/2026: transcript tô lỗi tại chỗ, nghe lại giọng mình,
+ * thước đo trôi chảy, chips cụm bỏ túi (tài liệu Teaching Speaking).
  */
 
-const DrillPanel = ({ fb, onRetry, onNext, onHearModel }) => {
+const DrillPanel = ({ fb, onRetry, onNext, onHearModel, onPlayMine, hasMine, onSpeakChunk }) => {
   if (!fb) return null;
-  const { d, passed, capReached, attempt, isLast } = fb;
+  const { d, passed, capReached, attempt, isLast, fluency } = fb;
   const grammar = d.grammar_errors || [];
   const pron = d.pronunciation || [];
 
@@ -21,11 +23,26 @@ const DrillPanel = ({ fb, onRetry, onNext, onHearModel }) => {
     <div className="card card-body mt-4">
       {d.praise_vi ? (
         <p className="text-primary-hover font-semibold text-sm my-2">
-          <MdBold text={d.praise_vi} />
+          🌟 <MdBold text={d.praise_vi} />
         </p>
       ) : null}
+      <FluencyBar stats={fluency} />
       <b className="text-[13px]">Em đã nói:</b>
-      <TranscriptBox>{d.transcript || ''}</TranscriptBox>
+      <HighlightTranscript text={d.transcript || ''} errors={grammar} pron={pron} />
+      {hasMine && (
+        <div className="flex flex-wrap items-center gap-2 my-1">
+          <button
+            type="button"
+            onClick={onPlayMine}
+            className="bg-white text-primary border-[1.5px] border-primary rounded-xl px-3.5 py-1.5 text-[12.5px] font-semibold hover:bg-primary-light transition-colors"
+          >
+            🎧 Nghe lại em nói
+          </button>
+          <span className="text-[11.5px] text-slate-400">
+            Nghe mình trước, nghe mẫu sau, tự tìm 1 điểm khác nhau rồi mới nói lại.
+          </span>
+        </div>
+      )}
 
       <div>
         {grammar.map((e, i) => (
@@ -55,6 +72,7 @@ const DrillPanel = ({ fb, onRetry, onNext, onHearModel }) => {
           </div>
         </div>
       ) : null}
+      <ChunkChips chunks={d.chunks} onSpeak={onSpeakChunk} />
 
       {/* Kết luận: đạt / hết trần số lần / nói lại */}
       <div className="bg-[#FFF8E6] border border-amber-600 rounded-xl p-3 my-2.5 text-sm font-semibold">

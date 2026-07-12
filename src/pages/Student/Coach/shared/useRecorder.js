@@ -11,6 +11,10 @@ import { useEffect, useRef, useState } from 'react';
  * - AnalyserNode đo im lặng + cộng dồn voicedMs (tổng thời gian THẬT SỰ có giọng nói):
  *   fftSize 512, tick 200ms, peak > 6 = có tiếng. Chỉ tự dừng khi ĐÃ từng nghe thấy
  *   giọng (everVoiced) và đã qua 1500ms đầu, máy đo hỏng thì không tự cắt.
+ * - Hồ sơ trôi chảy (nâng cấp 07/2026, tài liệu Teaching Speaking A.3): đếm thêm
+ *   pausesOver2s (số lần ngừng nói liên tục >2s GIỮA các đoạn có giọng) và
+ *   longestPauseMs (lần ngừng dài nhất). Số đo từ peak nên chỉ là ƯỚC TÍNH,
+ *   caller phải ẩn khi voiceMeterOk = false.
  * - Blob → base64 bằng FileReader.readAsDataURL cắt prefix (không btoa spread).
  * - Cap 8MB base64: vượt quá trả lỗi rõ ràng qua onError.
  *
@@ -18,7 +22,8 @@ import { useEffect, useRef, useState } from 'react';
  *   start({ silenceMs, onAutoStop, onResult, onError }): Promise, reject khi mic bị chặn.
  *     silenceMs: số ms im lặng để TỰ dừng (null/0 = không tự dừng).
  *     onAutoStop(): báo UI ngay khi tự dừng vì im lặng (trước khi onResult chạy).
- *     onResult({ b64, mime, size, voicedMs, voiceMeterOk }): đúng 1 lần sau khi dừng.
+ *     onResult({ b64, mime, size, voicedMs, voiceMeterOk, durationMs,
+ *               pausesOver2s, longestPauseMs }): đúng 1 lần sau khi dừng.
  *     onError(Error): lỗi đọc dữ liệu / vượt cap.
  *   stop(): dừng chủ động (nút Xong / hết giờ), vẫn trả kết quả qua onResult.
  *   abort(): hủy bỏ, KHÔNG trả kết quả (đình chỉ thi / rời trang). Tự chạy khi unmount.
@@ -36,6 +41,10 @@ export default function useRecorder() {
   const voicedRef = useRef(0);
   const meterOkRef = useRef(false);
   const optsRef = useRef({});
+  // Hồ sơ trôi chảy: thời điểm bắt đầu thu + số lần ngừng dài + lần ngừng lâu nhất
+  const startedAtRef = useRef(0);
+  const pausesRef = useRef(0);
+  const longestPauseRef = useRef(0);
 
   const stopMeter = () => {
     if (meterIdRef.current) {
@@ -88,6 +97,9 @@ export default function useRecorder() {
     optsRef.current = opts;
     voicedRef.current = 0;
     meterOkRef.current = false;
+    startedAtRef.current = Date.now();
+    pausesRef.current = 0;
+    longestPauseRef.current = 0;
 
     // getUserMedia chỉ ở đây, caller bắt lỗi để báo "Không truy cập được micro."
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -114,6 +126,10 @@ export default function useRecorder() {
         size: blob.size,
         voicedMs: Math.round(voicedRef.current),
         voiceMeterOk: meterOkRef.current,
+        // Hồ sơ trôi chảy (ước tính, chỉ tin khi voiceMeterOk)
+        durationMs: Math.max(0, Date.now() - startedAtRef.current),
+        pausesOver2s: pausesRef.current,
+        longestPauseMs: Math.round(longestPauseRef.current),
       };
       const fr = new FileReader();
       fr.onloadend = () => {
@@ -160,6 +176,7 @@ export default function useRecorder() {
       let lastSound = Date.now();
       let lastTick = Date.now();
       let everVoiced = false;
+      let pauseCounted = false; // mỗi quãng im lặng >2s chỉ đếm 1 lần
       meterIdRef.current = setInterval(() => {
         an.getByteTimeDomainData(data);
         let peak = 0;
@@ -168,10 +185,19 @@ export default function useRecorder() {
           if (d > peak) peak = d;
         }
         const now = Date.now();
+        const gap = now - lastSound; // im lặng liên tục tính tới tick này
         if (peak > 6) {
           lastSound = now;
           everVoiced = true;
+          pauseCounted = false; // quãng im lặng vừa kết thúc, sẵn sàng đếm quãng mới
           voicedRef.current += now - lastTick; // cộng dồn thời gian có giọng
+        } else if (everVoiced) {
+          // Chỉ tính ngừng GIỮA các đoạn nói (im lặng trước khi mở lời không tính)
+          if (gap > longestPauseRef.current) longestPauseRef.current = gap;
+          if (gap > 2000 && !pauseCounted) {
+            pausesRef.current += 1;
+            pauseCounted = true;
+          }
         }
         lastTick = now;
         const sil = optsRef.current.silenceMs;

@@ -249,7 +249,9 @@ exports.coachSpeaking = onCall(CALL_OPTS, async (request) => {
       trimStr(d.target_band, "6.0"),
       toIntOr(d.attempt, 1),
       d.prev_feedback,
-      d.voiced_ms // thoi luong giong noi thuc do o trinh duyet (co the thieu)
+      d.voiced_ms, // thoi luong giong noi thuc do o trinh duyet (co the thieu)
+      d.pauses_over_2s, // so lan ngung >2s + lan ngung lau nhat (nang cap 07/2026,
+      d.longest_pause_ms // giup cham FC co bang chung; client cu khong gui thi la undefined)
     );
     // Audio dat TRUOC prompt: nhac model bam vao am thanh, khong suy dien tu cau hoi
     const parts = [
@@ -332,6 +334,9 @@ exports.coachSpeaking = onCall(CALL_OPTS, async (request) => {
         bands: orNull(data.bands),
         report: data,
         drillStats: orNull(meta.drillStats),
+        // Tong ms hoc vien THAT SU noi trong phien (client do bang voice meter),
+        // phuc vu theo doi luong noi thuc theo thoi gian (nang cap 07/2026)
+        talkMs: orNull(meta.talkMs),
       });
     } catch (e) {
       console.warn("coachSpeaking: luu lich su that bai:", e && e.message);
