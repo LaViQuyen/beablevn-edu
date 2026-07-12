@@ -8,7 +8,7 @@
 //  4. Nhắc lịch học (mỗi 5')  → học viên có lớp bắt đầu trong ~30 phút
 // Deploy: firebase deploy --only functions
 // ============================================================
-const { onValueCreated, onValueUpdated } = require('firebase-functions/v2/database');
+const { onValueCreated, onValueUpdated, onValueDeleted, onValueWritten } = require('firebase-functions/v2/database');
 const { onSchedule } = require('firebase-functions/v2/scheduler');
 const admin = require('firebase-admin');
 
@@ -356,3 +356,102 @@ exports.tuitionAutoOverdue = onSchedule(
     console.log(`tuitionAutoOverdue: chuyển ${Object.keys(updates).length} record sang Quá hạn.`);
   }
 );
+
+// ============================================================
+// HỌC PHÍ x ĐIỂM DANH (nghiệp vụ Bak chốt 12/07/2026):
+// Ngày nào lớp CÓ điểm danh nghĩa là hôm đó CÓ DẠY → trừ 1 "buổi còn lại"
+// cho TẤT CẢ học viên trong lớp (kể cả vắng). Vắng CÓ PHÉP không hoàn buổi
+// trong hệ thống, thay vào đó báo Giáo vụ liên hệ sắp xếp hỗ trợ học bù
+// (xem onAttendanceExcused bên dưới).
+// - Guard tuitionDeductions/{lớp}/{ngày} chống trừ 2 lần (GV lưu lại nhiều
+//   lần trong ngày, function bị retry).
+// - Record học phí được khớp theo: học viên thuộc lớp (users.classIds) +
+//   cột "Lớp" của record trùng TÊN lớp (không phân biệt hoa thường).
+// - Xoá NGUYÊN node điểm danh của ngày đó (hôm đó không dạy nữa) → tự HOÀN buổi.
+// ============================================================
+const normName = (s) => String(s || '').trim().toUpperCase();
+
+exports.onAttendanceDayCreated = onValueCreated({ ...DB_OPTS, ref: '/attendance/{classId}/{date}' }, async (event) => {
+  const { classId, date } = event.params;
+  const guardRef = db.ref(`tuitionDeductions/${classId}/${date}`);
+  if ((await guardRef.get()).val()) return; // ngày này đã trừ rồi
+
+  const cls = (await db.ref(`classes/${classId}`).get()).val();
+  if (!cls) return;
+  const clsName = normName(cls.name);
+
+  const [users, allTuition] = await Promise.all([
+    allUsers(),
+    db.ref('tuitionRecords').get().then((s) => s.val() || {}),
+  ]);
+  // Nhánh học phí tra theo mã KHÔNG phân biệt hoa thường (dữ liệu cũ có thể lệch case)
+  const branchOf = {};
+  Object.keys(allTuition).forEach((code) => { branchOf[normName(code)] = code; });
+
+  const updates = {};
+  const deducted = {};
+  Object.values(users).forEach((u) => {
+    if (!u || u.role !== 'student' || !classIdsOf(u).includes(classId)) return;
+    const branch = branchOf[normName(u.studentCode)];
+    if (!branch) return; // học viên chưa có record học phí
+    Object.entries(allTuition[branch] || {}).forEach(([rid, r]) => {
+      if (!r || normName(r.className) !== clsName) return;
+      updates[`tuitionRecords/${branch}/${rid}/remainingSessions`] = (Number(r.remainingSessions) || 0) - 1;
+      deducted[`${branch}|${rid}`] = true;
+    });
+  });
+
+  if (Object.keys(deducted).length) {
+    updates[`tuitionDeductions/${classId}/${date}`] = {
+      deductedAt: new Date().toISOString(),
+      className:  cls.name || '',
+      records:    deducted,
+    };
+    await db.ref().update(updates);
+  }
+  console.log(`onAttendanceDayCreated ${cls.name || classId} ${date}: trừ buổi ${Object.keys(deducted).length} record học phí.`);
+});
+
+exports.onAttendanceDayDeleted = onValueDeleted({ ...DB_OPTS, ref: '/attendance/{classId}/{date}' }, async (event) => {
+  const { classId, date } = event.params;
+  const guardRef = db.ref(`tuitionDeductions/${classId}/${date}`);
+  const guard = (await guardRef.get()).val();
+  if (!guard) return; // ngày này chưa từng trừ
+  const updates = {};
+  await Promise.all(Object.keys(guard.records || {}).map(async (key) => {
+    const [branch, rid] = key.split('|');
+    const cur = (await db.ref(`tuitionRecords/${branch}/${rid}/remainingSessions`).get()).val();
+    if (cur === null) return; // record đã bị xoá thì thôi
+    updates[`tuitionRecords/${branch}/${rid}/remainingSessions`] = (Number(cur) || 0) + 1;
+  }));
+  updates[`tuitionDeductions/${classId}/${date}`] = null;
+  await db.ref().update(updates);
+  console.log(`onAttendanceDayDeleted ${classId} ${date}: hoàn buổi ${Object.keys(guard.records || {}).length} record.`);
+});
+
+// Học viên bị đánh "Có phép" (excused) → báo Giáo vụ (admin + staff phụ trách lớp)
+// qua FCM để liên hệ sắp xếp hỗ trợ việc học vào ngày nghỉ có phép.
+exports.onAttendanceExcused = onValueWritten({ ...DB_OPTS, ref: '/attendance/{classId}/{date}/{sid}' }, async (event) => {
+  const before = event.data.before.val();
+  const after = event.data.after.val();
+  const stBefore = before ? (typeof before === 'object' ? before.status : before) : null;
+  const stAfter = after ? (typeof after === 'object' ? after.status : after) : null;
+  if (stAfter !== 'excused' || stBefore === 'excused') return; // chỉ bắt lúc CHUYỂN sang Có phép
+
+  const { classId, date, sid } = event.params;
+  const users = await allUsers();
+  const student = users[sid] || {};
+  const cls = (await db.ref(`classes/${classId}`).get()).val() || {};
+  const note = typeof after === 'object' && after.note ? ` · Ghi chú: ${after.note}` : '';
+  const dateDisp = /^\d{4}-\d{2}-\d{2}$/.test(date) ? date.split('-').reverse().join('/') : date;
+
+  const targets = Object.entries(users)
+    .filter(([, u]) => u && (u.role === 'admin' || (u.role === 'staff' && (u.assignedClasses || []).includes(classId))))
+    .map(([id]) => id);
+  await sendTo(
+    await tokensOf(targets),
+    `📋 Vắng có phép: ${student.name || 'Học viên'}${student.studentCode ? ` (${student.studentCode})` : ''}`,
+    `Lớp ${cls.name || classId} · buổi ${dateDisp}${note}. Giáo vụ liên hệ học viên để sắp xếp hỗ trợ học bù.`,
+    '/staff/attendance'
+  );
+});

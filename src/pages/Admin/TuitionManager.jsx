@@ -777,7 +777,7 @@ const TuitionManager = () => {
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-xs text-blue-700 leading-relaxed">
             <span className="font-bold">Định dạng Excel (hàng đầu = tiêu đề, bỏ qua):</span>
             <span className="mx-1">A=Mã HV (bắt buộc, dòng thiếu mã sẽ bị bỏ qua) · B=Họ và tên · C=Lớp · D=Buổi còn lại · E=Buổi cộng thêm · F=Hạn thanh toán (DD/MM/YYYY) · G=Tình trạng.</span>
-            <span>Sau khi chọn file có thể chọn <span className="font-bold">Nhập bổ sung</span> (import lẻ, giữ danh sách cũ) hoặc <span className="font-bold text-red-600">Thay thế toàn bộ</span>.</span>
+            <span>Sau khi chọn file có thể chọn <span className="font-bold">Nhập bổ sung</span> (import lẻ, giữ danh sách cũ) hoặc <span className="font-bold text-red-600">Thay thế toàn bộ</span>. Ngày nào lớp có điểm danh (có dạy), hệ thống tự trừ 1 buổi cho cả lớp; cột "Lớp" phải trùng tên lớp trong hệ thống.</span>
           </div>
 
           {/* Bảng */}
@@ -830,7 +830,8 @@ const TuitionManager = () => {
                       <td className="font-medium text-slate-800">{r.name || '–'}</td>
                       <td className="text-slate-600 text-xs">{r.className || '–'}</td>
                       <td className="text-center">
-                        <span className="font-bold text-slate-700">{r.remainingSessions ?? '–'}</span>
+                        {/* Buoi con lai <= 0: het goi (so am = da hoc lo buoi chua dong phi) */}
+                        <span className={`font-bold ${Number(r.remainingSessions) <= 0 ? 'text-red-600' : 'text-slate-700'}`}>{r.remainingSessions ?? '–'}</span>
                       </td>
                       <td className="text-center">
                         <span className="font-bold text-blue-600">{r.addedSessions ?? 0}</span>
