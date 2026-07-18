@@ -44,7 +44,7 @@ const Login = () => {
 
       login(user); // user đã được loại bỏ password ở server
       if (user.role === 'admin') navigate('/admin/dashboard');
-      else if (user.role === 'staff') navigate('/staff/classes');
+      else if (user.role === 'staff') navigate('/staff/tracking');
       else if (user.role === 'parent') navigate('/parent/dashboard');
       else navigate('/student/dashboard');
     } catch (err) {

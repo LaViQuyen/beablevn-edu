@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { db } from '../../firebase';
 import { ref, onValue, push, set, update, remove } from "firebase/database";
 import { useAuth } from '../../context/AuthContext';
@@ -8,9 +9,11 @@ import { computeAutoBonus } from '../../utils/autoBonus'; // tự cộng Bonus k
 
 const ScoreInput = () => {
     const { currentUser } = useAuth();
+    const [searchParams] = useSearchParams();
 
     const [classes, setClasses] = useState([]);
-    const [selectedClass, setSelectedClass] = useState('');
+    // ?class=<id>: trang Theo dõi lớp dẫn sang với lớp đã chọn sẵn
+    const [selectedClass, setSelectedClass] = useState(searchParams.get('class') || '');
     const [students, setStudents] = useState([]);
 
     const TABS = [

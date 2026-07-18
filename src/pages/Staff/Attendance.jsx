@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { db } from '../../firebase';
 import { ref, onValue, update } from "firebase/database";
 import { useAuth } from '../../context/AuthContext';
@@ -86,10 +87,12 @@ const MonthPicker = ({ value, onChange }) => {
 
 const Attendance = () => {
     const { currentUser } = useAuth();
+    const [searchParams] = useSearchParams();
     const [tab, setTab] = useState('take');
     const [students, setStudents] = useState([]);
     const [classes, setClasses] = useState([]);
-    const [selectedClass, setSelectedClass] = useState('');
+    // ?class=<id>: trang Theo dõi lớp dẫn sang với lớp đã chọn sẵn
+    const [selectedClass, setSelectedClass] = useState(searchParams.get('class') || '');
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
     const [status, setStatus] = useState({});
     const [notes, setNotes] = useState({});

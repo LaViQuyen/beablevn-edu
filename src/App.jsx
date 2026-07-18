@@ -33,6 +33,7 @@ import ParentAppointments from './pages/Parent/Appointments';   // Đặt lịch
 import ParentSupport from './pages/Parent/Support';             // Hỗ trợ & Phản ánh
 
 // Pages - Staff (Be Able)
+import ClassTracking from './pages/Staff/ClassTracking'; // trang chủ Giáo vụ: theo dõi theo LỚP
 import ClassList from './pages/Staff/ClassList';
 import Attendance from './pages/Staff/Attendance';
 import ScoreInput from './pages/Staff/ScoreInput';
@@ -84,7 +85,7 @@ const RedirectBasedOnRole = () => {
   if (!currentUser) return <Navigate to="/login" />;
 
   if (userData?.role === 'admin') return <Navigate to="/admin/dashboard" />;
-  if (userData?.role === 'staff') return <Navigate to="/staff/classes" />;
+  if (userData?.role === 'staff') return <Navigate to="/staff/tracking" />;
   if (userData?.role === 'student') return <Navigate to="/student/dashboard" />;
   if (userData?.role === 'parent') return <Navigate to="/parent/dashboard" />;
 
@@ -133,6 +134,8 @@ const App = () => {
 
           {/* --- STAFF ROUTES --- */}
           <Route path="/staff" element={<ProtectedRoute allowedRoles={['staff', 'admin']}><StaffLayout /></ProtectedRoute>}>
+            {/* Theo dõi lớp: trang chủ Giáo vụ, mỗi lớp 1 thẻ sức khỏe + drill-down */}
+            <Route path="tracking" element={<ClassTracking />} />
             <Route path="classes" element={<ClassList />} />
             <Route path="attendance" element={<Attendance />} />
             <Route path="scores" element={<ScoreInput />} />
@@ -151,7 +154,7 @@ const App = () => {
             {/* Cửa hàng Skin + Game cho nhân sự (dùng chung component học viên, mở khóa toàn bộ + chơi không giới hạn) */}
             <Route path="skins" element={<StudentSkins />} />
             <Route path="games/hanh-trinh" element={<Suspense fallback={<div className="py-24 text-center text-slate-500">Đang tải game…</div>}><HanhTrinhGame /></Suspense>} />
-            <Route index element={<Navigate to="classes" />} />
+            <Route index element={<Navigate to="tracking" />} />
           </Route>
 
           {/* --- STUDENT ROUTES --- */}

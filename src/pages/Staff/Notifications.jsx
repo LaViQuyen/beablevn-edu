@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'; // Bổ sung useMemo
+import { useSearchParams } from 'react-router-dom';
 import { db, storage } from '../../firebase';
 import { ref, push, set, onValue, remove, update } from 'firebase/database';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -17,6 +18,7 @@ const modules = {
 
 const Notifications = () => {
     const { currentUser } = useAuth();
+    const [searchParams] = useSearchParams();
 
     // State quản lý form
     const [postMode, setPostMode] = useState('content');
@@ -34,7 +36,8 @@ const Notifications = () => {
     const mdToHtml = (html) => (html || '')
         .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')
         .replace(/(^|[\s>([])\*([^*\n<]+)\*(?=[\s<.,;:!?)\]]|$)/g, '$1<i>$2</i>');
-    const [scope, setScope] = useState('all');
+    // ?class=<id>: trang Theo dõi lớp dẫn sang với phạm vi lớp đã chọn sẵn
+    const [scope, setScope] = useState(searchParams.get('class') || 'all');
     const [classes, setClasses] = useState([]);
     const [loading, setLoading] = useState(false);
     const [notiList, setNotiList] = useState([]);
