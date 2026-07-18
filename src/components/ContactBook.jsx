@@ -249,7 +249,7 @@ const HomeworkSection = ({ items, locked }) => {
 };
 
 // ============ THẺ LỚP ============
-const ClassCard = ({ cls, student, attendanceData, scoresData, visibleNotis, homeworkLocked, attendanceHref, scoresHref }) => {
+const ClassCard = ({ cls, student, attendanceData, scoresData, visibleNotis, homeworkLocked, hideAttendanceLink, attendanceHref, scoresHref }) => {
   const [openSection, setOpenSection] = useState('attendance'); // mở sẵn mục chuyên cần
   const att = useMemo(() => computeAttendance(attendanceData, cls.id, student.id), [attendanceData, cls.id, student.id]);
   const scores = useMemo(() => computeClassScores(scoresData, cls.id, student.id), [scoresData, cls.id, student.id]);
@@ -285,8 +285,9 @@ const ClassCard = ({ cls, student, attendanceData, scoresData, visibleNotis, hom
       <Section icon="🗓️" title="Chuyên cần & Điểm danh" sub={`${att.total} buổi · ${att.absent} vắng`}
         badge={att.rate !== null && att.rate < 70 ? <span className="text-[9px] font-bold text-red-600 bg-red-50 border border-red-200 px-1.5 py-0.5 rounded">Thấp</span> : null}
         open={openSection === 'attendance'} onToggle={() => toggle('attendance')}>
-        {/* attLink là một notification dạng link: khi học phí Quá hạn phải ẩn cùng cơ chế khóa Thông báo */}
-        <AttendanceSection att={att} attLink={homeworkLocked ? null : attLink} attendanceHref={attendanceHref} />
+        {/* attLink là một notification dạng link: ẩn khi học phí Quá hạn (đồng bộ khóa Thông báo)
+            và ẩn TUYỆT ĐỐI ở cổng Phụ huynh (điểm danh là việc của HỌC VIÊN, PH không bấm thay con) */}
+        <AttendanceSection att={att} attLink={homeworkLocked || hideAttendanceLink ? null : attLink} attendanceHref={attendanceHref} />
       </Section>
 
       <Section icon="🏅" title="Điểm số theo từng loại" sub={scores.hasAnyGrade ? `Điểm tổng kết ${scores.gpa.toFixed(2)}` : 'Chưa có cột điểm'}
@@ -304,7 +305,7 @@ const ClassCard = ({ cls, student, attendanceData, scoresData, visibleNotis, hom
 };
 
 // ============ COMPONENT CHÍNH ============
-const ContactBook = ({ student, homeworkLocked = false, attendanceHref = null, scoresHref = null }) => {
+const ContactBook = ({ student, homeworkLocked = false, hideAttendanceLink = false, attendanceHref = null, scoresHref = null }) => {
   const [classes, setClasses] = useState({});
   const [attendanceData, setAttendanceData] = useState({});
   const [scoresData, setScoresData] = useState({});
@@ -360,7 +361,8 @@ const ContactBook = ({ student, homeworkLocked = false, attendanceHref = null, s
       {myClasses.map((cls) => (
         <ClassCard key={cls.id} cls={cls} student={student}
           attendanceData={attendanceData} scoresData={scoresData} visibleNotis={visibleNotis}
-          homeworkLocked={homeworkLocked} attendanceHref={attendanceHref} scoresHref={scoresHref} />
+          homeworkLocked={homeworkLocked} hideAttendanceLink={hideAttendanceLink}
+          attendanceHref={attendanceHref} scoresHref={scoresHref} />
       ))}
     </div>
   );

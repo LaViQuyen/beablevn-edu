@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { db } from '../../firebase';
 import { ref, onValue } from 'firebase/database';
 import { useAuth } from '../../context/AuthContext';
 import { useChildren } from './useChildren';
-import { visibleNotifications } from '../../utils/contactBook';
+import { visibleNotifications, isContactBookNoti } from '../../utils/contactBook';
 
 // ============================================================
 // THÔNG BÁO (cổng Phụ huynh)
@@ -48,11 +49,14 @@ const ParentNotifications = () => {
     return () => unsubs.forEach(u => u());
   }, []);
 
-  // Gộp thông báo hiển thị được của từng con (dedupe theo id, nhớ tin thuộc con nào)
+  // Gộp thông báo hiển thị được của từng con (dedupe theo id, nhớ tin thuộc con nào).
+  // Lọc bỏ báo bài (đã nằm trong Sổ liên lạc của con) và Link điểm danh
+  // (điểm danh là việc của HỌC VIÊN, phụ huynh không được bấm thay con).
   const merged = useMemo(() => {
     const byId = {};
     children.forEach((child) => {
       visibleNotifications(notiList, child).forEach((n) => {
+        if (isContactBookNoti(n)) return;
         if (!byId[n.id]) byId[n.id] = { ...n, childIds: [] };
         byId[n.id].childIds.push(child.id);
       });
@@ -84,8 +88,15 @@ const ParentNotifications = () => {
         </div>
         <div>
           <h2 className="page-title">Thông báo</h2>
-          <p className="page-sub hidden md:block">Báo bài, tin quan trọng và sự kiện từ các lớp của con.</p>
+          <p className="page-sub hidden md:block">Tin quan trọng và sự kiện từ các lớp của con.</p>
         </div>
+      </div>
+
+      {/* Dẫn hướng: báo bài của con xem trong Sổ liên lạc */}
+      <div className="flex items-center gap-3 bg-primary-subtle border border-green-100 rounded-xl px-4 py-3">
+        <span className="text-lg">📖</span>
+        <p className="text-xs text-slate-600 flex-1"><b>Báo bài</b> của con nằm trong <b>Sổ liên lạc</b> của từng bé, không hiển thị ở trang này.</p>
+        <Link to="/parent/dashboard" className="shrink-0 text-xs font-bold text-primary bg-white px-3 py-1.5 rounded-lg border border-green-200 hover:bg-primary-light transition-colors">Mở sổ →</Link>
       </div>
 
       {/* FILTER */}
@@ -95,7 +106,6 @@ const ParentNotifications = () => {
             <div className="flex gap-1 bg-slate-100 rounded-xl p-1">
               {[
                 { id: 'all', label: 'Tất cả' },
-                { id: 'báo bài', label: '📝 Báo bài' },
                 { id: 'quan trọng', label: '🔴 Quan trọng' },
                 { id: 'sự kiện', label: '🎉 Sự kiện' },
                 { id: 'link', label: '🔗 Link' },

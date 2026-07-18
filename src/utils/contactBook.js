@@ -106,11 +106,16 @@ export const visibleNotifications = (notificationList, student) => {
 export const homeworkOfClass = (visibleList, classId) =>
   (visibleList || []).filter((n) => n.type !== 'link' && n.label === 'báo bài' && n.scope === classId);
 
+// Thông báo dạng "Link điểm danh" (GV đăng link cho HỌC VIÊN tự điểm danh)
+export const isAttendanceLink = (n) => n?.type === 'link' && /điểm danh/i.test(n?.title || '');
+
+// Báo bài hoặc link điểm danh: 2 loại đã CHUYỂN HẲN vào Sổ liên lạc,
+// trang Thông báo lọc bỏ để không trùng lặp nội dung.
+export const isContactBookNoti = (n) => isAttendanceLink(n) || (n?.type !== 'link' && n?.label === 'báo bài');
+
 // Link điểm danh mới nhất của 1 lớp (GV đăng thông báo dạng link "Link điểm danh")
 export const latestAttendanceLink = (visibleList, classId) =>
-  (visibleList || []).find(
-    (n) => n.type === 'link' && n.scope === classId && /điểm danh/i.test(n.title || '')
-  ) || null;
+  (visibleList || []).find((n) => n.scope === classId && isAttendanceLink(n)) || null;
 
 // Màu chuyên cần theo ngưỡng (đồng bộ các trang hiện có)
 export const attendanceColor = (rate) => {

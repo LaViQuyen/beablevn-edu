@@ -73,6 +73,10 @@ const classIdsOf = (u) => Array.isArray(u.classIds) ? u.classIds : Object.values
 // ============================================================
 // 1. THÔNG BÁO MỚI → học viên đúng phạm vi
 // ============================================================
+// Phân loại thông báo thuộc Sổ liên lạc: link điểm danh + báo bài
+const isAttendanceLinkNoti = (n) => n && n.type === 'link' && /điểm danh/i.test(n.title || '');
+const isHomeworkNoti = (n) => n && n.type !== 'link' && n.label === 'báo bài';
+
 exports.onNotificationCreated = onValueCreated({ ...DB_OPTS, ref: '/notifications/{id}' }, async (event) => {
   const n = event.data.val();
   if (!n) return;
@@ -81,9 +85,13 @@ exports.onNotificationCreated = onValueCreated({ ...DB_OPTS, ref: '/notification
     .filter(([, u]) => u.role === 'student' && (n.scope === 'all' || classIdsOf(u).includes(n.scope)))
     .map(([id]) => id);
   const label = n.type === 'link' ? 'Liên kết' : (n.label ? n.label.charAt(0).toUpperCase() + n.label.slice(1) : 'Thông báo');
-  await sendTo(await tokensOf(targets), `📢 ${label} mới`, n.title || 'Mở app để xem chi tiết.', '/student/notifications');
+  // Báo bài + link điểm danh giờ nằm trong Sổ liên lạc → bấm push mở thẳng sổ
+  const studentUrl = (isHomeworkNoti(n) || isAttendanceLinkNoti(n)) ? '/student/lienlac' : '/student/notifications';
+  await sendTo(await tokensOf(targets), `📢 ${label} mới`, n.title || 'Mở app để xem chi tiết.', studentUrl);
 
-  // PHỤ HUYNH: cũng nhận push nếu thông báo thuộc phạm vi lớp của CON được liên kết (parentLinks)
+  // PHỤ HUYNH: cũng nhận push nếu thông báo thuộc phạm vi lớp của CON được liên kết (parentLinks).
+  // RIÊNG link điểm danh KHÔNG push cho phụ huynh (điểm danh là việc của học viên, tránh PH bấm thay con).
+  if (isAttendanceLinkNoti(n)) return;
   try {
     const links = (await db.ref('parentLinks').get()).val() || {};
     const parentTargets = Object.entries(links)
@@ -93,7 +101,8 @@ exports.onNotificationCreated = onValueCreated({ ...DB_OPTS, ref: '/notification
         return Object.keys(kids || {}).some((sid) => users[sid] && classIdsOf(users[sid]).includes(n.scope));
       })
       .map(([puid]) => puid);
-    await sendTo(await tokensOf(parentTargets), `📢 ${label} mới của lớp con`, n.title || 'Mở app để xem chi tiết.', '/parent/notifications');
+    const parentUrl = isHomeworkNoti(n) ? '/parent/dashboard' : '/parent/notifications';
+    await sendTo(await tokensOf(parentTargets), `📢 ${label} mới của lớp con`, n.title || 'Mở app để xem chi tiết.', parentUrl);
   } catch (e) { console.warn('Push parent notification:', e?.message); }
 });
 

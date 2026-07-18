@@ -125,7 +125,8 @@ const ParentDashboard = () => {
               <p className="text-xs text-slate-400">Mã HV: {child.studentCode || '–'}</p>
             </div>
           </div>
-          <ContactBook student={child} />
+          {/* hideAttendanceLink: KHÔNG cho PH thấy link điểm danh, tránh PH điểm danh thay con */}
+          <ContactBook student={child} hideAttendanceLink />
         </div>
       ) : (
         <div className="bg-white p-8 rounded-2xl border border-dashed border-slate-200 text-center">

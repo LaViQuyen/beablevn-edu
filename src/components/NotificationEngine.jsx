@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { db } from '../firebase';
 import { ref, onValue, set } from 'firebase/database';
 import { VAPID_KEY } from '../notifyConfig';
+import { isAttendanceLink } from '../utils/contactBook';
 
 // ============================================================
 // NOTIFICATION ENGINE, thông báo trình duyệt + âm thanh chuông
@@ -265,8 +266,10 @@ export const ParentNotifyEngine = ({ currentUser }) => {
   // 1. Thông báo mới trong phạm vi lớp các con.
   // enabled KHÔNG phụ thuộc childClassIds.length: tin scope 'all' vẫn phải reo
   // kể cả khi con chưa được xếp lớp (callback đã tự lọc scope).
+  // Link điểm danh KHÔNG reo cho phụ huynh: điểm danh là việc của học viên.
   useNewChildWatcher('notifications', (id, n) => {
     if (n.scope !== 'all' && !childClassIds.includes(n.scope)) return;
+    if (isAttendanceLink(n)) return;
     const label = n.type === 'link' ? 'liên kết' : (n.label || 'thông báo');
     fireNotify(`📢 ${label.charAt(0).toUpperCase() + label.slice(1)} mới của lớp con`, n.title || 'Mở app để xem chi tiết.');
   }, !!currentUser?.id);

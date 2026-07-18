@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { db } from '../../firebase';
 import { ref, onValue } from 'firebase/database';
 import { useAuth } from '../../context/AuthContext';
 import { getReserveStatus, fmtReserveDate } from '../../utils/reserve';
+import { isContactBookNoti } from '../../utils/contactBook';
 
 const Notifications = () => {
     const { currentUser } = useAuth();
@@ -40,10 +42,11 @@ const Notifications = () => {
                     ? currentUser.classIds
                     : Object.values(currentUser.classIds || {});
 
-                // Lấy ra danh sách các thông báo thuộc lớp của học viên này
+                // Lấy ra danh sách các thông báo thuộc lớp của học viên này.
+                // Báo bài + Link điểm danh đã CHUYỂN HẲN vào Sổ liên lạc → lọc bỏ ở đây, tránh trùng lặp.
                 let list = Object.entries(data)
                     .map(([id, val]) => ({ id, ...val }))
-                    .filter(noti => noti.scope === 'all' || myClassIds.includes(noti.scope));
+                    .filter(noti => (noti.scope === 'all' || myClassIds.includes(noti.scope)) && !isContactBookNoti(noti));
 
                 // --- BỘ LỌC THỜI GIAN KHÓA (CHỈ LẤY THÔNG BÁO CŨ) ---
                 if (currentUser?.lockedAt) {
@@ -236,13 +239,21 @@ const Notifications = () => {
                 </div>
             </div>
 
+            {/* Dẫn hướng: báo bài + link điểm danh đã dời sang Sổ liên lạc */}
+            <div className="flex items-center gap-3 bg-primary-subtle border border-green-100 rounded-xl px-4 py-3">
+                <span className="text-lg">📖</span>
+                <p className="text-xs text-slate-600 flex-1">
+                    <b>Báo bài</b> và <b>Link điểm danh</b> của từng lớp giờ nằm trong <b>Sổ liên lạc</b>, không hiển thị ở trang này nữa.
+                </p>
+                <Link to="/student/lienlac" className="shrink-0 text-xs font-bold text-primary bg-white px-3 py-1.5 rounded-lg border border-green-200 hover:bg-primary-light transition-colors">Mở sổ →</Link>
+            </div>
+
             {/* FILTER + SEARCH */}
             {!loading && notifications.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                     <div className="flex gap-1 bg-slate-100 rounded-xl p-1">
                         {[
                             { id: 'all',        label: 'Tất cả' },
-                            { id: 'báo bài',    label: '📝 Báo bài' },
                             { id: 'quan trọng', label: '🔴 Quan trọng' },
                             { id: 'sự kiện',    label: '🎉 Sự kiện' },
                             { id: 'link',       label: '🔗 Link' },
