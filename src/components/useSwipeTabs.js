@@ -16,8 +16,11 @@ export function useSwipeTabs(tabs) {
   const onTouchStart = (e) => {
     // Chi bat tren man hinh hep (mobile); desktop co sidebar nen khong can
     if (window.innerWidth >= 768) { startRef.current = null; return; }
-    // Bo qua khi cham vao vung tu cuon ngang / game / o nhap lieu / vung gan co data-noswipe
-    if (e.target.closest('canvas, table, .overflow-x-auto, .overflow-auto, input, textarea, select, [data-noswipe]')) {
+    // Bo qua khi cham vao vung tu cuon ngang / game / o nhap lieu / vung gan co data-noswipe.
+    // LUU Y: chinh <main> gan handler cung co class overflow-auto, closest() khop ca chinh no
+    // lam swipe chet toan bo -> phai loai tru e.currentTarget khoi ket qua khop.
+    const blocker = e.target.closest('canvas, table, .overflow-x-auto, .overflow-auto, input, textarea, select, [data-noswipe]');
+    if (blocker && blocker !== e.currentTarget) {
       startRef.current = null; return;
     }
     const t = e.touches[0];

@@ -232,6 +232,77 @@ export const StudentNotifyEngine = ({ currentUser }) => {
 };
 
 // ============================================================
+// ENGINE CHO PHỤ HUYNH
+// - Báo bài / thông báo mới thuộc lớp của CÁC CON (qua parentLinks)
+// - Lịch hẹn được phòng Đào tạo xác nhận / hủy / hoàn tất
+// ============================================================
+export const ParentNotifyEngine = ({ currentUser }) => {
+  const [childClassIds, setChildClassIds] = useState([]);
+
+  // Gộp classIds của các con: parentLinks/{uid} → users/{sid}/classIds (rules đã mở per-child)
+  useEffect(() => {
+    if (!currentUser?.id) return;
+    let childUnsubs = [];
+    const classesByChild = {};
+    const recompute = () => setChildClassIds([...new Set(Object.values(classesByChild).flat())]);
+    const unsubLinks = onValue(ref(db, `parentLinks/${currentUser.id}`), (snap) => {
+      childUnsubs.forEach(u => u());
+      childUnsubs = [];
+      Object.keys(classesByChild).forEach(k => delete classesByChild[k]);
+      const sids = Object.keys(snap.val() || {});
+      sids.forEach((sid) => {
+        childUnsubs.push(onValue(ref(db, `users/${sid}/classIds`), (s) => {
+          const v = s.val();
+          classesByChild[sid] = v ? (Array.isArray(v) ? v : Object.values(v)) : [];
+          recompute();
+        }, () => {}));
+      });
+      recompute();
+    });
+    return () => { unsubLinks(); childUnsubs.forEach(u => u()); };
+  }, [currentUser?.id]);
+
+  // 1. Thông báo mới trong phạm vi lớp các con.
+  // enabled KHÔNG phụ thuộc childClassIds.length: tin scope 'all' vẫn phải reo
+  // kể cả khi con chưa được xếp lớp (callback đã tự lọc scope).
+  useNewChildWatcher('notifications', (id, n) => {
+    if (n.scope !== 'all' && !childClassIds.includes(n.scope)) return;
+    const label = n.type === 'link' ? 'liên kết' : (n.label || 'thông báo');
+    fireNotify(`📢 ${label.charAt(0).toUpperCase() + label.slice(1)} mới của lớp con`, n.title || 'Mở app để xem chi tiết.');
+  }, !!currentUser?.id);
+
+  // 2. Lịch hẹn của mình được phòng Đào tạo cập nhật trạng thái
+  const apptPrevRef = useRef(null);
+  useEffect(() => {
+    if (!currentUser?.id) return;
+    apptPrevRef.current = null;
+    const unsub = onValue(ref(db, `appointments/${currentUser.id}`), (snap) => {
+      const data = snap.val() || {};
+      const cur = {};
+      Object.entries(data).forEach(([id, a]) => { cur[id] = a.status; });
+      if (apptPrevRef.current === null) { apptPrevRef.current = cur; return; }
+      Object.entries(cur).forEach(([id, status]) => {
+        const prev = apptPrevRef.current[id];
+        const a = data[id];
+        // Chỉ báo khi TRẠNG THÁI đổi và do phía trung tâm xử lý (có handledBy)
+        if (prev && prev !== status && a?.handledBy) {
+          if (status === 'confirmed') fireNotify('✅ Lịch hẹn đã được xác nhận', `${a.topicLabel || 'Lịch hẹn'} · ${a.preferredDate}${a.staffNote ? ` · ${a.staffNote}` : ''}`);
+          else if (status === 'done') fireNotify('🏁 Buổi hẹn đã hoàn tất', 'Cảm ơn Ba Mẹ đã dành thời gian trao đổi cùng Định Năng!');
+          else if (status === 'cancelled') fireNotify('❌ Lịch hẹn đã bị hủy', a.staffNote || 'Vui lòng đặt lịch khác hoặc liên hệ hotline 088 699 7099.');
+        }
+      });
+      apptPrevRef.current = cur;
+    });
+    return () => unsub();
+  }, [currentUser?.id]);
+
+  // Đăng ký FCM token (push khi đóng trình duyệt)
+  useEffect(() => { registerFcmToken(currentUser?.id); }, [currentUser?.id]);
+
+  return <PermissionBanner onGranted={() => registerFcmToken(currentUser?.id)} />;
+};
+
+// ============================================================
 // ENGINE CHO NHÂN SỰ
 // ============================================================
 export const StaffNotifyEngine = ({ currentUser, ffAccess, bodAccess }) => {
@@ -249,6 +320,34 @@ export const StaffNotifyEngine = ({ currentUser, ffAccess, bodAccess }) => {
 
   // 2. Đơn của chính nhân sự này được xác nhận / từ chối
   useMyOrderStatusWatcher(currentUser?.id);
+
+  // 3. Lịch hẹn phụ huynh MỚI (node lồng 2 cấp appointments/{pid}/{aid} → tự flatten và dò id mới)
+  const apptSeenRef = useRef(null);
+  useEffect(() => {
+    if (!currentUser?.id) return;
+    apptSeenRef.current = null;
+    const isAdmin = currentUser.role === 'admin';
+    const myClassIds = currentUser.assignedClasses || [];
+    const unsub = onValue(ref(db, 'appointments'), (snap) => {
+      const data = snap.val() || {};
+      const flat = {};
+      Object.entries(data).forEach(([pid, appts]) => {
+        Object.entries(appts || {}).forEach(([aid, a]) => { flat[`${pid}/${aid}`] = a; });
+      });
+      const keys = Object.keys(flat);
+      if (apptSeenRef.current === null) { apptSeenRef.current = new Set(keys); return; }
+      keys.forEach((k) => {
+        if (apptSeenRef.current.has(k)) return;
+        apptSeenRef.current.add(k);
+        const a = flat[k];
+        if (!a || a.status !== 'pending') return;
+        const cls = Array.isArray(a.classIds) ? a.classIds : Object.values(a.classIds || {});
+        if (!isAdmin && cls.length > 0 && !cls.some(c => myClassIds.includes(c))) return;
+        fireNotify('📅 Lịch hẹn mới từ phụ huynh', `${a.parentName || 'Phụ huynh'}${a.studentName ? ` (PH của ${a.studentName})` : ''} · ${a.preferredDate} ${a.preferredSlot || ''}`);
+      });
+    }, () => {});
+    return () => unsub();
+  }, [currentUser?.id]);
 
   // Đăng ký FCM token nếu đã có quyền (push khi đóng trình duyệt)
   useEffect(() => { registerFcmToken(currentUser?.id); }, [currentUser?.id]);

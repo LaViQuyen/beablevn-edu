@@ -6,6 +6,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import AdminLayout from './components/Layouts/AdminLayout';
 import StaffLayout from './components/Layouts/StaffLayout';
 import StudentLayout from './components/Layouts/StudentLayout';
+import ParentLayout from './components/Layouts/ParentLayout'; // Cổng Phụ huynh (role 'parent')
 
 // Pages - Auth
 import Login from './pages/Login';
@@ -22,7 +23,14 @@ import ClassStats from './pages/Admin/ClassStats';
 import SkinManager from './pages/Admin/SkinManager'; // Admin quản lý skin (catalog + cột mốc)
 import AutoBonusManager from './pages/Admin/AutoBonusManager'; // Admin cấu hình tự động cộng Bonus
 import TuitionManager from './pages/Admin/TuitionManager';     // Admin quản lý học phí
+import ParentManager from './pages/Admin/ParentManager';       // Admin tạo tài khoản phụ huynh + liên kết học viên
 import NotFound from './pages/NotFound';
+
+// Pages - Parent (Cổng Phụ huynh)
+import ParentDashboard from './pages/Parent/Dashboard';         // Sổ liên lạc các con
+import ParentNotifications from './pages/Parent/Notifications'; // Thông báo gộp theo con
+import ParentAppointments from './pages/Parent/Appointments';   // Đặt lịch hẹn phòng Đào tạo
+import ParentSupport from './pages/Parent/Support';             // Hỗ trợ & Phản ánh
 
 // Pages - Staff (Be Able)
 import ClassList from './pages/Staff/ClassList';
@@ -31,12 +39,14 @@ import ScoreInput from './pages/Staff/ScoreInput';
 import StaffNotifications from './pages/Staff/Notifications';
 import StaffInbox from './pages/Staff/Inbox';
 import FreshFit from './pages/Staff/FreshFit'; // trang FF: duyệt đổi credits + quản lý menu
+import StaffAppointments from './pages/Staff/Appointments'; // lịch hẹn phụ huynh (phòng Đào tạo xử lý)
 import StaffCredits from './pages/Staff/StaffCredits'; // ví BAVN Credits của nhân sự
 import BavnCenter from './pages/Staff/BavnCenter';     // khu BOD: grant credits + 2 hệ quà + duyệt đơn quà
 import ModBonus from './pages/Staff/ModBonus';         // khu MOD: thưởng Bonus nhân sự + đánh giá thưởng quý/năm
 
 // Pages - Student
 import StudentDashboard from './pages/Student/Dashboard';
+import StudentContactBook from './pages/Student/ContactBook'; // Sổ liên lạc online (thẻ lớp + chuyên cần + điểm + báo bài)
 import MyAttendance from './pages/Student/MyAttendance';
 import MyGrades from './pages/Student/MyGrades';
 import StudentNotifications from './pages/Student/Notifications';
@@ -76,6 +86,7 @@ const RedirectBasedOnRole = () => {
   if (userData?.role === 'admin') return <Navigate to="/admin/dashboard" />;
   if (userData?.role === 'staff') return <Navigate to="/staff/classes" />;
   if (userData?.role === 'student') return <Navigate to="/student/dashboard" />;
+  if (userData?.role === 'parent') return <Navigate to="/parent/dashboard" />;
 
   return <Navigate to="/login" />;
 };
@@ -116,6 +127,7 @@ const App = () => {
             <Route path="feedback" element={<FeedbackManager />} />
             <Route path="import" element={<BulkImport />} />
             <Route path="tuition" element={<TuitionManager />} />
+            <Route path="parents" element={<ParentManager />} />
             <Route index element={<Navigate to="dashboard" />} />
           </Route>
 
@@ -126,6 +138,8 @@ const App = () => {
             <Route path="scores" element={<ScoreInput />} />
             <Route path="notifications" element={<StaffNotifications />} />
             <Route path="inbox" element={<StaffInbox />} />
+            {/* Lịch hẹn phụ huynh, phòng Đào tạo xác nhận/hoàn tất */}
+            <Route path="appointments" element={<StaffAppointments />} />
             {/* Trang Fresh Fit, bên trong component tự chặn nếu nhân sự chưa có cờ ffAccess */}
             <Route path="freshfit" element={<FreshFit />} />
             {/* Ví Credits của nhân sự, mọi nhân sự đều có */}
@@ -143,6 +157,8 @@ const App = () => {
           {/* --- STUDENT ROUTES --- */}
           <Route path="/student" element={<ProtectedRoute allowedRoles={['student']}><StudentLayout /></ProtectedRoute>}>
             <Route path="dashboard" element={<StudentDashboard />} />
+            {/* Sổ liên lạc online. Path 'lienlac' cố ý KHÔNG chứa 'contact' để isActive('contact') của mục Liên hệ GV không dính nhầm */}
+            <Route path="lienlac" element={<StudentContactBook />} />
             <Route path="attendance" element={<MyAttendance />} />
             <Route path="scores" element={<MyGrades />} />
             <Route path="notifications" element={<StudentNotifications />} />
@@ -159,6 +175,15 @@ const App = () => {
             <Route path="profile" element={<StudentProfile />} />
             <Route path="feedback" element={<StudentFeedback />} />
             <Route path="contact" element={<StudentContact />} />
+            <Route index element={<Navigate to="dashboard" />} />
+          </Route>
+
+          {/* --- PARENT ROUTES (Cổng Phụ huynh) --- */}
+          <Route path="/parent" element={<ProtectedRoute allowedRoles={['parent']}><ParentLayout /></ProtectedRoute>}>
+            <Route path="dashboard" element={<ParentDashboard />} />
+            <Route path="notifications" element={<ParentNotifications />} />
+            <Route path="appointments" element={<ParentAppointments />} />
+            <Route path="support" element={<ParentSupport />} />
             <Route index element={<Navigate to="dashboard" />} />
           </Route>
 

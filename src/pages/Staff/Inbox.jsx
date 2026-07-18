@@ -7,9 +7,15 @@ import { withEnByCode } from '../../utils/studentName';
 const CATEGORIES = {
   'hoc-tap':   { label: '📚 Học tập',        color: 'bg-primary-light text-green-700 border-green-200' },
   'giao-vien': { label: '👨‍🏫 Giáo viên',      color: 'bg-primary-hover/10 text-primary-hover border-primary-hover/25' },
+  'hoc-phi':   { label: '💰 Học phí',         color: 'bg-yellow-50 text-yellow-700 border-yellow-200' }, // danh mục dành cho phụ huynh
   'co-so':     { label: '🏫 Cơ sở vật chất', color: 'bg-amber-50 text-amber-700 border-amber-200' },
   'khac':      { label: '💬 Khác',            color: 'bg-slate-50 text-slate-600 border-slate-200' },
 };
+
+// Badge nhận diện phản ánh gửi từ PHỤ HUYNH (senderRole = 'parent')
+const ParentBadge = () => (
+  <span className="text-[10px] font-bold px-2 py-0.5 rounded border bg-violet-50 text-violet-700 border-violet-200">👨‍👩‍👧 Phụ huynh</span>
+);
 
 const STATUS_STYLES = {
   pending:  'bg-amber-50 text-amber-700 border-amber-200',
@@ -202,7 +208,7 @@ const Inbox = () => {
         </div>
         <div>
           <h2 className="page-title">Hộp thư</h2>
-          <p className="page-sub">Phản ánh và tin nhắn từ học viên.</p>
+          <p className="page-sub">Phản ánh và tin nhắn từ học viên & phụ huynh.</p>
         </div>
       </div>
 
@@ -268,13 +274,14 @@ const Inbox = () => {
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-wrap gap-2 mb-1">
                           <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${cat.color}`}>{cat.label}</span>
+                          {fb.senderRole === 'parent' && <ParentBadge />}
                           <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${STATUS_STYLES[fb.status] || STATUS_STYLES.pending}`}>
                             {fb.status === 'pending' ? 'Chờ xử lý' : fb.status === 'read' ? 'Đã xem' : 'Đã xử lý'}
                           </span>
                         </div>
                         <p className={`text-sm font-bold truncate ${fb.status === 'pending' ? 'text-slate-900' : 'text-slate-700'}`}>{fb.title}</p>
                         <p className="text-xs text-slate-400 mt-0.5">
-                          {fb.isAnonymous ? 'Ẩn danh' : withEnByCode(fb.studentName, fb.studentCode, enMap)} · {new Date(fb.date).toLocaleDateString('vi-VN')}
+                          {fb.isAnonymous ? 'Ẩn danh' : withEnByCode(fb.studentName, fb.studentCode, enMap)}{fb.senderRole === 'parent' && fb.childNames ? ` (PH của ${fb.childNames})` : ''} · {new Date(fb.date).toLocaleDateString('vi-VN')}
                         </p>
                       </div>
                       {fb.status === 'pending' && <div className="w-2 h-2 rounded-full bg-amber-400 shrink-0 mt-2" />}
@@ -296,13 +303,17 @@ const Inbox = () => {
                   <span className={`text-[10px] font-bold px-2 py-1 rounded border ${(CATEGORIES[selectedFb.category] || CATEGORIES.khac).color}`}>
                     {(CATEGORIES[selectedFb.category] || CATEGORIES.khac).label}
                   </span>
+                  {selectedFb.senderRole === 'parent' && <ParentBadge />}
                   <span className={`text-[10px] font-bold px-2 py-1 rounded border ${STATUS_STYLES[selectedFb.status] || STATUS_STYLES.pending}`}>
                     {selectedFb.status === 'pending' ? 'Chờ xử lý' : selectedFb.status === 'read' ? 'Đã xem' : 'Đã xử lý'}
                   </span>
                 </div>
                 <h3 className="section-title">{selectedFb.title}</h3>
                 <p className="text-xs text-slate-400">
-                  {selectedFb.isAnonymous ? 'Ẩn danh' : `${withEnByCode(selectedFb.studentName, selectedFb.studentCode, enMap)} (${selectedFb.studentCode})`} · {new Date(selectedFb.date).toLocaleString('vi-VN')}
+                  {selectedFb.isAnonymous ? 'Ẩn danh'
+                    : selectedFb.senderRole === 'parent'
+                      ? `PH ${selectedFb.studentName}${selectedFb.childNames ? ` · con: ${selectedFb.childNames}` : ''}`
+                      : `${withEnByCode(selectedFb.studentName, selectedFb.studentCode, enMap)} (${selectedFb.studentCode})`} · {new Date(selectedFb.date).toLocaleString('vi-VN')}
                 </p>
 
                 {/* Hội thoại 2 chiều */}

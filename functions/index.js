@@ -82,6 +82,19 @@ exports.onNotificationCreated = onValueCreated({ ...DB_OPTS, ref: '/notification
     .map(([id]) => id);
   const label = n.type === 'link' ? 'Liên kết' : (n.label ? n.label.charAt(0).toUpperCase() + n.label.slice(1) : 'Thông báo');
   await sendTo(await tokensOf(targets), `📢 ${label} mới`, n.title || 'Mở app để xem chi tiết.', '/student/notifications');
+
+  // PHỤ HUYNH: cũng nhận push nếu thông báo thuộc phạm vi lớp của CON được liên kết (parentLinks)
+  try {
+    const links = (await db.ref('parentLinks').get()).val() || {};
+    const parentTargets = Object.entries(links)
+      .filter(([puid, kids]) => {
+        if (!users[puid] || users[puid].role !== 'parent') return false;
+        if (n.scope === 'all') return true;
+        return Object.keys(kids || {}).some((sid) => users[sid] && classIdsOf(users[sid]).includes(n.scope));
+      })
+      .map(([puid]) => puid);
+    await sendTo(await tokensOf(parentTargets), `📢 ${label} mới của lớp con`, n.title || 'Mở app để xem chi tiết.', '/parent/notifications');
+  } catch (e) { console.warn('Push parent notification:', e?.message); }
 });
 
 // ============================================================
@@ -453,6 +466,53 @@ exports.onAttendanceDayDeleted = onValueDeleted({ ...DB_OPTS, ref: '/attendance/
   updates[`tuitionDeductions/${classId}/${date}`] = null;
   await db.ref().update(updates);
   console.log(`onAttendanceDayDeleted ${classId} ${date}: hoàn buổi ${Object.keys(guard.records || {}).length} record.`);
+});
+
+// ============================================================
+// LỊCH HẸN PHỤ HUYNH (node appointments/{parentUid}/{aid})
+// 1. Lịch hẹn MỚI → push admin + staff phụ trách lớp liên quan
+// 2. Phòng Đào tạo đổi trạng thái → push lại cho phụ huynh
+// ============================================================
+exports.onAppointmentCreated = onValueCreated({ ...DB_OPTS, ref: '/appointments/{pid}/{aid}' }, async (event) => {
+  const a = event.data.val();
+  if (!a || a.status !== 'pending') return;
+  const users = await allUsers();
+  const aClasses = Array.isArray(a.classIds) ? a.classIds : Object.values(a.classIds || {});
+  const targets = Object.entries(users)
+    .filter(([, u]) => {
+      if (!u) return false;
+      if (u.role === 'admin') return true;
+      if (u.role !== 'staff') return false;
+      // Không gắn lớp → báo mọi staff; có lớp → chỉ staff phụ trách
+      return aClasses.length === 0 || (u.assignedClasses || []).some((c) => aClasses.includes(c));
+    })
+    .map(([id]) => id);
+  await sendTo(
+    await tokensOf(targets),
+    '📅 Lịch hẹn mới từ phụ huynh',
+    `${a.parentName || 'Phụ huynh'}${a.studentName ? ` (PH của ${a.studentName})` : ''} · ${a.topicLabel || ''} · ${a.preferredDate} ${a.preferredSlot || ''}`,
+    '/staff/appointments'
+  );
+});
+
+exports.onAppointmentStatusChanged = onValueUpdated({ ...DB_OPTS, ref: '/appointments/{pid}/{aid}' }, async (event) => {
+  const before = event.data.before.val() || {};
+  const after = event.data.after.val() || {};
+  if (before.status === after.status) return;
+  if (!after.handledBy) return; // phụ huynh tự hủy thì không push ngược lại chính họ
+  const { pid } = event.params;
+  let title, body;
+  if (after.status === 'confirmed') {
+    title = '✅ Lịch hẹn đã được xác nhận';
+    body = `${after.topicLabel || 'Lịch hẹn'} · ${after.preferredDate} ${after.preferredSlot || ''}${after.staffNote ? ` · ${after.staffNote}` : ''}`;
+  } else if (after.status === 'done') {
+    title = '🏁 Buổi hẹn đã hoàn tất';
+    body = 'Cảm ơn Ba Mẹ đã dành thời gian trao đổi cùng Định Năng!';
+  } else if (after.status === 'cancelled') {
+    title = '❌ Lịch hẹn đã bị hủy';
+    body = after.staffNote || 'Vui lòng đặt lịch khác hoặc liên hệ hotline 088 699 7099.';
+  } else return;
+  await sendTo(await tokensOf([pid]), title, body, '/parent/appointments');
 });
 
 // Học viên bị đánh "Có phép" (excused) → báo Giáo vụ (admin + staff phụ trách lớp)

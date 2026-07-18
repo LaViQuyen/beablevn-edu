@@ -308,6 +308,20 @@ const StudentDashboard = () => {
         <div className="absolute right-0 top-0 w-40 h-40 bg-white/10 rounded-full -mr-16 -mt-16 blur-3xl" />
       </div>
 
+      {/* ===== THẺ SỔ LIÊN LẠC ONLINE (đầu trang) ===== */}
+      <Link to="/student/lienlac" className="block bg-white rounded-2xl border-2 border-primary/20 shadow-sm p-4 flex items-center gap-4 hover:border-primary/50 hover:shadow-md transition-all group">
+        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-primary-medium flex items-center justify-center shrink-0 text-2xl shadow-sm">📖</div>
+        <div className="flex-1 min-w-0">
+          <p className="stat-label flex items-center gap-2">Sổ liên lạc online
+            <span className="text-[9px] font-bold bg-primary-light text-primary px-1.5 py-0.5 rounded border border-green-100 uppercase">Mới</span>
+          </p>
+          <p className="font-bold text-slate-800 text-sm">
+            Chuyên cần, điểm số từng loại và báo bài của <span className="text-primary">{myClasses.length} lớp</span>, gom về một nơi
+          </p>
+        </div>
+        <span className="shrink-0 text-xs font-bold text-primary bg-primary-light px-3.5 py-2 rounded-xl border border-green-100 group-hover:bg-green-100 transition-colors">Mở sổ →</span>
+      </Link>
+
       {/* ===== BANNER THÔNG BÁO HỌC PHÍ (3 cấp độ) ===== */}
       {bannerLevel === 1 && (
         <div className="rounded-2xl border border-yellow-300 bg-yellow-50 p-4 flex items-start gap-3">

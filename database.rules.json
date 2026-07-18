@@ -6,9 +6,31 @@
     "users": {
       ".read": "auth != null && (auth.token.role === 'staff' || auth.token.role === 'admin')",
       "$uid": {
-        ".read": "auth != null && auth.uid === $uid",
+        ".read": "auth != null && (auth.uid === $uid || root.child('parentLinks').child(auth.uid).child($uid).val() === true)",
         ".write": "auth != null && (auth.token.role === 'staff' || auth.token.role === 'admin')",
         "password": { ".validate": false }
+      }
+    },
+
+    "parentLinks": {
+      ".read": "auth != null && (auth.token.role === 'staff' || auth.token.role === 'admin')",
+      ".write": "auth != null && auth.token.role === 'admin'",
+      "$puid": {
+        ".read": "auth != null && auth.uid === $puid"
+      }
+    },
+
+    "appointments": {
+      ".read": "auth != null && (auth.token.role === 'staff' || auth.token.role === 'admin')",
+      "$puid": {
+        ".read": "auth != null && auth.uid === $puid",
+        "$aid": {
+          ".write": "auth != null && (auth.token.role === 'staff' || auth.token.role === 'admin' || (auth.uid === $puid && auth.token.role === 'parent'))",
+          ".validate": "auth.token.role === 'staff' || auth.token.role === 'admin' || (newData.child('parentId').val() === $puid && (newData.child('status').val() === 'cancelled' || (data.exists() && newData.child('status').val() === data.child('status').val()) || (!data.exists() && newData.child('status').val() === 'pending')))",
+          "handledBy": { ".validate": "auth.token.role === 'staff' || auth.token.role === 'admin'" },
+          "handledAt": { ".validate": "auth.token.role === 'staff' || auth.token.role === 'admin'" },
+          "staffNote": { ".validate": "auth.token.role === 'staff' || auth.token.role === 'admin'" }
+        }
       }
     },
 
@@ -60,7 +82,7 @@
     },
 
     "staffBonus": {
-      ".read": "auth != null",
+      ".read": "auth != null && auth.token.role !== 'parent'",
       "$uid": {
         "$rid": {
           ".write": "auth != null && !data.exists() && ( (auth.uid === $uid && (auth.token.role === 'staff' || auth.token.role === 'admin') && newData.child('score').isNumber() && newData.child('score').val() <= 0) || ((auth.token.role === 'admin' || auth.token.bod === true || auth.token.mod === true) && $uid !== auth.uid) )",
@@ -100,25 +122,25 @@
     },
 
     "creditPlus": {
-      ".read": "auth != null",
+      ".read": "auth != null && auth.token.role !== 'parent'",
       ".write": "auth != null && (auth.token.role === 'staff' || auth.token.role === 'admin')"
     },
 
     "staffCredits": {
-      ".read": "auth != null",
+      ".read": "auth != null && auth.token.role !== 'parent'",
       ".write": "auth != null && (auth.token.role === 'admin' || auth.token.bod === true)"
     },
 
     "redemptions": {
-      ".read": "auth != null",
+      ".read": "auth != null && auth.token.role !== 'parent'",
       "$rid": {
         ".write": "auth != null && (((auth.token.role === 'staff' || auth.token.role === 'admin')) || (!data.exists() && newData.child('studentId').val() === auth.uid) || (data.child('studentId').val() === auth.uid))"
       }
     },
 
     "messages": {
-      ".read": "auth != null",
-      ".write": "auth != null"
+      ".read": "auth != null && auth.token.role !== 'parent'",
+      ".write": "auth != null && auth.token.role !== 'parent'"
     },
 
     "feedback": {
