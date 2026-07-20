@@ -114,7 +114,7 @@ export const DEFAULT_BAND = '7.0';
 // macro "cải thiện speaking" chung chung, phải xuống tới sub-skill đo được)
 export const MODE_GOALS = {
   practice:
-    'Mục tiêu buổi luyện: mở rộng câu trả lời theo R-E-A (trả lời + lý do + ví dụ) và sửa lỗi ngay sau từng câu.',
+    'Mục tiêu buổi luyện: mở rộng câu trả lời theo A-R-E (trả lời + lý do + ví dụ) và sửa lỗi ngay sau từng câu.',
   drill:
     'Mục tiêu buổi luyện: nói đúng ngữ pháp và phát âm từng câu Part 1, lặp lại đến khi bật ra tự nhiên.',
   exam: 'Mục tiêu buổi luyện: giữ phong độ ổn định trọn 3 phần trong điều kiện thi thật.',

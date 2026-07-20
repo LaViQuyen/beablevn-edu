@@ -191,7 +191,7 @@ Advice text is in Vietnamese (có dấu); keep English the example phrases/struc
   Dislikes: I don't really like... / I'm not a big fan of... / I can't stand...
   Neutral: I don't mind... / I have mixed feelings about...
 - If you didn't understand: "I'm sorry, could you ask that question again?" / "I didn't catch that. Do you mind repeating it?"
-- Expand with R-E-A: (1) Answer trực tiếp → (2) Reason → (3) Example/Explanation → (4) Answer again (paraphrase).
+- Expand with A-R-E: (1) Answer trực tiếp → (2) Reason → (3) Example/Explanation → (4) Answer again (Restate, paraphrase).
 - "What kinds/types of..." → 4 steps: Category (2-3 nhóm) → Attribute → Typical example → Elaborate (liên hệ cá nhân).
 - No-interest topic → Distancing + Generalizing: "I'm not really into this, but from what I know..." / "Generally speaking, people tend to..." / "It depends on the person, but typically...".
 
@@ -208,7 +208,7 @@ Advice text is in Vietnamese (có dấu); keep English the example phrases/struc
 - Stay GENERAL: KHÔNG nói về bản thân; giữ khách quan, vĩ mô.
 - 3rd-person plural: Most people / A lot of people / Individuals. Tránh chủ ngữ kép ("Most people they think" → "Most people think").
 - Openers — Opinion: In my opinion / I believe / It seems to me that / I would say that. General: Most people these days / Generally speaking / The majority of people...
-- Expand with 4 steps: Answer → Reason → Example → Acknowledge (thừa nhận mặt trái / khía cạnh khác).
+- Expand with A-R-E-A: Answer → Reason → Example → Answer again (Restate: chốt lại quan điểm bằng cách paraphrase, KHÔNG lặp nguyên văn).
 - Question types:
   • Past vs Present: used to / would; Compared to... / In contrast to...; verbs: transform, evolve, adapt, undergo changes, significant shift.
   • Comparing two: "The fundamental difference lies in..." / "While A tends to..., B is more likely to..." / "There is a stark contrast between...".
@@ -337,7 +337,7 @@ YOUR TASKS (do them in this order):
 6. Write "upgrade": one better model sentence (natural, band ${targetBand}+) the student could have used, based on THEIR OWN idea.
 7. Decide "need_retry": true if there are pronunciation errors or language errors worth practising again, OR if the answer was thin/undeveloped (encourage a fuller attempt). false only if the answer was clean AND developed.
 8. "retry_focus": one short Vietnamese instruction telling the student exactly what to fix when saying it again (e.g. "Nói lại đầy đủ hơn: thêm 1 lý do và 1 ví dụ, chú ý phát âm /θ/ trong 'think'").
-9. "method_tips": 2-3 góp ý tiếng Việt theo ĐÚNG PHƯƠNG PHÁP BE ABLE của Part ${part} ở trên (chọn đúng khung của Part này). Mỗi tip = 1 câu ngắn, đi thẳng vào điều học viên NÊN làm ở lần sau, KÈM mẫu câu/cấu trúc tiếng Anh cụ thể để dùng ngay (in đậm cụm khoá bằng **...**). Bám vào câu trả lời thực tế của học viên — chỉ ra chỗ áp dụng được phương pháp. Ví dụ Part 1: "Mở rộng theo **R-E-A**: sau khi trả lời, thêm 1 lý do rồi 1 ví dụ." / "Đổi 'I like it' thành **I'm really into it** cho tự nhiên hơn." Nếu là non-answer (im lặng) thì để mảng rỗng [].
+9. "method_tips": 2-3 góp ý tiếng Việt theo ĐÚNG PHƯƠNG PHÁP BE ABLE của Part ${part} ở trên (chọn đúng khung của Part này). Mỗi tip = 1 câu ngắn, đi thẳng vào điều học viên NÊN làm ở lần sau, KÈM mẫu câu/cấu trúc tiếng Anh cụ thể để dùng ngay (in đậm cụm khoá bằng **...**). Bám vào câu trả lời thực tế của học viên — chỉ ra chỗ áp dụng được phương pháp. Ví dụ Part 1: "Mở rộng theo **A-R-E**: sau khi trả lời, thêm 1 lý do rồi 1 ví dụ." / "Đổi 'I like it' thành **I'm really into it** cho tự nhiên hơn." Nếu là non-answer (im lặng) thì để mảng rỗng [].
 10. "chunks": 2-3 CỤM CÂU NGẮN đáng học thuộc để bật ra tự động lần sau (mỗi cụm TỐI ĐA 6 từ tiếng Anh, plain text không markdown), lấy từ "upgrade" hoặc từ khung phương pháp của Part này (vd "I'm really into...", "When it comes to...", "Generally speaking,..."). Kèm "use_when_vi": 1 vế tiếng Việt cực ngắn nói dùng khi nào. Đây là nguyên liệu luyện automaticity, chọn cụm TÁI DÙNG được cho nhiều chủ đề. Nếu là non-answer thì để mảng rỗng [].
 
 ${JSON_RULES}
@@ -397,7 +397,7 @@ YOUR TASKS:
    - "part": số Part (1/2/3); "question": chép lại câu hỏi (hoặc chủ đề Part 2), rút gọn nếu quá dài.
    - "transcript": chép NGUYÊN VĂN phần học viên đã nói ở câu này (lấy từ "transcript_excerpt" trong dữ liệu) — GIỮ NGUYÊN MỌI LỖI, KHÔNG sửa, KHÔNG rút gọn, KHÔNG làm mượt. Đây là bản gốc để học viên đối chiếu.
    - "good_vi": 1 câu tiếng Việt nêu điều học viên làm ĐƯỢC ở câu này (cụ thể, bám transcript).
-   - "improve_vi": 1-2 câu tiếng Việt NHẬN XÉT chỗ cần cải thiện theo ĐÚNG PHƯƠNG PHÁP BE ABLE của Part đó (Part 1: R-E-A / phrasing like-dislike / 4 bước "what kinds"; Part 2: khung theo loại đề Người-Nơi-Vật-Sự kiện; Part 3: giữ general + 4 bước Answer-Reason-Example-Acknowledge + mẫu so sánh).
+   - "improve_vi": 1-2 câu tiếng Việt NHẬN XÉT chỗ cần cải thiện theo ĐÚNG PHƯƠNG PHÁP BE ABLE của Part đó (Part 1: A-R-E / phrasing like-dislike / 4 bước "what kinds"; Part 2: khung theo loại đề Người-Nơi-Vật-Sự kiện; Part 3: giữ general + 4 bước Answer-Reason-Example-Answer again (Restate) + mẫu so sánh).
    - "revised": bản CHỈNH SỬA hoàn chỉnh phần trả lời của học viên theo phương pháp Be Able VN — viết lại bằng tiếng Anh tự nhiên ở mức band ${targetBand}+, DỰA TRÊN CHÍNH Ý của học viên (KHÔNG bịa nội dung mới), sửa lỗi và áp khung phương pháp của Part đó. Đặt SAU nguyên bản để học viên thấy "nói thế nào thì hay hơn". Part 2 có thể 2-4 câu; Part 1/3 chỉ 1-2 câu.
    Giữ các câu tiếng Việt NGẮN GỌN — đây là bảng học viên đọc trên màn hình.
 9. "bottleneck": chẩn đoán MỘT giai đoạn nghẽn CHÍNH của cả phiên theo mô hình 4 giai đoạn tạo lời nói (Levelt). Suy từ BẰNG CHỨNG tổng hợp trong dữ liệu trên, KHÔNG đoán từ một câu lẻ:
@@ -507,7 +507,7 @@ YOUR TASKS (in order):
 1. Transcribe exactly what the student said (keep their errors; mark unclear words as [unclear]).
 2. Find GRAMMAR / WORD-CHOICE errors that a Part 1 answer at band ${targetBand} should not have. List up to 3, most important first. For each: what they said, the corrected version, and a SHORT Vietnamese explanation. Ignore tiny stylistic preferences — only real errors.
 3. Find PRONUNCIATION problems you actually HEAR. List up to 3: the word, how it sounded, correct IPA, and a short Vietnamese tip on mouth/stress. Only flag words that genuinely sounded wrong — do NOT invent issues, and do not penalise a mild accent that is still clearly understandable.
-4. "model_answer": rewrite the student's answer correctly in natural English at band ${targetBand}, 2-4 sentences, BASED ON THEIR OWN IDEA (do not invent new content) — apply the Part 1 method (direct answer + R-E-A, varied like/dislike phrasing, correct tense). This is what they will hear and imitate. PLAIN English, no markdown.
+4. "model_answer": rewrite the student's answer correctly in natural English at band ${targetBand}, 2-4 sentences, BASED ON THEIR OWN IDEA (do not invent new content) — apply the Part 1 method (direct answer + A-R-E, varied like/dislike phrasing, correct tense). This is what they will hear and imitate. PLAIN English, no markdown.
 5. "coach_script_en": a SHORT spoken script (English only, 2-4 sentences) the coach will READ ALOUD to the student. Format: briefly name the 1-2 most important fixes in plain spoken English (e.g. "Watch the past tense — say 'went', not 'go'. And the 'th' in 'think' should be soft."), then say: "Try saying it like this:" followed by the model_answer. Keep it natural and warm, like a teacher speaking. NO Vietnamese here, NO markdown, NO IPA symbols (spell sounds out so they can be read aloud).
 6. "passed": true ONLY if the answer is genuinely clean — no significant grammar errors AND no significant pronunciation errors (judged at the leniency level for this attempt). If there is at least one real grammar or pronunciation error worth fixing, set false. A clean, relevant 2-3 sentence Part 1 answer passes even if short.
 7. "praise_vi": one short Vietnamese sentence praising something real they did (specific, not generic). If passed, make it a congratulation.
