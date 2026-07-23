@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { auth, functions } from '../firebase';
+import { auth, functions, db } from '../firebase';
 import { signInWithCustomToken } from 'firebase/auth';
 import { httpsCallable } from 'firebase/functions';
+import { ref, push } from 'firebase/database';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Alert, Button } from '../components/UI';
@@ -56,6 +57,14 @@ const Login = () => {
         setError(err.message || "Tài khoản đã bị khóa. Liên hệ trung tâm.");
       } else {
         setError("Lỗi kết nối máy chủ. Vui lòng thử lại.");
+        // Chẩn đoán: ghi lỗi thật lên server để xem được nguyên nhân trên thiết bị
+        // (đặc biệt iPhone/Safari) mà không cần Mac/Web Inspector. Không hiện gì cho người dùng.
+        push(ref(db, 'clientErrorLogs'), {
+          ts: new Date().toISOString(),
+          code: code || err?.name || 'unknown',
+          message: String(err?.message || '').slice(0, 500),
+          ua: navigator.userAgent.slice(0, 300),
+        }).catch(() => {});
       }
     } finally {
       setLoading(false);

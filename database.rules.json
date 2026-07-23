@@ -233,6 +233,16 @@
     "tuitionDeductions": {
       ".read": "auth != null && auth.token.role === 'admin'",
       ".write": false
+    },
+
+    "clientErrorLogs": {
+      ".read": "auth != null && auth.token.role === 'admin'",
+      ".write": true,
+      "$eid": {
+        ".write": "!data.exists()",
+        ".validate": "newData.hasChildren(['ts','code','message','ua']) && newData.child('ts').isString() && newData.child('ts').val().length <= 40 && newData.child('code').isString() && newData.child('code').val().length <= 100 && newData.child('message').isString() && newData.child('message').val().length <= 500 && newData.child('ua').isString() && newData.child('ua').val().length <= 300",
+        "$other": { ".validate": false }
+      }
     }
   }
 }
